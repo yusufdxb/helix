@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import rclpy
 from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn, State
-from helix_msgs.msg import FaultEvent, RecoveryAction
+from helix_msgs.msg import FaultEvent, LLMDiagnosis, RecoveryAction
 
 from helix_recovery.state_db import StateDB, DEFAULT_DB_PATH
 from helix_recovery.action_executor import ActionExecutor
@@ -36,6 +36,11 @@ DEFAULT_MAX_CONCURRENT: int = 3
 
 FLAP_WINDOW_SEC: float = 600.0   # 10 minutes
 FLAP_THRESHOLD: int = 5           # >5 attempts in window → skip to tier 2
+
+LLM_CONFIDENCE_THRESHOLD: float = 0.75
+LLM_DIAGNOSIS_TIMEOUT_SEC: float = 60.0
+TOPIC_LLM_REQUESTS: str = "/helix/llm_requests"
+TOPIC_LLM_DIAGNOSES: str = "/helix/llm_diagnoses"
 
 
 class RecoveryPlanner(LifecycleNode):
@@ -78,6 +83,13 @@ class RecoveryPlanner(LifecycleNode):
         self._fault_sub = None
         self._action_pub = None
 
+        self._llm_request_pub = None
+        self._llm_diagnosis_sub = None
+        # fault_id -> asyncio.Event (set when diagnosis arrives)
+        self._pending_llm: Dict[str, asyncio.Event] = {}
+        # fault_id -> LLMDiagnosis (populated before event is set)
+        self._llm_results: Dict[str, Optional[LLMDiagnosis]] = {}
+
     # ── Lifecycle callbacks ──────────────────────────────────────────────────
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
@@ -114,6 +126,14 @@ class RecoveryPlanner(LifecycleNode):
         )
         self._fault_sub = self.create_subscription(
             FaultEvent, TOPIC_FAULTS, self._on_fault_received, 10
+        )
+
+        # LLM integration (Phase 3)
+        self._llm_request_pub = self.create_publisher(
+            FaultEvent, TOPIC_LLM_REQUESTS, 10
+        )
+        self._llm_diagnosis_sub = self.create_subscription(
+            LLMDiagnosis, TOPIC_LLM_DIAGNOSES, self._on_llm_diagnosis, 10
         )
 
         # Helper objects (ActionExecutor receives this node for publishing)
@@ -153,6 +173,10 @@ class RecoveryPlanner(LifecycleNode):
             self.destroy_subscription(self._fault_sub)
         if self._action_pub:
             self.destroy_publisher(self._action_pub)
+        if self._llm_request_pub:
+            self.destroy_publisher(self._llm_request_pub)
+        if self._llm_diagnosis_sub:
+            self.destroy_subscription(self._llm_diagnosis_sub)
         self._active_recoveries.clear()
         return TransitionCallbackReturn.SUCCESS
 
@@ -282,22 +306,9 @@ class RecoveryPlanner(LifecycleNode):
 
             action = tier_config.get("action", "")
 
-            # LLM tier stub (Phase 3 hook)
+            # LLM tier — request diagnosis from LLMAdvisor
             if action == "llm_requested":
-                self.get_logger().warn(
-                    f"LLM tier reached for '{fault.node_name}:{fault.fault_type}' "
-                    "— Phase 3 pending"
-                )
-                self._publish_recovery_action(
-                    fault=fault,
-                    fault_id=fault_id,
-                    action_taken="llm_requested",
-                    tier=3,
-                    attempt_number=1,
-                    success=False,
-                    duration_sec=0.0,
-                    outcome_detail="Awaiting LLM integration (Phase 3)",
-                )
+                await self._execute_llm_tier(fault, fault_id, tier_num)
                 return
 
             max_attempts = tier_config.get("max_attempts", 1)
@@ -428,6 +439,119 @@ class RecoveryPlanner(LifecycleNode):
             return await ex.standalone_mode()
         else:
             return (False, f"Unknown action '{action}'", 0.0)
+
+    # ── LLM tier (Phase 3) ───────────────────────────────────────────────────
+
+    def _on_llm_diagnosis(self, msg: LLMDiagnosis) -> None:
+        """
+        Called by rclpy executor when a LLMDiagnosis arrives on /helix/llm_diagnoses.
+
+        Resolves the asyncio.Event for the matching fault_id so _request_llm_diagnosis
+        can return the result to the recovery chain.
+        """
+        event = self._pending_llm.get(msg.fault_id)
+        if event and self._loop:
+            self._llm_results[msg.fault_id] = msg
+            self._loop.call_soon_threadsafe(event.set)
+
+    async def _request_llm_diagnosis(
+        self, fault: FaultEvent, fault_id: str
+    ) -> Optional[LLMDiagnosis]:
+        """
+        Publish fault to /helix/llm_requests and wait for LLMDiagnosis (up to 60s).
+
+        Returns the LLMDiagnosis message or None on timeout.
+        """
+        event = asyncio.Event()
+        self._pending_llm[fault_id] = event
+        self._llm_results[fault_id] = None
+
+        self.get_logger().info(
+            f"Requesting LLM diagnosis for fault '{fault_id}' "
+            f"({fault.fault_type} on '{fault.node_name}')"
+        )
+        self._llm_request_pub.publish(fault)
+
+        try:
+            await asyncio.wait_for(event.wait(), timeout=LLM_DIAGNOSIS_TIMEOUT_SEC)
+            return self._llm_results.get(fault_id)
+        except asyncio.TimeoutError:
+            self.get_logger().error(
+                f"LLM diagnosis timed out after {LLM_DIAGNOSIS_TIMEOUT_SEC}s "
+                f"for fault '{fault_id}'"
+            )
+            return None
+        finally:
+            self._pending_llm.pop(fault_id, None)
+            self._llm_results.pop(fault_id, None)
+
+    async def _execute_llm_tier(
+        self, fault: FaultEvent, fault_id: str, tier_num: int
+    ) -> None:
+        """
+        Execute the LLM tier: request diagnosis, gate on confidence, act or skip.
+        """
+        t_start = time.time()
+        diagnosis = await self._request_llm_diagnosis(fault, fault_id)
+
+        if diagnosis is None:
+            # Timeout or LLMAdvisor not running
+            self.get_logger().error(
+                f"LLM diagnosis unavailable for '{fault.node_name}:{fault.fault_type}'"
+            )
+            self._publish_recovery_action(
+                fault=fault,
+                fault_id=fault_id,
+                action_taken="llm_timeout",
+                tier=tier_num,
+                attempt_number=1,
+                success=False,
+                duration_sec=time.time() - t_start,
+                outcome_detail="LLM diagnosis timed out or advisor unavailable",
+            )
+            return
+
+        self.get_logger().info(
+            f"LLM diagnosis: action='{diagnosis.suggested_action}' "
+            f"confidence={diagnosis.confidence:.2f} — {diagnosis.reasoning}"
+        )
+
+        if diagnosis.confidence >= LLM_CONFIDENCE_THRESHOLD:
+            self.get_logger().info(
+                f"Confidence {diagnosis.confidence:.2f} >= {LLM_CONFIDENCE_THRESHOLD} "
+                f"— executing '{diagnosis.suggested_action}'"
+            )
+            success, detail, duration = await self._dispatch_action(
+                diagnosis.suggested_action, {}, fault
+            )
+            self._publish_recovery_action(
+                fault=fault,
+                fault_id=fault_id,
+                action_taken=f"llm:{diagnosis.suggested_action}",
+                tier=tier_num,
+                attempt_number=1,
+                success=success,
+                duration_sec=duration,
+                outcome_detail=detail,
+            )
+        else:
+            self.get_logger().warn(
+                f"LLM confidence {diagnosis.confidence:.2f} < "
+                f"{LLM_CONFIDENCE_THRESHOLD} — skipping auto-execution"
+            )
+            self._publish_recovery_action(
+                fault=fault,
+                fault_id=fault_id,
+                action_taken="llm_low_confidence",
+                tier=tier_num,
+                attempt_number=1,
+                success=False,
+                duration_sec=time.time() - t_start,
+                outcome_detail=(
+                    f"LLM suggested '{diagnosis.suggested_action}' but confidence "
+                    f"{diagnosis.confidence:.2f} is below threshold {LLM_CONFIDENCE_THRESHOLD}"
+                ),
+            )
 
     # ── Helpers ──────────────────────────────────────────────────────────────
 
