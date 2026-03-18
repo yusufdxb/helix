@@ -59,7 +59,10 @@ class FaultInjector(Node):
         time.sleep(GAP_BETWEEN_PHASES_SEC)
 
         self._inject_recovery_chain_test()
-        self.get_logger().info("All fault injections complete. Watch /helix/faults and /helix/recovery_actions.")
+        time.sleep(GAP_BETWEEN_PHASES_SEC)
+
+        self._inject_llm_advisor_test()
+        self.get_logger().info("All fault injections complete (including Scenario 5 LLM). Watch /helix/faults, /helix/recovery_actions, and /helix/llm_diagnoses.")
 
     def _inject_heartbeat_then_stop(self) -> None:
         """
@@ -163,6 +166,40 @@ class FaultInjector(Node):
             self._hb_pub.publish(hb_msg)
             time.sleep(interval)
         print("[FaultInjector] Scenario 4 complete.")
+
+    def _inject_llm_advisor_test(self) -> None:
+        """
+        Scenario 5: Publish a FaultEvent directly to /helix/llm_requests to test
+        the LLMAdvisor in isolation (bypasses the recovery planner tier chain).
+
+        The LLMAdvisor should respond on /helix/llm_diagnoses within ~55s if
+        Ollama is running, or immediately with confidence=0.0 if it is not.
+        """
+        print(
+            "\n[FaultInjector] Scenario 5: LLM advisor test — "
+            "publishing ANOMALY FaultEvent directly to /helix/llm_requests.\n"
+            "Watch for LLMDiagnosis on /helix/llm_diagnoses (confidence may be 0.0 "
+            "if Ollama is not running)."
+        )
+        from helix_msgs.msg import FaultEvent as FE
+
+        llm_req_pub = self.create_publisher(FE, "/helix/llm_requests", 10)
+
+        fault_msg = FE()
+        fault_msg.node_name = "fake_slam_node"
+        fault_msg.fault_type = "ANOMALY"
+        fault_msg.severity = 2
+        fault_msg.detail = "CPU load spike detected: Z-score = 8.4"
+        fault_msg.timestamp = time.time()
+        fault_msg.context_keys = []
+        fault_msg.context_values = []
+
+        # Give DDS a moment to discover the subscriber
+        time.sleep(1.0)
+        llm_req_pub.publish(fault_msg)
+        print("[FaultInjector] Scenario 5 fault published. Waiting 5s for response...")
+        time.sleep(5.0)
+        print("[FaultInjector] Scenario 5 complete. Check /helix/llm_diagnoses.")
 
     @staticmethod
     def _make_metric_msg(label: str, value: float) -> Float64MultiArray:
