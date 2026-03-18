@@ -21,3 +21,9 @@ helix_recovery_planner:
     max_concurrent_recoveries: 3
     standalone_mode: false
     # policy_file_path is set programmatically in the launch file
+
+helix_llm_advisor:
+  ros__parameters:
+    ollama_base_url: "http://localhost:11434"
+    ollama_model: "phi3:mini"
+    ollama_timeout_sec: 55.0
