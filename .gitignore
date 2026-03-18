@@ -1,0 +1,9 @@
+build/
+install/
+log/
+.colcon_cd
+__pycache__/
+*.pyc
+*.egg-info/
+.vscode/
+.idea/
