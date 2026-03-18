@@ -54,7 +54,7 @@ class FaultInjector(Node):
         self._log_pub = self.create_publisher(Log, ROSOUT_TOPIC, 10)
 
     def run_injection_sequence(self) -> None:
-        """Execute heartbeat, metric spike, and log pattern injections in order."""
+        """Execute all four fault injection scenarios in order."""
         self._inject_heartbeat_then_stop()
         time.sleep(GAP_BETWEEN_PHASES_SEC)
 
@@ -62,7 +62,10 @@ class FaultInjector(Node):
         time.sleep(GAP_BETWEEN_PHASES_SEC)
 
         self._inject_log_pattern()
-        self.get_logger().info("All fault injections complete. Watch /helix/faults.")
+        time.sleep(GAP_BETWEEN_PHASES_SEC)
+
+        self._inject_recovery_chain_test()
+        self.get_logger().info("All fault injections complete. Watch /helix/faults and /helix/recovery_actions.")
 
     def _inject_heartbeat_then_stop(self) -> None:
         """
@@ -130,6 +133,42 @@ class FaultInjector(Node):
         log_msg.function = "processScan"
         log_msg.line = 247
         self._log_pub.publish(log_msg)
+
+    def _inject_recovery_chain_test(self) -> None:
+        """
+        Scenario 4: Emit a CRASH FaultEvent directly to /helix/faults for
+        'fake_nav_node', then immediately resume heartbeats to simulate a
+        successful restart. This lets us observe the full recovery pipeline:
+        fault received → restart_node action → verification via heartbeat.
+        """
+        print(
+            "\n[FaultInjector] Scenario 4: Recovery chain test — "
+            "injecting CRASH FaultEvent for 'fake_nav_node' directly to /helix/faults.\n"
+            "Watch for RecoveryAction on /helix/recovery_actions."
+        )
+        from helix_msgs.msg import FaultEvent as FE
+        fault_pub = self.create_publisher(FE, "/helix/faults", 10)
+
+        fault_msg = FE()
+        fault_msg.node_name = "fake_nav_node"
+        fault_msg.fault_type = "CRASH"
+        fault_msg.severity = 3
+        fault_msg.detail = "Injected CRASH for recovery chain test"
+        fault_msg.timestamp = time.time()
+        fault_msg.context_keys = []
+        fault_msg.context_values = []
+        fault_pub.publish(fault_msg)
+
+        # Immediately resume heartbeats to simulate a successful restart
+        print("[FaultInjector] Resuming heartbeats for 'fake_nav_node' to simulate recovery...")
+        hb_msg = String()
+        hb_msg.data = "fake_nav_node"
+        interval = 1.0 / HEARTBEAT_RATE_HZ
+        deadline = time.time() + 6.0
+        while time.time() < deadline:
+            self._hb_pub.publish(hb_msg)
+            time.sleep(interval)
+        print("[FaultInjector] Scenario 4 complete.")
 
     @staticmethod
     def _make_metric_msg(label: str, value: float) -> Float64MultiArray:
