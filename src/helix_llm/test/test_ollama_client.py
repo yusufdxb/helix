@@ -88,6 +88,13 @@ class TestParseResponse(unittest.TestCase):
         result = self.client.parse_response(raw)
         self.assertGreaterEqual(result["confidence"], 0.0)
 
+    def test_parse_missing_response_key(self):
+        """Outer JSON valid but 'response' key missing → treats as non-JSON inner."""
+        raw = json.dumps({"done": True})  # no "response" key
+        result = self.client.parse_response(raw)
+        self.assertLess(result["confidence"], 0.5)
+        self.assertEqual(result["suggested_action"], "unknown")
+
 
 class TestIsAvailable(unittest.TestCase):
     """is_available checks /api/tags endpoint."""
