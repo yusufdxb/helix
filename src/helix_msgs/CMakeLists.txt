@@ -12,6 +12,7 @@ find_package(std_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/FaultEvent.msg"
   "msg/RecoveryHint.msg"
+  "msg/RecoveryAction.msg"
   DEPENDENCIES std_msgs
 )
 
