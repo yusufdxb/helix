@@ -28,6 +28,7 @@ setup(
     entry_points={
         'console_scripts': [
             'helix_fault_injector = helix_bringup.fault_injector:main',
+            'helix_lifecycle_manager = helix_bringup.lifecycle_manager:main',
         ],
     },
 )

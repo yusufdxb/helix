@@ -7,8 +7,9 @@ Launches all 6 nodes:
   Phase 3: helix_llm_advisor
   Phase 4: helix_dashboard_node (plain node — always on, no lifecycle)
 
-Lifecycle nodes are configured at t=2s and activated at t=4s.
-Dashboard node starts immediately (no lifecycle).
+helix_lifecycle_manager runs at t=3s and configures+activates all lifecycle
+nodes via rclpy service calls (no external ros2 CLI — avoids DDS discovery
+timeouts).
 
 After launch, dashboard is available at http://localhost:8080.
 """
@@ -16,7 +17,7 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, LogInfo, TimerAction
+from launch.actions import LogInfo, TimerAction
 from launch_ros.actions import LifecycleNode, Node
 
 
@@ -83,35 +84,24 @@ def generate_launch_description() -> LaunchDescription:
         output="screen",
     )
 
-    # ── Auto-transition lifecycle nodes ──────────────────────────────────────
-    lifecycle_names = [
-        "helix_heartbeat_monitor",
-        "helix_anomaly_detector",
-        "helix_log_parser",
-        "helix_recovery_planner",
-        "helix_llm_advisor",
-    ]
-
-    configure_cmds = [
-        ExecuteProcess(
-            cmd=["ros2", "lifecycle", "set", f"/{name}", "configure"],
-            output="screen",
-        )
-        for name in lifecycle_names
-    ]
-    activate_cmds = [
-        ExecuteProcess(
-            cmd=["ros2", "lifecycle", "set", f"/{name}", "activate"],
-            output="screen",
-        )
-        for name in lifecycle_names
-    ]
-
-    auto_configure = TimerAction(period=5.0, actions=configure_cmds)
-    auto_activate = TimerAction(period=8.0, actions=activate_cmds)
+    # ── Lifecycle manager (rclpy-based, no external CLI) ─────────────────────
+    # Starts at t=3s — gives nodes time to register their DDS services.
+    # Uses wait_for_service() internally so it handles slow startup gracefully.
+    lifecycle_manager = TimerAction(
+        period=3.0,
+        actions=[
+            Node(
+                package="helix_bringup",
+                executable="helix_lifecycle_manager",
+                name="helix_lifecycle_manager",
+                namespace="",
+                output="screen",
+            )
+        ],
+    )
 
     dashboard_ready = TimerAction(
-        period=10.0,
+        period=5.0,
         actions=[LogInfo(msg="HELIX dashboard available at http://localhost:8080")],
     )
 
@@ -122,7 +112,6 @@ def generate_launch_description() -> LaunchDescription:
         recovery_planner,
         llm_advisor,
         dashboard,
-        auto_configure,
-        auto_activate,
+        lifecycle_manager,
         dashboard_ready,
     ])

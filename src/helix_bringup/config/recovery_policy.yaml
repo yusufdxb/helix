@@ -1,0 +1,80 @@
+# HELIX recovery policy — tiered response per fault_type.
+#
+# Tiers are executed in order; escalation occurs on failure.
+# Actions: restart_node | llm_consult | notify | noop
+# Tier 1: fast automated fix
+# Tier 2: LLM-assisted diagnosis
+# Tier 3: operator notification (noop in simulation)
+
+recovery_policies:
+  CRASH:
+    tiers:
+      - tier: 1
+        action: restart_node
+        max_attempts: 3
+        backoff_sec: [2.0, 5.0, 10.0]
+        verify_timeout_sec: 15.0
+      - tier: 2
+        action: llm_consult
+        max_attempts: 1
+        backoff_sec: [0.0]
+        verify_timeout_sec: 60.0
+      - tier: 3
+        action: notify
+        max_attempts: 1
+        backoff_sec: [0.0]
+        verify_timeout_sec: 0.0
+
+  ANOMALY:
+    tiers:
+      - tier: 1
+        action: noop
+        max_attempts: 1
+        backoff_sec: [0.0]
+        verify_timeout_sec: 10.0
+      - tier: 2
+        action: llm_consult
+        max_attempts: 1
+        backoff_sec: [0.0]
+        verify_timeout_sec: 60.0
+      - tier: 3
+        action: notify
+        max_attempts: 1
+        backoff_sec: [0.0]
+        verify_timeout_sec: 0.0
+
+  NETWORK:
+    tiers:
+      - tier: 1
+        action: restart_node
+        max_attempts: 2
+        backoff_sec: [5.0, 15.0]
+        verify_timeout_sec: 20.0
+      - tier: 2
+        action: llm_consult
+        max_attempts: 1
+        backoff_sec: [0.0]
+        verify_timeout_sec: 60.0
+      - tier: 3
+        action: notify
+        max_attempts: 1
+        backoff_sec: [0.0]
+        verify_timeout_sec: 0.0
+
+  LOG_PATTERN:
+    tiers:
+      - tier: 1
+        action: noop
+        max_attempts: 1
+        backoff_sec: [0.0]
+        verify_timeout_sec: 5.0
+      - tier: 2
+        action: llm_consult
+        max_attempts: 1
+        backoff_sec: [0.0]
+        verify_timeout_sec: 60.0
+      - tier: 3
+        action: notify
+        max_attempts: 1
+        backoff_sec: [0.0]
+        verify_timeout_sec: 0.0

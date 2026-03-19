@@ -4,7 +4,7 @@
 
 source /opt/ros/humble/setup.bash
 source ~/helix_ws/install/setup.bash
-export ROS_LOCALHOST_ONLY=1
-unset CYCLONEDDS_URI
+export CYCLONEDDS_URI=file:///home/carebear/helix_ws/cyclonedds_loopback.xml
+unset ROS_LOCALHOST_ONLY
 
-echo "HELIX env ready — ROS2 Humble + helix_ws sourced, localhost only"
+echo "HELIX env ready — ROS2 Humble + helix_ws sourced, CycloneDDS loopback with unicast peer discovery"

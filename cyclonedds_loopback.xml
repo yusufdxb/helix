@@ -2,9 +2,15 @@
   <Domain id="any">
     <General>
       <Interfaces>
-        <NetworkInterface name="lo" multicast="true"/>
+        <NetworkInterface name="lo"/>
       </Interfaces>
-      <AllowMulticast>true</AllowMulticast>
+      <AllowMulticast>false</AllowMulticast>
     </General>
+    <Discovery>
+      <Peers>
+        <Peer Address="localhost"/>
+      </Peers>
+      <ParticipantIndex>auto</ParticipantIndex>
+    </Discovery>
   </Domain>
 </CycloneDDS>

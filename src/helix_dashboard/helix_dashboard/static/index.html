@@ -6,9 +6,9 @@
   <title>HELIX Dashboard</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/prop-types@15/prop-types.min.js" crossorigin></script>
   <script src="https://unpkg.com/recharts@2.12.0/umd/Recharts.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js" crossorigin></script>
   <style>
     :root {
       --bg-primary: #0f1117;
@@ -63,6 +63,7 @@
 </head>
 <body>
 <div id="root"></div>
+
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
 const { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
