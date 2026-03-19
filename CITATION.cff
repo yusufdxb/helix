@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use HELIX in your research, please cite it using the metadata below."
+type: software
+title: "HELIX: Hierarchical Execution and Lifecycle Intelligence eXecutor"
+abstract: "Self-healing middleware for ROS 2 robotic systems. Detects node failures,
+  sensor anomalies, and log-pattern faults autonomously, then recovers through a
+  three-tier escalation ladder — rule-based, adaptive, and on-device LLM-assisted
+  diagnosis — without human intervention. Built for the Unitree GO2 quadruped on
+  ROS 2 Humble with Jetson Orin."
+authors:
+  - family-names: Guenena
+    given-names: Yusuf
+    email: yusuf.a.guenena@gmail.com
+    orcid: ""
+repository-code: "https://github.com/yusufdxb/helix"
+url: "https://github.com/yusufdxb/helix"
+license: MIT
+version: 1.0.0
+date-released: "2026-03-19"
+keywords:
+  - robotics
+  - ros2
+  - fault-tolerance
+  - self-healing
+  - autonomous-recovery
+  - large-language-models
+  - unitree-go2
+  - jetson-orin
+  - middleware
+  - reliability-engineering
