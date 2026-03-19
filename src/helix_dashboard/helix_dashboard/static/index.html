@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HELIX Dashboard</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/recharts@2.12.0/umd/Recharts.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" crossorigin></script>
+  <style>
+    :root {
+      --bg-primary: #0f1117;
+      --bg-card: #1a1d2e;
+      --bg-card-hover: #1f2340;
+      --border: #2a2d3e;
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    .mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .scroll-list {
+      overflow-y: auto;
+      max-height: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .scroll-list::-webkit-scrollbar { width: 4px; }
+    .scroll-list::-webkit-scrollbar-track { background: transparent; }
+    .scroll-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .pulse { animation: pulse 1.5s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+const { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+function timeAgo(ts) {
+  const sec = Math.floor(Date.now() / 1000 - ts);
+  if (sec < 0) return 'just now';
+  if (sec < 60) return `${sec}s ago`;
+  if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
+  return `${Math.floor(sec / 3600)}h ago`;
+}
+
+function fmtTime(ts) {
+  const d = new Date(ts * 1000);
+  return d.toLocaleTimeString('en-US', { hour12: false });
+}
+
+function pct(n) { return `${Math.round((n || 0) * 100)}%`; }
+
+// ── Fault badge colors ─────────────────────────────────────────────────────
+
+const FAULT_COLORS = {
+  CRASH:       { bg: '#7f1d1d', text: '#fca5a5', dot: '#ef4444' },
+  ANOMALY:     { bg: '#78350f', text: '#fde68a', dot: '#f59e0b' },
+  LOG_PATTERN: { bg: '#1e3a5f', text: '#93c5fd', dot: '#3b82f6' },
+  NETWORK:     { bg: '#4c1d95', text: '#c4b5fd', dot: '#8b5cf6' },
+};
+function faultColor(type) { return FAULT_COLORS[type] || { bg: '#1e293b', text: '#94a3b8', dot: '#64748b' }; }
+
+// ── Severity dots ──────────────────────────────────────────────────────────
+
+function SeverityDots({ level }) {
+  const colors = ['#ef4444', '#f59e0b', '#10b981'];
+  return (
+    <span style={{ display: 'inline-flex', gap: 2 }}>
+      {[1,2,3].map(i => (
+        <span key={i} style={{
+          width: 6, height: 6, borderRadius: '50%',
+          background: i <= level ? colors[i-1] : 'var(--border)',
+          display: 'inline-block',
+        }} />
+      ))}
+    </span>
+  );
+}
+
+// ── Tier badge ─────────────────────────────────────────────────────────────
+
+function TierBadge({ tier }) {
+  const colors = { 1: '#10b981', 2: '#f59e0b', 3: '#8b5cf6' };
+  return (
+    <span className="badge" style={{ background: colors[tier] || '#64748b', color: '#fff', fontSize: 10 }}>
+      T{tier}
+    </span>
+  );
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────
+
+function Header({ connected, stats, tick }) {
+  const total = stats?.total_faults || 0;
+  const recoveries = stats?.total_recoveries || 0;
+  const rate = pct(stats?.recovery_success_rate || 0);
+  const llm = stats?.llm_calls || 0;
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '12px 20px', background: 'var(--bg-card)', borderBottom: '1px solid var(--border)',
+      flexWrap: 'wrap', gap: 12,
+    }}>
+      <div>
+        <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.5px' }}>HELIX</div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+          Self-Healing ROS 2 Middleware
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{
+          width: 8, height: 8, borderRadius: '50%',
+          background: connected ? 'var(--green)' : 'var(--red)',
+          display: 'inline-block',
+        }} className={connected ? '' : 'pulse'} />
+        <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+          {connected ? 'Live' : 'Reconnecting…'}
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        {[
+          { label: 'Faults', value: total, color: '#ef4444' },
+          { label: 'Recoveries', value: recoveries, color: '#10b981' },
+          { label: 'Success Rate', value: rate, color: '#3b82f6' },
+          { label: 'LLM Calls', value: llm, color: '#8b5cf6' },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{
+            background: 'var(--bg-primary)', border: '1px solid var(--border)',
+            borderRadius: 6, padding: '4px 12px', textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color }}>{value}</div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Node Health Grid ───────────────────────────────────────────────────────
+
+function NodeHealth({ nodeHealth }) {
+  const entries = Object.entries(nodeHealth || {});
+  const STATUS_STYLE = {
+    OK:    { bg: '#052e16', text: '#10b981' },
+    WARN:  { bg: '#3d1f00', text: '#f59e0b' },
+    ERROR: { bg: '#450a0a', text: '#ef4444' },
+    STALE: { bg: '#1e293b', text: '#64748b' },
+  };
+  return (
+    <div className="card" style={{ margin: '16px 20px 0' }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12 }}>
+        Node Health
+      </div>
+      {entries.length === 0 ? (
+        <div style={{ color: 'var(--text-muted)', fontSize: 13, padding: '8px 0' }}>
+          Waiting for heartbeats…
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 8 }}>
+          {entries.map(([name, status]) => {
+            const st = STATUS_STYLE[status] || STATUS_STYLE.STALE;
+            return (
+              <div key={name} style={{
+                background: st.bg, border: `1px solid ${st.text}33`,
+                borderRadius: 6, padding: '10px 12px',
+                display: 'flex', flexDirection: 'column', gap: 4,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {status === 'ERROR' && (
+                    <span className="pulse" style={{
+                      width: 6, height: 6, borderRadius: '50%', background: '#ef4444', flexShrink: 0,
+                    }} />
+                  )}
+                  <span className="mono" style={{
+                    fontSize: 11, color: 'var(--text-primary)', overflow: 'hidden',
+                    textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }} title={name}>{name}</span>
+                </div>
+                <span className="badge" style={{ background: st.text + '22', color: st.text, alignSelf: 'flex-start' }}>
+                  {status}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Fault List ─────────────────────────────────────────────────────────────
+
+function FaultList({ faults, tick }) {
+  return (
+    <div className="card" style={{ flex: 1 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 10 }}>
+        Recent Faults
+      </div>
+      <div className="scroll-list">
+        {faults.length === 0 && (
+          <div style={{ color: 'var(--text-muted)', fontSize: 12, padding: '8px 0' }}>No faults yet</div>
+        )}
+        {faults.map((f, i) => {
+          const fc = faultColor(f.fault_type);
+          return (
+            <div key={i} style={{
+              background: fc.bg + '44', border: `1px solid ${fc.dot}33`,
+              borderRadius: 6, padding: '8px 10px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <span className="badge" style={{ background: fc.bg, color: fc.text }}>
+                  {f.fault_type}
+                </span>
+                <span className="mono" style={{ fontSize: 11, color: 'var(--text-primary)', flexGrow: 1 }}>
+                  {f.node_name}
+                </span>
+                <SeverityDots level={f.severity || 0} />
+                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                  {timeAgo(f.timestamp || f.received_at || 0)}
+                </span>
+              </div>
+              {f.detail && (
+                <div style={{
+                  fontSize: 11, color: 'var(--text-secondary)', marginTop: 4,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }} title={f.detail}>{f.detail.slice(0, 60)}{f.detail.length > 60 ? '…' : ''}</div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Recovery List ──────────────────────────────────────────────────────────
+
+function RecoveryList({ recoveries, tick }) {
+  return (
+    <div className="card" style={{ flex: 1 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 10 }}>
+        Recovery Actions
+      </div>
+      <div className="scroll-list">
+        {recoveries.length === 0 && (
+          <div style={{ color: 'var(--text-muted)', fontSize: 12, padding: '8px 0' }}>No recoveries yet</div>
+        )}
+        {recoveries.map((r, i) => (
+          <div key={i} style={{
+            background: 'var(--bg-primary)', border: '1px solid var(--border)',
+            borderRadius: 6, padding: '8px 10px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <TierBadge tier={r.tier} />
+              <span className="mono" style={{ fontSize: 11, color: 'var(--text-primary)', flexGrow: 1 }}>
+                {r.action_taken}
+              </span>
+              <span style={{ fontSize: 13, color: r.success ? 'var(--green)' : 'var(--red)' }}>
+                {r.success ? '✓' : '✗'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 4, fontSize: 10, color: 'var(--text-muted)' }}>
+              <span>{(r.duration_sec || 0).toFixed(2)}s</span>
+              {r.attempt_number > 1 && <span>attempt {r.attempt_number}</span>}
+              <span style={{ flexGrow: 1, textAlign: 'right' }}>
+                {timeAgo(r.timestamp || r.received_at || 0)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── LLM Diagnosis List ─────────────────────────────────────────────────────
+
+function DiagnosisList({ diagnoses, tick }) {
+  return (
+    <div className="card" style={{ flex: 1 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 10 }}>
+        LLM Diagnoses
+      </div>
+      <div className="scroll-list">
+        {diagnoses.length === 0 && (
+          <div style={{ color: 'var(--text-muted)', fontSize: 12, padding: '8px 0' }}>No diagnoses yet</div>
+        )}
+        {diagnoses.map((d, i) => {
+          const conf = d.confidence || 0;
+          const barColor = conf >= 0.75 ? 'var(--green)' : conf >= 0.5 ? 'var(--yellow)' : 'var(--red)';
+          return (
+            <div key={i} style={{
+              background: 'var(--bg-primary)', border: '1px solid var(--border)',
+              borderRadius: 6, padding: '8px 10px',
+            }}>
+              {/* Confidence bar */}
+              <div style={{ height: 3, background: 'var(--border)', borderRadius: 2, marginBottom: 6 }}>
+                <div style={{ height: '100%', width: `${conf * 100}%`, background: barColor, borderRadius: 2, transition: 'width 0.3s' }} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span className="mono" style={{ fontSize: 11, color: 'var(--text-primary)', flexGrow: 1 }}>
+                  {d.suggested_action || 'unknown'}
+                </span>
+                <span style={{ fontSize: 10, color: barColor }}>{Math.round(conf * 100)}%</span>
+                {d.action_executed && (
+                  <span className="badge" style={{ background: '#052e16', color: '#10b981', fontSize: 9 }}>
+                    AUTO-EXECUTED
+                  </span>
+                )}
+              </div>
+              {d.reasoning && (
+                <div style={{
+                  fontSize: 10, color: 'var(--text-secondary)', marginTop: 4,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }} title={d.reasoning}>{d.reasoning.slice(0, 80)}{d.reasoning.length > 80 ? '…' : ''}</div>
+              )}
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4, textAlign: 'right' }}>
+                {timeAgo(d.timestamp || d.received_at || 0)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Fault Timeline Chart ───────────────────────────────────────────────────
+
+function FaultTimeline({ timeline }) {
+  if (!timeline || timeline.length === 0) {
+    return (
+      <div className="card" style={{ margin: '16px 20px', minHeight: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 20 }}>Fault Timeline</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>No faults recorded yet</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Bucket events into 10-second bins over last 10 minutes
+  const now = Date.now() / 1000;
+  const BIN_SEC = 10;
+  const WINDOW_SEC = 600;
+  const numBins = WINDOW_SEC / BIN_SEC;
+  const bins = [];
+  for (let i = 0; i < numBins; i++) {
+    const t = now - WINDOW_SEC + (i + 1) * BIN_SEC;
+    bins.push({ t, time: fmtTime(t), CRASH: 0, ANOMALY: 0, LOG_PATTERN: 0, NETWORK: 0 });
+  }
+  for (const evt of timeline) {
+    const age = now - (evt.timestamp || 0);
+    if (age > WINDOW_SEC || age < 0) continue;
+    const binIdx = Math.min(Math.floor((WINDOW_SEC - age) / BIN_SEC), numBins - 1);
+    const bin = bins[numBins - 1 - binIdx];
+    if (bin && evt.fault_type in bin) bin[evt.fault_type]++;
+  }
+
+  return (
+    <div className="card" style={{ margin: '16px 20px' }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12 }}>
+        Fault Timeline (last 10 min)
+      </div>
+      <ResponsiveContainer width="100%" height={180}>
+        <AreaChart data={bins} margin={{ top: 4, right: 16, bottom: 0, left: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3e" />
+          <XAxis dataKey="time" tick={{ fill: '#64748b', fontSize: 10 }} interval={Math.floor(numBins / 6)} />
+          <YAxis tick={{ fill: '#64748b', fontSize: 10 }} allowDecimals={false} />
+          <Tooltip contentStyle={{ background: '#1a1d2e', border: '1px solid #2a2d3e', borderRadius: 6, fontSize: 12 }} />
+          <Legend wrapperStyle={{ fontSize: 11, color: '#94a3b8' }} />
+          <Area type="monotone" dataKey="CRASH" stroke="#ef4444" fill="#ef4444" fillOpacity={0.3} />
+          <Area type="monotone" dataKey="ANOMALY" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.3} />
+          <Area type="monotone" dataKey="NETWORK" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.3} />
+          <Area type="monotone" dataKey="LOG_PATTERN" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+// ── Root App ───────────────────────────────────────────────────────────────
+
+function App() {
+  const [state, setState] = useState({
+    node_health: {},
+    recent_faults: [],
+    recent_recoveries: [],
+    recent_diagnoses: [],
+    stats: { total_faults: 0, total_recoveries: 0, successful_recoveries: 0, llm_calls: 0, recovery_success_rate: 0 },
+    fault_timeline: [],
+  });
+  const [connected, setConnected] = useState(false);
+  const [tick, setTick] = useState(0); // triggers relative time re-render
+  const wsRef = useRef(null);
+
+  // Auto-reconnecting WebSocket
+  const connect = useCallback(() => {
+    const ws = new WebSocket(`ws://${window.location.host}/ws`);
+    wsRef.current = ws;
+    ws.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (!data.ping) setState(data);
+      } catch {}
+    };
+    ws.onopen = () => setConnected(true);
+    ws.onclose = () => {
+      setConnected(false);
+      setTimeout(connect, 3000);
+    };
+    ws.onerror = () => ws.close();
+  }, []);
+
+  useEffect(() => {
+    connect();
+    return () => wsRef.current?.close();
+  }, [connect]);
+
+  // Tick every second to update relative timestamps
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // On first connect, also fetch state via REST for initial load
+  useEffect(() => {
+    fetch('/api/state')
+      .then(r => r.json())
+      .then(data => setState(data))
+      .catch(() => {});
+  }, []);
+
+  return (
+    <div style={{ minHeight: '100vh', paddingBottom: 20 }}>
+      <Header connected={connected} stats={state.stats} tick={tick} />
+      <NodeHealth nodeHealth={state.node_health} />
+
+      {/* Three-column panel */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, margin: '16px 20px 0', alignItems: 'start' }}>
+        <FaultList faults={state.recent_faults} tick={tick} />
+        <RecoveryList recoveries={state.recent_recoveries} tick={tick} />
+        <DiagnosisList diagnoses={state.recent_diagnoses} tick={tick} />
+      </div>
+
+      <FaultTimeline timeline={state.fault_timeline} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
