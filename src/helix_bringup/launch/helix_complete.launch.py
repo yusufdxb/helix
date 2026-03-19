@@ -107,11 +107,11 @@ def generate_launch_description() -> LaunchDescription:
         for name in lifecycle_names
     ]
 
-    auto_configure = TimerAction(period=2.0, actions=configure_cmds)
-    auto_activate = TimerAction(period=4.0, actions=activate_cmds)
+    auto_configure = TimerAction(period=5.0, actions=configure_cmds)
+    auto_activate = TimerAction(period=8.0, actions=activate_cmds)
 
     dashboard_ready = TimerAction(
-        period=5.0,
+        period=10.0,
         actions=[LogInfo(msg="HELIX dashboard available at http://localhost:8080")],
     )
 
