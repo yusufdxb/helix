@@ -14,3 +14,10 @@ helix_log_parser:
   ros__parameters:
     dedup_window_sec: 5.0
     # rules_file_path is set programmatically in the launch file
+
+helix_dashboard_node:
+  ros__parameters:
+    port: 8080
+    host: "0.0.0.0"
+    max_fault_history: 50
+    max_recovery_history: 50
