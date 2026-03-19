@@ -35,37 +35,18 @@ All decisions are logged to SQLite and streamed to a live web dashboard.
 ---
 
 ## Architecture
-```
-┌─────────────────────────────────────────────────────┐
-│                  ROS 2 Node Graph                   │
-│   Navigation │ Perception │ Control │ Comms/DDS     │
-└──────────────────────┬──────────────────────────────┘
-                       │ heartbeats + metrics + /rosout
-┌──────────────────────▼──────────────────────────────┐
-│              Phase 1 — Fault Sensing                │
-│  HeartbeatMonitor │ AnomalyDetector │ LogParser     │
-│                   → /helix/faults                   │
-└──────────────────────┬──────────────────────────────┘
-                       │ FaultEvent
-┌──────────────────────▼──────────────────────────────┐
-│             Phase 2 — Recovery Engine               │
-│  RecoveryPlanner → ActionExecutor → VerificationLoop│
-│  8 recovery actions │ SQLite state │ 3-tier policy  │
-│                   → /helix/recovery_actions         │
-└──────────┬───────────────────────────┬──────────────┘
-           │ tier 3 escalation         │ metrics
-┌──────────▼──────────┐   ┌───────────▼──────────────┐
-│  Phase 3 — LLM      │   │  Phase 4 — Dashboard     │
-│  Ollama / Phi-3 Mini│   │  FastAPI + React          │
-│  ContextBuilder     │   │  WebSocket broadcast      │
-│  Confidence-gated   │   │  http://localhost:8080    │
-│  auto-execution     │   │                          │
-└─────────────────────┘   └──────────────────────────┘
-```
+
+<p align="center">
+  <img src="docs/images/architecture.svg" alt="HELIX Architecture" width="100%"/>
+</p>
 
 ---
 
 ## Fault Coverage
+
+<p align="center">
+  <img src="docs/images/fault_taxonomy.svg" alt="Fault Taxonomy" width="100%"/>
+</p>
 
 | Fault Class | Detection Method | Tier 1 | Tier 2 | Tier 3 |
 |---|---|---|---|---|
