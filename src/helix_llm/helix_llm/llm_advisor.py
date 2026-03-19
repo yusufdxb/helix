@@ -94,6 +94,8 @@ class LLMAdvisor(LifecycleNode):
             self._loop.call_soon_threadsafe(self._loop.stop)
         if self._loop_thread:
             self._loop_thread.join(timeout=5.0)
+        self._loop = None
+        self._loop_thread = None
         self.get_logger().info("LLMAdvisor deactivated.")
         return TransitionCallbackReturn.SUCCESS
 
