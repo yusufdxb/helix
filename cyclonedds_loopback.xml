@@ -2,9 +2,9 @@
   <Domain id="any">
     <General>
       <Interfaces>
-        <NetworkInterface name="lo"/>
+        <NetworkInterface name="lo" multicast="true"/>
       </Interfaces>
-      <AllowMulticast>false</AllowMulticast>
+      <AllowMulticast>true</AllowMulticast>
     </General>
   </Domain>
 </CycloneDDS>
