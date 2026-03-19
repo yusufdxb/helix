@@ -48,7 +48,7 @@ class FaultInjector(Node):
         self._log_pub = self.create_publisher(Log, ROSOUT_TOPIC, 10)
 
     def run_injection_sequence(self) -> None:
-        """Execute all four fault injection scenarios in order."""
+        """Execute all five fault injection scenarios in order."""
         self._inject_heartbeat_then_stop()
         time.sleep(GAP_BETWEEN_PHASES_SEC)
 

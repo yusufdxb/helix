@@ -178,6 +178,8 @@ class RecoveryPlanner(LifecycleNode):
         if self._llm_diagnosis_sub:
             self.destroy_subscription(self._llm_diagnosis_sub)
         self._active_recoveries.clear()
+        self._pending_llm.clear()
+        self._llm_results.clear()
         return TransitionCallbackReturn.SUCCESS
 
     # ── ROS 2 fault callback ─────────────────────────────────────────────────
@@ -327,7 +329,7 @@ class RecoveryPlanner(LifecycleNode):
                 )
 
                 # Verification (blocking — run in thread pool so loop stays free)
-                loop = asyncio.get_event_loop()
+                loop = asyncio.get_running_loop()
                 verified, verify_detail = await loop.run_in_executor(
                     None,
                     functools.partial(
@@ -462,19 +464,24 @@ class RecoveryPlanner(LifecycleNode):
 
         Returns the LLMDiagnosis message or None on timeout.
         """
+        # Use fault.timestamp as the correlation key — matches the fault_id
+        # that LLMAdvisor sets in LLMDiagnosis.fault_id = str(fault_msg.timestamp).
+        correlation_key = str(fault.timestamp)
+
         event = asyncio.Event()
-        self._pending_llm[fault_id] = event
-        self._llm_results[fault_id] = None
+        self._pending_llm[correlation_key] = event
+        self._llm_results[correlation_key] = None
 
         self.get_logger().info(
             f"Requesting LLM diagnosis for fault '{fault_id}' "
-            f"({fault.fault_type} on '{fault.node_name}')"
+            f"({fault.fault_type} on '{fault.node_name}'), "
+            f"correlation_key='{correlation_key}'"
         )
         self._llm_request_pub.publish(fault)
 
         try:
             await asyncio.wait_for(event.wait(), timeout=LLM_DIAGNOSIS_TIMEOUT_SEC)
-            return self._llm_results.get(fault_id)
+            return self._llm_results.get(correlation_key)
         except asyncio.TimeoutError:
             self.get_logger().error(
                 f"LLM diagnosis timed out after {LLM_DIAGNOSIS_TIMEOUT_SEC}s "
@@ -482,8 +489,8 @@ class RecoveryPlanner(LifecycleNode):
             )
             return None
         finally:
-            self._pending_llm.pop(fault_id, None)
-            self._llm_results.pop(fault_id, None)
+            self._pending_llm.pop(correlation_key, None)
+            self._llm_results.pop(correlation_key, None)
 
     async def _execute_llm_tier(
         self, fault: FaultEvent, fault_id: str, tier_num: int
