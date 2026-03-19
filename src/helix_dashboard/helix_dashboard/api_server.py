@@ -141,7 +141,7 @@ async def api_db_stats() -> JSONResponse:
 
 
 @app.get("/")
-async def serve_index() -> FileResponse:
+async def serve_index():
     if _static_dir is None:
         return JSONResponse({"error": "static dir not configured"}, status_code=404)
     index = _static_dir / "index.html"
