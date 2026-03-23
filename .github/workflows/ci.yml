@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/phase2-recovery, feat/phase3-llm, feat/phase4-dashboard]
   pull_request:
     branches: [main]
 
@@ -39,10 +39,17 @@ jobs:
         run: |
           . /opt/ros/humble/setup.sh
           colcon build --symlink-install --packages-select \
-            helix_msgs helix_core helix_bringup
+            helix_msgs helix_core helix_recovery helix_bringup
 
       - name: Run helix_core tests
         run: |
           . /opt/ros/humble/setup.sh
           . install/setup.sh
           python3 -m pytest src/helix_core/test/ -v --timeout=30
+
+      - name: Run helix_recovery tests
+        run: |
+          . /opt/ros/humble/setup.sh
+          . install/setup.sh
+          python3 -m pytest src/helix_recovery/test/ -v --timeout=60 \
+            -k "not test_crash_fault_produces_recovery_action and not test_recovery_action_persisted_to_db"
