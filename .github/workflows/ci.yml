@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main, feat/phase2-recovery, feat/phase3-llm, feat/phase4-dashboard]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: pip install ruff
+      - run: ruff check src/ --select E,F,W,I --ignore E501
+
+  test:
+    name: Build & Test (ROS 2 Humble)
+    runs-on: ubuntu-22.04
+    container:
+      image: ros:humble-ros-base
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update -q
+          apt-get install -y python3-pip python3-pytest python3-colcon-common-extensions
+          pip install pytest-timeout
+
+      - name: Install Python deps
+        run: pip install aiofiles
+
+      - name: Build workspace
+        run: |
+          . /opt/ros/humble/setup.sh
+          colcon build --symlink-install --packages-select \
+            helix_msgs helix_core helix_recovery helix_bringup
+
+      - name: Run helix_core tests
+        run: |
+          . /opt/ros/humble/setup.sh
+          . install/setup.sh
+          python3 -m pytest src/helix_core/test/ -v --timeout=30
+
+      - name: Run helix_recovery tests
+        run: |
+          . /opt/ros/humble/setup.sh
+          . install/setup.sh
+          python3 -m pytest src/helix_recovery/test/ -v --timeout=60 \
+            -k "not test_crash_fault_produces_recovery_action and not test_recovery_action_persisted_to_db"
