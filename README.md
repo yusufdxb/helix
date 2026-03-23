@@ -6,9 +6,15 @@
 **Current scope:** fault detection, fault injection, and ROS 2 message plumbing  
 **Not yet public in this repo:** automated recovery, LLM diagnosis, dashboard, or hardware deployment
 
+[![CI](https://github.com/yusufdxb/helix/actions/workflows/ci.yml/badge.svg?branch=feat/phase2-recovery)](https://github.com/yusufdxb/helix/actions/workflows/ci.yml)
 [![ROS 2 Humble](https://img.shields.io/badge/ROS2-Humble-blue)](https://docs.ros.org/en/humble/)
 [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+
+> **Development branches:**
+> [`feat/phase2-recovery`](https://github.com/yusufdxb/helix/tree/feat/phase2-recovery) — recovery engine, CI, benchmark ([PR #1](https://github.com/yusufdxb/helix/pull/1)) ·
+> [`feat/phase3-llm`](https://github.com/yusufdxb/helix/tree/feat/phase3-llm) — Ollama/Phi-3 integration ·
+> [`feat/phase4-dashboard`](https://github.com/yusufdxb/helix/tree/feat/phase4-dashboard) — web dashboard
 
 ## What This Repo Actually Contains
 
