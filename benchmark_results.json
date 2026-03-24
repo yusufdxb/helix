@@ -1,0 +1,84 @@
+{
+  "benchmark_version": "1.0",
+  "timestamp": "2026-03-24T00:21:54Z",
+  "anomaly_detector": {
+    "detection_latency": {
+      "detection_latency_samples_mean": 3,
+      "detection_latency_samples_min": 3,
+      "detection_latency_samples_max": 3,
+      "detection_latency_ms_mean": 0.065,
+      "detection_latency_ms_p95": 0.0673,
+      "trials": 200,
+      "detected_trials": 200
+    },
+    "throughput": {
+      "total_samples": 100000,
+      "elapsed_sec": 2.1572,
+      "throughput_samples_per_sec": 46356
+    },
+    "tpr_fpr_sweep": [
+      {
+        "zscore_threshold": 1.5,
+        "tpr": 1.0,
+        "fpr": 0.0,
+        "true_positives": 200,
+        "false_positives": 0
+      },
+      {
+        "zscore_threshold": 2.0,
+        "tpr": 1.0,
+        "fpr": 0.0,
+        "true_positives": 200,
+        "false_positives": 0
+      },
+      {
+        "zscore_threshold": 2.5,
+        "tpr": 1.0,
+        "fpr": 0.0,
+        "true_positives": 200,
+        "false_positives": 0
+      },
+      {
+        "zscore_threshold": 3.0,
+        "tpr": 1.0,
+        "fpr": 0.0,
+        "true_positives": 200,
+        "false_positives": 0
+      },
+      {
+        "zscore_threshold": 3.5,
+        "tpr": 1.0,
+        "fpr": 0.0,
+        "true_positives": 200,
+        "false_positives": 0
+      },
+      {
+        "zscore_threshold": 4.0,
+        "tpr": 1.0,
+        "fpr": 0.0,
+        "true_positives": 200,
+        "false_positives": 0
+      },
+      {
+        "zscore_threshold": 5.0,
+        "tpr": 1.0,
+        "fpr": 0.0,
+        "true_positives": 200,
+        "false_positives": 0
+      }
+    ]
+  },
+  "heartbeat_monitor": {
+    "n_trials": 30,
+    "detected_trials": 30,
+    "miss_detection_latency_ms_mean": 200.4,
+    "miss_detection_latency_ms_p95": 200.5,
+    "miss_detection_latency_ms_min": 200.3,
+    "miss_detection_latency_ms_max": 200.5,
+    "config": {
+      "timeout_sec": 0.1,
+      "miss_threshold": 3,
+      "check_interval_sec": 0.05
+    }
+  }
+}
