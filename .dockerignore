@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.venv
+venv
+env
+
+# ROS 2 build artifacts
+build/
+install/
+log/
+
+# Research artifacts
+docs/images/
+benchmark_results.json
+RESULTS.md
+
+# OS files
+.DS_Store
