@@ -6,6 +6,7 @@
 **Current scope:** fault detection, fault injection, and ROS 2 message plumbing  
 **Not yet public in this repo:** automated recovery, LLM diagnosis, dashboard, or hardware deployment
 
+[![CI](https://github.com/yusufdxb/helix/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/yusufdxb/helix/actions/workflows/ci.yml)
 [![ROS 2 Humble](https://img.shields.io/badge/ROS2-Humble-blue)](https://docs.ros.org/en/humble/)
 [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
@@ -43,16 +44,11 @@ The project targets a real robotics problem: failures are often detectable befor
 - multiple sensing paths: heartbeats, numeric anomalies, and log pattern rules
 - offline tests around the core monitoring logic
 
-**Benchmarked performance ([RESULTS.md](RESULTS.md)):**
-
-| Component | Key Result |
-|---|---|
-| AnomalyDetector throughput | 46,356 samples/sec — <0.01% of a single core at 100 samples/sec operational load |
-| AnomalyDetector detection latency | 0.065 ms mean, 0.0673 ms p95 (200/200 trials detected) |
-| AnomalyDetector TPR/FPR | 100% TPR, 0% FPR across all tested Z-score thresholds (1.5–5.0) |
-| HeartbeatMonitor miss detection | 200.4 ms mean latency, 30/30 trials detected |
-
 ## Current Architecture
+
+<p align="center">
+  <img src="docs/images/architecture.svg" width="680"/>
+</p>
 
 ```text
 monitored ROS 2 graph
