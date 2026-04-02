@@ -243,10 +243,16 @@ def write_results_md(results: Dict, latency: Dict, throughput: Dict,
         f"| {r['zscore_threshold']} | {r['tpr']:.1%} | {r['fpr']:.1%} |"
         for r in tpr_fpr
     )
-    md = f"""# Results — HELIX
+    md = f"""# Results — HELIX Fault Sensing Benchmarks
 
-Quantitative evaluation of HELIX fault detection components.
-All benchmarks run in standalone mode (no ROS 2 required).
+## Benchmark Scope
+
+All results in this document are from **standalone synthetic benchmarks**. The benchmark script (`benchmark_helix.py`) runs pure-Python ports of the HELIX detection logic — no ROS 2 runtime, no `rclpy`, no message transport is involved.
+
+These measurements characterize the **algorithmic performance of the detection logic in isolation**. They do not reflect end-to-end ROS 2 pipeline latency, message serialization overhead, or performance under real robot workloads. Throughput numbers represent single-core CPython performance.
+
+The TPR/FPR sweep evaluates detection accuracy against synthetic Gaussian data with known injected anomalies, not against real-world fault traces.
+
 Generated: `{results['timestamp']}`
 
 ---
@@ -292,6 +298,8 @@ Window size: 60. Samples: 100,000.
 _At 10 Hz per node × 10 monitored metrics = 100 samples/sec operational load.
 HELIX operates at <0.01% of single-core capacity at steady state._
 
+Note: actual ROS 2 node performance will differ due to message serialization, callback scheduling, and other runtime overhead.
+
 ---
 
 ## AnomalyDetector — TPR / FPR Sweep
@@ -304,6 +312,8 @@ HELIX operates at <0.01% of single-core capacity at steady state._
 {tpr_fpr_table}
 
 _Default Z=3.0: TPR={z3_row['tpr']:.1%}, FPR={z3_row['fpr']:.1%}._
+
+The perfect separation across all thresholds reflects the large gap between normal noise (sigma ~0.08) and injected spikes (~1125 sigma above baseline). Any threshold-based detector would achieve perfect results on this data. Real-world fault signatures would produce less clean separation, particularly with non-Gaussian noise, gradual drift, or near-threshold anomalies.
 
 ---
 
@@ -340,7 +350,9 @@ python3 -m pytest test/ -v
 
 See `TESTING.md` for full test setup instructions.
 """
-    with open("RESULTS.md", "w") as f:
+    import os
+    os.makedirs("results", exist_ok=True)
+    with open("results/standalone_benchmark.md", "w") as f:
         f.write(md)
 
 
@@ -386,7 +398,7 @@ def main() -> None:
     print("\nWrote: benchmark_results.json")
 
     write_results_md(results, latency, throughput, z3_row, hb, tpr_fpr)
-    print("Wrote: RESULTS.md")
+    print("Wrote: results/standalone_benchmark.md")
 
 
 if __name__ == "__main__":

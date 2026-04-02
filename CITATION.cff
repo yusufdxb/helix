@@ -2,11 +2,12 @@ cff-version: 1.2.0
 message: "If you use HELIX in your research, please cite it using the metadata below."
 type: software
 title: "HELIX: Hierarchical Execution and Lifecycle Intelligence eXecutor"
-abstract: "Self-healing middleware for ROS 2 robotic systems. Detects node failures,
-  sensor anomalies, and log-pattern faults autonomously, then recovers through a
-  three-tier escalation ladder — rule-based, adaptive, and on-device LLM-assisted
-  diagnosis — without human intervention. Built for the Unitree GO2 quadruped on
-  ROS 2 Humble with Jetson Orin."
+abstract: "Fault sensing middleware prototype for ROS 2 robotic systems. Provides
+  lifecycle-managed detection of node failures, sensor anomalies, and log-pattern
+  faults using heartbeat monitoring, rolling Z-score analysis, and regex-based log
+  parsing. Publishes structured FaultEvent messages for downstream consumption.
+  Designed for deployment on the Unitree GO2 quadruped with Jetson Orin, validated
+  offline and in simulation."
 authors:
   - family-names: Guenena
     given-names: Yusuf
@@ -21,9 +22,8 @@ keywords:
   - robotics
   - ros2
   - fault-tolerance
-  - self-healing
-  - autonomous-recovery
-  - large-language-models
+  - fault-sensing
+  - fault-observability
   - unitree-go2
   - jetson-orin
   - middleware

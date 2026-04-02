@@ -1,0 +1,261 @@
+{
+  "timestamp": "2026-04-02T18:36:32-0400",
+  "rules_file": "/home/yusuf/workspace/helix/src/helix_bringup/config/log_rules.yaml",
+  "num_rules": 5,
+  "accuracy": {
+    "total_cases": 22,
+    "total_correct": 22,
+    "overall_accuracy": 1.0,
+    "per_rule": {
+      "dds_discovery_lost": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "hardware_estop": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "nav2_costmap_fail": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "slam_diverged": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "transform_timeout": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "details": [
+      {
+        "message": "Costmap2D failed to initialize properly",
+        "expected": "nav2_costmap_fail",
+        "actual": "nav2_costmap_fail",
+        "correct": true,
+        "label": "TP",
+        "note": ""
+      },
+      {
+        "message": "SLAM diverged at frame 142",
+        "expected": "slam_diverged",
+        "actual": "slam_diverged",
+        "correct": true,
+        "label": "TP",
+        "note": ""
+      },
+      {
+        "message": "Pose covariance exceeded threshold",
+        "expected": "slam_diverged",
+        "actual": "slam_diverged",
+        "correct": true,
+        "label": "TP",
+        "note": ""
+      },
+      {
+        "message": "DDS discovery timeout after 30s",
+        "expected": "dds_discovery_lost",
+        "actual": "dds_discovery_lost",
+        "correct": true,
+        "label": "TP",
+        "note": ""
+      },
+      {
+        "message": "Remote participant lost connection",
+        "expected": "dds_discovery_lost",
+        "actual": "dds_discovery_lost",
+        "correct": true,
+        "label": "TP",
+        "note": ""
+      },
+      {
+        "message": "TF extrapolation into the future",
+        "expected": "transform_timeout",
+        "actual": "transform_timeout",
+        "correct": true,
+        "label": "TP",
+        "note": ""
+      },
+      {
+        "message": "transform timeout waiting for base_link",
+        "expected": "transform_timeout",
+        "actual": "transform_timeout",
+        "correct": true,
+        "label": "TP",
+        "note": ""
+      },
+      {
+        "message": "Emergency stop activated by operator",
+        "expected": "hardware_estop",
+        "actual": "hardware_estop",
+        "correct": true,
+        "label": "TP",
+        "note": ""
+      },
+      {
+        "message": "E-STOP triggered by bumper sensor",
+        "expected": "hardware_estop",
+        "actual": "hardware_estop",
+        "correct": true,
+        "label": "TP",
+        "note": ""
+      },
+      {
+        "message": "Navigation goal reached successfully",
+        "expected": null,
+        "actual": null,
+        "correct": true,
+        "label": "TN",
+        "note": ""
+      },
+      {
+        "message": "SLAM initialization complete",
+        "expected": null,
+        "actual": null,
+        "correct": true,
+        "label": "TN",
+        "note": ""
+      },
+      {
+        "message": "DDS discovery completed normally",
+        "expected": null,
+        "actual": null,
+        "correct": true,
+        "label": "TN",
+        "note": ""
+      },
+      {
+        "message": "Transform lookup succeeded in 0.01s",
+        "expected": null,
+        "actual": null,
+        "correct": true,
+        "label": "TN",
+        "note": ""
+      },
+      {
+        "message": "All systems nominal",
+        "expected": null,
+        "actual": null,
+        "correct": true,
+        "label": "TN",
+        "note": ""
+      },
+      {
+        "message": "Battery level: 85%",
+        "expected": null,
+        "actual": null,
+        "correct": true,
+        "label": "TN",
+        "note": ""
+      },
+      {
+        "message": "Motor temperature within normal range",
+        "expected": null,
+        "actual": null,
+        "correct": true,
+        "label": "TN",
+        "note": ""
+      },
+      {
+        "message": "Costmap update cycle took 0.05s",
+        "expected": null,
+        "actual": null,
+        "correct": true,
+        "label": "TN",
+        "note": ""
+      },
+      {
+        "message": "SLAM covariance within bounds",
+        "expected": null,
+        "actual": null,
+        "correct": true,
+        "label": "TN",
+        "note": ""
+      },
+      {
+        "message": "costmap failed",
+        "expected": null,
+        "actual": null,
+        "correct": true,
+        "label": "EDGE",
+        "note": "No \"to initialize\" \u2014 pattern is \"Costmap.*failed to initialize\""
+      },
+      {
+        "message": "slam has diverged slightly",
+        "expected": "slam_diverged",
+        "actual": "slam_diverged",
+        "correct": true,
+        "label": "EDGE",
+        "note": "Case-insensitive, contains \"SLAM.*diverged\""
+      },
+      {
+        "message": "discovery was lost temporarily",
+        "expected": null,
+        "actual": null,
+        "correct": true,
+        "label": "EDGE",
+        "note": "No \"timeout\" and no \"participant.*lost\""
+      },
+      {
+        "message": "estop was disengaged",
+        "expected": "hardware_estop",
+        "actual": "hardware_estop",
+        "correct": true,
+        "label": "EDGE",
+        "note": "Contains \"estop\" literally"
+      }
+    ]
+  },
+  "throughput": {
+    "total_messages": 10000,
+    "matching_messages": 2017,
+    "elapsed_sec": 0.01287,
+    "messages_per_sec": 777029.0
+  },
+  "dedup": {
+    "dedup_window_sec": 5.0,
+    "scenarios": [
+      {
+        "name": "10 messages within 5s dedup window",
+        "expected_faults": 1,
+        "actual_faults": 1,
+        "pass": true
+      },
+      {
+        "name": "Message after dedup window expires",
+        "expected_faults": 1,
+        "actual_faults": 1,
+        "pass": true
+      },
+      {
+        "name": "Same rule, different nodes within window",
+        "expected_faults": 2,
+        "actual_faults": 2,
+        "pass": true
+      },
+      {
+        "name": "Different rules, same node within window",
+        "expected_faults": 2,
+        "actual_faults": 2,
+        "pass": true
+      }
+    ],
+    "all_pass": true
+  }
+}

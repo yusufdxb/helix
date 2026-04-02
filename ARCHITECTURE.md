@@ -1,75 +1,87 @@
-# HELIX Architecture
+# HELIX Sensing Architecture
 
-This document describes the architecture that is public in this repository today. It does not describe recovery, dashboard, or LLM subsystems as if they were already implemented.
+This document describes the fault sensing architecture implemented in this repository. HELIX is a detection and reporting layer — it does not include recovery execution, diagnosis, or operator tooling.
 
-## Public Scope
+## Sensing Scope
 
-The current repo is a sensing layer for robotics faults in ROS 2. It is organized around three questions:
-- Is a node still alive?
-- Are numeric metrics drifting into abnormal ranges?
-- Are logs showing known failure signatures?
+The sensing layer is organized around three questions:
 
-When one of those conditions is met, the system emits a structured `FaultEvent`.
+1. **Is a node still alive?** — Heartbeat monitoring with configurable timeouts
+2. **Are numeric metrics drifting?** — Rolling Z-score anomaly detection
+3. **Are logs showing failure signatures?** — Regex-based log pattern matching
+
+When any of these conditions is detected, the system publishes a structured `FaultEvent` message to `/helix/faults`.
 
 ## Packages
 
 ### `helix_msgs`
-Message package for communication between monitoring components and any future recovery layer.
 
-Public messages now:
-- `FaultEvent.msg`
-- `RecoveryHint.msg`
+Custom ROS 2 message definitions:
+
+- `FaultEvent.msg` — structured fault report (used by all three sensing nodes)
+- `RecoveryHint.msg` — defined for future use; not referenced by any node in this codebase
 
 ### `helix_core`
-Monitoring nodes.
 
-Components now:
-- `heartbeat_monitor.py`
-  Monitors expected heartbeats and flags node liveness failures.
-- `anomaly_detector.py`
-  Consumes metric streams and computes rolling Z-scores before emitting anomaly events.
-- `log_parser.py`
-  Matches configured log rules and converts known signatures into structured faults.
+Three lifecycle-managed sensing nodes:
+
+- **`heartbeat_monitor.py`** — Subscribes to expected heartbeat topics. When a monitored node fails to publish within a configurable timeout for a threshold number of consecutive misses, emits a `FaultEvent`.
+
+- **`anomaly_detector.py`** — Subscribes to `/helix/metrics`. Maintains a rolling window of recent samples and computes a Z-score for each incoming value. If the Z-score exceeds the configured threshold for a configurable number of consecutive samples, emits a `FaultEvent`.
+
+- **`log_parser.py`** — Matches incoming log entries against a set of configured regex rules. When a pattern matches, emits a `FaultEvent` with the rule name and matched content.
 
 ### `helix_bringup`
-Integration package.
 
-Contents now:
-- launch file for the sensing stack
-- YAML configuration
-- `fault_injector.py` for local demos and testing
+Integration and demonstration:
+
+- Launch file for the sensing stack (`helix_sensing.launch.py`)
+- YAML configuration for thresholds, timeouts, and log rules
+- `fault_injector.py` — publishes synthetic anomalies and stops heartbeats for local testing
 
 ## Data Flow
 
 ```text
 /diagnostics ------------------------------+
                                            |
-/helix/metrics ----------------------------+--> helix_core monitors --> /helix/faults
-                                           |
-configured log rules / injected faults ----+
+/helix/metrics ----------------------------+--> helix_core sensing nodes
+                                           |         |
+configured log rules / injected faults ----+         |
+                                                     v
+                                              /helix/faults (FaultEvent)
 ```
 
-The architecture is intentionally simple at this stage. The repo demonstrates detection and reporting, not autonomous recovery.
+Each sensing node independently subscribes to its input source, processes data, and publishes `FaultEvent` messages to the shared `/helix/faults` topic. There is no inter-node coordination within the sensing layer.
 
 ## Design Choices
 
 ### Lifecycle nodes
-The monitors are built as lifecycle-aware ROS 2 nodes so they can be configured and activated in a controlled way.
 
-### Structured events
-The project uses ROS messages instead of free-form console output as the main fault interface. That keeps downstream recovery or operator tooling possible without re-parsing strings.
+All three monitors are implemented as ROS 2 lifecycle (managed) nodes. This allows controlled startup sequencing — nodes can be configured before activation and cleanly deactivated without killing the process. It also makes the sensing layer compatible with ROS 2 launch-time lifecycle management.
 
-### Conservative statistics
-`anomaly_detector.py` computes its Z-score against the existing history window before appending the newest value. That avoids contaminating the baseline with the anomaly it is trying to detect.
+### Structured fault events
+
+Faults are reported as typed ROS 2 messages (`FaultEvent`) rather than free-form log output. This makes downstream consumption deterministic — any future recovery layer, dashboard, or logging system can subscribe to `/helix/faults` without parsing strings.
+
+### Conservative Z-score evaluation
+
+The anomaly detector computes its Z-score against the existing history window **before** appending the new sample. This prevents the anomalous value from contaminating the baseline statistics it is being evaluated against. The detection is also gated by a `consecutive_trigger` parameter — a single outlier does not produce a fault event.
 
 ### Testable core logic
-The current public code is most credible where it is bounded and testable. That is why the strongest part of the repo today is `helix_core`, not a broad unverified systems claim.
 
-## Intended Future Expansion
+The sensing nodes are designed so their core detection logic can be exercised in unit tests via `rclpy` without requiring a full multi-node ROS 2 deployment.
 
-These are design directions, not public deliverables in this repo today:
-- recovery planning and action execution
-- recovery verification loop
-- operator-facing event dashboard
-- hardware deployment on a real robot stack
-- optional LLM-assisted diagnosis after deterministic detection
+## Proposed Extensions (Not Implemented)
+
+The following are research directions documented for context. None are present in this codebase:
+
+- Recovery planning and action execution
+- Recovery verification loop (confirm that a recovery action resolved the fault)
+- Operator-facing event dashboard
+- Hardware deployment on the Unitree GO2 / Jetson Orin Nano platform
+- LLM-assisted diagnosis after deterministic detection
+- Persistent event storage (SQLite or similar)
+
+## Architecture Diagram Note
+
+The diagram at `docs/images/architecture.svg` depicts the **target deployment context**, including the GO2 quadruped and Jetson Orin hardware. This represents the intended research platform, not the current validated scope. The sensing logic in this repository is platform-independent and has been validated only in simulation and offline benchmarks.

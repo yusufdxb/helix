@@ -1,50 +1,40 @@
-# HELIX
+# HELIX — Structured Fault Sensing for ROS 2 Systems
 
-> ROS 2 fault-sensing prototype for robotics systems.
-
-**Status:** public Phase 1 prototype  
-**Current scope:** fault detection, fault injection, and ROS 2 message plumbing  
-**Not yet public in this repo:** automated recovery, LLM diagnosis, dashboard, or hardware deployment
+> A fault observability prototype: three lifecycle-managed detection nodes, a custom fault message type, and offline benchmarks.
 
 [![CI](https://github.com/yusufdxb/helix/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/yusufdxb/helix/actions/workflows/ci.yml)
 [![ROS 2 Humble](https://img.shields.io/badge/ROS2-Humble-blue)](https://docs.ros.org/en/humble/)
 [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-> **Development branches:**
-> [`feat/phase2-recovery`](https://github.com/yusufdxb/helix/tree/feat/phase2-recovery) — recovery engine, CI, benchmark ([PR #1](https://github.com/yusufdxb/helix/pull/1)) ·
-> [`feat/phase3-llm`](https://github.com/yusufdxb/helix/tree/feat/phase3-llm) — Ollama/Phi-3 integration ·
-> [`feat/phase4-dashboard`](https://github.com/yusufdxb/helix/tree/feat/phase4-dashboard) — web dashboard
+---
 
-## What This Repo Actually Contains
+## What This Is
 
-HELIX is an experiment in monitoring ROS 2 systems for early signs of failure. The current public repository is focused on sensing and reporting faults, not on full self-healing autonomy.
+HELIX is a bounded ROS 2 fault sensing prototype. It implements three lifecycle nodes that monitor a ROS 2 graph and publish structured `FaultEvent` messages when problems are detected:
 
-Implemented now:
-- `helix_core` lifecycle nodes for heartbeat monitoring, anomaly detection, and log parsing
-- `helix_msgs` custom messages for publishing fault events and recovery hints
-- `helix_bringup` launch/config package plus a fault injector for local demos
-- unit tests for the `helix_core` sensing components
-- architecture diagrams for the intended system direction
+- **Heartbeat monitor** — timeout-based liveness checks on expected nodes
+- **Anomaly detector** — rolling Z-score over numeric metric streams
+- **Log parser** — regex rule matching against log patterns
 
-Not implemented in this public tree:
-- recovery execution engine
-- LLM-backed diagnosis
-- web dashboard
-- persistent SQLite event store
-- Jetson or GO2 deployment artifacts
+All three nodes publish to `/helix/faults` using a custom `FaultEvent.msg` type. A fault injector node is included for local demonstration and testing.
 
-That distinction matters. This repo should be read as a solid Phase 1 sensing prototype, not a finished self-healing robotics middleware stack.
+Offline benchmarks (pure-Python ports of the detection logic) are provided for evaluating algorithmic performance without a ROS 2 runtime.
 
-## Why It Is Still Worth Looking At
+## What This Is Not
 
-The project targets a real robotics problem: failures are often detectable before they become mission-ending. Even at this prototype stage, the repo shows useful systems thinking:
-- lifecycle-node based monitoring
-- structured `FaultEvent` messages instead of ad hoc log strings
-- multiple sensing paths: heartbeats, numeric anomalies, and log pattern rules
-- offline tests around the core monitoring logic
+This repository does **not** contain:
 
-## Current Architecture
+- A recovery or self-healing engine
+- LLM-based diagnosis
+- A web dashboard or operator UI
+- Persistent event storage
+- Hardware deployment artifacts or robot-specific code
+- End-to-end integration with physical platforms
+
+A `RecoveryHint.msg` is defined in `helix_msgs` but is not used by any node in this codebase.
+
+## Architecture Overview
 
 <p align="center">
   <img src="docs/images/architecture.svg" width="680"/>
@@ -58,28 +48,24 @@ monitored ROS 2 graph
         +--> /helix/metrics -----------------+--> helix_core
         |                                    |    - heartbeat_monitor
         +--> log stream / fault rules -------+    - anomaly_detector
-                                             |    - log_parser
-                                             |
-                                             +--> /helix/faults (FaultEvent)
-                                             +--> /helix/recovery_hints
-
-helix_bringup
-- launch files
-- YAML config
-- fault_injector demo node
+                                                  - log_parser
+                                                  |
+                                                  +--> /helix/faults (FaultEvent)
 ```
 
 More detail: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Packages
 
-| Package | What is in the repo now |
+| Package | Contents |
 |---|---|
-| `helix_msgs` | `FaultEvent.msg`, `RecoveryHint.msg` |
+| `helix_msgs` | `FaultEvent.msg`, `RecoveryHint.msg` (defined but unused) |
 | `helix_core` | `anomaly_detector.py`, `heartbeat_monitor.py`, `log_parser.py` |
-| `helix_bringup` | launch file, config, and `fault_injector.py` |
+| `helix_bringup` | Launch file, YAML config, `fault_injector.py` |
 
-## Build
+## Quick Start
+
+### Build
 
 ```bash
 mkdir -p ~/helix_ws/src
@@ -91,31 +77,41 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
-## Run
+### Launch the sensing stack
 
 ```bash
 ros2 launch helix_bringup helix_sensing.launch.py
 ```
 
-In a separate terminal:
+### Inject faults (separate terminal)
 
 ```bash
 ros2 run helix_bringup fault_injector
 ```
 
-The launch path above reflects the files that currently exist in the repository.
+### Run benchmarks (no ROS required)
 
-## Fault Types in the Public Prototype
+```bash
+python3 benchmark_helix.py
+```
 
-| Source | Mechanism | Output |
-|---|---|---|
-| Heartbeat monitoring | timeout-based liveness checks | `FaultEvent` |
-| Metric anomaly detection | rolling Z-score over recent samples | `FaultEvent` |
-| Log parsing | regex and rule-based matching | `FaultEvent` |
+## Evaluation
+
+Five benchmark suites evaluate the sensing components:
+
+| Benchmark | Key Result | ROS 2? |
+|-----------|-----------|--------|
+| Algorithmic throughput | ~331K samples/sec | No |
+| End-to-end ROS 2 latency | 1.16 ms mean (p95: 1.24 ms) | Yes |
+| Realistic anomaly detection | 96.5% TPR at Z=3.0 with marginal anomalies; 0% TPR for 3-sigma in Laplace noise | No |
+| Log parser accuracy | 22/22 correct, ~754K msg/sec throughput | No |
+| GO2 topic gap analysis | 1/4 HELIX inputs available on real hardware | No |
+
+Full results, methodology, and caveats: [RESULTS.md](RESULTS.md)
 
 ## Testing
 
-`helix_core` includes local tests for the current sensing logic.
+Unit tests exercise the three `helix_core` nodes via `rclpy` in isolation. ROS 2 Humble is required.
 
 ```bash
 cd ~/helix_ws
@@ -124,19 +120,29 @@ colcon test --packages-select helix_core
 colcon test-result --verbose
 ```
 
-More detail: [TESTING.md](TESTING.md)
+Full details: [TESTING.md](TESTING.md)
 
-## Roadmap
+## Artifact Scope
 
-The intended direction is still useful, but it is future scope, not current scope:
-- rule-based recovery actions after fault detection
-- verification loop for recovery success/failure
-- hardware validation on a real robot stack
-- optional operator dashboard
-- optional LLM-assisted diagnosis
+An evaluator can reproduce the following locally:
+
+1. **Build** — `colcon build` in a ROS 2 Humble environment
+2. **Unit tests** — `colcon test --packages-select helix_core` (requires ROS 2 Humble)
+3. **Standalone benchmarks** — `python3 benchmark_helix.py`, `python3 scripts/bench_realistic_anomalies.py`, `python3 scripts/bench_log_parser.py` (no ROS 2 required)
+4. **End-to-end latency** — `python3 scripts/bench_e2e_latency.py` (requires ROS 2 Humble + built workspace)
+5. **GO2 gap analysis** — `python3 scripts/go2_topic_gap_analysis.py` (no ROS 2 required)
+6. **Live demo** — launch the sensing stack and inject faults in simulation
+
+Steps 1, 2, 4, and 6 require ROS 2 Humble. The `ros:humble-ros-base` Docker image is a known-good environment. Steps 3 and 5 run with standard Python 3.10+. All result artifacts are stored in `results/`.
+
+## Research Context
+
+HELIX is designed with the Unitree GO2 quadruped and NVIDIA Jetson Orin Nano as a target deployment platform. The current codebase is platform-independent sensing logic validated offline and in simulation. No hardware-specific code or on-robot validation exists in this repository.
+
+The architecture diagram (`docs/images/architecture.svg`) depicts the intended deployment context, including the target hardware — this reflects the research direction, not the current validated scope.
 
 ## Author
 
-**Yusuf Guenena**  
-M.S. Robotics Engineering — Wayne State University  
+**Yusuf Guenena**
+M.S. Robotics Engineering — Wayne State University
 [linkedin.com/in/yusuf-guenena](https://linkedin.com/in/yusuf-guenena) · [github.com/yusufdxb](https://github.com/yusufdxb)
