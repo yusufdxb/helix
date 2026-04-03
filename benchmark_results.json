@@ -1,20 +1,20 @@
 {
   "benchmark_version": "1.0",
-  "timestamp": "2026-04-02T22:36:31Z",
+  "timestamp": "2026-04-03T19:21:18Z",
   "anomaly_detector": {
     "detection_latency": {
       "detection_latency_samples_mean": 3,
       "detection_latency_samples_min": 3,
       "detection_latency_samples_max": 3,
-      "detection_latency_ms_mean": 0.0098,
-      "detection_latency_ms_p95": 0.0141,
+      "detection_latency_ms_mean": 0.0493,
+      "detection_latency_ms_p95": 0.0681,
       "trials": 200,
       "detected_trials": 200
     },
     "throughput": {
       "total_samples": 100000,
-      "elapsed_sec": 0.2981,
-      "throughput_samples_per_sec": 335500
+      "elapsed_sec": 1.24,
+      "throughput_samples_per_sec": 80643
     },
     "tpr_fpr_sweep": [
       {
@@ -71,10 +71,10 @@
   "heartbeat_monitor": {
     "n_trials": 30,
     "detected_trials": 30,
-    "miss_detection_latency_ms_mean": 200.3,
-    "miss_detection_latency_ms_p95": 200.3,
-    "miss_detection_latency_ms_min": 200.2,
-    "miss_detection_latency_ms_max": 200.3,
+    "miss_detection_latency_ms_mean": 200.7,
+    "miss_detection_latency_ms_p95": 202.0,
+    "miss_detection_latency_ms_min": 200.3,
+    "miss_detection_latency_ms_max": 202.5,
     "config": {
       "timeout_sec": 0.1,
       "miss_threshold": 3,

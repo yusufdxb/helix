@@ -1,0 +1,93 @@
+# Hardware Experiment Index
+
+All experiments run 2026-04-03 on live GO2/Jetson/PC hardware.
+Artifacts stored at: `T7 SSD: hardware_eval_20260403/`
+
+## Experiments
+
+### EXP-1: Hardware Provenance Capture
+- **What**: System info, ROS 2 graph snapshot, topic rates, network config
+- **Where**: `env/provenance_summary.json`, `env/jetson_*.txt`, `env/pc_*.txt`
+- **Claim supported**: "We have access to and have characterized the target hardware"
+- **Evidence strength**: Strong
+
+### EXP-2: HELIX Algorithmic Benchmark on Jetson
+- **What**: `benchmark_helix.py`, `bench_realistic_anomalies.py`, `bench_log_parser.py` run on Jetson Orin NX
+- **Where**: `results/jetson_vs_pc_benchmarks.json`, `results/benchmark_comparison.json`
+- **Claim supported**: "HELIX detection logic runs on the target hardware with acceptable performance"
+- **Evidence strength**: Strong
+- **Key numbers**:
+  - Anomaly throughput: 63,675 samp/s (636x operational requirement)
+  - Log parser: 156,231 msg/s (1562x operational requirement)
+  - Detection latency: 0.049 ms (identical to PC)
+
+### EXP-3: Cross-Device DDS Latency
+- **What**: 50-message round-trip measurement between PC and Jetson via ROS 2 topics
+- **Where**: `results/cross_device_latency.txt`, `results/benchmark_comparison.json`
+- **Claim supported**: "Cross-machine ROS 2 communication is fast enough for monitoring"
+- **Evidence strength**: Strong
+- **Key numbers**: 1.63 ms RTT mean, 0.81 ms one-way, 100% delivery
+
+### EXP-4: Jetson Resource Baseline
+- **What**: CPU, memory, thermal measurement while GO2 stack (103 topics) is active
+- **Where**: `results/jetson_resource_baseline.txt`, `results/resource_overhead_analysis.txt`
+- **Claim supported**: "Jetson has sufficient headroom for HELIX alongside GO2 stack"
+- **Evidence strength**: Strong
+- **Key numbers**: 82% idle CPU, 13GB free RAM, 43-48°C thermal
+
+### EXP-5: GO2 Topic Landscape Capture
+- **What**: Full topic enumeration with types, rate measurement, data samples
+- **Where**: `env/jetson_ros2_topics.txt`, `bags/helix_baseline_30s/`, `bags/sensor_30s/`
+- **Claim supported**: "The GO2 publishes rich ROS 2 data observable without robot modification"
+- **Evidence strength**: Strong
+
+### EXP-6: Baseline Bag Capture (Standard Types)
+- **What**: 30-second recordings of standard-typed GO2 topics
+- **Where**: `bags/baseline_30s/`, `bags/sensor_30s/`
+- **Claim supported**: "Real GO2 sensor data can be recorded and analyzed"
+- **Evidence strength**: Strong
+- **Key data**: 651 PoseStamped messages at 18.7 Hz, GPS at 1 Hz
+
+### EXP-7: High-Rate Bag Capture (Jetson-Side)
+- **What**: 40-second recordings from Jetson with access to all standard topics
+- **Where**: `bags/helix_baseline_30s/` (16,722 msgs), `bags/helix_topic_rates/` (16,649 msgs)
+- **Claim supported**: "Jetson can observe and record high-rate GO2 sensor streams"
+- **Evidence strength**: Strong
+- **Key data**: IMU at 250 Hz, odom at 150 Hz, pose at 19 Hz, lidar at 15 Hz
+
+### EXP-8: External Topic Injection (Perturbation A)
+- **What**: Published 5 test messages to /helix_test_topic; 20 from Jetson
+- **Where**: `bags/perturbation_test_publish/`, `bags/helix_rosout_perturbation/`
+- **Claim supported**: "External topic injection does not disturb GO2 — safe perturbation baseline"
+- **Evidence strength**: Moderate
+- **Finding**: Zero /rosout reaction from GO2 nodes
+
+### EXP-9: Topic Rate Stability (Perturbation C)
+- **What**: Two independent 30-second captures of the same topics
+- **Where**: `bags/helix_baseline_30s/`, `bags/helix_topic_rates/`
+- **Claim supported**: "GO2 topic rates are stable enough for rate-based anomaly detection"
+- **Evidence strength**: Moderate (short duration)
+- **Finding**: <1% rate variation between captures for IMU, odom
+
+## Experiments NOT Executed
+
+### Node Lifecycle Perturbation (Scenario B)
+- **Why not**: GO2 nodes not discoverable from external machines. Killing nodes on the robot risks locomotion safety.
+- **What it would prove**: Whether HELIX heartbeat monitor detects node death
+
+### Network Latency Perturbation (Scenario D)
+- **Why not**: Robot is live on physical floor. Requires human operator present for safety.
+- **What it would prove**: Whether topic rate degradation under network stress is detectable
+- **Protocol**: Documented in `notes/scenario_D_protocol.md`
+
+## Claims Defensibility Matrix
+
+| Paper Claim | Evidence | Defensible? |
+|-------------|----------|-------------|
+| "Runs on Jetson Orin NX" | EXP-2 benchmarks on actual Jetson | YES — algorithmic benchmark, not full ROS 2 stack |
+| "Negligible overhead on target hardware" | EXP-4 resource baseline + EXP-2 comparison | YES — projected, not measured with HELIX nodes running |
+| "Sub-millisecond cross-device latency" | EXP-3 DDS RTT measurements | YES — 0.81 ms one-way |
+| "GO2 publishes observable data" | EXP-5, EXP-6, EXP-7 bag captures | YES |
+| "HELIX can monitor GO2 faults" | No experiment | NO — HELIX nodes never ran against GO2 data |
+| "Adapter architecture is feasible" | EXP-5 topic analysis + EXP-6 data samples | PARTIAL — feasibility argument, not implementation |
+| "Rate-based detection is viable" | EXP-9 rate stability + EXP-2 detection accuracy | PARTIAL — stable baselines exist, detection not demonstrated |

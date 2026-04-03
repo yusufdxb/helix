@@ -18,25 +18,30 @@ python3 benchmark_helix.py   # no ROS 2 required
 
 Z-score threshold: 3.0, consecutive_trigger: 3, window_size: 60.
 Signal: baseline mean=10.0 (noise sigma ~0.08), spike value=100.0.
+Measured on PC (Intel i7-7700 @ 3.60 GHz), 2026-04-03.
 
 | Metric | Value |
 |--------|-------|
 | Samples to detection (mean) | 3 |
-| Detection latency — mean | 0.010 ms |
-| Detection latency — p95 | 0.014 ms |
+| Detection latency — mean | 0.049 ms |
+| Detection latency — p95 | 0.068 ms |
 | Trials | 200 |
 | Detected | 200/200 |
 
 ### AnomalyDetector — Throughput
 
 Single-threaded pure-Python `_process_sample` loop. Window size: 60. Samples: 100,000.
+Measured on PC (Intel i7-7700 @ 3.60 GHz), 2026-04-03.
 
 | Metric | Value |
 |--------|-------|
-| Throughput | ~331,000 samples/sec |
-| Wall time | 0.30 s |
+| Throughput (PC) | ~81,000 samples/sec |
+| Throughput (Jetson Orin NX) | ~64,000 samples/sec |
+| Wall time (PC) | 1.24 s |
 
-At 100 samples/sec operational load (10 Hz x 10 metrics), this represents <0.01% of single-core capacity. Actual ROS 2 node performance will differ due to message serialization, callback scheduling, and runtime overhead.
+At 100 samples/sec operational load (10 Hz x 10 metrics), the Jetson runs at <0.2% of single-core capacity (636x headroom). Actual ROS 2 node performance will differ due to message serialization, callback scheduling, and runtime overhead.
+
+**Note:** Earlier runs on different hardware reported ~331K samples/sec. The numbers above are from the current benchmark script on the current test hardware and are authoritative. See `benchmark_results.json` for exact values.
 
 ### AnomalyDetector — TPR / FPR (Trivial Baseline)
 
@@ -51,11 +56,12 @@ At 100 samples/sec operational load (10 Hz x 10 metrics), this represents <0.01%
 ### HeartbeatMonitor — Miss Detection Latency
 
 Config: timeout=0.1s, miss_threshold=3, check_interval=0.05s. 30 trials.
+Measured on PC (Intel i7-7700), 2026-04-03.
 
 | Metric | Value |
 |--------|-------|
-| Mean detection latency | 200.3 ms |
-| p95 detection latency | 200.6 ms |
+| Mean detection latency | 200.7 ms |
+| p95 detection latency | 202.0 ms |
 
 At production config (miss_threshold=3, check_interval=0.5s), expected latency is ~1.5–2.0s.
 
@@ -189,10 +195,12 @@ Overall: 22/22 correct.
 
 10,000 messages (80% non-matching, 20% matching) against 5 compiled regex patterns.
 
-| Metric | Value |
-|--------|-------|
-| Throughput | ~754,000 messages/sec |
-| Elapsed | 0.013 s |
+| Metric | PC | Jetson Orin NX |
+|--------|-----|----------------|
+| Throughput | ~248,000 msg/sec | ~156,000 msg/sec |
+| Elapsed | 0.040 s | 0.064 s |
+
+**Note:** An earlier measurement reported ~754K msg/sec. The values above are from `scripts/bench_log_parser.py` on current hardware (2026-04-03).
 
 ### Dedup Validation
 
@@ -211,20 +219,97 @@ Overall: 22/22 correct.
 
 **Script:** `scripts/go2_topic_gap_analysis.py` | **Doc:** `docs/GO2_TOPIC_ANALYSIS.md`
 
-Analysis of the Unitree GO2's ROS 2 topic landscape against HELIX's input requirements, based on a live capture from the GO2 (192.168.123.161) observed via Jetson Orin NX (192.168.123.18) on 2026-04-02.
+Analysis of the Unitree GO2's ROS 2 topic landscape against HELIX's input requirements, based on live captures from the GO2 (192.168.123.161).
+
+Topic counts vary across captures due to GO2 operating mode:
+- 2026-04-02 (Jetson observer): 121 topics
+- 2026-04-03 (PC observer, session 1): 103 topics
+- 2026-04-03 (PC observer, session 2): 153 topics
+
+The variation reflects which GO2 subsystems are active at capture time (e.g., SLAM, navigation, video streaming).
 
 ```bash
-python3 scripts/go2_topic_gap_analysis.py
+python3 scripts/go2_topic_gap_analysis.py         # static analysis
+python3 scripts/attachability_matrix.py            # live graph analysis
 ```
 
-| HELIX Input | GO2 Status |
-|-------------|-----------|
-| /diagnostics | Not published |
+| HELIX Input | GO2 Status (2026-04-03) |
+|-------------|------------------------|
+| /diagnostics | Available (twist_mux, ~2 Hz) |
 | /helix/heartbeat | Not published |
-| /helix/metrics | Not published |
-| /rosout | Available (5 publishers) |
+| /helix/metrics | Not published (bridged via passive_adapter.py) |
+| /rosout | Available |
 
-**Result:** 1 of 4 HELIX input channels has a native data source on the GO2. The gap is bridgeable with adapter nodes but requires meaningful integration work. See `docs/GO2_TOPIC_ANALYSIS.md` for full analysis.
+**Result:** 2 of 4 HELIX input channels have native data sources on the GO2. A passive adapter (`scripts/passive_adapter.py`) bridges 5 additional topic rate streams and 2 JSON state streams into `/helix/metrics`, enabling HELIX's anomaly detector to operate on live GO2 data. See `docs/GO2_HARDWARE_EVIDENCE.md` for full analysis.
+
+---
+
+## 6. Hardware Evaluation — GO2 + Jetson Orin NX
+
+**Date:** 2026-04-03. **Platform:** Live Unitree GO2 at 192.168.123.161, Jetson Orin NX at 192.168.123.18, PC at 192.168.123.10.
+
+### Adapter-Based Detection on Live GO2
+
+HELIX's anomaly detector ran on the PC while a passive adapter (`scripts/passive_adapter.py`) bridged live GO2 topic rates into `/helix/metrics`. During a 60-second evaluation:
+
+| Metric | Value |
+|--------|-------|
+| FaultEvents emitted | 4 |
+| Fault source | `/utlidar/cloud` rate anomaly |
+| Peak Z-score | 146.91 |
+| Consecutive violations | 6 |
+| RSS memory | 41.7 MB mean |
+| CPU usage | 22.3% mean (multi-threaded executor) |
+
+The LiDAR point cloud topic experienced a real rate fluctuation that the adapter converted into a metric stream, and HELIX's Z-score detector identified as anomalous. This is the first detection of a real hardware event by HELIX.
+
+**What this proves:** HELIX's detection logic can identify real anomalies in GO2 sensor data when bridged through a lightweight adapter.
+
+**What this does not prove:** That HELIX would function as a persistent, reliable monitor in deployment. This was a single 60-second controlled evaluation.
+
+### HELIX Node Resource Overhead (Measured)
+
+| Configuration | RSS (mean) | RSS (max) | CPU (mean) | CPU (max) | Faults |
+|---------------|-----------|-----------|-----------|-----------|--------|
+| 3 HELIX nodes only | 41.4 MB | 41.7 MB | 10.7% | 20.0% | 0 |
+| 3 HELIX nodes + adapter | 41.7 MB | 42.1 MB | 22.3% | 49.9% | 4 |
+
+Measured on PC (i7-7700). Overhead on the Jetson Orin NX would differ — see algorithmic benchmark comparison for scaling factors (Jetson runs at 64–79% of PC throughput).
+
+### Cross-Platform Benchmark Comparison
+
+| Metric | PC (i7-7700) | Jetson Orin NX | Ratio |
+|--------|-------------|----------------|-------|
+| Anomaly throughput | 81K samp/s | 64K samp/s | 0.79x |
+| Log parser throughput | 248K msg/s | 156K msg/s | 0.63x |
+| Detection latency | 0.049 ms | 0.049 ms | 1.0x |
+| Heartbeat miss latency | 200.7 ms | 200.7 ms | 1.0x |
+
+### GO2 Topic Rate Stability
+
+Measured from bag captures using `scripts/bag_rate_analysis.py`:
+
+| Topic | Rate (Hz) | Jitter (ms) | Stability | Duration |
+|-------|-----------|-------------|-----------|----------|
+| /utlidar/robot_pose | 18.8 | 1.20 | 99.8% | 34.8s |
+| /audiohub/player/state | 4.0 | 0.67 | 100.0% | 34.8s |
+| /gnss | 1.0 | 1.23 | 100.0% | 34.8s |
+| /multiplestate | 1.0 | 0.92 | 100.0% | 34.8s |
+
+Cross-bag coefficient of variation (CV) for shared topics: <0.01 (highly stable).
+
+### Attachability Matrix
+
+Computed from 153 live GO2 topics by `scripts/attachability_matrix.py`:
+
+| Metric | Value |
+|--------|-------|
+| Native HELIX input coverage | 2/4 (50%) |
+| Standard-type topics | 82/153 (54%) |
+| Topics adaptable to HELIX | 54 |
+| Topics behind custom msg barrier | 71 |
+
+Full results: `results/attachability_matrix.json`
 
 ---
 
@@ -234,9 +319,13 @@ python3 scripts/go2_topic_gap_analysis.py
 |-----------|---------|---------------|
 | Standalone algorithmic | `python3 benchmark_helix.py` | No |
 | Realistic anomalies | `python3 scripts/bench_realistic_anomalies.py` | No |
-| End-to-end ROS 2 latency | `python3 scripts/bench_e2e_latency.py` | Yes (Humble) |
+| End-to-end ROS 2 latency | `python3 scripts/bench_e2e_latency.py` | Yes (Humble + helix_msgs) |
 | Log parser evaluation | `python3 scripts/bench_log_parser.py` | No |
 | GO2 topic gap analysis | `python3 scripts/go2_topic_gap_analysis.py` | No |
+| Attachability matrix | `python3 scripts/attachability_matrix.py` | Yes (live graph) |
+| Bag rate analysis | `python3 scripts/bag_rate_analysis.py <bag>` | Yes (rosbag2) |
+| HELIX overhead | `python3 scripts/measure_helix_overhead.py` | Yes (Humble + helix_msgs) |
+| Passive adapter | `python3 scripts/passive_adapter.py` | Yes (live GO2) |
 | Unit tests | `colcon test --packages-select helix_core` | Yes (Humble) |
 
 All JSON result artifacts are stored in `results/`.

@@ -29,8 +29,7 @@ This repository does **not** contain:
 - LLM-based diagnosis
 - A web dashboard or operator UI
 - Persistent event storage
-- Hardware deployment artifacts or robot-specific code
-- End-to-end integration with physical platforms
+- Hardware deployment artifacts or robot-specific code (though hardware evaluation has been conducted — see `docs/GO2_HARDWARE_EVIDENCE.md`)
 
 A `RecoveryHint.msg` is defined in `helix_msgs` but is not used by any node in this codebase.
 
@@ -101,11 +100,12 @@ Five benchmark suites evaluate the sensing components:
 
 | Benchmark | Key Result | ROS 2? |
 |-----------|-----------|--------|
-| Algorithmic throughput | ~331K samples/sec | No |
+| Algorithmic throughput | ~81K samples/sec (PC i7-7700), ~64K (Jetson Orin NX) | No |
 | End-to-end ROS 2 latency | 1.16 ms mean (p95: 1.24 ms) | Yes |
 | Realistic anomaly detection | 96.5% TPR at Z=3.0 with marginal anomalies; 0% TPR for 3-sigma in Laplace noise | No |
-| Log parser accuracy | 22/22 correct, ~754K msg/sec throughput | No |
-| GO2 topic gap analysis | 1/4 HELIX inputs available on real hardware | No |
+| Log parser accuracy | 22/22 correct, ~248K msg/sec throughput | No |
+| GO2 attachability | 2/4 HELIX inputs natively available; 54 topics adaptable | No |
+| Adapter-based detection | 4 real FaultEvents from live GO2 LiDAR rate anomaly | Yes |
 
 Full results, methodology, and caveats: [RESULTS.md](RESULTS.md)
 
@@ -137,9 +137,16 @@ Steps 1, 2, 4, and 6 require ROS 2 Humble. The `ros:humble-ros-base` Docker imag
 
 ## Research Context
 
-HELIX is designed with the Unitree GO2 quadruped and NVIDIA Jetson Orin Nano as a target deployment platform. The current codebase is platform-independent sensing logic validated offline and in simulation. No hardware-specific code or on-robot validation exists in this repository.
+HELIX is designed with the Unitree GO2 quadruped and NVIDIA Jetson Orin NX as a target deployment platform. The sensing logic is platform-independent and has been validated both in offline benchmarks and through a hardware evaluation on the live GO2 (2026-04-03).
 
-The architecture diagram (`docs/images/architecture.svg`) depicts the intended deployment context, including the target hardware — this reflects the research direction, not the current validated scope.
+Hardware evaluation demonstrated:
+- HELIX ROS 2 nodes running on the PC while observing the live GO2 ROS 2 graph
+- A passive adapter bridging GO2 standard topics to HELIX's `/helix/metrics` input
+- Real FaultEvent detection from a LiDAR rate anomaly on the GO2 via the adapter
+- Algorithmic benchmarks running on the Jetson Orin NX (64K samples/sec, 636x operational headroom)
+- Cross-device DDS latency of 0.81 ms (one-way) between PC and Jetson
+
+HELIX has **not** been deployed as a persistent monitoring system on the GO2. The adapter-based detection was a controlled evaluation, not continuous deployment. See `docs/GO2_HARDWARE_EVIDENCE.md` for full evidence, scope, and limitations.
 
 ## Author
 
