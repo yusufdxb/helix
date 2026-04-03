@@ -2,7 +2,7 @@
 
 Evidence collected 2026-04-03 from a live Unitree GO2 quadruped, Jetson Orin NX companion, and development PC. All artifacts stored on T7 SSD at `hardware_eval_20260403/`.
 
-**Major update (session 2):** HELIX ROS 2 nodes ran on the live GO2 graph for the first time. A passive adapter bridging GO2 topic rates to `/helix/metrics` enabled the anomaly detector to emit 4 FaultEvents from a real LiDAR rate anomaly. `/diagnostics` was discovered to be published by GO2's `twist_mux` node, upgrading native input coverage from 1/4 to 2/4.
+**Major update (session 2):** HELIX ROS 2 nodes ran on the live GO2 graph for the first time. A passive adapter bridging GO2 topic rates to `/helix/metrics` enabled the anomaly detector to emit 4 FaultEvents from a LiDAR rate fluctuation (unconfirmed as fault). `/diagnostics` was discovered to be published by GO2's `twist_mux` node, upgrading native input coverage from 1/4 to 2/4.
 
 ## Hardware Topology
 
@@ -32,6 +32,7 @@ All benchmarks run on identical Python scripts, same random seeds.
 ### 2. Cross-Device DDS Latency
 
 Measured via 50 round-trip echo exchanges (PC publish → Jetson echo → PC receive).
+**Source:** `hardware_eval_20260403/results/cross_device_latency.txt` (no JSON artifact in `results/`).
 
 | Metric | Value |
 |--------|-------|
@@ -42,9 +43,12 @@ Measured via 50 round-trip echo exchanges (PC publish → Jetson echo → PC rec
 
 **Finding**: Cross-device ROS 2 message transport adds <1 ms one-way latency. At HELIX's 10 Hz monitoring rate, this is 0.81% of the sensing period — negligible.
 
+**Note:** This measurement is stored as a text log, not a structured JSON artifact. The numbers above are transcribed from that log. No independent replication artifact exists in `results/`.
+
 ### 3. Jetson Resource Headroom
 
-Baseline measurement while GO2 stack (103 topics) is running, no HELIX:
+Baseline measurement while GO2 stack (103 topics) is running, no HELIX.
+**Source:** `hardware_eval_20260403/results/jetson_resource_baseline.txt` (no JSON artifact in `results/`).
 
 | Resource | Value | HELIX Estimate |
 |----------|-------|---------------|
@@ -53,7 +57,7 @@ Baseline measurement while GO2 stack (103 topics) is running, no HELIX:
 | Thermal | 43–48°C (throttle at 85°C) | +0.2°C |
 | Cores | 4 of 8 online | Needs 1 core |
 
-**Finding**: The Jetson has massive headroom. HELIX's lifecycle nodes would consume <0.5% of a single core and <50 MB RAM.
+**Finding**: The Jetson has substantial headroom. The HELIX resource estimates (<0.5% CPU, <50 MB RAM, +0.2°C) are **projected** from PC measurements and algorithmic scaling factors — HELIX ROS 2 nodes have not been measured running on the Jetson.
 
 ### 4. GO2 Topic Landscape
 
@@ -68,16 +72,18 @@ Baseline measurement while GO2 stack (103 topics) is running, no HELIX:
 | /gnss | 1 Hz | std_msgs/String | GPS fault detection |
 | /multiplestate | 1 Hz | std_msgs/String | Config state monitoring |
 
-**Finding**: Rich sensor data available at standard ROS 2 types. The GO2 publishes sufficient data for meaningful HELIX monitoring, but HELIX's current input interfaces (/diagnostics, /helix/metrics, /helix/heartbeat) do not exist on the robot. Only /rosout is natively available.
+**Finding**: Rich sensor data available at standard ROS 2 types. The GO2 publishes sufficient data for meaningful HELIX monitoring, but HELIX's current input interfaces (/helix/metrics, /helix/heartbeat) do not exist on the robot. Two of four inputs — `/rosout` and `/diagnostics` (from twist_mux, ~2 Hz) — are natively available.
 
 ### 5. Perturbation Results
 
-| Scenario | Executed? | Finding |
-|----------|-----------|---------|
-| External topic injection | Yes | Zero /rosout reaction from GO2 — DDS isolation confirmed |
-| Topic rate baseline | Yes | Stable rates: IMU ±1%, odom ±1% across captures |
-| Node lifecycle observation | No | Nodes not discoverable from external machines |
-| Network latency perturbation | No | Deferred — requires human operator present |
+**Note:** No structured JSON artifact exists for these observations. The bag files `helix_rosout_perturbation` and `perturbation_test_publish` provide partial evidence for the injection test. The remaining claims are observational notes without machine-readable backing.
+
+| Scenario | Executed? | Finding | Evidence |
+|----------|-----------|---------|----------|
+| External topic injection | Yes | Zero /rosout reaction from GO2 — DDS isolation confirmed | Bag files in `hardware_eval_20260403/bags/` |
+| Topic rate baseline | Yes | Stable rates: IMU ±1%, odom ±1% across captures | `results/bag_rate_analysis_cross_3bags.json` |
+| Node lifecycle observation | No | Nodes not discoverable from external machines | — |
+| Network latency perturbation | No | Deferred — requires human operator present | — |
 
 **Finding**: The GO2's topic rates are highly stable, making rate-based anomaly detection viable. Node-level monitoring requires a different approach (topic liveness, not node discovery).
 
@@ -85,15 +91,15 @@ Baseline measurement while GO2 stack (103 topics) is running, no HELIX:
 
 A passive adapter (`scripts/passive_adapter.py`) bridged 5 GO2 topic rate streams and 2 JSON state streams into `/helix/metrics`. HELIX's anomaly detector ran for 60 seconds on the PC observing the live GO2 graph.
 
-| Metric | Value |
-|--------|-------|
-| FaultEvents emitted | 4 |
-| Fault source | `/utlidar/cloud` rate anomaly |
-| Peak Z-score | 146.91 |
-| Consecutive violations | 6 |
-| Adapter metrics published | rate_hz/utlidar_robot_pose, rate_hz/gnss, rate_hz/multiplestate, rate_hz/utlidar_imu, rate_hz/utlidar_cloud, gnss/satellite_total, gnss/hdop, go2_state/volume, go2_state/obstaclesAvoidSwitch, pose/displacement_rate_m_s |
+| Metric | Value | Source |
+|--------|-------|--------|
+| FaultEvents emitted | 4 | `results/helix_overhead_with_adapter.json` |
+| Fault source | `/utlidar/cloud` rate fluctuation | ibid. |
+| Peak Z-score | 5.52 | ibid., first emitted event |
+| Consecutive violations per event | 3 | ibid., each event states "3 consecutive samples" |
+| Adapter metrics published | rate_hz/utlidar_robot_pose, rate_hz/gnss, rate_hz/multiplestate, rate_hz/utlidar_imu, rate_hz/utlidar_cloud, gnss/satellite_total, gnss/hdop, go2_state/volume, go2_state/obstaclesAvoidSwitch, pose/displacement_rate_m_s | — |
 
-**Finding**: HELIX can detect real sensor anomalies on the GO2 when bridged through a passive adapter. The LiDAR point cloud rate dropped below baseline for 6 consecutive samples (Z > 3.0).
+**Finding**: HELIX flagged a rate fluctuation in the LiDAR point cloud topic when bridged through a passive adapter. Each of the 4 emitted FaultEvents was triggered after 3 consecutive Z-score violations (Z > 3.0). Whether this fluctuation represents a genuine sensor anomaly or normal DDS transport jitter is unknown — no ground-truth labeling exists.
 
 ### 7. /diagnostics Discovery
 
@@ -127,7 +133,7 @@ A passive adapter (`scripts/passive_adapter.py`) bridged 5 GO2 topic rate stream
 - Bag captures with real sensor data (34,547+ messages across multiple bags)
 - **HELIX ROS 2 nodes running on PC observing live GO2 graph (60 seconds)**
 - **Passive adapter bridging GO2 topics to /helix/metrics**
-- **4 FaultEvents from real LiDAR rate anomaly**
+- **4 FaultEvents from LiDAR rate fluctuation (unconfirmed as fault)**
 - **/diagnostics published by GO2's twist_mux at ~2 Hz**
 - **Measured HELIX overhead: 41.7 MB RSS, 22.3% CPU (PC, with adapter)**
 
@@ -138,7 +144,7 @@ A passive adapter (`scripts/passive_adapter.py`) bridged 5 GO2 topic rate stream
 
 ### Not Yet Validated
 - HELIX running as persistent ROS 2 service on GO2/Jetson
-- HELIX detecting a confirmed fault (rate anomaly ≠ confirmed fault)
+- HELIX detecting a confirmed fault (observed rate fluctuation ≠ confirmed fault; no ground truth)
 - Log parser with GO2-specific rules against real GO2 error logs
 - HELIX end-to-end latency on Jetson (helix_msgs not built on Jetson)
 - Recovery or intervention actions

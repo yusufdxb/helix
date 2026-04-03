@@ -4,13 +4,13 @@
 
 The following claims are defensible given current evidence:
 
-> HELIX is a structured ROS 2 fault sensing prototype comprising three lifecycle-managed detection nodes. We evaluate its algorithmic performance on both a development PC and an NVIDIA Jetson Orin NX, demonstrating >600x throughput headroom relative to operational requirements. Through a hardware-grounded attachability study on a live Unitree GO2 quadruped, we characterize the gap between HELIX's monitoring interfaces and the GO2's topic landscape, and demonstrate that lightweight passive adapters can bridge standard ROS 2 topics to HELIX's input channels — enabling real-time anomaly detection on live robot sensor data without modifying the target platform.
+> HELIX is a structured ROS 2 fault sensing prototype comprising three lifecycle-managed detection nodes. We evaluate its algorithmic performance on both a development PC and an NVIDIA Jetson Orin NX, demonstrating >600x throughput headroom relative to operational requirements. Through a hardware-grounded attachability study on a live Unitree GO2 quadruped, we characterize the gap between HELIX's monitoring interfaces and the GO2's topic landscape, and demonstrate that lightweight passive adapters can bridge standard ROS 2 topics to HELIX's input channels — enabling a 60-second demonstration of anomaly detection on live robot sensor data without modifying the target platform.
 
 **Claims you MUST NOT make:**
 - "HELIX monitors the GO2" (it ran a 60-second evaluation, not continuous monitoring)
 - "HELIX is deployed on the Jetson" (algorithmic benchmarks ran on Jetson; ROS 2 nodes ran on the PC observing GO2)
-- "HELIX detected a fault on the GO2" (it detected a rate anomaly; whether that represents a real fault is unknown)
-- "The adapter approach is validated" (one evaluation with 4 FaultEvents is a demonstration, not validation)
+- "HELIX detected a fault on the GO2" (it flagged a rate fluctuation; whether that represents a real fault is unknown — no ground truth)
+- "The adapter approach is validated" (one 60-second evaluation with 4 FaultEvents is a demonstration, not validation)
 
 ---
 
@@ -18,12 +18,12 @@ The following claims are defensible given current evidence:
 
 | Claim | Evidence | Strength | Safe Wording |
 |-------|----------|----------|-------------|
-| HELIX sensing logic is correct | Unit tests + benchmark suite | Strong | "The detection logic passes all unit tests and produces expected results across synthetic evaluation scenarios" |
+| HELIX sensing logic is correct | Benchmark suite (`results/realistic_anomaly_results.json`, `results/e2e_latency_results.json`). Unit test results: **no artifact in `results/`** — unit tests require ROS 2 Humble and are not included in offline validation. | Moderate | "The detection logic produces expected results across synthetic evaluation scenarios. Unit test results are not captured as a stored artifact." |
 | HELIX runs on Jetson hardware | benchmark_helix.py on Jetson | Strong | "HELIX's algorithmic core runs on the Jetson Orin NX at 64K samples/sec, providing 636x headroom over operational requirements" |
-| HELIX can observe GO2 data | Adapter + 4 FaultEvents | Moderate | "A passive adapter bridging GO2 topic rates to HELIX's input channel enabled the anomaly detector to identify a real rate fluctuation in the LiDAR subsystem" |
-| Cross-device latency is acceptable | 50 RTT measurements | Strong | "Cross-device DDS latency over wired Ethernet measured 0.81 ms one-way (50 trials), well within HELIX's 100 ms sensing period" |
+| HELIX can observe GO2 data | Adapter + 4 FaultEvents (`results/helix_overhead_with_adapter.json`) | Moderate | "A passive adapter bridging GO2 topic rates to HELIX's input channel enabled the anomaly detector to flag a rate fluctuation in the LiDAR subsystem (peak Z=5.52, 3 consecutive violations per event). Whether this represents a genuine fault is unknown." |
+| Cross-device latency is acceptable | 50 RTT measurements (`hardware_eval_20260403/results/cross_device_latency.txt` — text log, no JSON in `results/`) | Moderate | "Cross-device DDS latency over wired Ethernet measured 0.81 ms one-way (50 trials), well within HELIX's 100 ms sensing period. **Unsupported by structured artifact in `results/`; evidence is a text log in `hardware_eval_20260403/`.**" |
 | GO2 topic rates are stable | Bag analysis, 99.8% stability | Moderate | "Sensor topic rates showed >99% stability within 30-second windows and <1% coefficient of variation across captures" |
-| Attachability is quantifiable | Matrix from 153 live topics | Novel | "We formalize 'attachability' as the fraction of a monitoring architecture's input interface natively satisfied by the target platform, measured at 50% for the GO2 with 54 additional topics accessible via standard-type adapters" |
+| Attachability is quantifiable | Matrix from 153 live topics (`results/attachability_matrix.json`) | Novel | "We formalize 'attachability' as the fraction of a monitoring architecture's input interface natively satisfied by the target platform, measured at 50% for the GO2 with 54 additional topics identified as adapter candidates (24 demonstrated, 30 heuristic String-type candidates)" |
 
 ---
 
@@ -61,7 +61,7 @@ The following claims are defensible given current evidence:
 
 ### "Did HELIX run on the GO2?"
 
-HELIX's three ROS 2 lifecycle nodes (heartbeat monitor, anomaly detector, log parser) ran on a PC connected to the GO2's ROS 2 graph via wired Ethernet. The anomaly detector processed real GO2 sensor data through a passive adapter and produced 4 FaultEvents from a real LiDAR rate anomaly. The sensing logic (pure Python) was benchmarked directly on the Jetson Orin NX companion computer.
+HELIX's three ROS 2 lifecycle nodes (heartbeat monitor, anomaly detector, log parser) ran on a PC connected to the GO2's ROS 2 graph via wired Ethernet. The anomaly detector processed live GO2 sensor data through a passive adapter and produced 4 FaultEvents from an observed LiDAR rate fluctuation (peak Z=5.52). The sensing logic (pure Python) was benchmarked directly on the Jetson Orin NX companion computer.
 
 HELIX did **not** run as a persistent service on the robot. It was a 60-second controlled evaluation. The distinction matters: we demonstrated that HELIX can observe and react to GO2 data, not that it functions as a deployed monitoring system.
 
@@ -97,7 +97,7 @@ The adapter approach addresses a real problem: most open-source ROS 2 monitoring
 Our contribution is:
 1. **Quantifying the gap** — the attachability matrix measures exactly how much of a monitoring architecture's interface a platform natively satisfies (50% for GO2 + HELIX)
 2. **Demonstrating the bridge** — a 200-line adapter node translates 5 rate streams and 2 JSON state streams into HELIX's metric input, enabling anomaly detection with zero GO2 modifications
-3. **Observing real anomalies** — the adapter enabled detection of a real LiDAR rate fluctuation, demonstrating that the bridge produces actionable signals
+3. **Observing rate fluctuations** — the adapter enabled detection of a LiDAR rate fluctuation (not confirmed as a fault), demonstrating that the bridge produces signals the detector can act on
 
 The novelty is not the adapter code itself — it's the systematic analysis of monitoring architecture portability across non-standard robot platforms, with measured evidence.
 
@@ -112,9 +112,9 @@ The novelty is not the adapter code itself — it's the systematic analysis of m
 - Sensor topic rates: robot_pose 18.8 Hz, gnss 1 Hz, multiplestate 1 Hz (99.8–100% stability)
 - HELIX nodes ran for 60 seconds on the PC observing live GO2 graph
 - Passive adapter bridged 5 rate + 2 JSON streams to /helix/metrics
-- 4 FaultEvents from real /utlidar/cloud rate anomaly (Z=146.91 peak)
+- 4 FaultEvents from /utlidar/cloud rate fluctuation (Z=5.52 peak, 3 consecutive violations per event)
 - HELIX algorithmic benchmarks on Jetson: 64K samp/s anomaly, 156K msg/s log parser
-- Cross-device DDS RTT: 1.63 ms mean (PC ↔ Jetson, 50 trials)
+- Cross-device DDS RTT: 1.63 ms mean (PC ↔ Jetson, 50 trials) — source: `hardware_eval_20260403/results/cross_device_latency.txt` (text log, no JSON artifact in `results/`)
 - Jetson resource state: 82% idle CPU, 13GB free RAM with GO2 stack
 
 ### Inferred from Hardware

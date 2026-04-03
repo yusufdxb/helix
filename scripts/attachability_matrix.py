@@ -64,6 +64,23 @@ STANDARD_TYPES = {
     "action_msgs/", "builtin_interfaces/", "unique_identifier_msgs/",
 }
 
+# Topics matching these types have a demonstrated or strongly motivated adapter
+# path to HELIX /helix/metrics.  Topics that are merely std_msgs/msg/String
+# are *candidates* — the content may or may not be JSON-parseable with numeric
+# fields.  We label them separately so callers can distinguish demonstrated
+# adapters from heuristic candidates.
+DEMONSTRATED_ADAPTER_TYPES = {
+    "sensor_msgs/msg/Imu": "imu_rate_monitor",
+    "nav_msgs/msg/Odometry": "odom_drift_monitor",
+    "geometry_msgs/msg/PoseStamped": "pose_drift_monitor",
+    "sensor_msgs/msg/PointCloud2": "pointcloud_rate_monitor",
+    "sensor_msgs/msg/JointState": "joint_state_monitor",
+}
+
+# std_msgs/msg/String topics are heuristic candidates: they *might* carry
+# JSON with numeric fields, but we have no compile-time guarantee.
+CANDIDATE_ADAPTER_TYPE = "std_msgs/msg/String"
+
 
 def is_standard_type(msg_type: str) -> bool:
     return any(msg_type.startswith(prefix) for prefix in STANDARD_TYPES)
@@ -90,10 +107,13 @@ def get_live_topics() -> list:
 def compute_attachability(topics: list) -> dict:
     """Compute the attachability matrix."""
 
-    # Classify each platform topic
+    # Classify each platform topic.
+    # Duplicate topic names are deduplicated (first occurrence wins).
     platform_topics = {}
     for t in topics:
         topic = t["topic"]
+        if topic in platform_topics:
+            continue  # keep first occurrence
         msg_type = t["type"]
         standard = is_standard_type(msg_type)
         platform_topics[topic] = {
@@ -119,32 +139,34 @@ def compute_attachability(topics: list) -> dict:
 
     native_count = sum(1 for v in input_coverage.values() if v == "native")
 
-    # Identify adaptable topics (standard types that could feed HELIX)
-    adaptable = []
-    # Numeric sensor topics → /helix/metrics via rate/value adapter
+    # Identify adaptable topics (standard types that could feed HELIX).
+    # We split into two tiers:
+    #   demonstrated — type has a known, tested adapter path
+    #   candidate   — std_msgs/msg/String that *might* contain parseable JSON
+    demonstrated = []
+    candidates = []
     for topic, info in platform_topics.items():
-        if info["is_standard"] and topic not in HELIX_INPUTS:
-            adapter_type = None
-            if "sensor_msgs/msg/Imu" in info["type"]:
-                adapter_type = "imu_rate_monitor"
-            elif "nav_msgs/msg/Odometry" in info["type"]:
-                adapter_type = "odom_drift_monitor"
-            elif "geometry_msgs/msg/PoseStamped" in info["type"]:
-                adapter_type = "pose_drift_monitor"
-            elif "sensor_msgs/msg/PointCloud2" in info["type"]:
-                adapter_type = "pointcloud_rate_monitor"
-            elif "std_msgs/msg/String" in info["type"]:
-                adapter_type = "json_state_parser"
-            elif "sensor_msgs/msg/JointState" in info["type"]:
-                adapter_type = "joint_state_monitor"
+        if not info["is_standard"] or topic in HELIX_INPUTS:
+            continue
+        msg_type = info["type"]
+        if msg_type in DEMONSTRATED_ADAPTER_TYPES:
+            demonstrated.append({
+                "topic": topic,
+                "type": msg_type,
+                "adapter": DEMONSTRATED_ADAPTER_TYPES[msg_type],
+                "effort": "low",
+                "confidence": "demonstrated",
+            })
+        elif msg_type == CANDIDATE_ADAPTER_TYPE:
+            candidates.append({
+                "topic": topic,
+                "type": msg_type,
+                "adapter": "json_state_parser",
+                "effort": "low",
+                "confidence": "candidate",
+            })
 
-            if adapter_type:
-                adaptable.append({
-                    "topic": topic,
-                    "type": info["type"],
-                    "adapter": adapter_type,
-                    "effort": "low",
-                })
+    adaptable = demonstrated + candidates
 
     # Custom-type topics that need packages built
     unreachable = []
@@ -158,9 +180,15 @@ def compute_attachability(topics: list) -> dict:
             })
 
     # Compute scores
-    native_score = native_count / len(HELIX_INPUTS)
-    adaptable_score = min(1.0, len(adaptable) / max(1, len(HELIX_INPUTS) - native_count))
-    total_score = (native_count + min(len(adaptable), len(HELIX_INPUTS))) / len(HELIX_INPUTS)
+    #   native_coverage : fraction of HELIX inputs satisfied by the platform as-is
+    #   with_adapters   : fraction of HELIX inputs satisfiable if all adaptable
+    #                     topics were bridged (capped at 1.0)
+    #   adaptable_topics_count : how many platform topics have a plausible adapter
+    n_inputs = len(HELIX_INPUTS)
+    gaps = n_inputs - native_count                       # inputs still missing
+    fillable = min(len(adaptable), gaps)                 # adapters can fill at most the gaps
+    native_score = native_count / n_inputs
+    with_adapters_score = (native_count + fillable) / n_inputs  # always <= 1.0
 
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -173,15 +201,20 @@ def compute_attachability(topics: list) -> dict:
         "helix_input_coverage": input_coverage,
         "scores": {
             "native_coverage": round(native_score, 3),
-            "with_adapters": round(total_score, 3),
+            "with_adapters": round(with_adapters_score, 3),
             "adaptable_topics_count": len(adaptable),
+            "demonstrated_adapter_count": len(demonstrated),
+            "candidate_adapter_count": len(candidates),
             "unreachable_topics_count": len(unreachable),
         },
         "adaptable_topics": adaptable[:20],
         "unreachable_topics_sample": unreachable[:10],
         "interpretation": {
-            "native": f"{native_count}/{len(HELIX_INPUTS)} HELIX inputs available natively",
-            "adapter_path": f"{len(adaptable)} platform topics can feed HELIX via adapters",
+            "native": f"{native_count}/{n_inputs} HELIX inputs available natively",
+            "adapter_path": (
+                f"{len(demonstrated)} topics have demonstrated adapters, "
+                f"{len(candidates)} are heuristic candidates (std_msgs/String)"
+            ),
             "custom_barrier": f"{len(unreachable)} topics behind custom message type barrier",
         },
     }

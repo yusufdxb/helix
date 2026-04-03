@@ -33,15 +33,15 @@ Measured on PC (Intel i7-7700 @ 3.60 GHz), 2026-04-03.
 Single-threaded pure-Python `_process_sample` loop. Window size: 60. Samples: 100,000.
 Measured on PC (Intel i7-7700 @ 3.60 GHz), 2026-04-03.
 
-| Metric | Value |
-|--------|-------|
-| Throughput (PC) | ~81,000 samples/sec |
-| Throughput (Jetson Orin NX) | ~64,000 samples/sec |
-| Wall time (PC) | 1.24 s |
+| Metric | Value | Source |
+|--------|-------|--------|
+| Throughput (PC) | ~81,000 samples/sec | `hardware_eval_20260403/results/jetson_vs_pc_benchmarks.json` |
+| Throughput (Jetson Orin NX) | ~64,000 samples/sec | ibid. |
+| Wall time (PC) | 1.24 s | `results/standalone_benchmark.md` |
 
 At 100 samples/sec operational load (10 Hz x 10 metrics), the Jetson runs at <0.2% of single-core capacity (636x headroom). Actual ROS 2 node performance will differ due to message serialization, callback scheduling, and runtime overhead.
 
-**Note:** Earlier runs on different hardware reported ~331K samples/sec. The numbers above are from the current benchmark script on the current test hardware and are authoritative. See `benchmark_results.json` for exact values.
+**Note:** Earlier runs on different hardware reported ~331K samples/sec. The numbers above are from the hardware evaluation session (2026-04-03). The Jetson figures are stored in `hardware_eval_20260403/`, not in the main `results/` directory.
 
 ### AnomalyDetector — TPR / FPR (Trivial Baseline)
 
@@ -83,7 +83,7 @@ Baseline: 60 samples from Laplace(loc=10.0, scale=1.0). Positive: 3 consecutive 
 
 | Z Threshold | K=3 TPR | K=5 TPR | K=8 TPR | K=12 TPR | FPR |
 |-------------|---------|---------|---------|----------|-----|
-| 2.0 | 52.0% | 100% | 100% | 100% | 0.0% |
+| 2.0 | 52.0% | 100% | 100% | 100% | 0.5% |
 | 3.0 | **0.0%** | 50.0% | 100% | 100% | 0.0% |
 | 4.0 | 0.0% | 0.5% | 33.0% | 100% | 0.0% |
 
@@ -195,12 +195,13 @@ Overall: 22/22 correct.
 
 10,000 messages (80% non-matching, 20% matching) against 5 compiled regex patterns.
 
-| Metric | PC | Jetson Orin NX |
-|--------|-----|----------------|
-| Throughput | ~248,000 msg/sec | ~156,000 msg/sec |
-| Elapsed | 0.040 s | 0.064 s |
+| Metric | Value | Source |
+|--------|-------|--------|
+| Throughput (PC) | ~777,000 msg/sec | `results/log_parser_results.json` (2026-04-02) |
+| Elapsed (PC) | 0.013 s | ibid. |
+| Throughput (Jetson Orin NX) | ~156,000 msg/sec | `hardware_eval_20260403/results/jetson_vs_pc_benchmarks.json` |
 
-**Note:** An earlier measurement reported ~754K msg/sec. The values above are from `scripts/bench_log_parser.py` on current hardware (2026-04-03).
+**Note:** The PC throughput above is from `results/log_parser_results.json` (777,029 msg/sec, 10K messages in 0.01287 s). An earlier run on different hardware reported ~248K msg/sec; the difference is due to hardware/run conditions. The Jetson figure comes from a separate benchmark run stored in `hardware_eval_20260403/`.
 
 ### Dedup Validation
 
@@ -252,20 +253,20 @@ python3 scripts/attachability_matrix.py            # live graph analysis
 
 HELIX's anomaly detector ran on the PC while a passive adapter (`scripts/passive_adapter.py`) bridged live GO2 topic rates into `/helix/metrics`. During a 60-second evaluation:
 
-| Metric | Value |
-|--------|-------|
-| FaultEvents emitted | 4 |
-| Fault source | `/utlidar/cloud` rate anomaly |
-| Peak Z-score | 146.91 |
-| Consecutive violations | 6 |
-| RSS memory | 41.7 MB mean |
-| CPU usage | 22.3% mean (multi-threaded executor) |
+| Metric | Value | Source |
+|--------|-------|--------|
+| FaultEvents emitted | 4 | `results/helix_overhead_with_adapter.json` |
+| Fault source | `/utlidar/cloud` rate fluctuation | ibid. |
+| Peak Z-score | 5.52 | ibid., first emitted event |
+| Consecutive violations per event | 3 | ibid., each event detail states "3 consecutive samples" |
+| RSS memory | 41.7 MB mean | ibid. |
+| CPU usage | 22.3% mean (multi-threaded executor) | ibid. |
 
-The LiDAR point cloud topic experienced a real rate fluctuation that the adapter converted into a metric stream, and HELIX's Z-score detector identified as anomalous. This is the first detection of a real hardware event by HELIX.
+The LiDAR point cloud topic experienced a rate fluctuation that the adapter converted into a metric stream, and HELIX's Z-score detector flagged as anomalous. Whether this fluctuation represents a genuine sensor fault or normal DDS transport jitter is unknown — no ground-truth labeling exists.
 
-**What this proves:** HELIX's detection logic can identify real anomalies in GO2 sensor data when bridged through a lightweight adapter.
+**What this demonstrates:** HELIX's detection logic can flag rate fluctuations in GO2 sensor data when bridged through a lightweight adapter.
 
-**What this does not prove:** That HELIX would function as a persistent, reliable monitor in deployment. This was a single 60-second controlled evaluation.
+**What this does not prove:** That the flagged event was a real fault, or that HELIX would function as a persistent, reliable monitor in deployment. This was a single 60-second controlled evaluation.
 
 ### HELIX Node Resource Overhead (Measured)
 
@@ -278,6 +279,8 @@ Measured on PC (i7-7700). Overhead on the Jetson Orin NX would differ — see al
 
 ### Cross-Platform Benchmark Comparison
 
+Source: `hardware_eval_20260403/results/jetson_vs_pc_benchmarks.json`
+
 | Metric | PC (i7-7700) | Jetson Orin NX | Ratio |
 |--------|-------------|----------------|-------|
 | Anomaly throughput | 81K samp/s | 64K samp/s | 0.79x |
@@ -285,18 +288,20 @@ Measured on PC (i7-7700). Overhead on the Jetson Orin NX would differ — see al
 | Detection latency | 0.049 ms | 0.049 ms | 1.0x |
 | Heartbeat miss latency | 200.7 ms | 200.7 ms | 1.0x |
 
+**Note:** The PC log parser throughput here (248K) differs from the value in `results/log_parser_results.json` (777K) because these are separate benchmark runs on different dates. The Jetson figures have no corresponding artifact in `results/` — they are stored only in `hardware_eval_20260403/`.
+
 ### GO2 Topic Rate Stability
 
 Measured from bag captures using `scripts/bag_rate_analysis.py`:
 
-| Topic | Rate (Hz) | Jitter (ms) | Stability | Duration |
-|-------|-----------|-------------|-----------|----------|
-| /utlidar/robot_pose | 18.8 | 1.20 | 99.8% | 34.8s |
-| /audiohub/player/state | 4.0 | 0.67 | 100.0% | 34.8s |
-| /gnss | 1.0 | 1.23 | 100.0% | 34.8s |
-| /multiplestate | 1.0 | 0.92 | 100.0% | 34.8s |
+| Topic | Rate (Hz) | Jitter (ms) | Stability | Duration | Source |
+|-------|-----------|-------------|-----------|----------|--------|
+| /utlidar/robot_pose | 18.75 | 1.20 | 99.8% | 34.67s | `results/bag_rate_analysis_single.json` |
+| /audiohub/player/state | 3.98 | 0.67 | 100.0% | 34.38s | ibid. |
+| /gnss | 1.0 | 1.23 | 100.0% | 34.02s | ibid. |
+| /multiplestate | 1.0 | 0.92 | 100.0% | 34.12s | ibid. |
 
-Cross-bag coefficient of variation (CV) for shared topics: <0.01 (highly stable).
+Cross-bag coefficient of variation (CV) for shared topics: <0.01 (highly stable). Source: `results/bag_rate_analysis_cross_3bags.json`.
 
 ### Attachability Matrix
 
@@ -305,9 +310,13 @@ Computed from 153 live GO2 topics by `scripts/attachability_matrix.py`:
 | Metric | Value |
 |--------|-------|
 | Native HELIX input coverage | 2/4 (50%) |
-| Standard-type topics | 82/153 (54%) |
-| Topics adaptable to HELIX | 54 |
-| Topics behind custom msg barrier | 71 |
+| Standard-type topics | 83/153 (54%) |
+| Demonstrated adapter topics | 24 |
+| Candidate adapter topics (String heuristic) | 30 |
+| Topics behind custom msg barrier | 70 |
+| with_adapters score | 1.0 (all 4 HELIX inputs fillable) |
+
+Of the 54 adaptable topics, 24 have demonstrated adapter paths (sensor types with known converters) and 30 are heuristic candidates (`std_msgs/msg/String` topics that may contain parseable JSON). The candidate count should be treated as an upper bound, not a confirmed capability.
 
 Full results: `results/attachability_matrix.json`
 

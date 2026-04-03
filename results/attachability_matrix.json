@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-04-03T19:45:32.726030+00:00",
+  "timestamp": "2026-04-03T23:28:00.429391+00:00",
   "platform_summary": {
     "total_topics": 153,
-    "standard_type_topics": 82,
-    "custom_type_topics": 71,
-    "standard_fraction": 0.536
+    "standard_type_topics": 83,
+    "custom_type_topics": 70,
+    "standard_fraction": 0.542
   },
   "helix_input_coverage": {
     "/diagnostics": "native",
@@ -14,130 +14,152 @@
   },
   "scores": {
     "native_coverage": 0.5,
-    "with_adapters": 1.5,
+    "with_adapters": 1.0,
     "adaptable_topics_count": 54,
-    "unreachable_topics_count": 71
+    "demonstrated_adapter_count": 24,
+    "candidate_adapter_count": 30,
+    "unreachable_topics_count": 70
   },
   "adaptable_topics": [
-    {
-      "topic": "/audiohub/player/state",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
-    },
-    {
-      "topic": "/gas_sensor",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
-    },
-    {
-      "topic": "/gesture/result",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
-    },
-    {
-      "topic": "/gnss",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
-    },
     {
       "topic": "/goal_pose",
       "type": "geometry_msgs/msg/PoseStamped",
       "adapter": "pose_drift_monitor",
-      "effort": "low"
-    },
-    {
-      "topic": "/gpt_cmd",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
-    },
-    {
-      "topic": "/gptflowfeedback",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
+      "effort": "low",
+      "confidence": "demonstrated"
     },
     {
       "topic": "/joint_states",
       "type": "sensor_msgs/msg/JointState",
       "adapter": "joint_state_monitor",
-      "effort": "low"
-    },
-    {
-      "topic": "/lf/battery_alarm",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
+      "effort": "low",
+      "confidence": "demonstrated"
     },
     {
       "topic": "/lio_sam_ros2/mapping/odometry",
       "type": "nav_msgs/msg/Odometry",
       "adapter": "odom_drift_monitor",
-      "effort": "low"
-    },
-    {
-      "topic": "/multiplestate",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
+      "effort": "low",
+      "confidence": "demonstrated"
     },
     {
       "topic": "/odom",
       "type": "nav_msgs/msg/Odometry",
       "adapter": "odom_drift_monitor",
-      "effort": "low"
-    },
-    {
-      "topic": "/pet/flowfeedback",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
+      "effort": "low",
+      "confidence": "demonstrated"
     },
     {
       "topic": "/point_cloud2",
       "type": "sensor_msgs/msg/PointCloud2",
       "adapter": "pointcloud_rate_monitor",
-      "effort": "low"
+      "effort": "low",
+      "confidence": "demonstrated"
     },
     {
       "topic": "/pointcloud/aggregated",
       "type": "sensor_msgs/msg/PointCloud2",
       "adapter": "pointcloud_rate_monitor",
-      "effort": "low"
+      "effort": "low",
+      "confidence": "demonstrated"
     },
     {
       "topic": "/pointcloud/downsampled",
       "type": "sensor_msgs/msg/PointCloud2",
       "adapter": "pointcloud_rate_monitor",
-      "effort": "low"
+      "effort": "low",
+      "confidence": "demonstrated"
     },
     {
       "topic": "/pointcloud/filtered",
       "type": "sensor_msgs/msg/PointCloud2",
       "adapter": "pointcloud_rate_monitor",
-      "effort": "low"
+      "effort": "low",
+      "confidence": "demonstrated"
     },
     {
-      "topic": "/programming_actuator/command",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
+      "topic": "/uslam/cloud_map",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
     },
     {
-      "topic": "/programming_actuator/feedback",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
+      "topic": "/uslam/frontend/cloud_world_ds",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
     },
     {
-      "topic": "/public_network_status",
-      "type": "std_msgs/msg/String",
-      "adapter": "json_state_parser",
-      "effort": "low"
+      "topic": "/uslam/frontend/odom",
+      "type": "nav_msgs/msg/Odometry",
+      "adapter": "odom_drift_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
+    },
+    {
+      "topic": "/uslam/localization/cloud_world",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
+    },
+    {
+      "topic": "/uslam/localization/odom",
+      "type": "nav_msgs/msg/Odometry",
+      "adapter": "odom_drift_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
+    },
+    {
+      "topic": "/uslam/navigation/global_path",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
+    },
+    {
+      "topic": "/utlidar/cloud",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
+    },
+    {
+      "topic": "/utlidar/cloud_base",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
+    },
+    {
+      "topic": "/utlidar/cloud_deskewed",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
+    },
+    {
+      "topic": "/utlidar/grid_map",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
+    },
+    {
+      "topic": "/utlidar/height_map",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
+    },
+    {
+      "topic": "/utlidar/imu",
+      "type": "sensor_msgs/msg/Imu",
+      "adapter": "imu_rate_monitor",
+      "effort": "low",
+      "confidence": "demonstrated"
     }
   ],
   "unreachable_topics_sample": [
@@ -204,7 +226,7 @@
   ],
   "interpretation": {
     "native": "2/4 HELIX inputs available natively",
-    "adapter_path": "54 platform topics can feed HELIX via adapters",
-    "custom_barrier": "71 topics behind custom message type barrier"
+    "adapter_path": "24 topics have demonstrated adapters, 30 are heuristic candidates (std_msgs/String)",
+    "custom_barrier": "70 topics behind custom message type barrier"
   }
 }
