@@ -13,9 +13,9 @@ from typing import Optional, Tuple
 
 import rclpy
 import rclpy.node
+from geometry_msgs.msg import PoseWithCovarianceStamped
 from rclpy.parameter import Parameter
 from std_msgs.msg import Bool, Empty, String
-from geometry_msgs.msg import PoseWithCovarianceStamped
 
 # ── Topic constants ──────────────────────────────────────────────────────────
 TOPIC_FALLBACK_DIRECTIVE: str = "/helix/fallback_directive"
@@ -141,6 +141,7 @@ class ActionExecutor:
         run_in_executor so the asyncio event loop stays unblocked.
         """
         import threading
+
         from geometry_msgs.msg import PoseWithCovarianceStamped as PWCS
         from rclpy.executors import SingleThreadedExecutor as STE
 
@@ -193,6 +194,7 @@ class ActionExecutor:
         run_in_executor so the asyncio event loop stays unblocked.
         """
         import threading
+
         from rclpy.executors import SingleThreadedExecutor as STE
 
         received_pose: list = [None]

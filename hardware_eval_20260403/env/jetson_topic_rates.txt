@@ -1,0 +1,42 @@
+=== Jetson Topic Rates ===
+Collected: 2026-04-03T19:13:36Z
+
+--- timeout 5 ros2 topic hz /rosout ---
+
+--- timeout 5 ros2 topic hz /sportmodestate ---
+The message type 'unitree_go/msg/SportModeState' is invalid
+
+--- timeout 5 ros2 topic hz /lf/sportmodestate ---
+The message type 'unitree_go/msg/SportModeState' is invalid
+
+--- timeout 5 ros2 topic hz /lowstate ---
+The message type 'unitree_go/msg/LowState' is invalid
+
+--- timeout 5 ros2 topic hz /lf/lowstate ---
+The message type 'unitree_go/msg/LowState' is invalid
+
+--- timeout 5 ros2 topic hz /utlidar/cloud ---
+average rate: 15.401
+	min: 0.063s max: 0.066s std dev: 0.00090s window: 17
+average rate: 15.406
+	min: 0.063s max: 0.066s std dev: 0.00071s window: 33
+average rate: 15.408
+	min: 0.062s max: 0.068s std dev: 0.00108s window: 49
+
+--- timeout 5 ros2 topic hz /utlidar/imu ---
+average rate: 250.601
+	min: 0.000s max: 0.007s std dev: 0.00135s window: 252
+average rate: 250.279
+	min: 0.000s max: 0.008s std dev: 0.00136s window: 502
+average rate: 250.395
+	min: 0.000s max: 0.008s std dev: 0.00136s window: 753
+failed to shutdown: rcl_shutdown already called on the given context, at ./src/rcl/init.c:241
+
+--- timeout 5 ros2 topic hz /utlidar/robot_odom ---
+average rate: 150.942
+	min: 0.003s max: 0.011s std dev: 0.00086s window: 152
+average rate: 151.014
+	min: 0.003s max: 0.011s std dev: 0.00074s window: 304
+average rate: 150.669
+	min: 0.003s max: 0.011s std dev: 0.00072s window: 454
+

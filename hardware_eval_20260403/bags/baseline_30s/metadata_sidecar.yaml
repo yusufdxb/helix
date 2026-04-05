@@ -1,0 +1,24 @@
+scenario_id: "baseline_002"
+date: "2026-04-03"
+time: "15:17:08 UTC"
+platform: "PC (192.168.123.10)"
+duration_seconds: 34.6
+commands_run:
+  - "ros2 bag record -o baseline_30s /rosout /audiohub/player/state /gnss /multiplestate /parameter_events -d 30"
+expected_effect: "Passive observation of live GO2 status topics (string-typed)"
+observed_effect: |
+  236 messages captured across 5 topics:
+  - /audiohub/player/state: 138 msgs (~4 Hz) - JSON player state
+  - /gnss: 35 msgs (~1 Hz) - GPS data with satellite info
+  - /multiplestate: 34 msgs (~1 Hz) - robot settings (brightness, obstacle avoid, volume)
+  - /rosout: 16 msgs - recorder lifecycle logs
+  - /parameter_events: 13 msgs
+topics_recorded:
+  - "/rosout"
+  - "/audiohub/player/state"
+  - "/gnss"
+  - "/multiplestate"
+  - "/parameter_events"
+relevant_to_claim: "GO2 publishes rich status data observable via standard ROS 2 subscription"
+evidence_strength: "strong"
+notes: "All topics use standard msg types. Custom unitree_go types excluded."

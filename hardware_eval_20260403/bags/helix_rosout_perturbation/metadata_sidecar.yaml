@@ -1,0 +1,21 @@
+scenario_id: "scenario_A_rosout_under_load"
+date: "2026-04-03"
+time: "19:15:39 UTC"
+platform: "PC"
+duration_seconds: 38.1
+commands_run:
+  - "ros2 bag record -o /tmp/helix_rosout_perturbation /rosout /helix_test_topic --max-cache-size 100000000 -d 30"
+  - "ros2 topic pub --once /helix_test_topic std_msgs/msg/String \"data: 'helix_test_msg_N'\" (repeated 20 times, 1s apart)"
+expected_effect: "Publishing harmless test messages to /helix_test_topic should not affect GO2 /rosout, demonstrating that injected PC-side topics are isolated from robot internals"
+observed_effect: "Captured 15 of 20 test messages on /helix_test_topic and 7 /rosout messages. The /rosout messages were from the bag recorder itself (not from the robot reacting to test messages). This confirms that publishing to a novel topic has zero observable effect on the robot's log stream."
+topics_recorded:
+  - "/helix_test_topic [std_msgs/msg/String] - 15 msgs"
+  - "/rosout [rcl_interfaces/msg/Log] - 7 msgs"
+relevant_to_claim: "PC-side topic injection is isolated from robot internals; /rosout captures node-level log events"
+evidence_strength: "moderate"
+notes: |
+  5 of 20 test messages were lost, likely because the publisher instances timed out before
+  the subscriber (bag recorder) received them. The /rosout messages were all from the
+  rosbag2_recorder node itself, not from any GO2 node reacting to the test topic.
+  This confirms HELIX's log parser would need to monitor /rosout for internal robot events,
+  not for effects of external stimuli. External topic injection is safe and isolated.

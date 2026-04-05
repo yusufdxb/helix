@@ -1,0 +1,32 @@
+scenario_id: "scenario_C_topic_rate_baseline"
+date: "2026-04-03"
+time: "19:16:59 UTC"
+platform: "PC"
+duration_seconds: 39.7
+commands_run:
+  - "ros2 bag record -o /tmp/helix_topic_rates /utlidar/robot_odom /utlidar/imu /utlidar/robot_pose /rosout /multiplestate /gnss --max-cache-size 100000000 -d 30"
+expected_effect: "Capture topic rate and bandwidth baselines for HELIX monitoring calibration"
+observed_effect: |
+  Captured 16649 messages. Computed rates from bag:
+    /utlidar/imu: 249 Hz (9887 msgs) - highest rate sensor
+    /utlidar/robot_odom: 149 Hz (5921 msgs) - primary odometry
+    /utlidar/robot_pose: 18.7 Hz (741 msgs) - SLAM pose estimate
+    /gnss: 1.0 Hz (40 msgs) - GPS status string
+    /multiplestate: 1.0 Hz (39 msgs) - robot state string
+    /rosout: 0.5 Hz (21 msgs) - log messages
+  Total bag size: 8.1 MiB for ~40s = ~1.6 Mbps throughput for these topics.
+  Rates are highly consistent with baseline_001, confirming stable topic publishing.
+topics_recorded:
+  - "/utlidar/robot_odom [nav_msgs/msg/Odometry] - 5921 msgs"
+  - "/utlidar/imu [sensor_msgs/msg/Imu] - 9887 msgs"
+  - "/utlidar/robot_pose [geometry_msgs/msg/PoseStamped] - 741 msgs"
+  - "/gnss [std_msgs/msg/String] - 40 msgs"
+  - "/multiplestate [std_msgs/msg/String] - 39 msgs"
+  - "/rosout [rcl_interfaces/msg/Log] - 21 msgs"
+relevant_to_claim: "GO2 topic rates are stable and measurable; HELIX can use rate deviation as a fault signal"
+evidence_strength: "strong"
+notes: |
+  ros2 topic hz and ros2 topic bw commands did not produce output within 6-second timeouts,
+  possibly due to DDS discovery latency from external machine. However, bag-based rate
+  computation is reliable and reproducible. Two independent 30s captures show IMU at 249 Hz
+  and odom at 149-150 Hz with <1% variation, establishing a solid baseline for anomaly detection.

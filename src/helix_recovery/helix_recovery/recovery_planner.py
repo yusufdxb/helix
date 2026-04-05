@@ -13,18 +13,17 @@ blocked during long-running recovery operations.
 """
 import asyncio
 import functools
-import time
 import threading
+import time
 from typing import Any, Dict, List, Optional, Tuple
 
 import rclpy
-from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn, State
+from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
+
 from helix_msgs.msg import FaultEvent, RecoveryAction
-
-from helix_recovery.state_db import StateDB, DEFAULT_DB_PATH
 from helix_recovery.action_executor import ActionExecutor
+from helix_recovery.state_db import DEFAULT_DB_PATH, StateDB
 from helix_recovery.verification_loop import VerificationLoop
-
 
 # ── Constants ────────────────────────────────────────────────────────────────
 TOPIC_FAULTS: str = "/helix/faults"

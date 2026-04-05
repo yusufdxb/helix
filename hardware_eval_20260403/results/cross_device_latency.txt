@@ -1,0 +1,58 @@
+================================================================================
+Cross-Device DDS Latency: PC <-> Jetson Orin NX
+================================================================================
+Timestamp: 2026-04-03T19:16:00Z
+
+=== Setup ===
+PC: Intel i7-7700, Ubuntu 22.04, ROS 2 Humble
+Jetson: ARM Cortex-A78AE, Ubuntu 22.04, ROS 2 Humble (265 ROS packages)
+Network: Ethernet, 192.168.123.10 (PC) <-> 192.168.123.18 (Jetson)
+RMW: rmw_fastrtps_cpp (both sides)
+DDS domain: 0
+
+=== Test Method ===
+Round-trip test (RTT/2 for one-way estimate):
+- PC publishes std_msgs/String on /helix_bench/ping (containing sequence number)
+- Jetson echo node subscribes to /ping, immediately publishes back on /pong
+- PC measures round-trip time using time.perf_counter()
+- This avoids clock synchronization issues (PC and Jetson clocks differ by ~4 hours)
+
+Commands:
+  [Jetson] source /opt/ros/humble/setup.bash && python3 /tmp/helix_echo_node.py
+  [PC]     source /opt/ros/humble/setup.bash && python3 /tmp/helix_rtt_test.py
+
+=== Results ===
+Messages sent: 50
+Messages received: 50 (100% delivery)
+
+Round-Trip Time (RTT):
+  Mean:  1.63 ms
+  P50:   1.48 ms
+  P95:   2.31 ms
+  Min:   1.11 ms
+  Max:   5.15 ms
+
+Estimated One-Way Latency (RTT/2):
+  Mean:  0.81 ms
+  P50:   0.74 ms
+  P95:   1.16 ms
+  Min:   0.56 ms
+  Max:   2.58 ms
+
+=== Clock Synchronization Note ===
+PC time:     2026-04-03 15:16:40 (local)
+Jetson time: 2026-04-03 19:16:42 (local)
+Clock offset: ~4 hours (NTP not synchronized between devices)
+This is why RTT-based measurement was used instead of one-way timestamps.
+
+=== Analysis ===
+- Sub-millisecond one-way DDS latency over wired Ethernet is excellent
+- The 5.15 ms max RTT outlier likely from DDS discovery/scheduling jitter
+- At HELIX's 10 Hz monitoring rate (100ms period), 0.81 ms transport latency
+  represents <1% of the sampling period -- negligible overhead
+- 100% message delivery confirms reliable DDS transport between devices
+
+=== Gaps ===
+- helix_msgs not built on either PC or Jetson, so FaultEvent-based e2e latency
+  could not be measured across devices
+- NTP synchronization not configured, preventing direct one-way measurement

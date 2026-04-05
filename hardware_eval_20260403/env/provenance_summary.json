@@ -1,0 +1,164 @@
+{
+  "collection_timestamp": "2026-04-03T19:12:38Z",
+  "collector": "Agent 1: Hardware Provenance and Runtime Inventory",
+
+  "jetson": {
+    "hostname": "unitree-jetson-payload",
+    "model": "NVIDIA Jetson Orin NX Engineering Reference Developer Kit",
+    "tegra_release": "R36 (release), REVISION: 4.7, GCID: 42132812",
+    "kernel": "5.15.148-tegra #1 SMP PREEMPT",
+    "os": "Ubuntu 22.04.5 LTS (jammy)",
+    "arch": "aarch64",
+    "cpu": {
+      "model": "ARMv8 Processor rev 1 (v8l), Cortex-A78AE",
+      "cores_online": 4,
+      "cores_total": 8,
+      "note": "4 of 8 cores online at time of measurement"
+    },
+    "ram_total_mb": 15656,
+    "ram_used_mb": 1189,
+    "swap_total_mb": 7828,
+    "disk_root": {
+      "device": "/dev/nvme0n1p1",
+      "size_gb": 233,
+      "used_gb": 54,
+      "avail_gb": 167
+    },
+    "gpu": {
+      "engine": "GR3D",
+      "freq_percent_at_collection": 0,
+      "gpu_temp_c": 42.875
+    },
+    "power": {
+      "vdd_in_mw": 4754,
+      "vdd_cpu_gpu_cv_mw": 527,
+      "vdd_soc_mw": 1503
+    },
+    "thermal": {
+      "cpu_c": 45.937,
+      "gpu_c": 42.875,
+      "tj_c": 47.062
+    },
+    "cuda": "nvidia-l4t-cuda 36.4.7 (nvcc not in PATH)",
+    "jetpack": "Not installed as dpkg package (L4T R36.4.7)",
+    "ip_address": "192.168.123.18/24",
+    "interface": "enP8p1s0"
+  },
+
+  "pc": {
+    "hostname": "careslab-OptiPlex-7050",
+    "cpu": "Intel Core i7-7700 @ 3.60GHz",
+    "cores": 4,
+    "threads": 8,
+    "ram_total_gb": 16,
+    "os": "Ubuntu 22.04.5 LTS",
+    "kernel": "6.8.0-106-generic",
+    "arch": "x86_64",
+    "gpu": "None (no NVIDIA driver loaded)",
+    "disk_root": {
+      "device": "/dev/sda2",
+      "size_gb": 234,
+      "used_gb": 147,
+      "avail_gb": 75
+    },
+    "ip_address": "192.168.123.10/24",
+    "interface": "enp0s31f6"
+  },
+
+  "go2_robot": {
+    "ip_address": "192.168.123.161",
+    "note": "Unitree GO2 quadruped, topics observed via ROS 2 DDS"
+  },
+
+  "ros2": {
+    "distro": "humble",
+    "rmw": "rmw_cyclonedds_cpp",
+    "domain_id": 0,
+    "cyclonedds_interface": "enp0s31f6",
+    "total_topics_observed": 103,
+    "key_topics": {
+      "/sportmodestate": {
+        "type": "unitree_go/msg/SportModeState",
+        "publishers": 1,
+        "subscribers": 1,
+        "rate_hz": "message type not locally resolvable for hz measurement"
+      },
+      "/lowstate": {
+        "type": "unitree_go/msg/LowState",
+        "publishers": 1,
+        "subscribers": 1,
+        "rate_hz": "message type not locally resolvable for hz measurement"
+      },
+      "/utlidar/cloud": {
+        "type": "sensor_msgs/msg/PointCloud2",
+        "publishers": 1,
+        "rate_hz": 15.4
+      },
+      "/utlidar/imu": {
+        "type": "sensor_msgs/msg/Imu",
+        "publishers": 1,
+        "subscribers": 2,
+        "rate_hz": 250.4
+      },
+      "/utlidar/robot_odom": {
+        "type": "nav_msgs/msg/Odometry",
+        "publishers": 1,
+        "subscribers": 1,
+        "rate_hz": 150.7
+      }
+    },
+    "tf_published": false,
+    "diagnostics_published": false,
+    "joint_states_published": false,
+    "unitree_msg_packages": ["unitree_api", "unitree_go", "unitree_hg"],
+    "unitree_msg_location": "/home/unitree/unitree_ros2/cyclonedds_ws/src/unitree/"
+  },
+
+  "helix_repo": {
+    "url": "https://github.com/yusufdxb/helix",
+    "branch": "main",
+    "sha": "fe621e865527b261b6d41e83b931b9bed6651fc7",
+    "latest_commit": "prepare workshop-paper artifact: benchmarks, docs, honest framing",
+    "status": "clean, up to date with origin/main",
+    "feature_branches": [
+      "feat/phase2-recovery",
+      "feat/phase3-llm",
+      "feat/phase4-dashboard"
+    ]
+  },
+
+  "jetson_workspaces": {
+    "unitree_ros2": {
+      "path": "/home/unitree/unitree_ros2",
+      "git_sha": "fe621e865527b261b6d41e83b931b9bed6651fc7",
+      "contents": "cyclonedds_ws, example, setup scripts"
+    },
+    "go2_ws": {
+      "path": "/home/unitree/go2_ws",
+      "git_sha": "fe621e865527b261b6d41e83b931b9bed6651fc7",
+      "src_contents": ["go2_ros2_sdk", "unitree_ros2"],
+      "has_unitree_sdk2": true
+    }
+  },
+
+  "pc_workspaces": {
+    "ros2_ws": {
+      "path": "/home/careslab/ros2_ws",
+      "src_contents": ["go2_ros2_sdk"]
+    },
+    "helix": {
+      "path": "/home/careslab/yusuf/helix",
+      "has_cyclonedds_loopback_xml": true
+    }
+  },
+
+  "notes": [
+    "Jetson has 4 of 8 Cortex-A78AE cores online (power management)",
+    "unitree_go/msg types not installed in base ROS 2 on Jetson -- topic hz fails for proprietary msg types",
+    "Standard sensor_msgs topics (IMU, PointCloud2, Odometry) measurable at expected rates",
+    "No /tf, /diagnostics, or /joint_states topics published by GO2 natively",
+    "CycloneDDS on PC has MaxMessageSize/FragmentSize tuning; Jetson config is minimal",
+    "All three Jetson repos (unitree_ros2, go2_ws, yusuf/helix) share the same git SHA as the PC helix repo",
+    "GO2 robot at .161 publishes ~103 ROS 2 topics including SLAM, lidar, sport mode, and audio"
+  ]
+}

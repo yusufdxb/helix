@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-04-03T19:22:00Z",
+  "description": "HELIX algorithmic benchmark comparison: PC vs Jetson Orin NX",
+  "methodology": "Identical Python scripts run on both platforms, same seed=42 where applicable",
+
+  "anomaly_detector_throughput": {
+    "pc_samples_per_sec": 80643,
+    "jetson_samples_per_sec": 63675,
+    "ratio": 0.79,
+    "operational_requirement": 100,
+    "jetson_headroom_x": 636
+  },
+  "log_parser_throughput": {
+    "pc_messages_per_sec": 248282,
+    "jetson_messages_per_sec": 156231,
+    "ratio": 0.63,
+    "operational_requirement": 100,
+    "jetson_headroom_x": 1562
+  },
+  "detection_latency_ms": {
+    "pc_mean": 0.049,
+    "jetson_mean": 0.049,
+    "note": "Identical - dominated by algorithmic cost, not platform"
+  },
+  "heartbeat_miss_latency_ms": {
+    "pc_mean": 200.7,
+    "jetson_mean": 200.7,
+    "note": "Identical - dominated by sleep/check_interval timing"
+  },
+  "log_parser_accuracy": {
+    "pc": "22/22 = 100%",
+    "jetson": "22/22 = 100%",
+    "note": "Deterministic regex matching - platform-independent"
+  },
+  "realistic_anomaly_results": {
+    "note": "Identical on both platforms (deterministic with seed=42)",
+    "key_results": {
+      "laplace_noise_z3_k3_tpr": "0%",
+      "laplace_noise_z3_k5_tpr": "50%",
+      "gradual_drift_r0.1_detection": "1.5%",
+      "marginal_anomaly_z3_tpr": "96.5%",
+      "transient_single_spike_fpr": "0%"
+    }
+  }
+}

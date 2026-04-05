@@ -1,0 +1,154 @@
+{
+  "timestamp": "2026-04-03T19:13:00Z",
+  "description": "Structured comparison of HELIX benchmark results: PC vs Jetson Orin NX",
+  "platforms": {
+    "pc": {
+      "cpu": "Intel Core i7-7700 @ 3.60GHz",
+      "architecture": "x86_64",
+      "cores": 8,
+      "ram_gb": 16,
+      "os": "Ubuntu 22.04",
+      "python": "3.10.12"
+    },
+    "jetson": {
+      "cpu": "ARM Cortex-A78AE @ 1.98GHz",
+      "architecture": "aarch64",
+      "cores_online": 4,
+      "cores_total": 8,
+      "ram_gb": 16,
+      "os": "Ubuntu 22.04 (JetPack)",
+      "python": "3.10.12"
+    }
+  },
+  "anomaly_detector": {
+    "detection_latency": {
+      "metric": "Time to detect anomaly after spike injection",
+      "pc": {
+        "samples_mean": 3,
+        "ms_mean": 0.0358,
+        "ms_p95": 0.0657
+      },
+      "jetson": {
+        "samples_mean": 3,
+        "ms_mean": 0.0486,
+        "ms_p95": 0.0494
+      },
+      "jetson_vs_pc_ratio": {
+        "ms_mean": 1.36,
+        "note": "Jetson 36% slower on mean detection latency (0.049 vs 0.036 ms)"
+      }
+    },
+    "throughput": {
+      "metric": "Samples processed per second (100k sample run)",
+      "pc": {
+        "samples_per_sec": 98852,
+        "elapsed_sec": "~1.01"
+      },
+      "jetson": {
+        "samples_per_sec": 63222,
+        "elapsed_sec": "~1.58"
+      },
+      "jetson_vs_pc_ratio": {
+        "throughput": 0.64,
+        "note": "Jetson achieves 64% of PC throughput. Still 632x operational requirement (100 samples/sec)"
+      }
+    },
+    "accuracy": {
+      "note": "Identical on both platforms (deterministic with seed=42)",
+      "tpr_fpr_sweep": "All thresholds: TPR=100%, FPR=0% (synthetic large-gap test)",
+      "realistic_scenarios_identical": true
+    }
+  },
+  "heartbeat_monitor": {
+    "miss_detection_latency": {
+      "metric": "Time to detect node crash after heartbeat stops",
+      "pc": {
+        "ms_mean": 200.8,
+        "ms_p95": 202.9
+      },
+      "jetson": {
+        "ms_mean": 200.5,
+        "ms_p95": 201.2
+      },
+      "note": "Nearly identical -- dominated by sleep/check_interval timing, not CPU speed"
+    }
+  },
+  "log_parser": {
+    "accuracy": {
+      "pc": "22/22 = 100%",
+      "jetson": "22/22 = 100%",
+      "note": "Identical -- deterministic regex matching"
+    },
+    "throughput": {
+      "metric": "Log messages matched per second (regex, 10k messages)",
+      "pc": {
+        "messages_per_sec": 294335.0,
+        "elapsed_sec": 0.034
+      },
+      "jetson": {
+        "messages_per_sec": 155324.7,
+        "elapsed_sec": 0.064
+      },
+      "jetson_vs_pc_ratio": {
+        "throughput": 0.53,
+        "note": "Jetson achieves 53% of PC throughput for regex matching"
+      }
+    },
+    "dedup": {
+      "pc": "4/4 PASS",
+      "jetson": "4/4 PASS"
+    }
+  },
+  "cross_device_dds_latency": {
+    "method": "Round-trip time (RTT) measured on PC; echo node on Jetson",
+    "rmw": "rmw_fastrtps_cpp",
+    "network": "Wired Ethernet 192.168.123.x/24",
+    "messages_sent": 50,
+    "messages_received": 50,
+    "rtt_ms": {
+      "mean": 1.63,
+      "p50": 1.48,
+      "p95": 2.31,
+      "min": 1.11,
+      "max": 5.15
+    },
+    "estimated_one_way_ms": {
+      "mean": 0.81,
+      "p50": 0.74,
+      "p95": 1.16,
+      "min": 0.56,
+      "max": 2.58
+    }
+  },
+  "resource_overhead": {
+    "jetson_baseline": {
+      "cpu_idle_pct": 82.4,
+      "mem_used_gb": 1.1,
+      "mem_available_gb": 13.0,
+      "thermal_max_celsius": 47.9,
+      "active_ros_topics": 109
+    },
+    "jetson_during_benchmark": {
+      "mem_delta_gb": 0.0,
+      "thermal_delta_celsius": 0.2,
+      "load_avg_delta": 0.02,
+      "note": "Negligible impact from HELIX algorithmic benchmarks"
+    }
+  },
+  "e2e_ros2_latency": {
+    "status": "NOT_RUN",
+    "reason": "helix_msgs package not built in any available workspace",
+    "gap": "Requires colcon build of helix_msgs to measure full ROS 2 callback chain latency"
+  },
+  "summary": {
+    "key_findings": [
+      "Jetson throughput is 64% of PC for anomaly detection (63k vs 99k samples/sec)",
+      "Jetson throughput is 53% of PC for log parsing (155k vs 294k msg/sec)",
+      "Both exceed operational requirements by >600x (anomaly) and >1500x (log parsing)",
+      "Detection accuracy is identical on both platforms (deterministic algorithms)",
+      "Cross-device DDS latency is <1ms one-way over wired Ethernet",
+      "Jetson has 13GB free RAM and 82% idle CPU with GO2 stack running",
+      "HELIX benchmarks have negligible thermal/memory impact on Jetson"
+    ]
+  }
+}

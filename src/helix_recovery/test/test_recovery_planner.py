@@ -6,13 +6,14 @@ arrives on /helix/recovery_actions within 15 seconds.
 Also verifies state_db has a persisted attempt record.
 """
 import os
-import time
-import tempfile
 import threading
+import time
+
 import pytest
 import rclpy
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.parameter import Parameter
+
 from helix_msgs.msg import FaultEvent, RecoveryAction
 
 # Path to the recovery_policy.yaml in the source tree

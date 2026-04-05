@@ -1,0 +1,80 @@
+================================================================================
+HELIX PC Benchmark Results
+================================================================================
+Timestamp: 2026-04-03T19:13:00Z
+Host: PC (Ubuntu 22.04)
+CPU: Intel Core i7-7700 @ 3.60GHz (8 threads)
+RAM: 16 GB (15Gi total, ~11Gi available)
+Python: 3.10.12
+
+Commands used:
+  cd /home/careslab/yusuf/helix
+  python3 benchmark_helix.py
+  python3 scripts/bench_realistic_anomalies.py
+  python3 scripts/bench_log_parser.py
+
+================================================================================
+1. benchmark_helix.py — Core Algorithmic Benchmark
+================================================================================
+
+[1/4] Detection latency (200 trials):
+  Mean: 3 samples / 0.0358 ms
+  p95:  0.0657 ms
+
+[2/4] Throughput (100k samples):
+  98,852 samples/sec
+
+[3/4] TPR/FPR sweep:
+  Z=1.5: TPR=100.0%  FPR=0.0%
+  Z=2.0: TPR=100.0%  FPR=0.0%
+  Z=2.5: TPR=100.0%  FPR=0.0%
+  Z=3.0: TPR=100.0%  FPR=0.0%
+  Z=3.5: TPR=100.0%  FPR=0.0%
+  Z=4.0: TPR=100.0%  FPR=0.0%
+  Z=5.0: TPR=100.0%  FPR=0.0%
+
+[4/4] Heartbeat miss latency (30 trials):
+  Mean: 200.8 ms
+  p95:  202.9 ms
+
+================================================================================
+2. bench_realistic_anomalies.py — Realistic Scenarios
+================================================================================
+
+SCENARIO 1: Non-Gaussian (Laplace) Noise
+  Z=2.0, K=3.0: TPR=52.0%, FPR=0.0%
+  Z=2.0, K=5.0: TPR=100.0%, FPR=0.0%
+  Z=3.0, K=5.0: TPR=50.0%, FPR=0.0%
+  Z=3.0, K=8.0: TPR=100.0%, FPR=0.0%
+
+SCENARIO 2: Gradual Drift
+  R=0.1: 1.5% detected  |  R=0.2: 53.5%  |  R=0.5: 100%  |  R=1.0: 100%
+  Negative FPR: 0.0%
+
+SCENARIO 3: Transient Spikes
+  Single: 0.0% false alarm  |  Double: 0.0%  |  Triple: 99.5% TPR
+
+SCENARIO 4: Marginal Anomalies
+  Z=2.0: TPR=100.0%  |  Z=3.0: TPR=96.5%  |  Z=3.5: 48.5%  |  Z=4.0: 8.0%
+
+================================================================================
+3. bench_log_parser.py — Log Parser Benchmark
+================================================================================
+
+Detection Accuracy: 22/22 = 100.00%
+  All 5 rules: precision=100%, recall=100%
+
+Throughput: 294,335.0 msg/s (10,000 messages in 0.034s)
+
+Dedup: All 4 scenarios PASS
+
+================================================================================
+4. bench_e2e_latency.py — End-to-End ROS 2 Latency (FAILED)
+================================================================================
+
+Error: ModuleNotFoundError: No module named 'helix_msgs'
+Reason: helix_msgs package is not built in /home/careslab/ros2_ws.
+The workspace exists but does not contain helix_msgs.
+Command attempted:
+  source /opt/ros/humble/setup.bash && source /home/careslab/ros2_ws/install/setup.bash
+  python3 /home/careslab/yusuf/helix/scripts/bench_e2e_latency.py

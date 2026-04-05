@@ -8,15 +8,15 @@ planner's executor.
 verify() is synchronous and blocking. In the async recovery chain it must be
 called via: await loop.run_in_executor(None, partial(verifier.verify, ...))
 """
-import time
 import threading
+import time
 from typing import Tuple
 
 import rclpy
 import rclpy.node
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 from rclpy.executors import SingleThreadedExecutor
 from std_msgs.msg import String
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
 # ── Constants ────────────────────────────────────────────────────────────────
 TOPIC_HEARTBEAT: str = "/helix/heartbeat"

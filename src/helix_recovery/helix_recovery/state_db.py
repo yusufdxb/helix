@@ -10,7 +10,7 @@ import sqlite3
 import threading
 import time
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 # ── Constants ────────────────────────────────────────────────────────────────
 DEFAULT_DB_DIR: str = os.path.expanduser("~/.helix")

@@ -1,0 +1,36 @@
+=== HELIX Git Provenance ===
+Collected: 2026-04-03T19:13:09Z
+
+--- git rev-parse HEAD ---
+fe621e865527b261b6d41e83b931b9bed6651fc7
+
+--- git log --oneline -10 ---
+fe621e8 prepare workshop-paper artifact: benchmarks, docs, honest framing
+ac61788 chore: add LICENSE, CI workflow on main, fix badge, expand .gitignore
+92cbbcc docs: remove failing CI badge, add benchmark summary table
+7c10c89 chore: add .dockerignore for optimized container builds
+86e9bbe Add standalone benchmark script with real performance results
+a1d978c docs: add CI badge and development branch guide
+e85c57c Rewrite docs around public Phase 1 scope
+70bcad2 docs: add ORCID iD to CITATION.cff
+ebfc879 docs: add CITATION.cff for academic reference
+1070f25 docs: add architecture and fault taxonomy SVG diagrams
+
+--- git status ---
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+
+--- git remote -v ---
+origin	https://github.com/yusufdxb/helix (fetch)
+origin	https://github.com/yusufdxb/helix (push)
+
+--- git branch -a ---
+* main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/feat/phase2-recovery
+  remotes/origin/feat/phase3-llm
+  remotes/origin/feat/phase4-dashboard
+  remotes/origin/main
+

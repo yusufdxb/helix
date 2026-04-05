@@ -1,0 +1,210 @@
+{
+  "timestamp": "2026-04-03T19:45:32.726030+00:00",
+  "platform_summary": {
+    "total_topics": 153,
+    "standard_type_topics": 82,
+    "custom_type_topics": 71,
+    "standard_fraction": 0.536
+  },
+  "helix_input_coverage": {
+    "/diagnostics": "native",
+    "/helix/metrics": "missing",
+    "/helix/heartbeat": "missing",
+    "/rosout": "native"
+  },
+  "scores": {
+    "native_coverage": 0.5,
+    "with_adapters": 1.5,
+    "adaptable_topics_count": 54,
+    "unreachable_topics_count": 71
+  },
+  "adaptable_topics": [
+    {
+      "topic": "/audiohub/player/state",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    },
+    {
+      "topic": "/gas_sensor",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    },
+    {
+      "topic": "/gesture/result",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    },
+    {
+      "topic": "/gnss",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    },
+    {
+      "topic": "/goal_pose",
+      "type": "geometry_msgs/msg/PoseStamped",
+      "adapter": "pose_drift_monitor",
+      "effort": "low"
+    },
+    {
+      "topic": "/gpt_cmd",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    },
+    {
+      "topic": "/gptflowfeedback",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    },
+    {
+      "topic": "/joint_states",
+      "type": "sensor_msgs/msg/JointState",
+      "adapter": "joint_state_monitor",
+      "effort": "low"
+    },
+    {
+      "topic": "/lf/battery_alarm",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    },
+    {
+      "topic": "/lio_sam_ros2/mapping/odometry",
+      "type": "nav_msgs/msg/Odometry",
+      "adapter": "odom_drift_monitor",
+      "effort": "low"
+    },
+    {
+      "topic": "/multiplestate",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    },
+    {
+      "topic": "/odom",
+      "type": "nav_msgs/msg/Odometry",
+      "adapter": "odom_drift_monitor",
+      "effort": "low"
+    },
+    {
+      "topic": "/pet/flowfeedback",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    },
+    {
+      "topic": "/point_cloud2",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low"
+    },
+    {
+      "topic": "/pointcloud/aggregated",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low"
+    },
+    {
+      "topic": "/pointcloud/downsampled",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low"
+    },
+    {
+      "topic": "/pointcloud/filtered",
+      "type": "sensor_msgs/msg/PointCloud2",
+      "adapter": "pointcloud_rate_monitor",
+      "effort": "low"
+    },
+    {
+      "topic": "/programming_actuator/command",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    },
+    {
+      "topic": "/programming_actuator/feedback",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    },
+    {
+      "topic": "/public_network_status",
+      "type": "std_msgs/msg/String",
+      "adapter": "json_state_parser",
+      "effort": "low"
+    }
+  ],
+  "unreachable_topics_sample": [
+    {
+      "topic": "/api/assistant_recorder/request",
+      "type": "unitree_api/msg/Request",
+      "barrier": "custom_message_package",
+      "effort": "high"
+    },
+    {
+      "topic": "/api/assistant_recorder/response",
+      "type": "unitree_api/msg/Response",
+      "barrier": "custom_message_package",
+      "effort": "high"
+    },
+    {
+      "topic": "/api/audiohub/request",
+      "type": "unitree_api/msg/Request",
+      "barrier": "custom_message_package",
+      "effort": "high"
+    },
+    {
+      "topic": "/api/audiohub/response",
+      "type": "unitree_api/msg/Response",
+      "barrier": "custom_message_package",
+      "effort": "high"
+    },
+    {
+      "topic": "/api/bashrunner/request",
+      "type": "unitree_api/msg/Request",
+      "barrier": "custom_message_package",
+      "effort": "high"
+    },
+    {
+      "topic": "/api/bashrunner/response",
+      "type": "unitree_api/msg/Response",
+      "barrier": "custom_message_package",
+      "effort": "high"
+    },
+    {
+      "topic": "/api/config/request",
+      "type": "unitree_api/msg/Request",
+      "barrier": "custom_message_package",
+      "effort": "high"
+    },
+    {
+      "topic": "/api/config/response",
+      "type": "unitree_api/msg/Response",
+      "barrier": "custom_message_package",
+      "effort": "high"
+    },
+    {
+      "topic": "/api/fourg_agent/request",
+      "type": "unitree_api/msg/Request",
+      "barrier": "custom_message_package",
+      "effort": "high"
+    },
+    {
+      "topic": "/api/fourg_agent/response",
+      "type": "unitree_api/msg/Response",
+      "barrier": "custom_message_package",
+      "effort": "high"
+    }
+  ],
+  "interpretation": {
+    "native": "2/4 HELIX inputs available natively",
+    "adapter_path": "54 platform topics can feed HELIX via adapters",
+    "custom_barrier": "71 topics behind custom message type barrier"
+  }
+}

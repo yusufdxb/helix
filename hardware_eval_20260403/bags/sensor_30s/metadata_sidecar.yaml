@@ -1,0 +1,33 @@
+scenario_id: "sensor_001"
+date: "2026-04-03"
+time: "15:18:40 UTC"
+platform: "PC (192.168.123.10)"
+duration_seconds: 34.8
+commands_run:
+  - "ros2 bag record -o sensor_30s /rosout /utlidar/robot_pose /utlidar/range_info /gnss /audiohub/player/state /multiplestate /lf/battery_alarm /rtc/state /parameter_events -d 30"
+expected_effect: "Capture sensor-rich GO2 data including pose and range from LiDAR subsystem"
+observed_effect: |
+  906 messages captured across 8 topics:
+  - /utlidar/robot_pose: 651 msgs (~18.7 Hz) - PoseStamped with position/orientation
+  - /audiohub/player/state: 138 msgs (~4 Hz) - JSON player state
+  - /gnss: 35 msgs (~1 Hz) - GPS coordinates
+  - /rtc/state: 35 msgs (~1 Hz) - RTC status
+  - /multiplestate: 35 msgs (~1 Hz) - robot config
+  - /rosout: 12 msgs
+  - /utlidar/range_info: 0 msgs (subscribed but quiescent)
+  - /parameter_events: 0 msgs
+topics_recorded:
+  - "/utlidar/robot_pose"
+  - "/audiohub/player/state"
+  - "/gnss"
+  - "/rtc/state"
+  - "/multiplestate"
+  - "/rosout"
+  - "/utlidar/range_info"
+  - "/parameter_events"
+relevant_to_claim: "GO2 LiDAR subsystem publishes real-time pose at ~19 Hz observable without custom msgs"
+evidence_strength: "strong"
+notes: |
+  /utlidar/robot_pose is the richest sensor stream available without unitree_go packages.
+  651 poses in 34.8s = 18.7 Hz. Uses standard geometry_msgs/PoseStamped.
+  /lf/battery_alarm did not subscribe (not in topic list at recording time).

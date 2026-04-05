@@ -1,0 +1,24 @@
+scenario_id: "perturbation_001"
+date: "2026-04-03"
+time: "15:20:02 UTC"
+platform: "PC (192.168.123.10)"
+duration_seconds: 12.5
+commands_run:
+  - "ros2 bag record -o perturbation_test_publish /rosout /helix_test_topic -d 30"
+  - "ros2 topic pub --once /helix_test_topic std_msgs/msg/String 'data: helix_test_message_N' (x5, 1 Hz)"
+expected_effect: "Test whether publishing to a novel topic triggers any /rosout activity from GO2 nodes"
+observed_effect: |
+  12 messages captured:
+  - /helix_test_topic: 5 msgs - our injected test messages
+  - /rosout: 7 msgs - all from local rosbag2_recorder, none from GO2 nodes
+  Robot's /rosout showed zero reaction to external topic injection.
+  DDS namespace isolation confirmed: external publish does not trigger robot-side logging.
+topics_recorded:
+  - "/helix_test_topic"
+  - "/rosout"
+relevant_to_claim: "External topic injection is isolated from robot internals - safe perturbation baseline"
+evidence_strength: "moderate"
+notes: |
+  This establishes that publishing to novel topics from the PC does not
+  disturb the GO2 stack. HELIX's log parser would NOT detect this type
+  of event without a topic-existence monitor.
