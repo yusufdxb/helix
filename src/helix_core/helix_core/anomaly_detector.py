@@ -6,16 +6,17 @@ Maintains a rolling window of `window_size` samples per metric.
 Emits ANOMALY FaultEvent when Z-score exceeds `zscore_threshold` for
 `consecutive_trigger` consecutive samples.
 """
-import time
 import math
 import threading
+import time
 from collections import deque
-from typing import Dict, Deque
+from typing import Deque, Dict
 
 import rclpy
-from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn, State
 from diagnostic_msgs.msg import DiagnosticArray
+from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 from std_msgs.msg import Float64MultiArray
+
 from helix_msgs.msg import FaultEvent
 
 # ── Constants ────────────────────────────────────────────────────────────────

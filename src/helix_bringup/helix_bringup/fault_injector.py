@@ -11,13 +11,19 @@ Run with: ros2 run helix_bringup helix_fault_injector
 The node is spun in a background thread so DDS can deliver messages
 while the injection sequence runs in the main thread.
 """
-import time
 import threading
+import time
+
 import rclpy
+from rcl_interfaces.msg import Log
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
-from std_msgs.msg import String, Float64MultiArray, MultiArrayDimension, MultiArrayLayout
-from rcl_interfaces.msg import Log
+from std_msgs.msg import (
+    Float64MultiArray,
+    MultiArrayDimension,
+    MultiArrayLayout,
+    String,
+)
 
 # ── Constants ────────────────────────────────────────────────────────────────
 HEARTBEAT_TOPIC: str = "/helix/heartbeat"

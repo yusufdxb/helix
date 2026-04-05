@@ -5,8 +5,9 @@ Publishes normal samples to build a window, then injects spikes.
 Asserts a FaultEvent with fault_type=="ANOMALY" is emitted.
 rclpy initialized by conftest.py session fixture.
 """
-import time
 import threading
+import time
+
 import pytest
 import rclpy
 from rclpy.executors import SingleThreadedExecutor

@@ -6,13 +6,13 @@ Asserts FaultEvent with fault_type=="LOG_PATTERN" and rule_id=="slam_diverged".
 rclpy initialized by conftest.py session fixture.
 """
 import os
-import time
 import threading
+import time
+
 import pytest
 import rclpy
-from rclpy.executors import SingleThreadedExecutor
 from rcl_interfaces.msg import Log
-
+from rclpy.executors import SingleThreadedExecutor
 
 # Locate log_rules.yaml in source tree (resolved to absolute path at import time)
 RULES_FILE = os.path.abspath(os.path.join(

@@ -7,13 +7,14 @@ Emits FaultEvent when a log message matches a rule.
 Deduplicates: same rule_id + node_name suppressed within `dedup_window_sec`.
 """
 import re
-import time
 import threading
+import time
 from typing import Any, Dict, List, Tuple
 
 import rclpy
-from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn, State
 from rcl_interfaces.msg import Log
+from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
+
 from helix_msgs.msg import FaultEvent
 
 # ── Constants ────────────────────────────────────────────────────────────────

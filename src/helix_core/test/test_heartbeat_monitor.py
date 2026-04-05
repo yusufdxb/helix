@@ -4,8 +4,9 @@ Tests for HeartbeatMonitor lifecycle node.
 Uses pytest + rclpy directly. No pytest-ros needed.
 rclpy is initialized once for the entire session via conftest.py (autouse).
 """
-import time
 import threading
+import time
+
 import pytest
 import rclpy
 from rclpy.executors import SingleThreadedExecutor

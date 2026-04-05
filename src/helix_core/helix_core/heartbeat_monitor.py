@@ -8,15 +8,16 @@ CRASH FaultEvent is emitted to /helix/faults.
 
 Also publishes /helix/node_health (diagnostic_msgs/DiagnosticArray) every 1s.
 """
-import time
 import threading
+import time
 from typing import Dict, Set, Tuple
 
 import rclpy
-from rclpy.lifecycle import LifecycleNode, TransitionCallbackReturn, State
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
+from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 from rclpy.timer import Timer
 from std_msgs.msg import String
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
+
 from helix_msgs.msg import FaultEvent
 
 # ── Constants ────────────────────────────────────────────────────────────────
