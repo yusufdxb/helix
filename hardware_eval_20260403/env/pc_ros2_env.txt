@@ -1,0 +1,33 @@
+=== PC ROS 2 Environment ===
+Collected: 2026-04-03T19:13:17Z
+
+--- ROS 2 installations ---
+humble
+
+--- ROS_DISTRO (from bashrc) ---
+# Unitree Go2 CycloneDDS
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+export CYCLONEDDS_URI=file:///home/careslab/unitree_ros2/cyclonedds_ws/src/cyclonedds.xml
+export ROS_DOMAIN_ID=0
+export ROS_DOMAIN_ID=0
+
+--- Source and check ---
+ROS_DISTRO=humble
+RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+CYCLONEDDS_URI=file:///home/careslab/unitree_ros2/cyclonedds_ws/src/cyclonedds.xml
+ROS_DOMAIN_ID=0
+
+--- ros2_ws contents ---
+go2_ros2_sdk
+
+--- cyclonedds_ws contents ---
+No ~/cyclonedds_ws/src/
+
+--- CycloneDDS XML files in helix ---
+/home/careslab/yusuf/helix/src/helix_msgs/package.xml
+/home/careslab/yusuf/helix/src/helix_core/package.xml
+/home/careslab/yusuf/helix/src/helix_bringup/package.xml
+/home/careslab/yusuf/helix/cyclonedds_loopback.xml
+
+--- CycloneDDS XML files in ros2_ws ---
+

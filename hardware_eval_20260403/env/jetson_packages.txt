@@ -1,0 +1,87 @@
+=== Jetson ROS 2 Packages (corrected) ===
+Collected: 2026-04-03T19:14:24Z
+
+--- Home directory listing ---
+build
+Desktop
+Documents
+Downloads
+go2_voice_tree
+go2_ws
+install
+log
+mic.wav
+Music
+Pictures
+Public
+Templates
+test.wav
+unitree_ros2
+Videos
+yusuf
+
+--- /home/unitree/unitree_ros2/ ---
+_backup_scripts
+CHANGELOG.md
+cyclonedds_ws
+docs
+example
+LICENSE
+README.md
+README _zh.md
+setup_default.sh
+setup_local.sh
+setup_offline.sh
+setup.sh
+version.txt
+
+--- /home/unitree/unitree_ros2/cyclonedds_ws/src/ ---
+cyclonedds.xml
+unitree
+
+--- CycloneDDS XML ---
+<?xml version="1.0" encoding="UTF-8" ?>
+<CycloneDDS>
+  <Domain Id="any">
+    <General>
+      <Interfaces>
+        <NetworkInterface name="enp0s31f6" priority="default" multicast="default" />
+      </Interfaces>
+    </General>
+  </Domain>
+</CycloneDDS>
+
+--- /home/unitree/ros2_ws/src/ ---
+Not found
+
+--- /home/unitree/go2_ws/ ---
+build
+install
+log
+src
+unitree_sdk2
+
+--- Git SHAs ---
+  /home/unitree/unitree_ros2:
+fe621e865527b261b6d41e83b931b9bed6651fc7
+fe621e8 prepare workshop-paper artifact: benchmarks, docs, honest framing
+ac61788 chore: add LICENSE, CI workflow on main, fix badge, expand .gitignore
+92cbbcc docs: remove failing CI badge, add benchmark summary table
+
+  /home/unitree/go2_ws:
+fe621e865527b261b6d41e83b931b9bed6651fc7
+fe621e8 prepare workshop-paper artifact: benchmarks, docs, honest framing
+ac61788 chore: add LICENSE, CI workflow on main, fix badge, expand .gitignore
+92cbbcc docs: remove failing CI badge, add benchmark summary table
+
+  /home/unitree/yusuf/helix:
+fe621e865527b261b6d41e83b931b9bed6651fc7
+fe621e8 prepare workshop-paper artifact: benchmarks, docs, honest framing
+ac61788 chore: add LICENSE, CI workflow on main, fix badge, expand .gitignore
+92cbbcc docs: remove failing CI badge, add benchmark summary table
+
+--- Unitree ROS 2 packages (via ros2 pkg list) ---
+(Note: unitree_go topics visible but msg types not locally installed on Jetson base ROS)
+
+--- dpkg unitree packages ---
+
