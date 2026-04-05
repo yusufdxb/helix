@@ -1,0 +1,112 @@
+================================================================================
+HELIX Resource Overhead Analysis
+================================================================================
+Timestamp: 2026-04-03T19:15:00Z
+
+=== Methodology ===
+
+Resource measurements were taken on the Jetson Orin NX (unitree@192.168.123.18)
+before and after running HELIX algorithmic benchmarks, with the GO2 robot stack
+active and publishing 109 ROS 2 topics.
+
+Commands used:
+  sshpass -p '123' ssh unitree@192.168.123.18 "free -h; uptime; top -bn1 | head -20"
+  sshpass -p '123' ssh unitree@192.168.123.18 "cat /sys/class/thermal/thermal_zone*/temp"
+  sshpass -p '123' ssh unitree@192.168.123.18 "ps aux | grep -E 'ros|unitree_'"
+
+=== Jetson Orin NX Baseline (GO2 stack running, no HELIX) ===
+
+CPU:
+  - 82.4% idle (7.4% user, 10.3% system)
+  - Load average: 0.62, 0.28, 0.13
+  - Only 4 of 8 cores online (cores 4-7 offline for power savings)
+
+Memory:
+  - Total: 15.3 GiB
+  - Used: 1.1 GiB (7.2% of total)
+  - Available: 13.0 GiB
+  - Swap: 7.6 GiB (0 used)
+
+Thermal:
+  - Range: 43.5 C to 47.9 C across 9 zones
+  - All within safe operating limits (throttle at ~85 C)
+
+Active processes:
+  - ros2-daemon: 62 MB RSS, 1.2% CPU
+  - 109 active ROS 2 topics from GO2 stack
+
+=== During HELIX Benchmark Execution ===
+
+benchmark_helix.py (18 seconds runtime):
+  - Memory delta: 0.0 GiB (no measurable increase)
+  - Load average delta: +0.02
+  - Thermal delta: +0.2 C max
+  - Pure Python, single-threaded, no GPU usage
+
+bench_realistic_anomalies.py:
+  - Similar resource profile to above
+  - No additional memory allocation beyond Python interpreter
+
+bench_log_parser.py:
+  - Similar resource profile
+  - Regex compilation is one-time cost
+
+=== Operational Resource Budget ===
+
+At HELIX's operational rate (10 Hz per metric, ~10 metrics = 100 samples/sec):
+
+Anomaly detection:
+  - Jetson throughput: 63,222 samples/sec
+  - Operational load: 100/63,222 = 0.16% of one core
+  - CPU overhead: negligible
+
+Log parsing:
+  - Jetson throughput: 155,325 msg/sec
+  - Typical log rate: ~10-100 msg/sec
+  - CPU overhead: <0.1% of one core
+
+Heartbeat monitoring:
+  - Timer-based (50ms check interval)
+  - CPU overhead: negligible (sleep-dominated)
+
+Combined HELIX overhead estimate:
+  - CPU: <0.5% of one core (~0.12% of 4 available cores)
+  - Memory: <50 MB additional RSS (Python interpreter + data structures)
+  - Network: <1 KB/s for heartbeat + fault messages
+
+=== Cross-Device DDS Transport Overhead ===
+
+Round-trip latency: 1.63 ms mean (0.81 ms one-way estimate)
+At 10 Hz monitoring: 0.81 ms / 100 ms period = 0.81% of cycle time
+100% message delivery (50/50 in test)
+Network overhead is negligible compared to sensing period.
+
+=== Conclusions ===
+
+1. HELIX can run on the Jetson Orin NX alongside the GO2 stack with negligible
+   resource impact:
+   - <0.5% CPU on a single core
+   - <50 MB additional memory (out of 13 GB available)
+   - <0.3 C thermal increase
+
+2. The Jetson has massive headroom:
+   - 82% CPU idle with GO2 stack running
+   - 13 GB RAM free
+   - 4 additional cores available if needed
+
+3. Cross-device DDS latency (<1 ms) is negligible relative to HELIX's 10 Hz
+   monitoring rate, confirming that distributed deployment (HELIX on PC,
+   GO2 on Jetson) is viable with no latency concerns.
+
+4. The Jetson performs at 53-64% of the PC's throughput, which is expected given:
+   - ARM vs x86 architecture differences
+   - Lower clock speed (1.98 GHz vs 3.60 GHz)
+   - Only 4 of 8 cores online
+   This is more than sufficient for HELIX's operational requirements.
+
+=== Known Gaps ===
+
+- tegrastats could not be captured (may require sudo)
+- End-to-end ROS 2 latency (bench_e2e_latency.py) not measured: helix_msgs not built
+- No measurement of HELIX running as actual ROS 2 nodes on Jetson
+- NTP not synchronized between PC and Jetson (clock offset ~4 hours)

@@ -1,0 +1,81 @@
+{
+  "timestamp": "2026-04-03T19:47:01.727216+00:00",
+  "mode": "single",
+  "bags": [
+    "/media/careslab/T7 Storage/hardware_eval_20260403/bags/sensor_30s"
+  ],
+  "results": {
+    "/audiohub/player/state": {
+      "count": 138,
+      "duration_sec": 34.38,
+      "mean_hz": 3.98,
+      "std_hz": 0.003,
+      "min_gap_ms": 247.384,
+      "max_gap_ms": 253.896,
+      "mean_gap_ms": 250.979,
+      "jitter_ms": 0.67,
+      "stability_pct": 100.0,
+      "type": "std_msgs/msg/String"
+    },
+    "/gnss": {
+      "count": 35,
+      "duration_sec": 34.02,
+      "mean_hz": 1.0,
+      "std_hz": 0.001,
+      "min_gap_ms": 996.345,
+      "max_gap_ms": 1004.649,
+      "mean_gap_ms": 1000.665,
+      "jitter_ms": 1.226,
+      "stability_pct": 100.0,
+      "type": "std_msgs/msg/String"
+    },
+    "/multiplestate": {
+      "count": 35,
+      "duration_sec": 34.12,
+      "mean_hz": 1.0,
+      "std_hz": 0.001,
+      "min_gap_ms": 1001.697,
+      "max_gap_ms": 1007.264,
+      "mean_gap_ms": 1003.575,
+      "jitter_ms": 0.92,
+      "stability_pct": 100.0,
+      "type": "std_msgs/msg/String"
+    },
+    "/rosout": {
+      "count": 12,
+      "duration_sec": 0.11,
+      "mean_hz": 104.73,
+      "std_hz": 0,
+      "min_gap_ms": 0.009,
+      "max_gap_ms": 102.202,
+      "mean_gap_ms": 9.548,
+      "jitter_ms": 29.301,
+      "stability_pct": 0.0,
+      "type": "rcl_interfaces/msg/Log"
+    },
+    "/rtc/state": {
+      "count": 35,
+      "duration_sec": 34.0,
+      "mean_hz": 1.0,
+      "std_hz": 0.0,
+      "min_gap_ms": 999.624,
+      "max_gap_ms": 1000.424,
+      "mean_gap_ms": 1000.086,
+      "jitter_ms": 0.193,
+      "stability_pct": 100.0,
+      "type": "std_msgs/msg/String"
+    },
+    "/utlidar/robot_pose": {
+      "count": 651,
+      "duration_sec": 34.67,
+      "mean_hz": 18.75,
+      "std_hz": 0.065,
+      "min_gap_ms": 49.158,
+      "max_gap_ms": 64.267,
+      "mean_gap_ms": 53.334,
+      "jitter_ms": 1.198,
+      "stability_pct": 99.8,
+      "type": "geometry_msgs/msg/PoseStamped"
+    }
+  }
+}

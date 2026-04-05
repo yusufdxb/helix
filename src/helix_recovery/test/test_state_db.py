@@ -2,9 +2,8 @@
 Tests for StateDB — pure Python SQLite layer.
 No ROS dependency. Uses a temp file DB for isolation.
 """
-import os
 import time
-import tempfile
+
 import pytest
 from helix_recovery.state_db import StateDB
 
@@ -70,9 +69,7 @@ def test_get_recovery_history_both_attempts(db):
     fault_id = db.insert_fault(_make_fault())
     db.insert_recovery_attempt(_make_attempt(fault_id, attempt_number=1, success=False))
     db.insert_recovery_attempt(_make_attempt(fault_id, attempt_number=2, success=True))
-    history = db.get_recovery_history("test_node", "CRASH")
-    # history is the node_recovery_history row (updated via update_node_history)
-    # Separate check: get_recent_faults to confirm attempts logged
+    db.get_recovery_history("test_node", "CRASH")
     faults = db.get_recent_faults("test_node", limit=10)
     assert len(faults) == 1
 

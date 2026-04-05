@@ -1,0 +1,81 @@
+================================================================================
+HELIX Jetson Orin NX Benchmark Results
+================================================================================
+Timestamp: 2026-04-03T19:13:44Z
+Host: Jetson Orin NX (unitree@192.168.123.18)
+CPU: ARM Cortex-A78AE, 4 online / 8 total cores, max 1984 MHz
+RAM: 16 GB (15Gi total, ~13Gi available)
+Python: 3.10.12
+NumPy: 1.26.4, PyYAML: 5.4.1
+
+Commands used:
+  sshpass -p '123' ssh unitree@192.168.123.18 "cd /tmp && python3 benchmark_helix.py"
+  sshpass -p '123' ssh unitree@192.168.123.18 "cd /tmp && python3 bench_realistic_anomalies.py"
+  sshpass -p '123' ssh unitree@192.168.123.18 "cd /tmp/helix_bench && python3 scripts/bench_log_parser.py"
+
+================================================================================
+1. benchmark_helix.py — Core Algorithmic Benchmark
+================================================================================
+
+PRE-RUN STATE:
+  Memory: 15Gi total, 13Gi free, 1.1Gi used
+  Uptime: 8 min, load avg: 0.28, 0.16, 0.09
+  Thermal zones (mC): 46968, 43468, 45500, 44937, 44468, 45968, 47875, 45125, 47875
+
+[1/4] Detection latency (200 trials):
+  Mean: 3 samples / 0.0486 ms
+  p95:  0.0494 ms
+
+[2/4] Throughput (100k samples):
+  63,222 samples/sec
+
+[3/4] TPR/FPR sweep:
+  Z=1.5: TPR=100.0%  FPR=0.0%
+  Z=2.0: TPR=100.0%  FPR=0.0%
+  Z=2.5: TPR=100.0%  FPR=0.0%
+  Z=3.0: TPR=100.0%  FPR=0.0%
+  Z=3.5: TPR=100.0%  FPR=0.0%
+  Z=4.0: TPR=100.0%  FPR=0.0%
+  Z=5.0: TPR=100.0%  FPR=0.0%
+
+[4/4] Heartbeat miss latency (30 trials):
+  Mean: 200.5 ms
+  p95:  201.2 ms
+
+POST-RUN STATE:
+  Memory: 15Gi total, 13Gi free, 1.1Gi used
+  Uptime: 8 min, load avg: 0.30, 0.17, 0.09
+  Thermal zones (mC): 46937, 43875, 45500, 44968, 44656, 45937, 48093, 45187, 48093
+
+================================================================================
+2. bench_realistic_anomalies.py — Realistic Scenarios
+================================================================================
+
+SCENARIO 1: Non-Gaussian (Laplace) Noise
+  Z=2.0, K=3.0: TPR=52.0%, FPR=0.0%
+  Z=2.0, K=5.0: TPR=100.0%, FPR=0.0%
+  Z=3.0, K=5.0: TPR=50.0%, FPR=0.0%
+  Z=3.0, K=8.0: TPR=100.0%, FPR=0.0%
+
+SCENARIO 2: Gradual Drift
+  R=0.1: 1.5% detected  |  R=0.2: 53.5%  |  R=0.5: 100%  |  R=1.0: 100%
+  Negative FPR: 0.0%
+
+SCENARIO 3: Transient Spikes
+  Single: 0.0% false alarm  |  Double: 0.0%  |  Triple: 99.5% TPR
+
+SCENARIO 4: Marginal Anomalies
+  Z=2.0: TPR=100.0%  |  Z=3.0: TPR=96.5%  |  Z=3.5: 48.5%  |  Z=4.0: 8.0%
+
+NOTE: Identical accuracy results to PC (expected — deterministic with seed=42)
+
+================================================================================
+3. bench_log_parser.py — Log Parser Benchmark
+================================================================================
+
+Detection Accuracy: 22/22 = 100.00%
+  All 5 rules: precision=100%, recall=100%
+
+Throughput: 155,324.7 msg/s (10,000 messages in 0.064s)
+
+Dedup: All 4 scenarios PASS

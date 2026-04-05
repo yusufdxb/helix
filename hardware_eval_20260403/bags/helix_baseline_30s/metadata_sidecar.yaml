@@ -1,0 +1,31 @@
+scenario_id: "baseline_001"
+date: "2026-04-03"
+time: "19:14:07 UTC"
+platform: "PC"
+duration_seconds: 39.8
+commands_run:
+  - "ros2 bag record -o /tmp/helix_baseline_30s /rosout /parameter_events /utlidar/robot_odom /utlidar/robot_pose /utlidar/imu /utlidar/range_info /gas_sensor /gnss /selftest /servicestate /multiplestate /rtc_status /lf/battery_alarm /public_network_status --max-cache-size 100000000 -d 30"
+expected_effect: "Passive observation of live GO2 topics using standard ROS 2 message types only"
+observed_effect: "Captured 16722 messages across 12 topics. High-rate topics: /utlidar/imu (249 Hz, 9918 msgs), /utlidar/robot_odom (150 Hz, 5960 msgs), /utlidar/robot_pose (19 Hz, 744 msgs). Low-rate status topics: /gnss (1 Hz), /multiplestate (1 Hz), /rosout (0.4 Hz). Several topics had 0 messages during capture window: /utlidar/range_info, /selftest, /public_network_status, /rtc_status, /gas_sensor, /lf/battery_alarm."
+topics_recorded:
+  - "/rosout [rcl_interfaces/msg/Log] - 16 msgs"
+  - "/parameter_events [rcl_interfaces/msg/ParameterEvent] - 3 msgs"
+  - "/utlidar/robot_odom [nav_msgs/msg/Odometry] - 5960 msgs"
+  - "/utlidar/robot_pose [geometry_msgs/msg/PoseStamped] - 744 msgs"
+  - "/utlidar/imu [sensor_msgs/msg/Imu] - 9918 msgs"
+  - "/utlidar/range_info [geometry_msgs/msg/PointStamped] - 0 msgs"
+  - "/gnss [std_msgs/msg/String] - 40 msgs"
+  - "/selftest [std_msgs/msg/String] - 0 msgs"
+  - "/servicestate [std_msgs/msg/String] - 1 msgs"
+  - "/multiplestate [std_msgs/msg/String] - 40 msgs"
+  - "/rtc_status [std_msgs/msg/String] - 0 msgs"
+  - "/public_network_status [std_msgs/msg/String] - 0 msgs"
+relevant_to_claim: "GO2 runtime topology is observable via ROS 2 from the PC"
+evidence_strength: "strong"
+notes: |
+  No /joint_states, /odom, or /tf topics exist on GO2 - it uses custom unitree_go message types
+  (e.g., /lowstate, /sportmodestate) which cannot be bagged without the unitree_go package
+  installed on the recording machine. Standard nav_msgs/Odometry is available via /utlidar/robot_odom.
+  The bag size was 8.2 MiB for ~40 seconds, implying ~1.6 Mbps of standard-type topic data.
+  Node discovery (ros2 node list) returns empty from both PC and Jetson, meaning the GO2's
+  internal DDS participants are not discoverable - only topics are visible.

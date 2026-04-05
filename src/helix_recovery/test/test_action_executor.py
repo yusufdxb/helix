@@ -4,13 +4,14 @@ Tests for ActionExecutor.
 Uses AsyncMock for subprocess and a live rclpy node for pub/sub verification.
 """
 import asyncio
-import time
 import threading
+import time
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 import rclpy
-from unittest.mock import AsyncMock, patch, MagicMock
 from rclpy.executors import SingleThreadedExecutor
-from std_msgs.msg import String, Bool
+from std_msgs.msg import Bool, String
 
 
 @pytest.fixture(scope="module")

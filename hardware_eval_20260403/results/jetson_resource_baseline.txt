@@ -1,0 +1,44 @@
+================================================================================
+Jetson Orin NX Resource Baseline (GO2 Stack Running)
+================================================================================
+Timestamp: 2026-04-03T19:14:56Z
+Host: unitree@192.168.123.18
+Command: sshpass -p '123' ssh unitree@192.168.123.18 "top -bn1 | head -25; free -h; ps aux | grep -E 'ros|unitree_'"
+
+=== System Overview ===
+Tasks: 338 total, 1 running, 337 sleeping
+CPU: 7.4% us, 10.3% sy, 82.4% idle
+Memory: 15Gi total, 1.1Gi used, 13Gi free (1.1Gi buff/cache)
+Swap: 7.6Gi total, 0B used
+Load average: 0.62, 0.28, 0.13
+
+=== ROS 2 / GO2 Processes ===
+- ros2-daemon running (pid 3570, 0.3% mem, 1.2% CPU)
+- 109 active ROS 2 topics detected
+- GO2 stack is publishing standard Unitree topics
+
+=== Thermal State (millidegrees C) ===
+Zone 0: 46968 (47.0 C)
+Zone 1: 43468 (43.5 C)
+Zone 2: 45500 (45.5 C)
+Zone 3: 44937 (44.9 C)
+Zone 4: 44468 (44.5 C)
+Zone 5: 45968 (46.0 C)
+Zone 6: 47875 (47.9 C)
+Zone 7: 45125 (45.1 C)
+Zone 8: 47875 (47.9 C)
+
+=== Network ===
+enP8p1s0: 192.168.123.18/24 (UP)
+
+=== Resource Impact of HELIX Benchmarks ===
+Before benchmark: 1.1Gi used, load 0.28
+After benchmark:  1.1Gi used, load 0.30
+Thermal delta: max +0.2 C (negligible)
+Conclusion: HELIX algorithmic benchmarks have negligible memory/thermal impact.
+The Jetson has ample headroom (13Gi free) for running HELIX alongside GO2 stack.
+
+=== CPU Cores ===
+Only 4 of 8 cores are online (cores 0-3).
+Cores 4-7 are offline (power management).
+Max frequency: 1984 MHz.
