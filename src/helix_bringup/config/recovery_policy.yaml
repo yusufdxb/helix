@@ -1,0 +1,56 @@
+recovery_policies:
+  CRASH:
+    tiers:
+      - tier: 1
+        action: restart_node
+        max_attempts: 3
+        backoff_sec: [1.0, 4.0, 16.0]
+      - tier: 2
+        action: activate_fallback_topic
+        max_attempts: 1
+        backoff_sec: [2.0]
+        fallback_map:
+          camera_node: /camera/depth/image_raw_fallback
+          slam_node: /scan_fallback
+      - tier: 3
+        action: llm_requested
+
+  ANOMALY:
+    tiers:
+      - tier: 1
+        action: reduce_velocity_limits
+        factor: 0.5
+        max_attempts: 2
+        backoff_sec: [2.0, 5.0]
+      - tier: 2
+        action: activate_safe_mode
+        max_attempts: 1
+        backoff_sec: [1.0]
+      - tier: 3
+        action: llm_requested
+
+  LOG_PATTERN:
+    tiers:
+      - tier: 1
+        action: restart_node
+        max_attempts: 2
+        backoff_sec: [2.0, 8.0]
+      - tier: 2
+        action: activate_safe_mode
+        max_attempts: 1
+        backoff_sec: [1.0]
+      - tier: 3
+        action: llm_requested
+
+  NETWORK:
+    tiers:
+      - tier: 1
+        action: reconfigure_dds
+        max_attempts: 2
+        backoff_sec: [3.0, 10.0]
+      - tier: 2
+        action: standalone_mode
+        max_attempts: 1
+        backoff_sec: [2.0]
+      - tier: 3
+        action: llm_requested
