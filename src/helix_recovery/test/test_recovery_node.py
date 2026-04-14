@@ -1,5 +1,5 @@
 """Tests for the safety envelope — pure, no ROS 2 spin."""
-from helix_recovery.recovery_node import SafetyEnvelope, ACTION_STOP, ACTION_RESUME, ACTION_LOG_ONLY
+from helix_recovery.recovery_node import SafetyEnvelope, ACTION_STOP, ACTION_LOG_ONLY
 
 
 def test_disabled_rejects_everything():
