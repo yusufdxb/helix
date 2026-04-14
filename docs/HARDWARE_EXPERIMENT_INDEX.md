@@ -69,6 +69,37 @@ Artifacts stored at: `T7 SSD: hardware_eval_20260403/`
 - **Evidence strength**: Moderate (short duration)
 - **Finding**: <1% rate variation between captures for IMU, odom
 
+## Session 2 Experiments (2026-04-06)
+
+### EXP-10: Extended 5-Minute Bag Capture
+- **What**: 329.6-second recording of 6 key GO2 topics (IMU, pose, cloud, GNSS, multiplestate, rosout)
+- **Where**: `hardware_eval_20260406/bags/extended_5min/`
+- **Claim supported**: "GO2 topic rates are stable over extended observation windows"
+- **Evidence strength**: Strong
+- **Key numbers**: 94,325 messages, 100% rate stability, 650.4 MiB
+
+### EXP-11: Controlled /rosout Error Injection
+- **What**: Injected 5 ERROR-level messages to /rosout; bagged /rosout during injection
+- **Where**: `hardware_eval_20260406/bags/perturbation_rosout_inject/`
+- **Claim supported**: "Fault injection via /rosout is feasible, safe, and detectable by HELIX"
+- **Evidence strength**: Moderate
+- **Finding**: 23 total messages captured; 5 injected errors clearly identified. Zero GO2 reaction.
+
+### EXP-12: DDS Load Impact on Topic Rates
+- **What**: Published 1000 Hz test traffic while measuring /utlidar/robot_pose rate
+- **Where**: `hardware_eval_20260406/bags/perturbation_rate_load/`
+- **Claim supported**: "HELIX monitoring adds negligible overhead to DDS transport"
+- **Evidence strength**: Strong
+- **Key numbers**: 18.81 Hz baseline, 18.80 Hz under load (0.05% change = noise)
+
+### EXP-13: Adapter-Based Detection Reproduction
+- **What**: HELIX passive adapter + 3 lifecycle nodes running for 120s against live GO2
+- **Where**: `hardware_eval_20260406/results/helix_overhead_with_adapter_20260406.json`
+- **Claim supported**: "Adapter-based detection is reproducible across sessions"
+- **Evidence strength**: Strong
+- **Key numbers**: 2 FaultEvents (pose rate anomaly, Z=4.41 and 3.28), 39.4 MB RSS, 15.9% CPU
+- **Reproduces**: Session 1 adapter detection (different anomaly source confirms real detection)
+
 ## Experiments NOT Executed
 
 ### Node Lifecycle Perturbation (Scenario B)
