@@ -39,10 +39,25 @@ jobs:
         run: |
           . /opt/ros/humble/setup.sh
           colcon build --symlink-install --packages-select \
-            helix_msgs helix_core helix_bringup
+            helix_msgs helix_core helix_bringup \
+            helix_diagnosis helix_recovery helix_explanation
 
-      - name: Run helix_core tests
+      - name: Run unit tests (helix_core, helix_diagnosis, helix_recovery, helix_explanation)
         run: |
           . /opt/ros/humble/setup.sh
           . install/setup.sh
-          python3 -m pytest src/helix_core/test/ -v --timeout=30
+          python3 -m pytest \
+            src/helix_core/test/ \
+            src/helix_diagnosis/test/ \
+            src/helix_recovery/test/ \
+            src/helix_explanation/test/ \
+            -v --timeout=30
+
+      - name: Sim-integration harness import check (sim not run in CI)
+        run: |
+          . /opt/ros/humble/setup.sh
+          . install/setup.sh
+          pip install rosbags
+          python3 -c "import tests.sim_integration.test_lidar_occlusion_recovery"
+          python3 -c "import tests.sim_integration.test_rule_r3_log_critical"
+          python3 -c "import tests.sim_integration.test_rule_r4_crash_logonly"
