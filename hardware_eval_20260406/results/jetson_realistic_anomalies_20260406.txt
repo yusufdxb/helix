@@ -1,0 +1,69 @@
+HELIX Realistic Anomaly Detection Benchmark
+======================================================================
+Seed: 42 | Trials per condition: 200
+
+======================================================================
+SCENARIO 1: Non-Gaussian (Laplace) Noise
+======================================================================
+Baseline: 60 Laplace(loc=10.0, scale=1.0) samples. Positive: 3 consecutive samples at mean + K*scale. Negative: continue Laplace draws.
+
+  Z-thresh   Spike K       TPR       FPR
+------------------------------------------
+       2.0       3.0    52.0%     0.0%
+       2.0       5.0   100.0%     0.0%
+       2.0       8.0   100.0%     0.0%
+       2.0      12.0   100.0%     0.5%
+       3.0       3.0     0.0%     0.0%
+       3.0       5.0    50.0%     0.0%
+       3.0       8.0   100.0%     0.0%
+       3.0      12.0   100.0%     0.0%
+       4.0       3.0     0.0%     0.0%
+       4.0       5.0     0.5%     0.0%
+       4.0       8.0    33.0%     0.0%
+       4.0      12.0   100.0%     0.0%
+
+======================================================================
+SCENARIO 2: Gradual Drift
+======================================================================
+Baseline: 60 N(10.0, 0.5) samples. Drift: value = 10.0 + R*i + noise for 20 samples. Z-threshold=3.0, consecutive=3.
+
+   Drift R    Det.Rate    Mean S2D
+------------------------------------
+       0.1       1.5%        13.3
+       0.2      53.5%        13.2
+       0.5     100.0%         6.2
+       1.0     100.0%         4.1
+       2.0     100.0%         3.2
+
+Negative (no drift): FPR = 0.0% (0/200)
+
+======================================================================
+SCENARIO 3: Transient Spikes (consecutive_trigger validation)
+======================================================================
+Baseline: 60 N(10.0, 0.5). Spike at 5.0-sigma above mean. consecutive_trigger=3. Single and double spikes should NOT fire; triple should.
+
+  Single spike:  false alarm rate = 0.0%  (0/200)  -- expected: 0% (spike count < consecutive_trigger)
+  Double spike:  false alarm rate = 0.0%  (0/200)  -- expected: 0% (spike count < consecutive_trigger)
+  Triple spike:  TPR = 99.5%  (199/200)  -- expected: ~100% (spike count == consecutive_trigger at 5-sigma)
+
+======================================================================
+SCENARIO 4: Marginal Anomalies in Realistic Sensor Noise
+======================================================================
+Baseline: 60 N(10.0, 1.0). Positive: 3 consecutive at [3.5, 4.0, 5.0] sigma above mean. These are near-threshold -- not trivially separable.
+
+Anomaly injection sigmas: [3.5, 4.0, 5.0]
+  Z-thresh       TPR       FPR
+------------------------------
+       2.0   100.0%     0.0%
+       3.0    96.5%     0.0%
+       3.5    48.5%     0.0%
+       4.0     8.0%     0.0%
+
+======================================================================
+SUMMARY
+======================================================================
+  Laplace noise worst FPR (Z=3.0):  0.0%
+  Drift R=0.1: detection rate = 1.5%
+  Single-spike false alarm rate:     0.0%
+  Double-spike false alarm rate:     0.0%
+  Marginal anomaly TPR (Z=3.0):     96.5%

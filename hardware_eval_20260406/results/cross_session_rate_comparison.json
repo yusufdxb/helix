@@ -1,0 +1,94 @@
+{
+  "timestamp": "2026-04-06T18:21:09.805961+00:00",
+  "mode": "comparison",
+  "bags": [
+    "/media/careslab/T7 Storage/hardware_eval_20260403/bags/longrun_5min",
+    "hardware_eval_20260406/bags/extended_5min"
+  ],
+  "results": {
+    "/gnss": {
+      "bags": [
+        {
+          "bag": "longrun_5min",
+          "mean_hz": 1.0,
+          "stability_pct": 100.0,
+          "jitter_ms": 0.663,
+          "count": 310
+        },
+        {
+          "bag": "extended_5min",
+          "mean_hz": 1.0,
+          "stability_pct": 100.0,
+          "jitter_ms": 0.699,
+          "count": 330
+        }
+      ],
+      "cross_bag_mean_hz": 1.0,
+      "cross_bag_cv": 0.0,
+      "cross_bag_stable": true
+    },
+    "/multiplestate": {
+      "bags": [
+        {
+          "bag": "longrun_5min",
+          "mean_hz": 1.0,
+          "stability_pct": 100.0,
+          "jitter_ms": 1.689,
+          "count": 308
+        },
+        {
+          "bag": "extended_5min",
+          "mean_hz": 1.0,
+          "stability_pct": 100.0,
+          "jitter_ms": 0.858,
+          "count": 328
+        }
+      ],
+      "cross_bag_mean_hz": 1.0,
+      "cross_bag_cv": 0.0,
+      "cross_bag_stable": true
+    },
+    "/rosout": {
+      "bags": [
+        {
+          "bag": "longrun_5min",
+          "mean_hz": 0.34,
+          "stability_pct": 2.4,
+          "jitter_ms": 10277.975,
+          "count": 85
+        },
+        {
+          "bag": "extended_5min",
+          "mean_hz": 0.21,
+          "stability_pct": 2.2,
+          "jitter_ms": 12055.111,
+          "count": 46
+        }
+      ],
+      "cross_bag_mean_hz": 0.28,
+      "cross_bag_cv": 0.2364,
+      "cross_bag_stable": false
+    },
+    "/utlidar/robot_pose": {
+      "bags": [
+        {
+          "bag": "longrun_5min",
+          "mean_hz": 18.74,
+          "stability_pct": 99.9,
+          "jitter_ms": 1.187,
+          "count": 5800
+        },
+        {
+          "bag": "extended_5min",
+          "mean_hz": 18.75,
+          "stability_pct": 100.0,
+          "jitter_ms": 1.295,
+          "count": 6177
+        }
+      ],
+      "cross_bag_mean_hz": 18.74,
+      "cross_bag_cv": 0.0003,
+      "cross_bag_stable": true
+    }
+  }
+}

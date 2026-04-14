@@ -1,0 +1,68 @@
+Loaded 5 rules from /tmp/helix_bench/src/helix_bringup/config/log_rules.yaml
+
+========================================================================
+  Part 1: Detection Accuracy
+========================================================================
+Label Correct Expected               Actual                 Message
+-------------------------------------------------------------------------------------------------
+TP    OK      nav2_costmap_fail      nav2_costmap_fail      Costmap2D failed to initialize properly
+TP    OK      slam_diverged          slam_diverged          SLAM diverged at frame 142
+TP    OK      slam_diverged          slam_diverged          Pose covariance exceeded threshold
+TP    OK      dds_discovery_lost     dds_discovery_lost     DDS discovery timeout after 30s
+TP    OK      dds_discovery_lost     dds_discovery_lost     Remote participant lost connection
+TP    OK      transform_timeout      transform_timeout      TF extrapolation into the future
+TP    OK      transform_timeout      transform_timeout      transform timeout waiting for base_link
+TP    OK      hardware_estop         hardware_estop         Emergency stop activated by operator
+TP    OK      hardware_estop         hardware_estop         E-STOP triggered by bumper sensor
+TN    OK      (none)                 (none)                 Navigation goal reached successfully
+TN    OK      (none)                 (none)                 SLAM initialization complete
+TN    OK      (none)                 (none)                 DDS discovery completed normally
+TN    OK      (none)                 (none)                 Transform lookup succeeded in 0.01s
+TN    OK      (none)                 (none)                 All systems nominal
+TN    OK      (none)                 (none)                 Battery level: 85%
+TN    OK      (none)                 (none)                 Motor temperature within normal range
+TN    OK      (none)                 (none)                 Costmap update cycle took 0.05s
+TN    OK      (none)                 (none)                 SLAM covariance within bounds
+EDGE  OK      (none)                 (none)                 costmap failed
+EDGE  OK      slam_diverged          slam_diverged          slam has diverged slightly
+EDGE  OK      (none)                 (none)                 discovery was lost temporarily
+EDGE  OK      hardware_estop         hardware_estop         estop was disengaged
+
+Overall accuracy: 22/22 = 100.00%
+
+Per-rule precision / recall:
+  Rule ID                 TP  FP  FN   Prec Recall
+  dds_discovery_lost       2   0   0 100.00% 100.00%
+  hardware_estop           3   0   0 100.00% 100.00%
+  nav2_costmap_fail        1   0   0 100.00% 100.00%
+  slam_diverged            3   0   0 100.00% 100.00%
+  transform_timeout        2   0   0 100.00% 100.00%
+
+========================================================================
+  Part 2: Throughput
+========================================================================
+Messages processed : 10,000
+Matching messages  : 2,017
+Elapsed            : 0.064600 s
+Throughput         : 154,797.9 msg/s
+
+========================================================================
+  Part 3: Dedup Behavior Validation
+========================================================================
+  [PASS] 10 messages within 5s dedup window: expected=1, actual=1
+  [PASS] Message after dedup window expires: expected=1, actual=1
+  [PASS] Same rule, different nodes within window: expected=2, actual=2
+  [PASS] Different rules, same node within window: expected=2, actual=2
+
+  All dedup tests pass: True
+
+========================================================================
+  Rule Coverage Summary
+========================================================================
+  nav2_costmap_fail       test cases: 1
+  slam_diverged           test cases: 3
+  dds_discovery_lost      test cases: 2
+  transform_timeout       test cases: 2
+  hardware_estop          test cases: 3
+
+Results saved to /tmp/helix_bench/results/log_parser_results.json

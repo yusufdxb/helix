@@ -1,0 +1,30 @@
+rules:
+  - id: nav2_costmap_fail
+    pattern: "Costmap.*failed to initialize"
+    fault_type: LOG_PATTERN
+    severity: 3
+    detail_template: "Nav2 costmap initialization failure detected"
+
+  - id: slam_diverged
+    pattern: "SLAM.*diverged|covariance.*exceeded"
+    fault_type: LOG_PATTERN
+    severity: 2
+    detail_template: "SLAM divergence pattern detected in logs"
+
+  - id: dds_discovery_lost
+    pattern: "discovery.*timeout|participant.*lost"
+    fault_type: NETWORK
+    severity: 2
+    detail_template: "DDS discovery failure detected"
+
+  - id: transform_timeout
+    pattern: "transform.*timeout|TF.*extrapolation"
+    fault_type: LOG_PATTERN
+    severity: 1
+    detail_template: "TF transform timeout — possible timing issue"
+
+  - id: hardware_estop
+    pattern: "emergency stop|E-STOP|estop"
+    fault_type: CRASH
+    severity: 3
+    detail_template: "Hardware E-stop pattern detected"

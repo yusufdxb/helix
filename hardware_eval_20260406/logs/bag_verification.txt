@@ -1,0 +1,75 @@
+=== Bag Verification Report — 2026-04-06 ===
+Generated: 2026-04-06T18:26:08Z
+
+
+=== extended_5min ===
+
+Files:             extended_5min_0.db3
+                   extended_5min_1.db3
+Bag size:          650.4 MiB
+Storage id:        sqlite3
+Duration:          329.601840622s
+Start:             Apr  6 2026 14:13:40.377989788 (1775499220.377989788)
+End:               Apr  6 2026 14:19:09.979830410 (1775499549.979830410)
+Messages:          94325
+Topic information: Topic: /utlidar/robot_pose | Type: geometry_msgs/msg/PoseStamped | Count: 6177 | Serialization Format: cdr
+                   Topic: /utlidar/imu | Type: sensor_msgs/msg/Imu | Count: 82367 | Serialization Format: cdr
+                   Topic: /utlidar/cloud | Type: sensor_msgs/msg/PointCloud2 | Count: 5077 | Serialization Format: cdr
+                   Topic: /gnss | Type: std_msgs/msg/String | Count: 330 | Serialization Format: cdr
+                   Topic: /multiplestate | Type: std_msgs/msg/String | Count: 328 | Serialization Format: cdr
+                   Topic: /rosout | Type: rcl_interfaces/msg/Log | Count: 46 | Serialization Format: cdr
+
+
+=== helix_adapter_session ===
+
+Files:             helix_adapter_session_0.db3
+                   helix_adapter_session_1.db3
+Bag size:          559.1 KiB
+Storage id:        sqlite3
+Duration:          134.608169329s
+Start:             Apr  6 2026 14:20:18.719460572 (1775499618.719460572)
+End:               Apr  6 2026 14:22:33.327629901 (1775499753.327629901)
+Messages:          5135
+Topic information: Topic: /helix/metrics | Type: std_msgs/msg/Float64MultiArray | Count: 5112 | Serialization Format: cdr
+                   Topic: /rosout | Type: rcl_interfaces/msg/Log | Count: 23 | Serialization Format: cdr
+
+
+=== helix_faults_session ===
+
+Files:             helix_faults_session_0.db3
+                   helix_faults_session_1.db3
+Bag size:          422.0 KiB
+Storage id:        sqlite3
+Duration:          74.599908681s
+Start:             Apr  6 2026 14:24:17.149723736 (1775499857.149723736)
+End:               Apr  6 2026 14:25:31.749632417 (1775499931.749632417)
+Messages:          3795
+Topic information: Topic: /helix/metrics | Type: std_msgs/msg/Float64MultiArray | Count: 3788 | Serialization Format: cdr
+                   Topic: /rosout | Type: rcl_interfaces/msg/Log | Count: 7 | Serialization Format: cdr
+
+
+=== perturbation_rate_load ===
+
+Files:             perturbation_rate_load_0.db3
+                   perturbation_rate_load_1.db3
+Bag size:          165.2 KiB
+Storage id:        sqlite3
+Duration:          49.489429480s
+Start:             Apr  6 2026 14:15:50.859004883 (1775499350.859004883)
+End:               Apr  6 2026 14:16:40.348434363 (1775499400.348434363)
+Messages:          929
+Topic information: Topic: /utlidar/robot_pose | Type: geometry_msgs/msg/PoseStamped | Count: 929 | Serialization Format: cdr
+
+
+=== perturbation_rosout_inject ===
+
+Files:             perturbation_rosout_inject_0.db3
+                   perturbation_rosout_inject_1.db3
+Bag size:          49.5 KiB
+Storage id:        sqlite3
+Duration:          71.284074742s
+Start:             Apr  6 2026 14:14:39.525127807 (1775499279.525127807)
+End:               Apr  6 2026 14:15:50.809202549 (1775499350.809202549)
+Messages:          23
+Topic information: Topic: /rosout | Type: rcl_interfaces/msg/Log | Count: 23 | Serialization Format: cdr
+

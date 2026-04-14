@@ -1,0 +1,2 @@
+# Service list empty - CycloneDDS multicast discovery does not enumerate remote services
+# ros2 service list returned 0 results

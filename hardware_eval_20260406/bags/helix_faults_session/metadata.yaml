@@ -1,0 +1,39 @@
+rosbag2_bagfile_information:
+  version: 5
+  storage_identifier: sqlite3
+  duration:
+    nanoseconds: 74599908681
+  starting_time:
+    nanoseconds_since_epoch: 1775499857149723736
+  message_count: 3795
+  topics_with_message_count:
+    - topic_metadata:
+        name: /helix/metrics
+        type: std_msgs/msg/Float64MultiArray
+        serialization_format: cdr
+        offered_qos_profiles: "- history: 1\n  depth: 10\n  reliability: 1\n  durability: 2\n  deadline:\n    sec: 9223372036\n    nsec: 854775807\n  lifespan:\n    sec: 9223372036\n    nsec: 854775807\n  liveliness: 1\n  liveliness_lease_duration:\n    sec: 9223372036\n    nsec: 854775807\n  avoid_ros_namespace_conventions: false\n- history: 1\n  depth: 10\n  reliability: 1\n  durability: 2\n  deadline:\n    sec: 9223372036\n    nsec: 854775807\n  lifespan:\n    sec: 9223372036\n    nsec: 854775807\n  liveliness: 1\n  liveliness_lease_duration:\n    sec: 9223372036\n    nsec: 854775807\n  avoid_ros_namespace_conventions: false"
+      message_count: 3788
+    - topic_metadata:
+        name: /rosout
+        type: rcl_interfaces/msg/Log
+        serialization_format: cdr
+        offered_qos_profiles: "- history: 1\n  depth: 1000\n  reliability: 1\n  durability: 1\n  deadline:\n    sec: 9223372036\n    nsec: 854775807\n  lifespan:\n    sec: 10\n    nsec: 0\n  liveliness: 1\n  liveliness_lease_duration:\n    sec: 9223372036\n    nsec: 854775807\n  avoid_ros_namespace_conventions: false"
+      message_count: 7
+  compression_format: ""
+  compression_mode: ""
+  relative_file_paths:
+    - helix_faults_session_0.db3
+    - helix_faults_session_1.db3
+  files:
+    - path: helix_faults_session_0.db3
+      starting_time:
+        nanoseconds_since_epoch: 1775499857149723736
+      duration:
+        nanoseconds: 59678720217
+      message_count: 3035
+    - path: helix_faults_session_1.db3
+      starting_time:
+        nanoseconds_since_epoch: 1775499917248088731
+      duration:
+        nanoseconds: 14501543686
+      message_count: 760

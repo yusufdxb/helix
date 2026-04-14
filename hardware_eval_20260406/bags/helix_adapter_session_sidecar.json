@@ -1,0 +1,45 @@
+{
+  "scenario_id": "EXP-13",
+  "scenario": "HELIX passive adapter + anomaly detector running against live GO2 topics",
+  "date": "2026-04-06",
+  "platform": "PC (192.168.123.10) observing GO2 (192.168.123.161)",
+  "duration_target_s": 120,
+  "duration_actual_s": 120,
+  "commands": [
+    "python3 scripts/passive_adapter.py",
+    "python3 scripts/measure_helix_overhead.py --duration 120 --with-adapter",
+    "ros2 bag record -o helix_adapter_session /helix/metrics /helix/faults /rosout --max-bag-duration 120"
+  ],
+  "nodes_running": [
+    "helix_passive_adapter",
+    "helix_log_parser",
+    "helix_anomaly_detector",
+    "helix_heartbeat_monitor",
+    "helix_fault_counter"
+  ],
+  "fault_events_detected": 2,
+  "fault_details": [
+    {
+      "type": "ANOMALY",
+      "node": "rate_hz/utlidar_robot_pose",
+      "detail": "Z-score 4.41 exceeded threshold on 3 consecutive samples"
+    },
+    {
+      "type": "ANOMALY",
+      "node": "rate_hz/utlidar_robot_pose",
+      "detail": "Z-score 3.28 exceeded threshold on 3 consecutive samples"
+    }
+  ],
+  "resource_overhead": {
+    "rss_mb_mean": 39.4,
+    "rss_mb_max": 39.8,
+    "cpu_percent_mean": 15.9,
+    "cpu_percent_max": 39.9
+  },
+  "expected_effect": "HELIX adapter observes GO2 topics and emits FaultEvent when anomalies detected",
+  "observed_effect": "Adapter successfully monitored 5 GO2 topics. AnomalyDetector detected 2 FaultEvents (Z-score violations in robot_pose rate). Multiple Z-score warnings for gnss, multiplestate, cloud, imu rate variations.",
+  "supports_claim": "Adapter-based HELIX detection works on live GO2 hardware; reproduces April 3 detection capability in a second session (reproducibility evidence)",
+  "evidence_strength": "strong",
+  "reproduces_session": "2026-04-03",
+  "notes": "Bag recorder for /helix/faults couldn't serialize FaultEvent (custom msg type not sourced by recorder). Fault data captured via measure_helix_overhead.py FaultCounter node instead."
+}

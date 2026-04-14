@@ -1,0 +1,10 @@
+stamp:
+  sec: 1775499296
+  nanosec: 623470254
+level: 20
+name: go2_audio_node
+msg: Go2 Audio Node — robot_ip=192.168.123.161, noise_reduce=False
+file: /home/careslab/ros2_ws/install/go2_audio/lib/python3.10/site-packages/go2_audio/ros_node.py
+function: __init__
+line: 90
+---

@@ -1,0 +1,106 @@
+{
+  "session_date": "2026-04-06",
+  "session_id": "hardware_eval_20260406",
+  "capture_timestamp_utc": "2026-04-06T18:12:26Z",
+  "platforms": {
+    "pc": {
+      "hostname": "careslab-OptiPlex-7050",
+      "cpu": "Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz (4C/8T, max 4200 MHz)",
+      "ram": "15Gi total, 12Gi available",
+      "disk": "/dev/sda2 234G, 72G avail (68% used)",
+      "os": "Ubuntu 22.04.5 LTS (jammy)",
+      "kernel": "6.8.0-106-generic x86_64",
+      "ros2_distro": "humble",
+      "rmw": "rmw_cyclonedds_cpp",
+      "network_interface": "enp0s31f6",
+      "ip": "192.168.123.10/24",
+      "mac": "50:9a:4c:36:0f:2b"
+    },
+    "jetson": {
+      "hostname": "unitree-jetson-payload",
+      "cpu": "Cortex-A78AE (8 cores, 4 active/nproc, 1 thread/core)",
+      "ram": "15Gi total, 13Gi available",
+      "disk": "/dev/nvme0n1p1 233G, 167G avail (25% used)",
+      "os": "Ubuntu 22.04.5 LTS (jammy)",
+      "kernel": "5.15.148-tegra aarch64",
+      "tegra_release": "R36 rev4.7, GCID 42132812, 2025-09-18",
+      "gpu": "Orin (nvgpu), NVIDIA driver 540.4.0, CUDA 12.6",
+      "ros2_distro": "humble",
+      "network_interface": "enP8p1s0",
+      "ip": "192.168.123.18/24",
+      "mac": "48:b0:2d:f9:1b:4a",
+      "thermal_snapshot_mC": {
+        "cpu-thermal": 44343,
+        "gpu-thermal": 40968,
+        "cv0-thermal": 43093,
+        "cv1-thermal": 42500,
+        "cv2-thermal": 42031,
+        "soc0-thermal": 43312,
+        "soc1-thermal": 45343,
+        "soc2-thermal": 42718,
+        "tj-thermal": 45218
+      }
+    },
+    "go2": {
+      "ip": "192.168.123.161",
+      "reachable": true,
+      "ping_avg_ms": 0.175,
+      "ping_loss_pct": 0
+    }
+  },
+  "network": {
+    "subnet": "192.168.123.0/24",
+    "pc_interface": "enp0s31f6",
+    "jetson_interface": "enP8p1s0",
+    "dds": "CycloneDDS",
+    "cyclonedds_config": "/home/careslab/cyclonedds_go2.xml",
+    "pc_to_jetson_ping_avg_ms": 0.226,
+    "pc_to_go2_ping_avg_ms": 0.175,
+    "jetson_default_gw": "192.168.123.10 (PC)"
+  },
+  "ros2_graph": {
+    "topic_count": 110,
+    "node_count": 0,
+    "node_count_note": "CycloneDDS multicast discovery does not enumerate remote nodes; 110 active topics confirm live DDS",
+    "service_count": 0,
+    "service_count_note": "CycloneDDS multicast discovery does not enumerate remote services"
+  },
+  "key_topic_rates_hz": {
+    "/utlidar/imu": 250.02,
+    "/utlidar/robot_odom": 150.65,
+    "/utlidar/robot_pose": 18.72,
+    "/utlidar/cloud": 15.41,
+    "/gnss": 1.0,
+    "/multiplestate": 1.0,
+    "/rosout": 0.39,
+    "/diagnostics": null,
+    "/tf": null
+  },
+  "rosout_sample": {
+    "node": "go2_audio_node",
+    "msg": "Go2 Audio Node — robot_ip=192.168.123.161, noise_reduce=False",
+    "source": "/home/careslab/ros2_ws/install/go2_audio/lib/python3.10/site-packages/go2_audio/ros_node.py"
+  },
+  "helix_git_sha": "fe621e865527b261b6d41e83b931b9bed6651fc7",
+  "helix_git_log_head": "fe621e8 prepare workshop-paper artifact: benchmarks, docs, honest framing",
+  "ros2_ws_packages": {
+    "go2_ros2_sdk": {
+      "sha": "4e186b5f89bfec1f32c85676cbe22d4958e4f0fa",
+      "head": "4e186b5 Merge pull request #227 from ashishgoswami13/master"
+    }
+  },
+  "helix_in_colcon_ws": false,
+  "evidence_files": [
+    "env/pc_system_info.txt",
+    "env/jetson_system_info.txt",
+    "env/network_topology.txt",
+    "env/git_workspace_info.txt",
+    "env/ros2_node_list.txt",
+    "env/ros2_topic_list_typed.txt",
+    "env/ros2_service_list.txt",
+    "env/topic_rates.txt",
+    "env/rosout_sample.txt",
+    "env/diagnostics_sample.txt",
+    "env/provenance_summary.json"
+  ]
+}

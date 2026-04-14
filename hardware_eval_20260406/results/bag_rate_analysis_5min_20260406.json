@@ -1,0 +1,81 @@
+{
+  "timestamp": "2026-04-06T18:20:22.191850+00:00",
+  "mode": "single",
+  "bags": [
+    "hardware_eval_20260406/bags/extended_5min"
+  ],
+  "results": {
+    "/gnss": {
+      "count": 330,
+      "duration_sec": 329.23,
+      "mean_hz": 1.0,
+      "std_hz": 0.001,
+      "min_gap_ms": 998.092,
+      "max_gap_ms": 1003.536,
+      "mean_gap_ms": 1000.692,
+      "jitter_ms": 0.699,
+      "stability_pct": 100.0,
+      "type": "std_msgs/msg/String"
+    },
+    "/multiplestate": {
+      "count": 328,
+      "duration_sec": 328.14,
+      "mean_hz": 1.0,
+      "std_hz": 0.001,
+      "min_gap_ms": 999.411,
+      "max_gap_ms": 1006.407,
+      "mean_gap_ms": 1003.48,
+      "jitter_ms": 0.858,
+      "stability_pct": 100.0,
+      "type": "std_msgs/msg/String"
+    },
+    "/rosout": {
+      "count": 46,
+      "duration_sec": 213.95,
+      "mean_hz": 0.21,
+      "std_hz": 0.54,
+      "min_gap_ms": 0.006,
+      "max_gap_ms": 59036.449,
+      "mean_gap_ms": 4754.511,
+      "jitter_ms": 12055.111,
+      "stability_pct": 2.2,
+      "type": "rcl_interfaces/msg/Log"
+    },
+    "/utlidar/cloud": {
+      "count": 5077,
+      "duration_sec": 329.46,
+      "mean_hz": 15.41,
+      "std_hz": 0.024,
+      "min_gap_ms": 44.52,
+      "max_gap_ms": 85.097,
+      "mean_gap_ms": 64.906,
+      "jitter_ms": 1.692,
+      "stability_pct": 99.9,
+      "type": "sensor_msgs/msg/PointCloud2"
+    },
+    "/utlidar/imu": {
+      "count": 82367,
+      "duration_sec": 329.48,
+      "mean_hz": 249.99,
+      "std_hz": 0.743,
+      "min_gap_ms": 0.006,
+      "max_gap_ms": 33.874,
+      "mean_gap_ms": 4.0,
+      "jitter_ms": 1.585,
+      "stability_pct": 58.2,
+      "type": "sensor_msgs/msg/Imu"
+    },
+    "/utlidar/robot_pose": {
+      "count": 6177,
+      "duration_sec": 329.44,
+      "mean_hz": 18.75,
+      "std_hz": 0.088,
+      "min_gap_ms": 45.329,
+      "max_gap_ms": 70.848,
+      "mean_gap_ms": 53.342,
+      "jitter_ms": 1.295,
+      "stability_pct": 100.0,
+      "type": "geometry_msgs/msg/PoseStamped"
+    }
+  }
+}

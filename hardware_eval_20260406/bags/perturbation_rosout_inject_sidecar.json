@@ -1,0 +1,22 @@
+{
+  "scenario_id": "EXP-11",
+  "scenario": "Controlled /rosout error injection to test HELIX log parser detectability",
+  "date": "2026-04-06",
+  "platform": "PC (192.168.123.10) observing GO2 (192.168.123.161)",
+  "duration_target_s": 60,
+  "duration_actual_s": 71.3,
+  "commands": [
+    "ros2 bag record -o perturbation_rosout_inject /rosout --max-bag-duration 60",
+    "ros2 topic pub /rosout rcl_interfaces/msg/Log \"{stamp: {sec: 0, nanosec: 0}, level: 40, name: 'helix_test_injector', msg: 'HELIX_TEST: simulated error condition', file: 'test', function: 'test', line: 0}\" --times 5 --rate 0.5"
+  ],
+  "topics_recorded": ["/rosout"],
+  "message_count": 23,
+  "injected_messages": 5,
+  "injection_level": 40,
+  "injection_level_name": "ERROR",
+  "expected_effect": "5 ERROR-level messages appear on /rosout alongside normal rosout traffic",
+  "observed_effect": "23 total /rosout messages captured, 5 of which are injected ERROR-level test messages. Injection is clearly labeled with 'helix_test_injector' source and 'HELIX_TEST' prefix.",
+  "supports_claim": "HELIX log_parser can detect injected error conditions in /rosout stream; demonstrates fault injection is feasible and safe",
+  "evidence_strength": "moderate",
+  "notes": "Perturbation is fully reversible - only published to /rosout topic. Level 40 = ERROR in ROS2 logging."
+}

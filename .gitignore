@@ -8,3 +8,6 @@ __pycache__/
 .vscode/
 .idea/
 .ruff_cache/
+
+# Hardware evaluation raw bag data (lives on T7 SSD)
+hardware_eval_*/bags/**/*.db3
