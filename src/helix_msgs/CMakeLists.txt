@@ -13,6 +13,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/FaultEvent.msg"
   "msg/RecoveryHint.msg"
   "msg/RecoveryAction.msg"
+  "srv/GetContext.srv"
   DEPENDENCIES std_msgs
 )
 
