@@ -1,0 +1,16 @@
+helix_heartbeat_monitor:
+  ros__parameters:
+    heartbeat_timeout_sec: 0.3
+    miss_threshold: 3
+    check_interval_sec: 0.5
+
+helix_anomaly_detector:
+  ros__parameters:
+    zscore_threshold: 3.0
+    consecutive_trigger: 3
+    window_size: 60
+
+helix_log_parser:
+  ros__parameters:
+    dedup_window_sec: 5.0
+    # rules_file_path is set programmatically in the launch file

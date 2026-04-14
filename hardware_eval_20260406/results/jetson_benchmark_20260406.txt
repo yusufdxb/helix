@@ -1,0 +1,25 @@
+HELIX Standalone Benchmark
+==================================================
+
+[1/4] Detection latency (200 trials)...
+  Mean: 3 samples / 0.0492 ms
+  p95:  0.0504 ms
+
+[2/4] Throughput (100k samples)...
+  63,433 samples/sec
+
+[3/4] TPR/FPR sweep...
+  Z=1.5: TPR=100.0%  FPR=0.0%
+  Z=2.0: TPR=100.0%  FPR=0.0%
+  Z=2.5: TPR=100.0%  FPR=0.0%
+  Z=3.0: TPR=100.0%  FPR=0.0%
+  Z=3.5: TPR=100.0%  FPR=0.0%
+  Z=4.0: TPR=100.0%  FPR=0.0%
+  Z=5.0: TPR=100.0%  FPR=0.0%
+
+[4/4] Heartbeat miss latency (30 trials)...
+  Mean: 200.5 ms
+  p95:  200.9 ms
+
+Wrote: benchmark_results.json
+Wrote: results/standalone_benchmark.md

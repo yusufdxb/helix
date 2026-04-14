@@ -1,0 +1,18 @@
+DDS Latency Measurement - Jetson Orin NX (Local Loopback)
+==========================================================
+Date: 2026-04-06
+Method: Python rclpy pub/sub on same node, /helix_latency_test topic
+RMW: rmw_fastrtps_cpp (default, RMW_IMPLEMENTATION not explicitly set)
+Message type: std_msgs/String
+
+Results (20 messages):
+  Mean: 0.487 ms
+  Min:  0.367 ms
+  Max:  0.916 ms
+
+Notes:
+- This is LOCAL loopback (same process pub/sub), not cross-device
+- April 3 cross-device DDS latency (PC<->Jetson) was 0.81 ms one-way
+- ROS2 daemon was running; 111 topics visible from Unitree GO2 robot
+- No HELIX nodes were running during this test
+- Jetson sees full GO2 topic graph via DDS discovery

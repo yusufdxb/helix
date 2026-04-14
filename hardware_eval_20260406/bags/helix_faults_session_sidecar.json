@@ -1,0 +1,23 @@
+{
+  "scenario_id": "EXP-14",
+  "scenario": "HELIX adapter /helix/metrics capture with helix_msgs sourced",
+  "date": "2026-04-06",
+  "platform": "PC (192.168.123.10) observing GO2 (192.168.123.161)",
+  "duration_target_s": 60,
+  "duration_actual_s": 74.6,
+  "commands": [
+    "python3 scripts/passive_adapter.py",
+    "ros2 bag record -o helix_faults_session /helix/metrics /helix/faults /rosout --max-bag-duration 60"
+  ],
+  "topics_recorded": ["/helix/metrics", "/rosout"],
+  "message_count": 3795,
+  "topic_counts": {
+    "/helix/metrics": 3788,
+    "/rosout": 7
+  },
+  "expected_effect": "Capture adapter-derived metrics from live GO2 observation",
+  "observed_effect": "3788 /helix/metrics messages captured at ~50 Hz from passive adapter. Metrics include topic rates, GNSS fields, pose drift, and GO2 state.",
+  "supports_claim": "HELIX adapter produces continuous telemetry stream from standard GO2 topics without modifying robot software",
+  "evidence_strength": "moderate",
+  "notes": "Adapter-only session (no HELIX detector nodes). HELIX detector was run separately in EXP-13."
+}

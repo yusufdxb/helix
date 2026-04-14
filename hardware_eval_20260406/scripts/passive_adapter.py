@@ -1,0 +1,249 @@
+#!/usr/bin/env python3
+"""
+HELIX Passive Adapter — bridges GO2 standard topics to HELIX inputs.
+
+Demonstrates "adapter-based observability" for non-standard robot platforms.
+Requires NO changes to the GO2 software stack.
+
+Three adapter channels:
+  1. Topic Rate Monitor  — publishes rolling Hz for monitored topics to /helix/metrics
+  2. JSON State Parser   — extracts numeric fields from /gnss, /multiplestate strings
+  3. Pose Drift Monitor  — computes displacement rate from /utlidar/robot_pose
+
+All derived metrics are published as Float64MultiArray on /helix/metrics,
+compatible with HELIX's AnomalyDetector without modification.
+
+Usage:
+  source /opt/ros/humble/setup.bash
+  source /tmp/helix_ws/install/setup.bash
+  python3 scripts/passive_adapter.py
+"""
+
+import json
+import math
+import time
+import threading
+from collections import deque
+
+import rclpy
+from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
+from std_msgs.msg import Float64MultiArray, MultiArrayDimension, String
+from geometry_msgs.msg import PoseStamped
+from sensor_msgs.msg import Imu, PointCloud2
+from nav_msgs.msg import Odometry
+
+
+# ── Topic Rate Monitor ──────────────────────────────────────────────────────
+
+class TopicRateMonitor:
+    """Tracks message arrival timestamps and computes rolling Hz."""
+
+    def __init__(self, window_sec: float = 5.0):
+        self._window_sec = window_sec
+        self._timestamps: deque = deque()
+        self._lock = threading.Lock()
+
+    def record(self):
+        now = time.monotonic()
+        with self._lock:
+            self._timestamps.append(now)
+            cutoff = now - self._window_sec
+            while self._timestamps and self._timestamps[0] < cutoff:
+                self._timestamps.popleft()
+
+    def hz(self) -> float:
+        now = time.monotonic()
+        with self._lock:
+            cutoff = now - self._window_sec
+            while self._timestamps and self._timestamps[0] < cutoff:
+                self._timestamps.popleft()
+            n = len(self._timestamps)
+            if n < 2:
+                return 0.0
+            span = self._timestamps[-1] - self._timestamps[0]
+            if span < 1e-6:
+                return 0.0
+            return (n - 1) / span
+
+
+# ── Main Adapter Node ───────────────────────────────────────────────────────
+
+class PassiveAdapter(Node):
+    """
+    Adapter node that translates GO2 standard topics into HELIX /helix/metrics.
+
+    This node demonstrates that a monitoring architecture designed for standard
+    ROS 2 inputs can observe a non-standard robot platform through lightweight
+    adapters that require zero changes to the robot's software.
+    """
+
+    def __init__(self):
+        super().__init__("helix_passive_adapter")
+
+        # Publisher for derived metrics
+        self._metrics_pub = self.create_publisher(
+            Float64MultiArray, "/helix/metrics", 10
+        )
+
+        # ── Rate monitors ───────────────────────────────────────────────
+        self._rate_monitors = {}
+        rate_topics = {
+            "/utlidar/robot_pose": PoseStamped,
+            "/gnss": String,
+            "/multiplestate": String,
+        }
+
+        # Try to subscribe to high-rate sensor topics with best-effort QoS
+        sensor_qos = QoSProfile(
+            depth=10,
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            durability=DurabilityPolicy.VOLATILE,
+        )
+
+        for topic, msg_type in rate_topics.items():
+            monitor = TopicRateMonitor(window_sec=5.0)
+            self._rate_monitors[topic] = monitor
+            self.create_subscription(
+                msg_type, topic,
+                lambda msg, t=topic: self._on_rate_msg(t),
+                10,
+            )
+
+        # Sensor topics often need best-effort QoS
+        for topic, msg_type in [
+            ("/utlidar/imu", Imu),
+            ("/utlidar/cloud", PointCloud2),
+        ]:
+            monitor = TopicRateMonitor(window_sec=5.0)
+            self._rate_monitors[topic] = monitor
+            self.create_subscription(
+                msg_type, topic,
+                lambda msg, t=topic: self._on_rate_msg(t),
+                sensor_qos,
+            )
+
+        # ── JSON state parsers ──────────────────────────────────────────
+        self._last_gnss = {}
+        self._last_multiplestate = {}
+
+        self.create_subscription(String, "/gnss", self._on_gnss, 10)
+        self.create_subscription(
+            String, "/multiplestate", self._on_multiplestate, 10
+        )
+
+        # ── Pose drift monitor ──────────────────────────────────────────
+        self._last_pose = None
+        self._last_pose_time = None
+        self._displacement_rate = 0.0
+
+        self.create_subscription(
+            PoseStamped, "/utlidar/robot_pose", self._on_pose, 10
+        )
+
+        # ── Periodic metric publisher (2 Hz) ────────────────────────────
+        self._timer = self.create_timer(0.5, self._publish_metrics)
+
+        self.get_logger().info(
+            f"PassiveAdapter started — monitoring {len(self._rate_monitors)} "
+            f"topics, 2 JSON streams, 1 pose stream"
+        )
+
+    # ── Callbacks ────────────────────────────────────────────────────────
+
+    def _on_rate_msg(self, topic: str):
+        self._rate_monitors[topic].record()
+
+    def _on_gnss(self, msg: String):
+        try:
+            data = json.loads(msg.data)
+            self._last_gnss = data
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    def _on_multiplestate(self, msg: String):
+        try:
+            data = json.loads(msg.data)
+            self._last_multiplestate = data
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    def _on_pose(self, msg: PoseStamped):
+        pos = msg.pose.position
+        now = time.monotonic()
+
+        if self._last_pose is not None and self._last_pose_time is not None:
+            dt = now - self._last_pose_time
+            if dt > 0.001:
+                dx = pos.x - self._last_pose.x
+                dy = pos.y - self._last_pose.y
+                dz = pos.z - self._last_pose.z
+                dist = math.sqrt(dx * dx + dy * dy + dz * dz)
+                self._displacement_rate = dist / dt
+
+        self._last_pose = pos
+        self._last_pose_time = now
+
+    # ── Metric publishing ────────────────────────────────────────────────
+
+    def _publish_metric(self, name: str, value: float):
+        msg = Float64MultiArray()
+        dim = MultiArrayDimension()
+        dim.label = name
+        dim.size = 1
+        dim.stride = 1
+        msg.layout.dim = [dim]
+        msg.data = [value]
+        self._metrics_pub.publish(msg)
+
+    def _publish_metrics(self):
+        """Publish all derived metrics at 2 Hz."""
+
+        # 1. Topic rates
+        for topic, monitor in self._rate_monitors.items():
+            clean_name = topic.replace("/", "_").lstrip("_")
+            self._publish_metric(f"rate_hz/{clean_name}", monitor.hz())
+
+        # 2. GNSS metrics
+        if self._last_gnss:
+            for key in ["satellite_total", "satellite_inuse", "hdop"]:
+                if key in self._last_gnss:
+                    try:
+                        val = float(self._last_gnss[key])
+                        self._publish_metric(f"gnss/{key}", val)
+                    except (ValueError, TypeError):
+                        pass
+
+        # 3. Multiplestate metrics
+        if self._last_multiplestate:
+            for key in ["volume", "brightness"]:
+                if key in self._last_multiplestate:
+                    try:
+                        val = float(self._last_multiplestate[key])
+                        self._publish_metric(f"go2_state/{key}", val)
+                    except (ValueError, TypeError):
+                        pass
+            # Boolean as 0/1
+            for key in ["obstaclesAvoidSwitch", "uwbSwitch"]:
+                if key in self._last_multiplestate:
+                    val = 1.0 if self._last_multiplestate[key] else 0.0
+                    self._publish_metric(f"go2_state/{key}", val)
+
+        # 4. Pose drift rate
+        self._publish_metric("pose/displacement_rate_m_s", self._displacement_rate)
+
+
+def main():
+    rclpy.init()
+    node = PassiveAdapter()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()

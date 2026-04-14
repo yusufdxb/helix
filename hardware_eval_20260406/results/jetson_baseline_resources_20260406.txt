@@ -1,0 +1,36 @@
+=== CPU ===
+top - 18:14:25 up 15 min,  3 users,  load average: 1.10, 0.74, 0.42
+Tasks: 320 total,   2 running, 318 sleeping,   0 stopped,   0 zombie
+%Cpu(s): 36.6 us, 12.7 sy,  0.0 ni, 50.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem :  15655.7 total,  12760.6 free,   1556.8 used,   1338.3 buff/cache
+MiB Swap:   7827.8 total,   7827.8 free,      0.0 used.  13804.1 avail Mem 
+=== Memory ===
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       1.5Gi        12Gi        21Mi       1.3Gi        13Gi
+Swap:          7.6Gi          0B       7.6Gi
+=== Thermal ===
+cpu-thermal: 45156
+gpu-thermal: 41906
+cv0-thermal: 43718
+cv1-thermal: 43156
+cv2-thermal: 42718
+soc0-thermal: 44093
+soc1-thermal: 46125
+soc2-thermal: 43375
+tj-thermal: 45968
+=== Processes ===
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root        8005  111  0.7 147040 118544 ?       R    18:14   0:01 /usr/lib/gcc/aarch64-linux-gnu/11/cc1 (compiling rtl8188eus driver)
+root        1687  7.3  0.3 448332 54836 ?        Ssl  17:59   1:05 /usr/libexec/packagekitd
+unitree     3087  6.1  1.4 565284 233080 ?       SNl  18:03   0:39 /usr/bin/python3 /usr/bin/update-manager
+unitree     5516  0.5  0.3 838708 62376 ?        Sl   18:10   0:01 ros2-daemon
+=== GPU ===
+no gpu load file
+tegrastats not available or needs sudo (Unknown command: 3)
+
+NOTES:
+- Jetson was compiling rtl8188eus WiFi driver in background (cc1 at 111% CPU)
+- Baseline CPU idle: 50.7%
+- Memory: 1.5 GiB used / 15 GiB total (10% utilization)
+- Thermal: CPU 45.2C, GPU 41.9C, SoC max 46.1C (tj 46.0C) -- all well within limits
+- ROS2 daemon running (rmw_fastrtps_cpp)

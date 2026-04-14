@@ -1,0 +1,4 @@
+WARNING: topic [/diagnostics] does not appear to be published yet
+Could not determine the type for the passed topic
+
+# /diagnostics topic is not published on the GO2 DDS graph

@@ -1,0 +1,122 @@
+=== Jetson Orin NX System Info ===
+Date: 2026-04-06T18:12:35Z
+
+--- uname -a ---
+Linux unitree-jetson-payload 5.15.148-tegra #1 SMP PREEMPT Thu Sep 18 15:08:33 PDT 2025 aarch64 aarch64 aarch64 GNU/Linux
+
+--- Tegra Release ---
+# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025
+# KERNEL_VARIANT: oot
+TARGET_USERSPACE_LIB_DIR=nvidia
+TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia
+
+--- CPU ---
+4
+model name	: ARMv8 Processor rev 1 (v8l)
+CPU(s):                             8
+Model name:                         Cortex-A78AE
+Thread(s) per core:                 1
+Core(s) per cluster:                4
+NUMA node0 CPU(s):                  0-3
+
+--- Memory ---
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       1.5Gi        12Gi        21Mi       1.3Gi        13Gi
+Swap:          7.6Gi          0B       7.6Gi
+
+--- Disk ---
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme0n1p1  233G   55G  167G  25% /
+
+--- GPU ---
+nvidia-smi:
+Mon Apr  6 18:12:35 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 540.4.0                Driver Version: 540.4.0      CUDA Version: 12.6     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Orin (nvgpu)                  N/A  | N/A              N/A |                  N/A |
+| N/A   N/A  N/A               N/A /  N/A | Not Supported        |     N/A          N/A |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+gpu power status:
+not found
+
+jetson_clocks status:
+
+--- Thermal ---
+  cpu-thermal: 44343
+  gpu-thermal: 40968
+  cv0-thermal: 43093
+  cv1-thermal: 42500
+  cv2-thermal: 42031
+  soc0-thermal: 43312
+  soc1-thermal: 45343
+  soc2-thermal: 42718
+  tj-thermal: 45218
+
+--- OS Release ---
+PRETTY_NAME="Ubuntu 22.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="22.04"
+VERSION="22.04.5 LTS (Jammy Jellyfish)"
+VERSION_CODENAME=jammy
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=jammy
+
+--- ROS2 ---
+ROS_DISTRO=humble
+humble
+
+--- Network ---
+    inet 192.168.123.18/24 brd 192.168.123.255 scope global noprefixroute enP8p1s0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::b751:6fce:a0fd:6a7a/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+
+Full ip addr:
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: can0: <NOARP,ECHO> mtu 16 qdisc noop state DOWN group default qlen 10
+    link/can 
+3: enP8p1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+    link/ether 48:b0:2d:f9:1b:4a brd ff:ff:ff:ff:ff:ff
+    inet 192.168.123.18/24 brd 192.168.123.255 scope global noprefixroute enP8p1s0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::b751:6fce:a0fd:6a7a/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+4: l4tbr0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether 3e:c7:e7:79:f3:87 brd ff:ff:ff:ff:ff:ff
+5: usb0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc pfifo_fast master l4tbr0 state DOWN group default qlen 1000
+    link/ether 92:a0:18:eb:00:1d brd ff:ff:ff:ff:ff:ff
+6: usb1: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc pfifo_fast master l4tbr0 state DOWN group default qlen 1000
+    link/ether 92:a0:18:eb:00:1f brd ff:ff:ff:ff:ff:ff
+
+ip route:
+default via 192.168.123.10 dev enP8p1s0 proto static metric 100 
+169.254.0.0/16 dev enP8p1s0 scope link metric 1000 
+192.168.123.0/24 dev enP8p1s0 proto kernel scope link src 192.168.123.18 metric 100 
+
+--- hostname ---
+unitree-jetson-payload

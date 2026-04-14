@@ -1,0 +1,3 @@
+# Node list empty - CycloneDDS multicast discovery does not enumerate remote nodes
+# ros2 node list returned 0 results
+# Topic discovery (110 topics) confirms active DDS communication

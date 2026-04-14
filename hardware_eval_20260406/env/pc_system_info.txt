@@ -1,0 +1,54 @@
+=== PC System Info ===
+Date: 2026-04-06T18:12:26Z
+
+--- uname -a ---
+Linux careslab-OptiPlex-7050 6.8.0-106-generic #106~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Mar  6 08:44:59 UTC  x86_64 x86_64 x86_64 GNU/Linux
+
+--- CPU ---
+CPU(s):                                  8
+Model name:                              Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz
+Thread(s) per core:                      2
+Core(s) per socket:                      4
+Socket(s):                               1
+CPU max MHz:                             4200.0000
+CPU min MHz:                             800.0000
+NUMA node0 CPU(s):                       0-7
+
+--- Memory ---
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       2.5Gi       9.1Gi       364Mi       3.9Gi        12Gi
+Swap:          2.0Gi          0B       2.0Gi
+
+--- Disk ---
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       234G  150G   72G  68% /
+
+--- OS Release ---
+Distributor ID:	Ubuntu
+Description:	Ubuntu 22.04.5 LTS
+Release:	22.04
+Codename:	jammy
+
+--- ROS2 ---
+ROS_DISTRO=humble
+RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+--- Network: enp0s31f6 ---
+2: enp0s31f6: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 50:9a:4c:36:0f:2b brd ff:ff:ff:ff:ff:ff
+    inet 192.168.123.10/24 brd 192.168.123.255 scope global noprefixroute enp0s31f6
+       valid_lft forever preferred_lft forever
+    inet6 fe80::c721:884:f228:9c7b/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+
+--- CycloneDDS Config ---
+<CycloneDDS>
+  <Domain>
+    <General>
+      <Interfaces>
+        <NetworkInterface name="enp0s31f6"/>
+      </Interfaces>
+      <AllowMulticast>true</AllowMulticast>
+    </General>
+  </Domain>
+</CycloneDDS>
