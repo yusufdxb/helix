@@ -19,6 +19,7 @@ Usage:
   python3 scripts/passive_adapter.py
 """
 
+import argparse
 import json
 import math
 import time
@@ -168,8 +169,16 @@ class PassiveAdapter(Node):
     adapters that require zero changes to the robot's software.
     """
 
-    def __init__(self):
+    def __init__(self, sim: bool = False):
         super().__init__("helix_passive_adapter")
+        self._sim = sim
+        # In sim mode, the Isaac Sim bridge publishes synthetic /utlidar/cloud
+        # and an injector relays to /utlidar/cloud_throttled. Monitor the
+        # throttled topic so the fault-injection schedule is what
+        # AnomalyDetector sees.
+        self._utlidar_cloud_topic = (
+            "/utlidar/cloud_throttled" if sim else "/utlidar/cloud"
+        )
 
         # Publisher for derived metrics
         self._metrics_pub = self.create_publisher(
@@ -203,7 +212,7 @@ class PassiveAdapter(Node):
         # Sensor topics often need best-effort QoS
         for topic, msg_type in [
             ("/utlidar/imu", Imu),
-            ("/utlidar/cloud", PointCloud2),
+            (self._utlidar_cloud_topic, PointCloud2),
         ]:
             monitor = TopicRateMonitor(window_sec=5.0)
             self._rate_monitors[topic] = monitor
@@ -328,8 +337,17 @@ class PassiveAdapter(Node):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--sim",
+        action="store_true",
+        help="Monitor /utlidar/cloud_throttled (Isaac Sim harness) "
+             "instead of the real /utlidar/cloud.",
+    )
+    args, _ = parser.parse_known_args()
+
     rclpy.init()
-    node = PassiveAdapter()
+    node = PassiveAdapter(sim=args.sim)
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
