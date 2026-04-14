@@ -1,0 +1,7 @@
+# GetContext — served by ContextBuffer, queried by DiagnosisNode.
+# Request has no parameters; response carries the current context snapshot.
+---
+string[] rosout_ring
+string metrics_json
+string node_health_json
+float64 snapshot_time
