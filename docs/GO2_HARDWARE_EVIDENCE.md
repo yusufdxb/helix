@@ -1,8 +1,10 @@
 # GO2 Hardware Evidence Summary
 
-Evidence collected 2026-04-03 from a live Unitree GO2 quadruped, Jetson Orin NX companion, and development PC. All artifacts stored on T7 SSD at `hardware_eval_20260403/`.
+Evidence collected across two sessions (2026-04-03 and 2026-04-06) from a live Unitree GO2 quadruped, Jetson Orin NX companion, and development PC. Artifacts stored on T7 SSD at `hardware_eval_20260403/` and `hardware_eval_20260406/`.
 
-**Major update (session 2):** HELIX ROS 2 nodes ran on the live GO2 graph for the first time. A passive adapter bridging GO2 topic rates to `/helix/metrics` enabled the anomaly detector to emit 4 FaultEvents from a LiDAR rate fluctuation (unconfirmed as fault). `/diagnostics` was discovered to be published by GO2's `twist_mux` node, upgrading native input coverage from 1/4 to 2/4.
+**Session 1 (2026-04-03):** HELIX ROS 2 nodes ran on the live GO2 graph for the first time. A passive adapter bridging GO2 topic rates to `/helix/metrics` enabled the anomaly detector to emit 4 FaultEvents from a LiDAR rate fluctuation (unconfirmed as fault). `/diagnostics` was discovered to be published by GO2's `twist_mux` node, upgrading native input coverage from 1/4 to 2/4.
+
+**Session 2 (2026-04-06):** Reproducibility validation after a 3-day gap. All Jetson benchmarks reproduced within 1% of Session 1 values. Adapter detection reproduced with 2 new FaultEvents from a `/utlidar/robot_pose` rate anomaly (peak Z-score 4.41) — a different source than Session 1's LiDAR fluctuation, consistent with HELIX reacting to real rate variation rather than a fixed artifact. An extended 5-minute bag capture collected ~104K messages with 100% in-window rate stability. Cross-session topic rate stability was strong (CV < 0.001 across the 3-day gap). A 1000 Hz DDS load test showed a 0.05% change in `/utlidar/robot_pose` rate (within measurement noise). `/diagnostics` was NOT observed in Session 2, confirming that its availability from `twist_mux` is intermittent and mode-dependent.
 
 ## Hardware Topology
 
