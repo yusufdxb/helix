@@ -71,13 +71,15 @@ jobs:
         run: |
           . /opt/ros/humble/setup.sh
           . install/setup.sh
-          python3 -c "from launch import LaunchDescription; \
-            from launch.launch_description_sources import PythonLaunchDescriptionSource; \
-            import os; \
-            from ament_index_python.packages import get_package_share_directory; \
-            share = get_package_share_directory('helix_bringup'); \
-            for n in ['helix_sensing.launch.py', 'helix_adapter.launch.py']: \
-              src = PythonLaunchDescriptionSource(os.path.join(share, 'launch', n)); \
-              ld = src.try_get_launch_description_without_context(); \
-              assert ld is not None, n; \
-              print(f'OK: {n}')"
+          python3 <<'PY'
+          import os
+          from ament_index_python.packages import get_package_share_directory
+          from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+          share = get_package_share_directory("helix_bringup")
+          for name in ("helix_sensing.launch.py", "helix_adapter.launch.py"):
+              src = PythonLaunchDescriptionSource(os.path.join(share, "launch", name))
+              ld = src.try_get_launch_description_without_context()
+              assert ld is not None, name
+              print(f"OK: {name}")
+          PY
