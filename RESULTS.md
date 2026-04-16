@@ -234,14 +234,14 @@ python3 scripts/go2_topic_gap_analysis.py         # static analysis
 python3 scripts/attachability_matrix.py            # live graph analysis
 ```
 
-| HELIX Input | GO2 Status (2026-04-03) |
-|-------------|------------------------|
-| /diagnostics | Available (twist_mux, ~2 Hz) |
+| HELIX Input | GO2 Status (resolved 2026-04-15) |
+|-------------|---------------------------------|
+| /diagnostics | NOT reliably published — observed once in Session 1 (twist_mux, ~2 Hz), absent in Sessions 2 and 5 across 6 sport-API modes under `motion_switcher = normal`. See `docs/GO2_HARDWARE_EVIDENCE.md` §7 / §9. |
 | /helix/heartbeat | Not published |
-| /helix/metrics | Not published (bridged via passive_adapter.py) |
+| /helix/metrics | Not published (bridged via the `helix_adapter` package) |
 | /rosout | Available |
 
-**Result:** 2 of 4 HELIX input channels have native data sources on the GO2. A passive adapter (`scripts/passive_adapter.py`) bridges 5 additional topic rate streams and 2 JSON state streams into `/helix/metrics`, enabling HELIX's anomaly detector to operate on live GO2 data. See `docs/GO2_HARDWARE_EVIDENCE.md` for full analysis.
+**Result:** Only 1 of 4 HELIX input channels (`/rosout`) is reliably native on the GO2 under default operating conditions; `/diagnostics` is not (see resolved status above). The other two HELIX inputs (`/helix/metrics`, `/helix/heartbeat`) are HELIX-internal topics that no robot publishes by default. The `helix_adapter` ROS 2 package (`helix_topic_rate_monitor`, `helix_json_state_parser`, `helix_pose_drift_monitor` — launch with `ros2 launch helix_bringup helix_adapter.launch.py`) bridges 5 additional topic rate streams, 2 JSON state streams, and pose displacement into `/helix/metrics`, enabling HELIX's anomaly detector to operate on live GO2 data. The Session 1 / Session 2 hardware results were produced by the predecessor monolithic `passive_adapter.py` script (now archived under `hardware_eval_20260406/scripts/`). See `docs/GO2_HARDWARE_EVIDENCE.md` for full analysis.
 
 ---
 
@@ -251,7 +251,7 @@ python3 scripts/attachability_matrix.py            # live graph analysis
 
 ### Adapter-Based Detection on Live GO2
 
-HELIX's anomaly detector ran on the PC while a passive adapter (`scripts/passive_adapter.py`) bridged live GO2 topic rates into `/helix/metrics`. During a 60-second evaluation:
+HELIX's anomaly detector ran on the PC while a passive adapter bridged live GO2 topic rates into `/helix/metrics`. The Session 1 / Session 2 evaluations used the predecessor monolithic script `passive_adapter.py` (archived at `hardware_eval_20260406/scripts/passive_adapter.py`); main-branch reproduction now uses the packaged `helix_adapter` lifecycle nodes, which are functionally equivalent for rate / JSON / pose-drift bridging. During a 60-second evaluation:
 
 | Metric | Value | Source |
 |--------|-------|--------|
@@ -309,7 +309,7 @@ Computed from 153 live GO2 topics by `scripts/attachability_matrix.py`:
 
 | Metric | Value |
 |--------|-------|
-| Native HELIX input coverage | 2/4 (50%) |
+| Native HELIX input coverage | 1/4 (`/rosout` only — see `docs/GO2_HARDWARE_EVIDENCE.md` §7 for the superseded 2/4 figure based on a non-reproducible `/diagnostics` sighting) |
 | Standard-type topics | 83/153 (54%) |
 | Demonstrated adapter topics | 24 |
 | Candidate adapter topics (String heuristic) | 30 |
@@ -334,7 +334,8 @@ Full results: `results/attachability_matrix.json`
 | Attachability matrix | `python3 scripts/attachability_matrix.py` | Yes (live graph) |
 | Bag rate analysis | `python3 scripts/bag_rate_analysis.py <bag>` | Yes (rosbag2) |
 | HELIX overhead | `python3 scripts/measure_helix_overhead.py` | Yes (Humble + helix_msgs) |
-| Passive adapter | `python3 scripts/passive_adapter.py` | Yes (live GO2) |
+| Adapter (canonical) | `ros2 launch helix_bringup helix_adapter.launch.py` | Yes (live GO2 or sim_mode:=true) |
+| Adapter (archived monolithic) | `python3 hardware_eval_20260406/scripts/passive_adapter.py` | Yes (live GO2; reproduces Session 1/2 results) |
 | Unit tests | `colcon test --packages-select helix_core` | Yes (Humble) |
 
 All JSON result artifacts are stored in `results/`.

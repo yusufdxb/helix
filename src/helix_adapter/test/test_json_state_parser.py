@@ -20,6 +20,16 @@ def node():
     n.destroy_node()
 
 
+def _spin_until(executor, predicate, timeout_sec: float) -> bool:
+    """Spin until predicate() is true or the deadline passes."""
+    deadline = time.monotonic() + timeout_sec
+    while time.monotonic() < deadline:
+        if predicate():
+            return True
+        executor.spin_once(timeout_sec=0.02)
+    return predicate()
+
+
 def _collect_metrics(node, seconds: float = 0.5):
     received: list = []
     helper = rclpy.create_node("test_json_helper")
@@ -34,15 +44,27 @@ def _collect_metrics(node, seconds: float = 0.5):
     exec_.add_node(node)
     exec_.add_node(helper)
 
-    gnss_pub.publish(String(
-        data='{"satellite_total": 13, "satellite_inuse": 8, "hdop": 1.2}'))
-    mstate_pub.publish(String(
-        data='{"volume": 7, "brightness": 3, "obstaclesAvoidSwitch": true, '
-             '"uwbSwitch": false}'))
+    # Wait for both publishers to be discovered by JsonStateParser before
+    # publishing; otherwise the first message races discovery and is dropped.
+    _spin_until(
+        exec_,
+        lambda: (gnss_pub.get_subscription_count() >= 1
+                 and mstate_pub.get_subscription_count() >= 1),
+        timeout_sec=2.0,
+    )
 
-    start = time.monotonic()
-    while time.monotonic() - start < seconds:
-        exec_.spin_once(timeout_sec=0.02)
+    # Republish across the collection window so a single dropped message
+    # doesn't make the test fail; JsonStateParser keeps the latest payload
+    # and re-emits on its publish timer.
+    end = time.monotonic() + seconds
+    while time.monotonic() < end:
+        gnss_pub.publish(String(
+            data='{"satellite_total": 13, "satellite_inuse": 8, "hdop": 1.2}'))
+        mstate_pub.publish(String(
+            data='{"volume": 7, "brightness": 3, "obstaclesAvoidSwitch": true, '
+                 '"uwbSwitch": false}'))
+        for _ in range(5):
+            exec_.spin_once(timeout_sec=0.02)
 
     helper.destroy_node()
     exec_.shutdown()
@@ -76,6 +98,9 @@ def test_invalid_json_is_silently_dropped(node):
     exec_.add_node(node)
     exec_.add_node(helper)
 
+    _spin_until(
+        exec_, lambda: gnss_pub.get_subscription_count() >= 1, timeout_sec=2.0
+    )
     gnss_pub.publish(String(data='{not json'))
     gnss_pub.publish(String(data='null'))
     gnss_pub.publish(String(data='[1, 2, 3]'))

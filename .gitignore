@@ -11,3 +11,7 @@ __pycache__/
 
 # Hardware evaluation raw bag data (lives on T7 SSD)
 hardware_eval_*/bags/**/*.db3
+
+# Live overhead-measurement artifacts (re-runs of scripts/measure_helix_overhead.py).
+# The curated Session 1 evidence at results/helix_overhead_with_adapter.json is tracked.
+results/helix_overhead_*_live.json

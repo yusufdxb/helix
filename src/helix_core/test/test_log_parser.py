@@ -43,6 +43,16 @@ def parser_node():
     node.destroy_node()
 
 
+def _spin_until(executor, predicate, timeout_sec: float) -> bool:
+    """Spin until predicate() is true or the deadline passes."""
+    deadline = time.monotonic() + timeout_sec
+    while time.monotonic() < deadline:
+        if predicate():
+            return True
+        executor.spin_once(timeout_sec=0.02)
+    return predicate()
+
+
 def test_log_pattern_detection(parser_node):
     """
     Publish a Log message matching slam_diverged rule.
@@ -68,7 +78,14 @@ def test_log_pattern_detection(parser_node):
     executor.add_node(sub_node)
     executor.add_node(pub_node)
 
-    # Publish a matching log message
+    # Wait for DDS discovery — LogParser must see our /rosout publisher AND
+    # our FaultEvent subscriber must see LogParser's /helix/faults publisher.
+    # Without this wait the single publish below races discovery and the test
+    # flakes when run alongside other tests / launches.
+    assert _spin_until(
+        executor, lambda: pub.get_subscription_count() >= 1, timeout_sec=2.0
+    ), "LogParser never discovered the /rosout publisher"
+
     log_msg = Log()
     log_msg.level = 40  # ERROR
     log_msg.name = "fake_slam_node"
@@ -76,12 +93,19 @@ def test_log_pattern_detection(parser_node):
     log_msg.file = "slam_toolbox.cpp"
     log_msg.function = "update"
     log_msg.line = 42
-    pub.publish(log_msg)
 
-    # Spin to process
-    for _ in range(30):
-        executor.spin_once(timeout_sec=0.05)
-        time.sleep(0.02)
+    # Republish until a LOG_PATTERN FaultEvent shows up (or we time out). The
+    # log_parser dedups identical (rule_id, node_name) within dedup_window_sec
+    # so re-emitting only inflates the count if discovery was slow; the dedup
+    # guarantees at most one FaultEvent for the matching window.
+    deadline = time.monotonic() + 2.0
+    while time.monotonic() < deadline:
+        pub.publish(log_msg)
+        for _ in range(5):
+            executor.spin_once(timeout_sec=0.02)
+        with lock:
+            if any(f.fault_type == "LOG_PATTERN" for f in received_faults):
+                break
 
     executor.remove_node(parser_node)
     executor.remove_node(sub_node)

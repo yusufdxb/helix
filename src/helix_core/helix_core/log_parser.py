@@ -184,4 +184,4 @@ def main(args=None) -> None:
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        rclpy.try_shutdown()

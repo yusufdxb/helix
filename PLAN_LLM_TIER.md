@@ -205,10 +205,10 @@ This is prerequisite infrastructure. Without it, diagnosis has no input beyond t
 - Memory bound: ~50 KB worst case for 20 messages
 
 #### 2b. Metric rate cache
-- New subscriber to /helix/metrics (Float64MultiArray from passive_adapter.py)
+- New subscriber to /helix/metrics (Float64MultiArray from the helix_adapter package)
 - Maintains per-metric rolling rate: current value, mean over last window
 - Bounded: last 10 samples per metric
-- **Dependency:** Requires passive_adapter.py to be running. If adapter is absent, cache is empty. Diagnosis node must handle this gracefully (context field is empty, not an error).
+- **Dependency:** Requires the helix_adapter lifecycle nodes (or any other publisher of `/helix/metrics`) to be active. If no adapter is running, the cache is empty. Diagnosis node must handle this gracefully (context field is empty, not an error).
 
 #### 2c. Node health snapshot
 - Subscribe to `/helix/node_health` (already published by HeartbeatMonitor as DiagnosticArray)
@@ -293,7 +293,8 @@ Deterministic. Zero latency. No model. Confidence = 1.0. Method = "rules".
 #### 4b. Jetson deployment
 1. Build all packages from source on Jetson
 2. Launch full stack with rule-based diagnosis enabled
-3. Run passive_adapter.py bridging GO2 topics
+3. Launch the helix_adapter lifecycle nodes bridging GO2 topics
+   (`ros2 launch helix_bringup helix_adapter.launch.py`)
 4. Verify `/helix/recovery` publishes RecoveryHints
 
 #### 4c. Evaluation experiments
@@ -424,7 +425,7 @@ Decide after Phase 4 results. Candidates: IROS 2026, pedestrian workshop, RSS/IC
 - Unitree GO2 at 192.168.123.161
 - Wired Ethernet 192.168.123.0/24
 - CycloneDDS (PC) / FastRTPS (Jetson/GO2)
-- passive_adapter.py bridging GO2 topics to /helix/metrics
+- helix_adapter lifecycle nodes bridging GO2 topics to /helix/metrics
 
 ---
 

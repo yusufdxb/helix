@@ -41,6 +41,16 @@ def _make_metric_msg(label: str, value: float) -> Float64MultiArray:
     return msg
 
 
+def _spin_until(executor, predicate, timeout_sec: float) -> bool:
+    """Spin until predicate() is true or the deadline passes."""
+    deadline = time.monotonic() + timeout_sec
+    while time.monotonic() < deadline:
+        if predicate():
+            return True
+        executor.spin_once(timeout_sec=0.02)
+    return predicate()
+
+
 def test_anomaly_detection(detector_node):
     """
     Publish 15 normal samples with slight noise (to create non-zero std),
@@ -65,6 +75,13 @@ def test_anomaly_detection(detector_node):
     executor.add_node(detector_node)
     executor.add_node(sub_node)
     executor.add_node(pub_node)
+
+    # Wait for both DDS links: detector must see our metric publisher, and our
+    # FaultEvent subscriber must see the detector's publisher. Otherwise the
+    # first samples / first FaultEvent race discovery and the assertion flakes.
+    assert _spin_until(
+        executor, lambda: pub.get_subscription_count() >= 1, timeout_sec=2.0
+    ), "AnomalyDetector never discovered the metric publisher"
 
     # Publish 25 normal samples with slight noise so std > 1e-6.
     # N=25 ensures the asymptotic Z-score for the 3rd consecutive spike
