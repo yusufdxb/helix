@@ -1,0 +1,26 @@
+helix_topic_rate_monitor:
+  ros__parameters:
+    window_sec: 5.0
+    publish_period_sec: 0.5
+    topics:
+      - "/utlidar/imu"
+      - "/utlidar/robot_odom"
+      - "/utlidar/robot_pose"
+      - "/utlidar/cloud"
+      - "/gnss"
+      - "/multiplestate"
+
+helix_json_state_parser:
+  ros__parameters:
+    publish_period_sec: 0.5
+    sources:
+      - "/gnss|gnss|satellite_total,satellite_inuse,hdop|"
+      - "/multiplestate|go2_state|volume,brightness|obstaclesAvoidSwitch,uwbSwitch"
+
+helix_pose_drift_monitor:
+  ros__parameters:
+    topic: "/utlidar/robot_pose"
+    stale_sec: 5.0
+    min_dt: 0.001
+    publish_period_sec: 0.5
+    metric_name: "pose/displacement_rate_m_s"
