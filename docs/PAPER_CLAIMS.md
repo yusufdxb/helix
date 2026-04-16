@@ -124,9 +124,22 @@ The novelty is not the adapter code itself — it's the systematic analysis of m
 - Thermal headroom for HELIX on Jetson (43–48°C measured vs 85°C throttle point)
 
 ### Not Yet Validated
-- HELIX running as persistent ROS 2 service on GO2/Jetson
-- Fault detection accuracy against known GO2 fault scenarios
+- ~~HELIX running as persistent ROS 2 service on GO2/Jetson~~ → **VALIDATED 2026-04-15: 1780 s on-Jetson run, all success_criteria true. See `GO2_HARDWARE_EVIDENCE.md` § 8 and `HARDWARE_EXPERIMENT_INDEX.md` EXP-15.**
+- Fault detection accuracy against known GO2 fault scenarios — **PARTIAL via Session 5 ground-truth injection (EXP-17): log-pattern detection works (~1.8 s), but physical/sensor injections produce no faults absent an adapter layer.**
 - Log parser with GO2-specific rules against real GO2 error logs
 - Adapter output correctness (are derived metrics semantically meaningful?)
 - Sustained operation under thermal stress
 - Multi-robot or multi-platform attachability comparison
+
+### Session 5 (2026-04-15) — additional defensible claims
+- "HELIX runs as a persistent ROS 2 service on Jetson Orin NX vs live GO2 for ≥30 minutes with no node deaths, no OOM, no thermal throttle." — Strong (EXP-15).
+- "End-to-end log-pattern fault detection via `/rosout` works on Jetson with ~1.8 s latency, severity correctly mapped from `log_rules.yaml`." — Strong (EXP-17 inject 1).
+- "Without an adapter layer, physical sensor anomalies (LiDAR occlusion, USB device disconnect) and unrelated topic flooding produce 0 HELIX faults — the attachability gap is real on hardware." — Strong (EXP-17 injects 2/3/4).
+
+### Session 5 — claim superseded
+- The Session 2 claim that `twist_mux` publishes `/diagnostics` (raising native
+  input coverage from 1/4 to 2/4) is **NOT reproduced 2026-04-15** under
+  `motion_switcher = normal` across 6 sport-API states. Either the claim was
+  mode-dependent (`ai` / `advanced` not yet tested) or the GO2 firmware /
+  configuration changed. Until re-verified, the conservative reading is 1/4
+  native input coverage (just `/rosout`). See EXP-16.
