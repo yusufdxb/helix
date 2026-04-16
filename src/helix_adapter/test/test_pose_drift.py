@@ -2,7 +2,6 @@
 import math
 
 import pytest
-
 from helix_adapter.pose_drift import DisplacementTracker
 
 
