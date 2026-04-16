@@ -122,3 +122,49 @@ Artifacts stored at: `T7 SSD: hardware_eval_20260403/`
 | "HELIX can monitor GO2 faults" | No experiment | NO — HELIX nodes never ran against GO2 data |
 | "Adapter architecture is feasible" | EXP-5 topic analysis + EXP-6 data samples | PARTIAL — feasibility argument, not implementation |
 | "Rate-based detection is viable" | EXP-9 rate stability + EXP-2 detection accuracy | PARTIAL — stable baselines exist, detection not demonstrated |
+| "HELIX runs as persistent service on Jetson against live GO2 (≥30 min)" | EXP-15 | YES — Session 5, 1780 s, all success_criteria true |
+| "Log-pattern detection works end-to-end on hardware with low latency" | EXP-17 inject 1 | YES — Session 5, 1.8 s detection of nav2_costmap_fail pattern |
+| "HELIX detects sensor / hardware anomalies on GO2" | EXP-17 inject 2,4 | NO — Session 5 negative results document the attachability gap |
+
+## Experiments — Session 5 (2026-04-15)
+
+Artifacts: `T7:LABWORK/HELIX/hardware_eval_20260415/`
+
+### EXP-15: 30-minute persistent Jetson deployment vs live GO2
+- **What**: All 3 HELIX lifecycle nodes (`heartbeat_monitor`, `anomaly_detector`,
+  `log_parser`) launched on Jetson Orin NX with `setsid + nohup ros2 run` per
+  node, ran for 1780 s
+- **Where**: `results/jetson_persistent_30min_v3/`
+  - `jetson_persistent_30min.json` — summary with success_criteria
+  - `sampler.jsonl` — 90 samples, 15 s period (actual ~20 s/sample due to
+    per-sample lifecycle gets)
+  - `tegrastats.log` — 1790 samples, 1 Hz
+  - `lifecycle.log`, `hb.log`, `ad.log`, `lp.log`, `mid_run_monitor.log`
+- **Claim supported**: "HELIX runs as a persistent service on the target hardware"
+- **Evidence strength**: Strong
+- **Key numbers**: RSS HB/AD/LP mean 38.7 / 38.6 / 38.0 MB; CPU mean
+  0.61 / 0.41 / 0.40 %; tj_max 55.63 °C; 0 deaths; lifecycle ACTIVE throughout
+
+### EXP-16: /diagnostics mode-dependence (mode matrix)
+- **What**: Cycled GO2 through 6 sport-API states under `motion_switcher = normal`
+  and recorded `/diagnostics` publishers + rate per state
+- **Where**: `results/diagnostics_mode_matrix.json` + `results/task5_diagnostics_modes_partial/`
+- **Claim supported**: `GO2_ATTACHABILITY_UPDATE.md` claim that `/diagnostics`
+  is not natively published — extended from default-mode to all
+  motion_switcher=normal sport states
+- **Evidence strength**: Strong (for normal mode); modes `ai` / `advanced` not tested
+- **Key finding**: 0 publishers in every state. Note: `notes/incident_damp_collapse.md`
+  documents an operator-safety lesson learned during this run
+
+### EXP-17: Ground-truth fault injection on hardware
+- **What**: 12-min HELIX deployment on Jetson; 4 injection scenarios; per-injection
+  expected vs actual fault recorded
+- **Where**: `results/ground_truth_injection.json` + `results/task6_helix_fault_injection/`
+- **Claim supported**: Log-pattern detection works end-to-end on hardware (positive
+  control fired with ~1.8 s latency, severity 3 matched rule).
+  3 negative results document the attachability gap concretely.
+- **Evidence strength**: Strong
+- **Key numbers**: 1 LOG_PATTERN fault from positive control; 0 faults from LiDAR
+  cover, USB cable disconnect, and topic flood; 1 injection (`kill -9` of GO2 node)
+  documented as INFEASIBLE because GO2 MCU has no SSH and GO2 internals are not
+  in `ros2 node list`

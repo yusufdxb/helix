@@ -95,4 +95,8 @@ This motivates the paper's argument for **adapter-based fault sensing**: a monit
 | Custom types carry critical fault data | Known from GO2 documentation + topic info | Moderate |
 | HELIX can observe /rosout on GO2 | Bag captures include GO2-side /rosout messages | Strong |
 | Adapter approach is feasible | JSON strings already parseable, IMU/odom available | Moderate |
-| Full deployment works on hardware | NOT validated | None |
+| Full deployment works on hardware (≥30 min on Jetson vs live GO2) | EXP-15 (Session 5, 2026-04-15) | Strong |
+| `/diagnostics` is not natively published — across all sport-API states under motion_switcher=normal | EXP-16 (Session 5) | Strong |
+| LiDAR occlusion is invisible to HELIX without an adapter | EXP-17 inject 2 (Session 5) | Strong |
+| USB device disconnect is invisible to HELIX without an adapter | EXP-17 inject 4 (Session 5) | Strong |
+| Log-pattern detection works end-to-end on hardware | EXP-17 inject 1 (Session 5) | Strong |

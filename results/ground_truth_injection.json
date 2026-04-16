@@ -1,0 +1,99 @@
+{
+  "task": "Task 6 — Ground-truth fault injection on live GO2 with HELIX deployed on Jetson",
+  "session_date": "2026-04-15",
+  "helix_run_window": {
+    "launched_ts": 1776295047,
+    "duration_s_target": 720,
+    "duration_s_actual": 716,
+    "samples": 70,
+    "fault_count_total": 1,
+    "node_deaths_at_elapsed_681s_explanation": "All 3 nodes' per-node logs (hb.log/ad.log/lp.log) end with a clean rclpy.shutdown() trace + harmless 'rcl_shutdown already called on the given context' double-shutdown error and 'Process exited with failure 1'. This is the v3 script's own teardown sequence (pkill -f lib/helix_core/...), not a mid-run failure. The sampler runs a few more iterations after teardown and observes pid=0, which then propagates into the aggregator's 'first_death_elapsed_s' and 'no_oom: false'. Functionally HELIX ran the full 716s window and the positive-control fault was correctly emitted.",
+    "success_criteria_raw": {"no_oom": false, "no_thermal_throttle": true, "lifecycle_active_throughout": false},
+    "success_criteria_corrected": {"no_oom_during_run": true, "no_thermal_throttle": true, "lifecycle_active_during_run": true, "all_three_caveat": "values flipped to false in the raw aggregator due to script-teardown artifact described above"},
+    "subscriptions_in_use": ["/diagnostics", "/rosout", "/helix/heartbeat", "/helix/metrics"],
+    "publications_in_use": ["/helix/faults"],
+    "log_rules_loaded": [
+      "nav2_costmap_fail (LOG_PATTERN, sev 3)",
+      "slam_diverged (LOG_PATTERN, sev 2)",
+      "dds_discovery_lost (NETWORK, sev 2)",
+      "transform_timeout (LOG_PATTERN, sev 1)",
+      "hardware_estop (CRASH, sev 3)"
+    ]
+  },
+  "operator_present_with_robot": true,
+  "robot_pose_during_test": "down + damp (body_height ≈ 0.07 m, motors released) — set by Task 5 cleanup",
+  "injections": [
+    {
+      "id": "1_positive_control_log_pattern",
+      "injection": "publish_rosout_log_msg",
+      "payload": "rcl_interfaces/msg/Log{level=40 (ERROR), name='test_inject', msg='Costmap failed to initialize during ground-truth inject'}",
+      "expected_fault": "LOG_PATTERN (matches log_rules.yaml/nav2_costmap_fail regex 'Costmap.*failed to initialize'), severity 3",
+      "ts_injected": 1776295110,
+      "ts_observation_end": 1776295140,
+      "actual_faults_emitted": 1,
+      "actual_fault_first_ts": 1776295111.8036711,
+      "actual_fault_severity": 3,
+      "actual_fault_type_inferred_from_strlen": "LOG_PATTERN (string length 11 matches exactly)",
+      "detection_latency_s": 1.8,
+      "match": true,
+      "notes": "Positive control. Confirms log_parser pipeline + faults_echo capture working end-to-end on Jetson."
+    },
+    {
+      "id": "2_lidar_occlude",
+      "injection": "physical — operator covered LiDAR with hand",
+      "payload": "Hand over LiDAR aperture, ~41 s",
+      "expected_fault": "ANOMALY (PointCloud2 rate drop on /utlidar/cloud)",
+      "ts_injected": 1776295232,
+      "ts_observation_end": 1776295273,
+      "duration_covered_s": 41,
+      "actual_faults_emitted": 0,
+      "actual_fault_first_ts": null,
+      "match": false,
+      "expected_failure_mode": "HELIX has no LiDAR-rate adapter — anomaly_detector subscribes only to /diagnostics (NOT PUBLISHED by GO2 — see Task 5) and /helix/metrics (no publisher exists). LiDAR rate changes are invisible to current HELIX deployment.",
+      "interpretation": "Negative result. Concrete hardware evidence of the attachability gap predicted by docs/GO2_ATTACHABILITY_UPDATE.md. Without an adapter publishing PointCloud2 rate to /helix/metrics, LiDAR occlusion cannot be detected."
+    },
+    {
+      "id": "3_topic_flood",
+      "injection": "10000 std_msgs/String publishes to /test/spam via single rclpy publisher",
+      "payload": "10000 messages, duration_s=0.08 (≈125k msg/s burst)",
+      "expected_fault": "ANOMALY (per Prompt 5)",
+      "ts_injected": 1776295332,
+      "ts_observation_end": 1776295347,
+      "actual_faults_emitted": 0,
+      "actual_fault_first_ts": null,
+      "match": false,
+      "expected_failure_mode": "HELIX subscribes to /diagnostics, /rosout, /helix/heartbeat, /helix/metrics — NOT to /test/spam. Flooding an unrelated topic produces no faults because HELIX is not in the data path.",
+      "interpretation": "Negative result, but useful: confirms HELIX does NOT false-positive on graph-noise of unrelated topics. To produce a positive flood-detection result, the flood would need to be on a HELIX-subscribed topic that has an established baseline rate (e.g., a /helix/metrics stream from a future adapter)."
+    },
+    {
+      "id": "4_cable_disconnect",
+      "injection": "physical — operator unplugged USB microphone, ~35 s detached, then reconnected",
+      "payload": "USB mic on Jetson",
+      "expected_fault": "ANOMALY or LOG_PATTERN (depending on whether driver emitted /rosout error)",
+      "ts_injected": 1776295560,
+      "ts_observation_end": 1776295605,
+      "duration_disconnected_s": 35,
+      "actual_faults_emitted": 0,
+      "actual_fault_first_ts": null,
+      "match": false,
+      "expected_failure_mode": "USB mic is not in the GO2 sensor stack and is not published to any topic HELIX monitors. Even if the host kernel logged a USB disconnect event, that goes to dmesg, not to /rosout. Same attachability gap.",
+      "interpretation": "Negative result. Documents the second-order attachability gap: even peripheral hardware events do not reach HELIX without an adapter that bridges syslog/dmesg → /rosout."
+    },
+    {
+      "id": "5_kill_go2_node",
+      "injection": "INFEASIBLE — not executed",
+      "rationale": "GO2 MCU at 192.168.123.161 has no SSH (port 22 connection refused — verified). GO2 internal nodes do not appear in `ros2 node list` from the Jetson (verified with cyclonedds_uri sourced). Without a shell on the MCU and without discoverable ROS 2 nodes, there is no GO2 process to send SIGKILL to. Documenting this finding rather than fabricating a result.",
+      "match": null
+    }
+  ],
+  "summary": {
+    "injections_attempted": 4,
+    "injections_skipped": 1,
+    "positive_controls_passing": 1,
+    "physical_injections_with_no_detection": 2,
+    "topic_flood_no_false_positive": 1,
+    "headline_finding": "HELIX as currently deployed (no adapters) detects only stimuli that arrive on its 4 subscribed topics. The positive control via /rosout fired correctly with ~1.8 s latency. The 3 physical / network injections (LiDAR occlude, USB cable disconnect, /test/spam flood) produced 0 faults because no adapter bridges those signals to /diagnostics or /helix/metrics. This concretely demonstrates the attachability gap: HELIX needs the adapter layer described in docs/GO2_ATTACHABILITY_UPDATE.md Phase 1 to be useful on the GO2.",
+    "claim_supported": "HELIX detects log-pattern faults on /rosout end-to-end on Jetson with low latency.",
+    "claim_NOT_supported": "HELIX detects sensor or hardware anomalies on the GO2 — REQUIRES adapters that do not yet exist."
+  }
+}

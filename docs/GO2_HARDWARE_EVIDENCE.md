@@ -166,3 +166,71 @@ A passive adapter (`scripts/passive_adapter.py`) bridged 5 GO2 topic rate stream
 | perturbation_test_publish | 12 | 12.5s | Novel topic publish test |
 
 All bags verified readable with `ros2 bag info`. Sidecar metadata files included.
+
+---
+
+## Session 5 update — 2026-04-15 (artifacts in `T7:LABWORK/HELIX/hardware_eval_20260415/`)
+
+### 8. 30-minute persistent HELIX deployment on Jetson vs live GO2
+
+All three lifecycle nodes ran on the Jetson Orin NX for 1780 s (target 1800 s)
+against the live GO2 stack. Result: ALL `success_criteria` true
+(`no_oom`, `no_thermal_throttle`, `lifecycle_active_throughout`).
+
+| Metric | Heartbeat | Anomaly | Log Parser |
+|--------|----------:|--------:|-----------:|
+| RSS mean (MB) | 38.7 | 38.6 | 38.0 |
+| RSS max (MB) | 41.3 | 41.0 | 39.3 |
+| CPU mean (%) | 0.61 | 0.41 | 0.40 |
+| `first_death_elapsed_s` | null | null | null |
+
+Thermals: `cpu_max 54.97 °C, gpu_max 50.72 °C, soc_max 53.28 °C, tj_max 55.63 °C`,
+no throttle observed across 1790 tegrastats samples.
+Artifact: `results/jetson_persistent_30min_v3/jetson_persistent_30min.json`.
+
+### 9. /diagnostics — re-verified absent under motion_switcher = normal
+
+Cycled GO2 through 6 sport-API states under default motion_switcher mode.
+Across all 6 captures (`baseline_idle`, `damp_on_standing`, `recovery_stand`,
+`balance_stand_walk`, `obstacles_avoid_on`, `stand_down + damp`),
+`ros2 topic info -v /diagnostics` returned **`Unknown topic`**, `Publisher count: 0`,
+`ros2 topic hz` warned `does not appear to be published yet`. The
+**Section-7 claim that twist_mux publishes /diagnostics is NOT reproduced**
+under motion_switcher = normal. Modes `ai` and `advanced` were not tested
+this session (operator-safety rationale); the twist_mux hypothesis remains
+unverified for those modes. Artifact: `results/diagnostics_mode_matrix.json`.
+
+### 10. Ground-truth fault injection on Jetson with HELIX deployed
+
+12-min HELIX run on Jetson with 4 injection scenarios:
+
+| # | Injection | Faults emitted | Detection latency | Match? |
+|---|-----------|---------------:|-------------------|:------:|
+| 1 | `/rosout` ERROR matching `nav2_costmap_fail` regex | **1** | **~1.8 s** | YES |
+| 2 | LiDAR cover ~41 s (physical) | 0 | n/a | NO (gap) |
+| 3 | 10000-msg flood on `/test/spam` | 0 | n/a | NO false-positive |
+| 4 | USB mic disconnect ~35 s (physical) | 0 | n/a | NO (gap) |
+| 5 | `kill -9` of GO2 node | INFEASIBLE (no SSH to MCU, GO2 nodes invisible to `ros2 node list`) | — | n/a |
+
+**Headline:** end-to-end log-pattern detection works on hardware with low
+latency. The 3 zero-fault outcomes for physical / network injections concretely
+demonstrate the attachability gap predicted by `GO2_ATTACHABILITY_UPDATE.md`:
+without an adapter bridging LiDAR rate / USB events / unrelated topics into
+HELIX's 4 subscriptions, those signals are invisible.
+Artifact: `results/ground_truth_injection.json`.
+
+### 11. Operator-safety incident (documented for reproducibility)
+
+A `Damp` (sport_api 1001) command issued during Task-5 mode cycling was
+sent while the GO2 was standing — the script had read `sportmodestate.mode = 0`
+and incorrectly inferred "robot is laying". `body_height` was the correct
+pose indicator (≈ 0.32 m standing vs ≈ 0.07 m down). The robot collapsed
+under released torque; no damage; recovered with `RecoveryStand` (1006).
+Lessons recorded in `notes/incident_damp_collapse.md`.
+
+### Updated "Observed on Hardware" additions (Session 5)
+
+- HELIX 3-node lifecycle deployment on Jetson, 30 min, 0 deaths, success_criteria true
+- Log-pattern fault end-to-end via `/rosout` → log_parser → `/helix/faults` (latency ~1.8 s)
+- `/diagnostics` confirmed UNPUBLISHED across 6 sport-API states under motion_switcher=normal
+- Hardware-grounded confirmation of LiDAR/USB attachability gap (3 physical injections, 0 detections)
