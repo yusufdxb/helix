@@ -23,24 +23,39 @@ These are not integration tests, multi-node tests, or end-to-end system tests. N
 
 ## Test Files
 
+`helix_core` lifecycle nodes:
 - `src/helix_core/test/test_anomaly_detector.py`
 - `src/helix_core/test/test_heartbeat_monitor.py`
 - `src/helix_core/test/test_log_parser.py`
+
+`helix_adapter` lifecycle nodes (rate, JSON, pose-drift bridges):
+- `src/helix_adapter/test/test_rate_window.py`, `test_topic_rate_monitor.py`
+- `src/helix_adapter/test/test_json_parse.py`, `test_json_state_parser.py`
+- `src/helix_adapter/test/test_pose_drift.py`, `test_pose_drift_monitor.py`
+
+Root-level repo-integrity (no ROS required):
+- `tests/test_attachability.py`
+- `tests/test_docs_consistency.py`
+- `tests/test_adapter_migration.py`
 
 ## How to Run
 
 ```bash
 cd ~/helix_ws
 source /opt/ros/humble/setup.bash
-colcon test --packages-select helix_core
+colcon test --packages-select helix_core helix_adapter
 colcon test-result --verbose
 ```
 
-Or with pytest directly:
+Or with pytest directly (after `source install/setup.bash` for the sourced
+suite; the root-level suite runs without ROS):
 
 ```bash
-cd src/helix_core
-python3 -m pytest test/ -v
+# Sourced ROS package tests (43 tests as of 2026-04-16)
+python3 -m pytest src/helix_core/test/ src/helix_adapter/test/ -q
+
+# Root-level repo-integrity tests (21 tests, no ROS required)
+python3 -m pytest tests/ -q
 ```
 
 ## Reproducibility
@@ -72,5 +87,6 @@ CI runs these tests automatically on every push to `main` via the GitHub Actions
 
 - Tests depend on `rclpy` and cannot run without a ROS 2 installation. The standalone benchmark (`benchmark_helix.py`) provides a ROS-free way to evaluate detection logic.
 - No integration tests verify the behavior of multiple sensing nodes running together in a single ROS 2 graph.
-- No tests exercise the fault injector or launch file.
+- No `colcon`-driven launch test asserts lifecycle activation under `ros2 launch`. The auto-activation contract is validated at the launch-file parse level in CI and by manual runs of `ros2 launch helix_bringup helix_sensing.launch.py` followed by `ros2 lifecycle get`.
+- No tests exercise the fault injector script.
 - Test coverage does not extend to message serialization, topic transport, or lifecycle state transitions under load.

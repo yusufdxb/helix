@@ -2,9 +2,11 @@
 
 Evidence collected across two sessions (2026-04-03 and 2026-04-06) from a live Unitree GO2 quadruped, Jetson Orin NX companion, and development PC. Artifacts stored on T7 SSD at `hardware_eval_20260403/` and `hardware_eval_20260406/`.
 
-**Session 1 (2026-04-03):** HELIX ROS 2 nodes ran on the live GO2 graph for the first time. A passive adapter bridging GO2 topic rates to `/helix/metrics` enabled the anomaly detector to emit 4 FaultEvents from a LiDAR rate fluctuation (unconfirmed as fault). `/diagnostics` was discovered to be published by GO2's `twist_mux` node, upgrading native input coverage from 1/4 to 2/4.
+**Session 1 (2026-04-03):** HELIX ROS 2 nodes ran on the live GO2 graph for the first time. A passive adapter bridging GO2 topic rates to `/helix/metrics` enabled the anomaly detector to emit 4 FaultEvents from a LiDAR rate fluctuation (unconfirmed as fault). `/diagnostics` was observed once with a `twist_mux` publisher present.
 
-**Session 2 (2026-04-06):** Reproducibility validation after a 3-day gap. All Jetson benchmarks reproduced within 1% of Session 1 values. Adapter detection reproduced with 2 new FaultEvents from a `/utlidar/robot_pose` rate anomaly (peak Z-score 4.41) — a different source than Session 1's LiDAR fluctuation, consistent with HELIX reacting to real rate variation rather than a fixed artifact. An extended 5-minute bag capture collected ~104K messages with 100% in-window rate stability. Cross-session topic rate stability was strong (CV < 0.001 across the 3-day gap). A 1000 Hz DDS load test showed a 0.05% change in `/utlidar/robot_pose` rate (within measurement noise). `/diagnostics` was NOT observed in Session 2, confirming that its availability from `twist_mux` is intermittent and mode-dependent.
+**Session 2 (2026-04-06):** Reproducibility validation after a 3-day gap. All Jetson benchmarks reproduced within 1% of Session 1 values. Adapter detection reproduced with 2 new FaultEvents from a `/utlidar/robot_pose` rate anomaly (peak Z-score 4.41) — a different source than Session 1's LiDAR fluctuation, consistent with HELIX reacting to real rate variation rather than a fixed artifact. An extended 5-minute bag capture collected ~104K messages with 100% in-window rate stability. Cross-session topic rate stability was strong (CV < 0.001 across the 3-day gap). A 1000 Hz DDS load test showed a 0.05% change in `/utlidar/robot_pose` rate (within measurement noise). `/diagnostics` was NOT observed in Session 2.
+
+**Resolved /diagnostics status (Session 5, 2026-04-15 — see §9):** Across 6 sport-API states under `motion_switcher = normal`, `/diagnostics` had zero publishers (`ros2 topic info` returned `Unknown topic`). The Session 1 observation of `twist_mux` publishing `/diagnostics` is therefore **not reproducible** under default operating conditions and is treated as superseded. Native HELIX input coverage on the GO2 should be reported as **1/4** (`/rosout` only); the `2/4` figure that appears in earlier sections refers to the unreproduced Session 1 reading and is preserved verbatim only for traceability.
 
 ## Hardware Topology
 
@@ -74,7 +76,7 @@ Baseline measurement while GO2 stack (103 topics) is running, no HELIX.
 | /gnss | 1 Hz | std_msgs/String | GPS fault detection |
 | /multiplestate | 1 Hz | std_msgs/String | Config state monitoring |
 
-**Finding**: Rich sensor data available at standard ROS 2 types. The GO2 publishes sufficient data for meaningful HELIX monitoring, but HELIX's current input interfaces (/helix/metrics, /helix/heartbeat) do not exist on the robot. Two of four inputs — `/rosout` and `/diagnostics` (from twist_mux, ~2 Hz) — are natively available.
+**Finding**: Rich sensor data available at standard ROS 2 types. The GO2 publishes sufficient data for meaningful HELIX monitoring, but HELIX's current input interfaces (/helix/metrics, /helix/heartbeat) do not exist on the robot. Of the four HELIX inputs, only `/rosout` is reliably available natively; `/diagnostics` was seen once in Session 1 from `twist_mux` (~2 Hz) but was confirmed absent across all 6 sport-API states tested in Session 5 under `motion_switcher = normal` — see §9.
 
 ### 5. Perturbation Results
 
@@ -91,7 +93,7 @@ Baseline measurement while GO2 stack (103 topics) is running, no HELIX.
 
 ### 6. Adapter-Based Anomaly Detection on Live GO2
 
-A passive adapter (`scripts/passive_adapter.py`) bridged 5 GO2 topic rate streams and 2 JSON state streams into `/helix/metrics`. HELIX's anomaly detector ran for 60 seconds on the PC observing the live GO2 graph.
+A passive adapter bridged 5 GO2 topic rate streams and 2 JSON state streams into `/helix/metrics`. HELIX's anomaly detector ran for 60 seconds on the PC observing the live GO2 graph. The Session 1 / Session 2 runs used the predecessor monolithic script `passive_adapter.py`, archived at `hardware_eval_20260406/scripts/passive_adapter.py`. The canonical main-branch path is now the `helix_adapter` ROS 2 package (lifecycle nodes `helix_topic_rate_monitor`, `helix_json_state_parser`, `helix_pose_drift_monitor`), launched via `ros2 launch helix_bringup helix_adapter.launch.py`.
 
 | Metric | Value | Source |
 |--------|-------|--------|
@@ -103,17 +105,19 @@ A passive adapter (`scripts/passive_adapter.py`) bridged 5 GO2 topic rate stream
 
 **Finding**: HELIX flagged a rate fluctuation in the LiDAR point cloud topic when bridged through a passive adapter. Each of the 4 emitted FaultEvents was triggered after 3 consecutive Z-score violations (Z > 3.0). Whether this fluctuation represents a genuine sensor anomaly or normal DDS transport jitter is unknown — no ground-truth labeling exists.
 
-### 7. /diagnostics Discovery
+### 7. /diagnostics Discovery (Session 1 — superseded by §9)
 
-`/diagnostics` is published by GO2's `twist_mux` node at ~2 Hz with velocity topic masking status and timing. This was not observed in the April 2 capture, suggesting it activates only under certain operating modes.
+`/diagnostics` was observed once in Session 1 (2026-04-03) being published by what appeared to be GO2's `twist_mux` node at ~2 Hz with velocity-topic masking status and timing. It was already absent in the April 2 pre-session capture and absent again in Session 2 (2026-04-06).
+
+**Status:** Superseded by Session 5 (§9), which deliberately cycled the GO2 through 6 sport-API states under `motion_switcher = normal` and never observed a publisher on `/diagnostics`. The Session 1 sighting is treated as **non-reproducible under default operating conditions**. Treat the GO2's native HELIX-input coverage as **1/4** (`/rosout` only) unless and until `/diagnostics` is reproduced.
 
 ## HELIX Attachability Assessment (Updated)
 
 | HELIX Component | Current Input | GO2 Availability | Gap |
 |----------------|---------------|------------------|-----|
 | Heartbeat Monitor | /helix/heartbeat | NOT AVAILABLE | Needs bridge nodes publishing heartbeats on behalf of GO2 nodes |
-| Anomaly Detector (metrics) | /helix/metrics | BRIDGED via passive_adapter.py | Adapter publishes rate + JSON-derived metrics |
-| Anomaly Detector (diagnostics) | /diagnostics | AVAILABLE (twist_mux, ~2 Hz) | Native DiagnosticArray with velocity topic status |
+| Anomaly Detector (metrics) | /helix/metrics | BRIDGED via the `helix_adapter` package | Adapter publishes rate + JSON-derived + pose-drift metrics (Session 1/2 used the now-archived `passive_adapter.py`) |
+| Anomaly Detector (diagnostics) | /diagnostics | NOT RELIABLY AVAILABLE (Session 5: 0 publishers across 6 sport-API modes; Session 1 sighting unreproduced) | Treat as unavailable for HELIX attachability accounting |
 | Log Parser | /rosout | AVAILABLE | Works, but low-rate when robot is idle |
 
 ### What Would Make HELIX Attachable Today
@@ -136,7 +140,7 @@ A passive adapter (`scripts/passive_adapter.py`) bridged 5 GO2 topic rate stream
 - **HELIX ROS 2 nodes running on PC observing live GO2 graph (60 seconds)**
 - **Passive adapter bridging GO2 topics to /helix/metrics**
 - **4 FaultEvents from LiDAR rate fluctuation (unconfirmed as fault)**
-- **/diagnostics published by GO2's twist_mux at ~2 Hz**
+- **/diagnostics observed once in Session 1 from twist_mux at ~2 Hz (unreproduced in Sessions 2 and 5; treated as non-reliable)**
 - **Measured HELIX overhead: 41.7 MB RSS, 22.3% CPU (PC, with adapter)**
 
 ### Inferred from Hardware

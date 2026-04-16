@@ -218,4 +218,7 @@ def main(args=None) -> None:
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        # try_shutdown is a no-op if rclpy's signal handler already shut the
+        # context down (the common path under `ros2 launch` SIGINT). Plain
+        # rclpy.shutdown() raises RCLError("rcl_shutdown already called") here.
+        rclpy.try_shutdown()

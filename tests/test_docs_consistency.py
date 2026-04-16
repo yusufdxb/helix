@@ -89,7 +89,10 @@ class TestLaplaceFPR(unittest.TestCase):
             self.fail("Z=2.0 K=12 entry not found in JSON")
         # The doc table row for Z=2.0 should contain "0.5%" not "0.0%"
         # Find the Z=2.0 row
-        z2_line = [l for l in self.md.split("\n") if l.strip().startswith("| 2.0")]
+        z2_line = [
+            line for line in self.md.split("\n")
+            if line.strip().startswith("| 2.0")
+        ]
         self.assertTrue(len(z2_line) > 0, "Z=2.0 row not found in RESULTS.md")
         self.assertIn("0.5%", z2_line[0],
                       f"FPR should be 0.5% in Z=2.0 row, got: {z2_line[0]}")

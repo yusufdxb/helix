@@ -31,13 +31,24 @@ Three lifecycle-managed sensing nodes:
 
 - **`log_parser.py`** — Matches incoming log entries against a set of configured regex rules. When a pattern matches, emits a `FaultEvent` with the rule name and matched content.
 
+### `helix_adapter`
+
+Three lifecycle-managed adapter nodes that bridge non-standard robot topics into HELIX's `/helix/metrics` so the `helix_core` AnomalyDetector can run against a robot that does not natively publish HELIX-shaped inputs:
+
+- **`topic_rate_monitor.py`** — Subscribes to a configured set of topics (default: GO2 IMU / odom / pose / cloud / GNSS / multiplestate), tracks callback-arrival timestamps in a rolling window, and publishes per-topic `rate_hz/<topic>` to `/helix/metrics`. Stale topics emit NaN.
+- **`json_state_parser.py`** — Subscribes to `std_msgs/String` topics (default: `/gnss`, `/multiplestate`), parses JSON payloads, and republishes selected numeric and boolean fields as labeled metrics.
+- **`pose_drift_monitor.py`** — Subscribes to a `geometry_msgs/PoseStamped` topic and publishes a rolling displacement-rate metric.
+
+These replace the predecessor monolithic `passive_adapter.py` script (now archived under `hardware_eval_20260406/scripts/`); the canonical main-branch path is `ros2 launch helix_bringup helix_adapter.launch.py`.
+
 ### `helix_bringup`
 
 Integration and demonstration:
 
-- Launch file for the sensing stack (`helix_sensing.launch.py`)
-- YAML configuration for thresholds, timeouts, and log rules
-- `fault_injector.py` — publishes synthetic anomalies and stops heartbeats for local testing
+- Launch file for the sensing stack (`helix_sensing.launch.py`) — auto-transitions the three `helix_core` lifecycle nodes through `configure → active`
+- Launch file for the adapter stack (`helix_adapter.launch.py`) — auto-transitions the three `helix_adapter` lifecycle nodes
+- YAML configuration for thresholds, timeouts, log rules, and adapter sources
+- `fault_injector.py` (executable: `helix_fault_injector`) — publishes synthetic anomalies and stops heartbeats for local testing
 
 ## Data Flow
 
@@ -84,4 +95,4 @@ The following are research directions documented for context. None are present i
 
 ## Architecture Diagram Note
 
-The diagram at `docs/images/architecture.svg` depicts the **target deployment context**, including the GO2 quadruped and Jetson Orin hardware. This represents the intended research platform, not the current validated scope. The sensing logic in this repository is platform-independent and has been validated only in simulation and offline benchmarks.
+The diagram at `docs/images/architecture.svg` depicts the **target deployment context**, including the GO2 quadruped and Jetson Orin hardware. The sensing logic in this repository is platform-independent and has been validated through offline benchmarks, in-process ROS 2 unit tests, and four bounded hardware sessions on the live GO2 (longest run: 30 minutes on Jetson Orin NX). It has not been deployed as a persistent monitoring service. See `docs/GO2_HARDWARE_EVIDENCE.md` and `docs/LIMITATIONS.md` for the exact reproducibility boundary.

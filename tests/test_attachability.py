@@ -1,13 +1,13 @@
 """Offline tests for scripts/attachability_matrix.py scoring logic."""
 
-import sys
 import os
+import sys
 import unittest
 
 # Allow importing from the scripts directory without installing.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir, "scripts"))
 
-from attachability_matrix import compute_attachability, HELIX_INPUTS
+from attachability_matrix import HELIX_INPUTS, compute_attachability  # noqa: E402
 
 
 def _make_topic(name: str, msg_type: str) -> dict:

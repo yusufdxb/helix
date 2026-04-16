@@ -16,7 +16,19 @@ jobs:
         with:
           python-version: "3.10"
       - run: pip install ruff
-      - run: ruff check src/ --select E,F,W,I --ignore E501
+      - run: ruff check src/ tests/ --select E,F,W,I --ignore E501
+
+  repo_consistency:
+    name: Root tests (repo-integrity, no ROS)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: pip install pytest pytest-timeout
+      - name: Run root-level pytest
+        run: python3 -m pytest tests/ -v --timeout=30
 
   test:
     name: Build & Test (ROS 2 Humble)
@@ -29,20 +41,43 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update -q
-          apt-get install -y python3-pip python3-pytest python3-colcon-common-extensions
-          pip install pytest-timeout
-
-      - name: Install Python deps
-        run: pip install aiofiles
+          apt-get install -y python3-pip python3-pytest \
+            python3-colcon-common-extensions \
+            ros-humble-diagnostic-msgs \
+            ros-humble-sensor-msgs \
+            ros-humble-nav-msgs \
+            ros-humble-geometry-msgs
+          pip install pytest-timeout aiofiles
 
       - name: Build workspace
         run: |
           . /opt/ros/humble/setup.sh
           colcon build --symlink-install --packages-select \
-            helix_msgs helix_core helix_bringup
+            helix_msgs helix_core helix_adapter helix_bringup
 
       - name: Run helix_core tests
         run: |
           . /opt/ros/humble/setup.sh
           . install/setup.sh
           python3 -m pytest src/helix_core/test/ -v --timeout=30
+
+      - name: Run helix_adapter tests
+        run: |
+          . /opt/ros/humble/setup.sh
+          . install/setup.sh
+          python3 -m pytest src/helix_adapter/test/ -v --timeout=30
+
+      - name: Verify launch files import cleanly
+        run: |
+          . /opt/ros/humble/setup.sh
+          . install/setup.sh
+          python3 -c "from launch import LaunchDescription; \
+            from launch.launch_description_sources import PythonLaunchDescriptionSource; \
+            import os; \
+            from ament_index_python.packages import get_package_share_directory; \
+            share = get_package_share_directory('helix_bringup'); \
+            for n in ['helix_sensing.launch.py', 'helix_adapter.launch.py']: \
+              src = PythonLaunchDescriptionSource(os.path.join(share, 'launch', n)); \
+              ld = src.try_get_launch_description_without_context(); \
+              assert ld is not None, n; \
+              print(f'OK: {n}')"
