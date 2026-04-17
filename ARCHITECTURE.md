@@ -89,7 +89,7 @@ The following are research directions documented for context. None are present i
 - Recovery planning and action execution
 - Recovery verification loop (confirm that a recovery action resolved the fault)
 - Operator-facing event dashboard
-- Hardware deployment on the Unitree GO2 / Jetson Orin Nano platform
+- Hardware deployment on the Unitree GO2 / Jetson Orin NX platform
 - LLM-assisted diagnosis after deterministic detection
 - Persistent event storage (SQLite or similar)
 

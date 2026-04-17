@@ -116,7 +116,7 @@ Benchmark against `diagnostic_aggregator` and `diagnostic_updater` — the stand
 
 ### 10. On-device profiling on Jetson Orin
 
-Run the sensing stack on a Jetson Orin Nano and profile CPU/memory/power. This validates the "designed for Jetson Orin" claim and provides deployment-relevant numbers.
+Run the sensing stack on a Jetson Orin NX (16 GB) and profile CPU/memory/power. This validates the "designed for Jetson Orin" claim and provides deployment-relevant numbers.
 
 ### 11. Real ROS 2 navigation stack logs
 
