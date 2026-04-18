@@ -122,13 +122,15 @@ Five benchmark suites evaluate the sensing components:
 
 | Benchmark | Key Result | ROS 2? |
 |-----------|-----------|--------|
-| Algorithmic throughput | ~81K samples/sec (PC i7-7700), ~64K (Jetson Orin NX) | No |
+| Algorithmic throughput | ~81K samples/sec (PC i7-7700), ~64K (Jetson Orin NX); reproduces within ±2% across 11 days (Sessions 2→7) | No |
 | End-to-end ROS 2 latency | 1.16 ms mean (p95: 1.24 ms) | Yes |
 | Realistic anomaly detection | 96.5% TPR at Z=3.0 with marginal anomalies; 0% TPR for 3-sigma in Laplace noise | No |
 | Log parser accuracy | 22/22 correct, ~248K msg/sec throughput | No |
-| GO2 attachability | 1/4 HELIX inputs reliably native (`/rosout`); 54 topics adaptable | No |
-| Adapter-based detection | 4 real FaultEvents from live GO2 LiDAR rate anomaly (Session 1, archived `passive_adapter.py`); reproduced in Session 2 | Yes |
-| Persistent Jetson deployment | 30-min run, 0 OOM / 0 thermal throttle / 0 lifecycle deaths (Session 5) | Yes |
+| GO2 attachability | 1/4 HELIX inputs reliably native (`/rosout`); 49 topics adaptable | No |
+| Adapter-based detection — synthetic | CRASH + ANOMALY positive controls end-to-end on Jetson (Session 6) | Yes |
+| Adapter-based detection — live GO2 | 60 real ANOMALY FaultEvents across 6 metric labels during a 20-min live run (Session 6, `helix_adapter` package) | Yes |
+| Persistent Jetson deployment | 30-min run, 0 OOM / 0 thermal throttle / 0 lifecycle deaths (Session 5); 1-hr follow-up with RSS plateau at 282 MB (Session 7) | Yes |
+| Adapter overhead (6-node canonical path) | ~48% of one Jetson core / 282 MB RSS with `/utlidar/imu` included; ~6% / 270 MB with it excluded (Session 7) | Yes |
 
 Full results, methodology, and caveats: [RESULTS.md](RESULTS.md)
 
@@ -161,18 +163,25 @@ Steps 1, 2 (the `colcon test` half), 4, 6, and 7 require ROS 2 Humble. The `ros:
 
 ## Research Context
 
-HELIX is designed with the Unitree GO2 quadruped and NVIDIA Jetson Orin NX as a target deployment platform. The sensing logic is platform-independent and has been validated through offline benchmarks and four bounded hardware sessions on the live GO2.
+HELIX is designed with the Unitree GO2 quadruped and NVIDIA Jetson Orin NX as a target deployment platform. The sensing logic is platform-independent and has been validated through offline benchmarks and seven bounded hardware sessions on the live GO2 (2026-04-03, 04-06, 04-14, 04-15, and 04-16 Phase 1 / Phase 2 / 04-17 Phase 3).
 
 Hardware evaluation demonstrated:
-- HELIX ROS 2 nodes running on the PC while observing the live GO2 ROS 2 graph (Sessions 1 / 2)
-- A passive adapter bridging GO2 standard topics to HELIX's `/helix/metrics` input (Sessions 1 / 2 used the now-archived monolithic `passive_adapter.py`; the canonical main-branch path is the `helix_adapter` package)
-- Real FaultEvent detection from a LiDAR rate anomaly on the GO2 via the adapter (Session 1: 4 events; Session 2: 2 events from a `/utlidar/robot_pose` rate anomaly, peak Z-score 4.41)
-- Algorithmic benchmarks running on the Jetson Orin NX (64K samples/sec, 636x operational headroom)
-- Cross-device DDS latency of 0.81 ms (one-way) between PC and Jetson
-- Three `helix_core` lifecycle nodes running natively on the Jetson against the live GO2 for 1780 s with no OOM, no thermal throttle, and no lifecycle deaths (Session 5, 2026-04-15)
-- End-to-end `/rosout` log-pattern detection with ~1.8 s detection latency under a controlled injection (Session 5)
 
-HELIX has **not** been deployed as a persistent monitoring system on the GO2 — the longest run is 30 minutes — and three Session 5 physical injections (LiDAR cover, USB mic disconnect, unrelated topic flood) produced 0 FaultEvents because no adapter was configured to bridge those signals. The `/diagnostics` availability sighting from Session 1 was not reproduced in Sessions 2 or 5; treat native HELIX-input coverage on the GO2 as 1/4 (`/rosout` only). See `docs/GO2_HARDWARE_EVIDENCE.md` for full evidence, scope, and limitations.
+- **Algorithmic benchmarks on the Jetson Orin NX** — 64K samp/s anomaly, 156K msg/s log parser, 0.049 ms per-sample detection latency. Reproduces within ±2% across 11 days (Session 7 vs Session 2).
+- **Cross-device DDS latency** of 0.81 ms (one-way) between PC and Jetson over wired Ethernet.
+- **Three `helix_core` lifecycle nodes running natively on the Jetson** against the live GO2 for 1780 s with no OOM, no thermal throttle, and no lifecycle deaths (Session 5, 2026-04-15).
+- **End-to-end `/rosout` log-pattern detection** with ~1.8 s detection latency under a controlled injection (Session 5).
+- **Packaged `helix_adapter` stack (lifecycle nodes `helix_topic_rate_monitor`, `helix_json_state_parser`, `helix_pose_drift_monitor`)** running alongside the three `helix_core` nodes on the Jetson, publishing `/helix/metrics` with 14 labels across topic-rate, JSON-state, and pose-drift sources (Session 6). This replaces the archived monolithic `passive_adapter.py` used in Sessions 1 / 2.
+- **All three fault types end-to-end on hardware:** LOG_PATTERN (Session 5), and CRASH + ANOMALY (Session 6) via PC-side positive controls on `/helix/heartbeat` and `/helix/metrics`.
+- **60 real ANOMALY FaultEvents from live GO2 data** during a 20-min run with concurrent robot workloads, across 6 distinct metric labels (rate anomalies on `/utlidar/*`, pose-drift on robot motion, `/multiplestate` config-state transitions) (Session 6).
+- **1-hour stability on the Jetson** with the full 6-node canonical adapter path. Total RSS grew 257 → 282 MB and **plateaued at t ≈ 38 min** (samples 226 through 359 identical at 281.77 MB); 360/360 samples with all nodes `active [3]` throughout. Retires the Phase-2 question of whether the early +0.7 MB/min growth was a leak — it was pre-plateau warm-up (Session 7).
+- **Adapter CPU is one-edit tunable.** With `/utlidar/imu` (250 Hz) included, the 6-node stack uses ~48% of one Jetson core. Removing `/utlidar/imu` from `helix_topic_rate_monitor.topics` drops that to under 6% (−88%) with no effect on the fault-detection paths for the other 5 topics (Session 7).
+
+HELIX has **not** been deployed as a persistent monitoring system on the GO2 beyond the 1-hour Session 7 run — multi-hour / days-scale persistence is still out of scope. Three Session 5 physical injections (LiDAR cover, USB mic disconnect, unrelated topic flood) produced 0 FaultEvents because no adapter was configured to bridge those specific signals — a deliberate demonstration of the attachability gap. The `/diagnostics` availability sighting from Session 1 was not reproduced in Sessions 2, 5, or 6; treat native HELIX-input coverage on the GO2 as **1/4** (`/rosout` only), with `/diagnostics` treated as mode-dependent and absent under `motion_switcher = normal`. See `docs/GO2_HARDWARE_EVIDENCE.md` for full evidence, scope, and limitations.
+
+### Adapter tuning note
+
+For deployments where 250 Hz `/utlidar/imu` rate monitoring is not required, drop it from `helix_topic_rate_monitor.topics` in `helix_bringup/config/helix_adapter_params.yaml`. This reduces adapter CPU from ~48% of one Jetson core to under 6%, without changing the fault-detection paths for the other 5 topics.
 
 ## Author
 

@@ -143,3 +143,49 @@ The novelty is not the adapter code itself — it's the systematic analysis of m
   mode-dependent (`ai` / `advanced` not yet tested) or the GO2 firmware /
   configuration changed. Until re-verified, the conservative reading is 1/4
   native input coverage (just `/rosout`). See EXP-16.
+
+### Session 6 (2026-04-16) — additional defensible claims
+- "All three HELIX fault-type paths are validated end-to-end on hardware.
+  LOG_PATTERN was demonstrated in Session 5 (~1.8 s /rosout → /helix/faults).
+  CRASH is demonstrated via an external `/helix/heartbeat` publisher that goes
+  silent — detector emits a single CRASH FaultEvent at 1.60 s after the third
+  missed heartbeat, matching `check_interval_sec=0.5 × miss_threshold=3`.
+  ANOMALY is demonstrated on live GO2 data: 60 real FaultEvents in a 20-min
+  run across 6 distinct metric labels (utlidar rate metrics, pose drift,
+  config-state transitions), on top of a synthetic Z-spike positive control
+  (zscore 5.38)." — Strong (PHASE2_SUMMARY §3, §4E).
+- "The packaged `helix_adapter` lifecycle stack survives concurrent
+  come-here and phoenix load on the same Jetson past the 866 s point at which
+  Session 4 crashed, for the full 20-min window with 0 node deaths, 0
+  lifecycle transitions, and thermal stable at ~57 °C." — Strong
+  (PHASE2_SUMMARY §4A, §4B).
+- "`sim_mode:=true` on `helix_adapter.launch.py` remaps the topic_rate_monitor
+  subscription from `/utlidar/cloud` to `/utlidar/cloud_throttled`, verified
+  end-to-end via topic-info subscriber counts and metric-label emission." —
+  Strong (PHASE2_SUMMARY §5).
+
+### Session 7 (2026-04-17) — additional defensible claims
+- "The 6-node canonical adapter path exhibits RSS **plateau**, not linear
+  leak, over a 1-hour run on the Jetson. Total RSS grew 257 → 282 MB with
+  first-half growth 0.717 MB/min and second-half 0.103 MB/min (7× deceleration);
+  RSS was flat at 281.77 MB from t ≈ 38 min onward (samples 226, 270, 359 all
+  identical). The Phase 2 concern that +0.7 MB/min over 20 min might
+  extrapolate badly past 1 hr is retired for the current config." — Strong
+  (PHASE3_SUMMARY §2B).
+- "Session 1 (2026-04-06) Jetson benchmark numbers reproduce within ±2 % on
+  2026-04-17 across anomaly throughput, anomaly latency (mean and p95),
+  heartbeat miss latency, log-parser throughput, and log-parser accuracy." —
+  Strong (PHASE3_SUMMARY §3).
+- "Adapter CPU on the Jetson is configurable from ~48 % of one core to under
+  6 % via a single edit to `helix_topic_rate_monitor.topics` — removing
+  `/utlidar/imu` (250 Hz) drops that node's CPU 41.3 % → 2.58 % (−94 %) and
+  6-node sum 47.6 % → 5.86 % (−88 %), with no effect on the fault-detection
+  paths for the other 5 topics." — Strong (PHASE3_SUMMARY §4).
+
+### Session 6 — claim retired
+- The Phase 2 hypothesis that the 20-min RSS trend (`+0.7 MB/min`) was a
+  `topic_rate_monitor` callback leak on high-rate topics is **refuted** by
+  Session 7. Over 1 hr, `topic_rate_monitor` had the *smallest* RSS delta
+  (+2.48 MB) despite dominating CPU; growth was spread evenly across all 6
+  processes (+2.5 – 5.1 MB each), consistent with ordinary Python heap
+  warm-up. See PHASE3_SUMMARY §2C.

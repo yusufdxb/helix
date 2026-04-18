@@ -100,3 +100,14 @@ This motivates the paper's argument for **adapter-based fault sensing**: a monit
 | LiDAR occlusion is invisible to HELIX without an adapter | EXP-17 inject 2 (Session 5) | Strong |
 | USB device disconnect is invisible to HELIX without an adapter | EXP-17 inject 4 (Session 5) | Strong |
 | Log-pattern detection works end-to-end on hardware | EXP-17 inject 1 (Session 5) | Strong |
+| `/diagnostics` remains absent — re-verified clean in Session 6 (2026-04-16) post full HELIX teardown | Session 6 `attachability_matrix_clean_20260416.json` → 1/4 native | Strong |
+| ANOMALY end-to-end on live GO2 — 60 real FaultEvents from the `helix_adapter` path | Session 6 (20 min) | Strong |
+
+**Current reading:** native HELIX-input coverage on the GO2 is **1–2 / 4,
+mode-dependent**. `/rosout` is always-on; `/diagnostics` has only ever been
+observed under a specific `twist_mux` configuration in Session 1 (2026-04-03)
+and has not been reproduced under `motion_switcher = normal` in Sessions 2,
+5, or 6. The conservative reading for any claim written today is **1/4** until
+`/diagnostics` is re-verified in `ai` / `advanced` modes. Session 7
+(2026-04-17) did not re-probe attachability — it focused on adapter CPU /
+stability — so the Session-6 1/4 reading stands.
