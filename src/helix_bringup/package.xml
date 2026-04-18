@@ -12,6 +12,8 @@
   <depend>rcl_interfaces</depend>
   <depend>helix_msgs</depend>
   <depend>helix_core</depend>
+  <exec_depend>helix_adapter</exec_depend>
+  <exec_depend>helix_adapter_cpp</exec_depend>
   <depend>ros2launch</depend>
 
   <buildtool_depend>ament_python</buildtool_depend>

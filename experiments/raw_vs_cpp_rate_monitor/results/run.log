@@ -1,0 +1,14 @@
+=== bench start 2026-04-18T01:39:23Z ===
+--- trial raw=0 (cooked_a) ---
+sub log:
+raw=False received=15014 wall_s=60.06 hz=249.99 cpu_mean_pct=4.52 cpu_peak_pct=6.00 samples=60
+--- trial raw=1 (raw_a) ---
+sub log:
+raw=True received=15015 wall_s=60.06 hz=250.00 cpu_mean_pct=3.68 cpu_peak_pct=5.00 samples=60
+--- trial raw=0 (cooked_b) ---
+sub log:
+raw=False received=15015 wall_s=60.06 hz=250.00 cpu_mean_pct=4.65 cpu_peak_pct=6.00 samples=60
+--- trial raw=1 (raw_b) ---
+sub log:
+raw=True received=15015 wall_s=60.06 hz=250.00 cpu_mean_pct=3.57 cpu_peak_pct=5.00 samples=60
+=== bench end 2026-04-18T01:44:03Z ===

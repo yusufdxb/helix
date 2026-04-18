@@ -76,8 +76,13 @@ def generate_launch_description() -> LaunchDescription:
     )
     auto_activate_cond = IfCondition(LaunchConfiguration("auto_activate"))
 
+    # C++ implementation from helix_adapter_cpp. Same node name, same
+    # parameters, same /helix/metrics output as the legacy Python node in
+    # helix_adapter — the Python version still builds and can be launched
+    # manually as `ros2 run helix_adapter helix_topic_rate_monitor` if
+    # needed for parity checks.
     topic_rate_monitor = LifecycleNode(
-        package="helix_adapter",
+        package="helix_adapter_cpp",
         executable="helix_topic_rate_monitor",
         name="helix_topic_rate_monitor",
         namespace="",
