@@ -1,6 +1,6 @@
 # GO2 Hardware Evidence Summary
 
-Evidence collected across two sessions (2026-04-03 and 2026-04-06) from a live Unitree GO2 quadruped, Jetson Orin NX companion, and development PC. Artifacts stored on T7 SSD at `hardware_eval_20260403/` and `hardware_eval_20260406/`.
+Evidence collected across seven sessions (2026-04-03, 04-06, 04-14, 04-15, 04-16 Phase 1, 04-16 Phase 2, 04-17 Phase 3) on a live Unitree GO2 quadruped, Jetson Orin NX companion, and development PC. Artifacts stored on T7 SSD at `hardware_eval_20260403/`, `hardware_eval_20260406/`, `hardware_eval_20260414/`, `hardware_eval_20260415/`, and `hardware_eval_20260416/` (the last of which covers Phase 1, Phase 2, and Phase 3 in nested `jetson_live_copy_phase{1,2,3}/` dirs).
 
 **Session 1 (2026-04-03):** HELIX ROS 2 nodes ran on the live GO2 graph for the first time. A passive adapter bridging GO2 topic rates to `/helix/metrics` enabled the anomaly detector to emit 4 FaultEvents from a LiDAR rate fluctuation (unconfirmed as fault). `/diagnostics` was observed once with a `twist_mux` publisher present.
 
@@ -54,14 +54,14 @@ Measured via 50 round-trip echo exchanges (PC publish → Jetson echo → PC rec
 Baseline measurement while GO2 stack (103 topics) is running, no HELIX.
 **Source:** `hardware_eval_20260403/results/jetson_resource_baseline.txt` (no JSON artifact in `results/`).
 
-| Resource | Value | HELIX Estimate |
+| Resource | Baseline (no HELIX) | HELIX measured (6-node canonical adapter path, Session 7 1-hr) |
 |----------|-------|---------------|
-| CPU idle | 82.4% | <0.5% of one core |
-| RAM free | 13.0 GB / 15.7 GB | <50 MB additional |
-| Thermal | 43–48°C (throttle at 85°C) | +0.2°C |
+| CPU idle | 82.4% | ~48% of one core (IMU included) / ~6% (IMU excluded) |
+| RAM free | 13.0 GB / 15.7 GB | +282 MB plateau across 6 processes (plateau at t ≈ 38 min) |
+| Thermal | 43–48°C (throttle at 85°C) | +9°C (peak 52.9 °C over 1 hr with cold-start) |
 | Cores | 4 of 8 online | Needs 1 core |
 
-**Finding**: The Jetson has substantial headroom. The HELIX resource estimates (<0.5% CPU, <50 MB RAM, +0.2°C) are **projected** from PC measurements and algorithmic scaling factors — HELIX ROS 2 nodes have not been measured running on the Jetson.
+**Finding**: The Jetson has substantial headroom. Prior to Session 5 the HELIX resource cost was **projected** (<0.5 % CPU, <50 MB RAM, +0.2 °C) from PC measurements; those projections were `helix_core`-only numbers that omitted the adapter layer. The measured numbers above are for the full canonical adapter path (3 `helix_core` nodes + 3 `helix_adapter` nodes) against the live GO2 graph on the Jetson, Session 7 (2026-04-17). Dominant cost is `helix_topic_rate_monitor` subscribed to `/utlidar/imu` at 250 Hz; excluding that topic via `helix_topic_rate_monitor.topics` drops adapter CPU by 88 %.
 
 ### 4. GO2 Topic Landscape
 
@@ -149,13 +149,13 @@ A passive adapter bridged 5 GO2 topic rate streams and 2 JSON state streams into
 - Adapter viability for sustained monitoring — demonstrated for 60 seconds only
 
 ### Not Yet Validated
-- HELIX running as persistent ROS 2 service on GO2/Jetson
-- HELIX detecting a confirmed fault (observed rate fluctuation ≠ confirmed fault; no ground truth)
+- ~~HELIX running as persistent ROS 2 service on GO2/Jetson~~ → **VALIDATED (Session 5: 30 min; Session 7: 1 hr with RSS plateau at ~40 min)**
+- HELIX detecting a confirmed fault from a real GO2 fault condition (ground-truth injection validated LOG_PATTERN in Session 5; ANOMALY events captured in Sessions 6/7 are natural statistical-noise crossings, not confirmed faults)
 - Log parser with GO2-specific rules against real GO2 error logs
-- HELIX end-to-end latency on Jetson (helix_msgs not built on Jetson)
+- ~~HELIX end-to-end latency on Jetson (helix_msgs not built on Jetson)~~ → **PARTIAL: Session 5 measured ~1.8 s /rosout → /helix/faults on Jetson under injected ERROR log**
 - Recovery or intervention actions
-- Long-duration stability (>5 minutes)
-- Performance under Jetson thermal throttling
+- ~~Long-duration stability (>5 minutes)~~ → **VALIDATED: 20 min under concurrent load (Session 6); 1 hr cold-start (Session 7). Multi-hour / days-scale still out of scope.**
+- Performance under Jetson thermal throttling (Session 7 peak 52.9 °C, 32 °C below 85 °C throttle — not yet stressed)
 - Multi-platform attachability comparison
 
 ## Bag Inventory
@@ -238,3 +238,106 @@ Lessons recorded in `notes/incident_damp_collapse.md`.
 - Log-pattern fault end-to-end via `/rosout` → log_parser → `/helix/faults` (latency ~1.8 s)
 - `/diagnostics` confirmed UNPUBLISHED across 6 sport-API states under motion_switcher=normal
 - Hardware-grounded confirmation of LiDAR/USB attachability gap (3 physical injections, 0 detections)
+
+---
+
+## Session 6 update — 2026-04-16 (Phase 2; artifacts in `hardware_eval_20260416/jetson_live_copy_phase2/`)
+
+### 12. Packaged `helix_adapter` live on GO2, all three fault paths end-to-end
+
+First hardware run of the main-branch `helix_adapter` ROS 2 package (replacing the archived monolithic `passive_adapter.py`). All 6 lifecycle nodes (3 `helix_core` + 3 `helix_adapter`) came up via `ros2 launch helix_bringup helix_sensing.launch.py` and `helix_adapter.launch.py`, auto-configured and auto-activated.
+
+**Dual positive control (CRASH + ANOMALY, PC-side publishers):**
+- CRASH path — published `std_msgs/String("pc_test_node")` on `/helix/heartbeat` 15× at 10 Hz, then stopped. Detector emitted a single CRASH FaultEvent at 1.60 s (matches `check_interval_sec=0.5 × miss_threshold=3 = 1.5 s`); `_crashed_nodes` dedup correctly suppressed repeat emissions.
+- ANOMALY path — published Float64MultiArray on `/helix/metrics` with 65 baseline samples at 10.0 ± 0.1 followed by 5× spikes at 50.0. Detector emitted 3 ANOMALY FaultEvents (zscore 5.38 / 4.36 / 3.74 as the rolling window absorbed the outliers).
+
+**Live GO2 anomaly detection (the big win):** during a 20-min stability run (1201 s, 120 samples) with concurrent come-here and phoenix load on the same Jetson, the adapter + anomaly_detector emitted **60 real ANOMALY FaultEvents** across 6 distinct metric labels:
+
+| Metric (node_name field) | Faults | Comment |
+|---|---:|---|
+| `rate_hz/utlidar_robot_pose` | 18 | natural jitter on ~19 Hz topic |
+| `rate_hz/utlidar_imu` | 15 | 250 Hz topic |
+| `rate_hz/multiplestate` | 12 | 1 Hz topic, high relative jitter |
+| `pose/displacement_rate_m_s` | 9 | real transient motion (robot was handled) |
+| `rate_hz/utlidar_robot_odom` | 3 | ~150 Hz |
+| `go2_state/obstaclesAvoidSwitch` | 3 | config-state transition |
+
+The 9 pose-drift spikes (current 0.13–0.33 m/s vs window mean ~0.003 m/s) correspond to genuine robot motion events detected from live telemetry — the adapter's pose-drift subsystem is correctly picking up transients against a stationary window. The `obstaclesAvoidSwitch` fault reflects a real config-state toggle during the run.
+
+### 13. 20-min stability under concurrent load
+
+Session 4 (2026-04-14) crashed at 866 s under concurrent come-here + phoenix load. Session 6 ran through the same concurrency pattern (come-here active for the entire 20-min window; phoenix wireless estop joining the last 2 min) and passed cleanly — all 6 nodes `active [3]` for every one of the 120 samples, 0 transitions, 0 deaths.
+
+| Metric | First sample | Last sample | Peak |
+|---|---|---|---|
+| Total RSS (6 nodes) | 250.1 MB | 263.5 MB | 263.5 MB |
+| Total CPU (sum) | — | — | 56.7 % |
+| Jetson load1 | 8.53 | 4.40 | 12.71 |
+| Thermal max | 57.5 °C | 56.9 °C | 58.2 °C |
+
+**The +13 MB over 20 min (+0.7 MB/min) was left open at Phase 2** — could have been leak or warm-up — and was resolved by Session 7 (§14) as pre-plateau warm-up.
+
+### 14. `sim_mode:=true` remap verified
+
+Relaunched `helix_adapter.launch.py sim_mode:=true`. `ros2 topic info` confirms `helix_topic_rate_monitor` subscribes `/utlidar/cloud_throttled` instead of `/utlidar/cloud`; metric labels emit `rate_hz/utlidar_cloud_throttled` (other 13 labels unchanged).
+
+### Updated "Observed on Hardware" additions (Session 6)
+
+- Packaged `helix_adapter` lifecycle stack end-to-end on Jetson vs live GO2
+- All three fault types (CRASH, ANOMALY, LOG_PATTERN) validated end-to-end on hardware
+- 60 real ANOMALY FaultEvents from live GO2 topic rates and pose-drift
+- 20-min stability under concurrent come-here + phoenix load (past Session 4's 866 s failure point)
+- `sim_mode:=true` topic remap verified
+
+---
+
+## Session 7 update — 2026-04-17 (Phase 3; artifacts in `hardware_eval_20260416/jetson_live_copy_phase3/`)
+
+### 15. 1-hour stability — RSS plateau, not leak
+
+60-min run (3603 s, 360 psutil samples at 10 s) with all 6 lifecycle nodes `active [3]` from cold-boot Jetson. `alive_count == 6` across every sample.
+
+**Total RSS grew 257.16 MB → 281.77 MB and plateaued**. Growth rate decelerated 7× between halves (0.717 MB/min for minutes 0–30, 0.103 MB/min for 30–60), and the total RSS was already flat at 281.77 MB from sample 226 (t ≈ 38 min) through sample 359 (t ≈ 60 min).
+
+Per-node RSS deltas refute the Phase 2 hypothesis that the trend was a `topic_rate_monitor` callback leak: `topic_rate_monitor` had the *smallest* RSS growth (+2.48 MB) despite burning ~40× more CPU than any other node. Growth was spread evenly across all 6 processes (+2.5–5.1 MB each), consistent with ordinary Python heap warm-up.
+
+**Faults during the run (idle GO2, no injections):** 151 ANOMALY events across 7 labels — dominated by low-rate topics (`/multiplestate` 49, `/gnss` 48, `/utlidar/robot_pose` 19). All are natural statistical-noise crossings on Z ≥ 3 against tight rolling-window baselines on 1-Hz topics; no real faults were induced. No CRASH events (nothing was publishing `/helix/heartbeat`), no LOG_PATTERN events (no log rules fired).
+
+### 16. Session 1 benchmark reproduction — ±2 % across the board
+
+Pure-Python benchmarks re-run on the Jetson immediately after stack teardown:
+
+| Benchmark | 2026-04-06 | 2026-04-17 | Δ |
+|---|---:|---:|---|
+| Anomaly detection throughput | 63,433 samp/s | 62,225 samp/s | −1.9 % |
+| Anomaly detection latency (mean) | 0.0492 ms | 0.0488 ms | −0.8 % |
+| Anomaly detection latency (p95) | 0.0504 ms | 0.0506 ms | +0.4 % |
+| Heartbeat miss latency (mean) | 200.5 ms | 200.3 ms | −0.1 % |
+| Heartbeat miss latency (p95) | 200.9 ms | 200.3 ms | −0.3 % |
+| Log-parser throughput | 154,798 msg/s | 154,915 msg/s | +0.08 % |
+| Log-parser accuracy (22 cases) | 22/22 | 22/22 | identical |
+
+**All within ±2 %** 11 days after Session 1.
+
+### 17. IMU-excluded overhead — adapter CPU is one-topic-list-edit tunable
+
+Relaunched with `/helix_topic_rate_monitor/topics` set to the 5-topic list (drop `/utlidar/imu`) before `configure`. 60 s psutil sampler post-activate:
+
+| Node | CPU (%) with IMU (Phase 3 1-hr) | CPU (%) no-IMU | Δ |
+|---|---:|---:|---|
+| `helix_topic_rate_monitor` | 41.27 | 2.58 | **−94 %** |
+| `helix_pose_drift_monitor` | 2.32 | 0.35 | −85 % |
+| `helix_anomaly_detector` | 2.21 | 1.80 | −19 % |
+| `helix_json_state_parser` | 0.96 | 0.73 | −24 % |
+| `helix_heartbeat_monitor` | 0.53 | 0.30 | −43 % |
+| `helix_log_parser` | 0.32 | 0.10 | −69 % |
+| **Sum** | **47.61** | **5.86** | **−88 %** |
+
+The 250 Hz `/utlidar/imu` rate-monitor callback alone accounts for ~94 % of `topic_rate_monitor`'s CPU and ~88 % of the whole 6-node adapter stack. **For deployments where `/utlidar/imu` rate monitoring isn't required, drop it from `helix_topic_rate_monitor.topics` — adapter CPU drops from ~48 % of one Jetson core to under 6 %, with no effect on the fault-detection paths for the other 5 topics.**
+
+### Updated "Observed on Hardware" additions (Session 7)
+
+- 1-hour RSS plateau at 282 MB, no leak — refutes the Phase 2 attribution
+- Session 1 benchmark numbers reproduce within ±2 % across 11 days
+- Adapter CPU is configurable 48 % → 6 % via a single `topics` edit
+- Thermal stable across 1 hr cold-start (peak 52.9 °C, 32 °C below throttle)
