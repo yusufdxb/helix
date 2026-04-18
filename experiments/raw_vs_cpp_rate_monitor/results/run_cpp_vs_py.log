@@ -1,0 +1,28 @@
+=== bench start 2026-04-18T01:54:33Z ===
+--- trial py raw=0 (py_cooked_a) ---
+raw=False received=15015 wall_s=60.06 hz=250.00 cpu_mean_pct=4.40 cpu_peak_pct=5.00 samples=60
+--- trial py raw=1 (py_raw_a) ---
+raw=True received=15015 wall_s=60.06 hz=250.00 cpu_mean_pct=3.38 cpu_peak_pct=5.00 samples=60
+--- trial cpp (cpp_a) ---
+[INFO] [1776477486.022999229] [helix_topic_rate_monitor]: TopicRateMonitor deactivated.
+--- trial py raw=0 (py_cooked_b) ---
+raw=False received=15015 wall_s=60.06 hz=250.00 cpu_mean_pct=4.43 cpu_peak_pct=5.00 samples=60
+--- trial py raw=1 (py_raw_b) ---
+raw=True received=15015 wall_s=60.06 hz=250.00 cpu_mean_pct=3.42 cpu_peak_pct=5.00 samples=60
+--- trial cpp (cpp_b) ---
+RuntimeError: configure failed
+=== bench end 2026-04-18T02:00:42Z ===
+=== bench start 2026-04-18T02:01:28Z ===
+--- trial py raw=0 (py_cooked_a) ---
+raw=False received=15014 wall_s=60.06 hz=249.99 cpu_mean_pct=4.47 cpu_peak_pct=6.00 samples=60
+--- trial py raw=1 (py_raw_a) ---
+raw=True received=15015 wall_s=60.06 hz=250.00 cpu_mean_pct=3.58 cpu_peak_pct=4.00 samples=60
+--- trial cpp (cpp_a) ---
+[INFO] [1776477901.517370035] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+--- trial py raw=0 (py_cooked_b) ---
+raw=False received=15015 wall_s=60.06 hz=250.00 cpu_mean_pct=4.73 cpu_peak_pct=6.00 samples=60
+--- trial py raw=1 (py_raw_b) ---
+raw=True received=15016 wall_s=60.06 hz=250.01 cpu_mean_pct=3.53 cpu_peak_pct=4.00 samples=60
+--- trial cpp (cpp_b) ---
+[INFO] [1776478118.425762503] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+=== bench end 2026-04-18T02:08:42Z ===

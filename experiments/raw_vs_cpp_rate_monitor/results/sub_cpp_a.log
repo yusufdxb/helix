@@ -1,0 +1,6 @@
+[INFO] [1776477833.445248484] [helix_topic_rate_monitor]: TopicRateMonitor configured - 1 topics, window=5.0s
+[INFO] [1776477834.298260845] [helix_topic_rate_monitor]: TopicRateMonitor activated.
+debug: launcher_pid=247482 measured_pid=247484
+cpp wall_s=60.06 cpu_mean_pct=1.04 cpu_peak_pct=2.00 samples=60
+[INFO] [1776477900.199850968] [helix_topic_rate_monitor]: TopicRateMonitor deactivated.
+[INFO] [1776477901.517370035] [rclcpp]: signal_handler(SIGINT/SIGTERM)
