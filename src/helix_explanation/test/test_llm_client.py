@@ -10,10 +10,10 @@ from unittest.mock import MagicMock
 
 import pytest
 import requests
-
 from helix_explanation.llm_client import (
-    AsyncLLMClient,
     HEALER_SCHEMA,
+    RECOVERY_ALLOWLIST,
+    AsyncLLMClient,
     LLMClient,
     LLMClientError,
     LLMHTTPError,
@@ -23,10 +23,8 @@ from helix_explanation.llm_client import (
     LLMRole,
     LLMTimeoutError,
     LLMTransportError,
-    RECOVERY_ALLOWLIST,
     _validate_against_schema,
 )
-
 
 # ---------------------------------------------------------------------------
 # helpers

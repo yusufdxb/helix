@@ -10,13 +10,10 @@ REQUIREMENT: Isaac Sim bridge running before invoking.
 import os
 import signal
 import subprocess
-import time
 from pathlib import Path
 
 import pytest
-
 from rosbags.highlevel import AnyReader
-
 
 SCENARIO_DURATION_S = 40.0
 CRASH_DELAY_S = 15.0

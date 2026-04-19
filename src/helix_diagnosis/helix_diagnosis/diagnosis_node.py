@@ -12,10 +12,9 @@ from typing import Optional
 import rclpy
 from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 
+from helix_diagnosis.rules import STATE_IDLE, STATE_STOP_AND_HOLD, HintShape, evaluate
 from helix_msgs.msg import FaultEvent, RecoveryHint
 from helix_msgs.srv import GetContext
-
-from helix_diagnosis.rules import evaluate, STATE_IDLE, STATE_STOP_AND_HOLD, HintShape
 
 TICK_HZ: float = 10.0
 

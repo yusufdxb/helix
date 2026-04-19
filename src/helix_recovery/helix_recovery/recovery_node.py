@@ -14,7 +14,6 @@ from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 
 from helix_msgs.msg import RecoveryAction, RecoveryHint
 
-
 ACTION_STOP = 'STOP_AND_HOLD'
 ACTION_RESUME = 'RESUME'
 ACTION_LOG_ONLY = 'LOG_ONLY'

@@ -26,8 +26,6 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
-from helix_msgs.msg import FaultEvent, RecoveryHint
-
 from helix_explanation.llm_client import (
     AsyncLLMClient,
     LLMClient,
@@ -36,6 +34,7 @@ from helix_explanation.llm_client import (
     LLMResponse,
     LLMRole,
 )
+from helix_msgs.msg import FaultEvent, RecoveryHint
 
 SEVERITY_LABEL = {1: 'WARN', 2: 'ERROR', 3: 'CRITICAL'}
 

@@ -6,12 +6,13 @@ hardware parity is re-confirmed on the Jetson with a real rosbag. Set
 the arg true to launch the C++ lifecycle component instead. Both paths
 honor the same config file (same param names).
 """
-from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import LifecycleNode, Node
 from launch_ros.substitutions import FindPackageShare
+
+from launch import LaunchDescription
 
 
 def generate_launch_description():

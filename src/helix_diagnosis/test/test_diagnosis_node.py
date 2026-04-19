@@ -1,7 +1,11 @@
 """Tests for DiagnosisNode state machine (subscribed to /helix/faults)."""
 from types import SimpleNamespace
 
-from helix_diagnosis.diagnosis_node import DiagnosisStateMachine, STATE_IDLE, STATE_STOP_AND_HOLD
+from helix_diagnosis.diagnosis_node import (
+    STATE_IDLE,
+    STATE_STOP_AND_HOLD,
+    DiagnosisStateMachine,
+)
 
 
 def _fault(ft='ANOMALY', sev=2, metric='utlidar_rate', fid='f1', ts=0.0):
