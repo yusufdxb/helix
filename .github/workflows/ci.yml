@@ -60,17 +60,16 @@ jobs:
             helix_sensing_cpp \
             helix_diagnosis helix_recovery helix_explanation
 
-      - name: Run unit tests (Python packages)
+      - name: Run unit tests (Python packages — one invocation per package for rclpy isolation)
         run: |
           . /opt/ros/humble/setup.sh
           . install/setup.sh
-          python3 -m pytest \
-            src/helix_core/test/ \
-            src/helix_adapter/test/ \
-            src/helix_diagnosis/test/ \
-            src/helix_recovery/test/ \
-            src/helix_explanation/test/ \
-            -v --timeout=30
+          set -e
+          for pkg in helix_core helix_adapter helix_diagnosis helix_recovery helix_explanation; do
+            echo "::group::pytest $pkg"
+            python3 -m pytest "src/$pkg/test/" -v --timeout=30
+            echo "::endgroup::"
+          done
 
       - name: Run C++ tests (helix_sensing_cpp)
         run: |
