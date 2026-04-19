@@ -153,7 +153,7 @@ Steps 1, 2, 4, and 6 require ROS 2 Humble. The `ros:humble-ros-base` Docker imag
 
 ## Project Direction
 
-HELIX is being shipped as a **public repo + demo video** — not a paper. The deliverable is a working self-healing system that other roboticists can install and adapt. Four pillars:
+HELIX is being shipped as a **public repo + demo video**. The deliverable is a working self-healing system that other roboticists can install and adapt. Four pillars:
 
 1. **Closed-loop self-healing** — detect → diagnose → recover → explain, on GO2 + Jetson.
 2. **C/C++ on hot paths** — Python is a RAM/latency liability on Jetson at steady-state. Hot-path sensing nodes are being ported to C++ (AnomalyDetector landed; HeartbeatMonitor, LogParser, adapter rate-monitor to follow). Target: <30% of Python RSS baseline.
