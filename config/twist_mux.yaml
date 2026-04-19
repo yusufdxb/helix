@@ -1,0 +1,19 @@
+# twist_mux priority arbitration for HELIX closed loop.
+# Higher priority wins when multiple topics publish.
+# Humble requires the `twist_mux: ros__parameters:` wrapper.
+twist_mux:
+  ros__parameters:
+    topics:
+      helix_recovery:
+        topic:    /helix/cmd_vel
+        timeout:  0.5
+        priority: 100
+      navigation:
+        topic:    /nav/cmd_vel
+        timeout:  0.5
+        priority: 50
+      teleop:
+        topic:    /teleop/cmd_vel
+        timeout:  0.5
+        priority: 30
+    locks: {}

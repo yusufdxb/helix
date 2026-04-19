@@ -1,0 +1,48 @@
+# HELIX sim harness: extend go2_ros2_bridge.py to publish a synthetic
+# /utlidar/cloud topic at a configurable rate so PassiveAdapter sees the
+# same topic name in sim as on the real GO2.
+#
+# Target file (outside this repo):
+#   ~/IsaacLab/scripts/reinforcement_learning/rsl_rl/go2_ros2_bridge.py
+#
+# Apply with: `patch -p1 < go2_ros2_bridge.utlidar.patch` from that directory,
+# or apply the three hunks by hand (they are small and readable).
+
+--- a/scripts/reinforcement_learning/rsl_rl/go2_ros2_bridge.py
++++ b/scripts/reinforcement_learning/rsl_rl/go2_ros2_bridge.py
+@@ -49,6 +49,8 @@
+ parser.add_argument("--ros_namespace", type=str, default="/go2", help="ROS2 topic namespace.")
+ parser.add_argument("--cmd_timeout", type=float, default=0.5, help="Seconds of no /cmd_vel before we zero out.")
++parser.add_argument("--utlidar_rate_hz", type=float, default=10.0,
++                    help="Rate [Hz] for synthetic /utlidar/cloud publisher (HELIX sim harness).")
+ cli_args.add_rsl_rl_args(parser)
+ add_launcher_args(parser)
+ args_cli, hydra_args = parser.parse_known_args()
+
+@@ -77,7 +79,7 @@
+         from rclpy.node import Node
+         from geometry_msgs.msg import Twist, TransformStamped
+         from nav_msgs.msg import Odometry
+-        from sensor_msgs.msg import JointState, Imu
++        from sensor_msgs.msg import JointState, Imu, PointCloud2
+
+@@ -125,7 +127,20 @@
+         node.create_subscription(Twist, f"{ns}/cmd_vel", cmd_vel_cb, 10)
+         odom_pub = node.create_publisher(Odometry, f"{ns}/odom", 10)
+         joint_pub = node.create_publisher(JointState, f"{ns}/joint_states", 10)
+         imu_pub = node.create_publisher(Imu, f"{ns}/imu", 10)
+-        print(f"[bridge] Subscribing: {ns}/cmd_vel  |  Publishing: {ns}/odom, {ns}/joint_states, {ns}/imu")
++        # HELIX sim harness: publish synthetic /utlidar/cloud so PassiveAdapter
++        # can monitor its rate the same way it does on real hardware.
++        utlidar_pub = node.create_publisher(PointCloud2, "/utlidar/cloud", 10)
++
++        def _pub_utlidar():
++            msg = PointCloud2()
++            msg.header.stamp = node.get_clock().now().to_msg()
++            msg.header.frame_id = "utlidar"
++            # width/height left zero — rate is the signal, payload is not.
++            utlidar_pub.publish(msg)
++
++        node.create_timer(1.0 / max(args_cli.utlidar_rate_hz, 0.01), _pub_utlidar)
++        print(f"[bridge] Subscribing: {ns}/cmd_vel  |  Publishing: {ns}/odom, {ns}/joint_states, {ns}/imu, "
++              f"/utlidar/cloud @ {args_cli.utlidar_rate_hz:.1f} Hz")

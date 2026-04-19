@@ -46,26 +46,38 @@ jobs:
             ros-humble-diagnostic-msgs \
             ros-humble-sensor-msgs \
             ros-humble-nav-msgs \
-            ros-humble-geometry-msgs
+            ros-humble-geometry-msgs \
+            ros-humble-rclcpp-lifecycle \
+            ros-humble-rclcpp-components \
+            ros-humble-ament-cmake-gtest
           pip install pytest-timeout aiofiles
 
       - name: Build workspace
         run: |
           . /opt/ros/humble/setup.sh
           colcon build --symlink-install --packages-select \
-            helix_msgs helix_core helix_adapter helix_bringup
+            helix_msgs helix_core helix_adapter helix_bringup \
+            helix_sensing_cpp \
+            helix_diagnosis helix_recovery helix_explanation
 
-      - name: Run helix_core tests
+      - name: Run unit tests (Python packages)
         run: |
           . /opt/ros/humble/setup.sh
           . install/setup.sh
-          python3 -m pytest src/helix_core/test/ -v --timeout=30
+          python3 -m pytest \
+            src/helix_core/test/ \
+            src/helix_adapter/test/ \
+            src/helix_diagnosis/test/ \
+            src/helix_recovery/test/ \
+            src/helix_explanation/test/ \
+            -v --timeout=30
 
-      - name: Run helix_adapter tests
+      - name: Run C++ tests (helix_sensing_cpp)
         run: |
           . /opt/ros/humble/setup.sh
           . install/setup.sh
-          python3 -m pytest src/helix_adapter/test/ -v --timeout=30
+          colcon test --packages-select helix_sensing_cpp
+          colcon test-result --verbose
 
       - name: Verify launch files import cleanly
         run: |
@@ -83,3 +95,12 @@ jobs:
               assert ld is not None, name
               print(f"OK: {name}")
           PY
+
+      - name: Sim-integration harness import check (sim not run in CI)
+        run: |
+          . /opt/ros/humble/setup.sh
+          . install/setup.sh
+          pip install rosbags
+          python3 -c "import tests.sim_integration.test_lidar_occlusion_recovery"
+          python3 -c "import tests.sim_integration.test_rule_r3_log_critical"
+          python3 -c "import tests.sim_integration.test_rule_r4_crash_logonly"
