@@ -8,9 +8,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
-
 from rosbags.highlevel import AnyReader
-
 
 SCENARIO_CMD = [
     'python3', 'scripts/sim_faults/run_closed_loop_scenario.py',

@@ -1,7 +1,7 @@
 """Unit tests for helix_diagnosis.rules — pure function, no ROS 2 runtime."""
 from types import SimpleNamespace
 
-from helix_diagnosis.rules import evaluate, STATE_IDLE, STATE_STOP_AND_HOLD
+from helix_diagnosis.rules import STATE_IDLE, STATE_STOP_AND_HOLD, evaluate
 
 
 def _fault(fault_type='ANOMALY', metric='utlidar_rate', severity=2, fault_id='f1'):

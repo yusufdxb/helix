@@ -9,13 +9,10 @@ REQUIREMENT: Isaac Sim bridge running (for /utlidar/cloud) before invoking.
 import os
 import signal
 import subprocess
-import time
 from pathlib import Path
 
 import pytest
-
 from rosbags.highlevel import AnyReader
-
 
 SCENARIO_DURATION_S = 40.0
 LOG_INJECT_DELAY_S = 15.0
