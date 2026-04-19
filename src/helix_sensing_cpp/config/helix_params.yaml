@@ -1,0 +1,20 @@
+# AnomalyDetector parameters — shared between the Python (helix_core) and
+# C++ (helix_sensing_cpp) implementations. Same param names on both sides.
+#
+# emit_cooldown_s is new to the C++ port; the Python path ignores unknown
+# params (rclpy declare_parameter is opt-in). When ported back to Python
+# add the same declaration to helix_core.anomaly_detector.
+#
+#   zscore_threshold     — |z| above which a sample counts as a violation
+#   consecutive_trigger  — number of consecutive violations needed to emit
+#   window_size          — rolling window length in samples
+#   emit_cooldown_s      — seconds between FaultEvent emissions per metric
+#                           (0.0 = legacy Python behavior: emit every sample
+#                           once the trigger streak is reached)
+
+helix_anomaly_detector:
+  ros__parameters:
+    zscore_threshold: 3.0
+    consecutive_trigger: 3
+    window_size: 60
+    emit_cooldown_s: 1.0
