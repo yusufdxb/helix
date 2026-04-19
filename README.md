@@ -1,9 +1,10 @@
-# HELIX — Structured Fault Sensing for ROS 2 Systems
+# HELIX — Self-Healing Middleware for ROS 2 Robots
 
-> A fault observability prototype: three lifecycle-managed detection nodes, a custom fault message type, and offline benchmarks.
+> A closed-loop self-healing system for ROS 2: detect faults, diagnose root cause, recover safely, explain what happened. Validated on a Unitree GO2 + Jetson Orin NX.
 
 [![CI](https://github.com/yusufdxb/helix/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/yusufdxb/helix/actions/workflows/ci.yml)
 [![ROS 2 Humble](https://img.shields.io/badge/ROS2-Humble-blue)](https://docs.ros.org/en/humble/)
+[![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)](https://en.cppreference.com/w/cpp/17)
 [![Python 3.10](https://img.shields.io/badge/Python-3.10-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
@@ -11,27 +12,20 @@
 
 ## What This Is
 
-HELIX is a bounded ROS 2 fault sensing prototype. It implements three lifecycle nodes that monitor a ROS 2 graph and publish structured `FaultEvent` messages when problems are detected:
+HELIX is a four-tier self-healing stack for ROS 2 robots:
 
-- **Heartbeat monitor** — timeout-based liveness checks on expected nodes
-- **Anomaly detector** — rolling Z-score over numeric metric streams
-- **Log parser** — regex rule matching against log patterns
+1. **Sense** — lifecycle nodes monitor the ROS 2 graph and emit structured `FaultEvent` messages
+   - Anomaly detector (rolling Z-score, Python + **C++ port**)
+   - Heartbeat monitor (topic-rate liveness)
+   - Log parser (regex rule matching)
+   - Adapter nodes bridging robot-specific telemetry to `/helix/metrics`
+2. **Diagnose** — a lifecycle node runs deterministic rules (R1–R4) against fault streams + context snapshots and publishes `RecoveryHint` suggestions. Pure-function rules are unit-testable without ROS 2.
+3. **Recover** — a lifecycle node consumes hints, enforces a strict safety envelope (cooldown, allowlist `{STOP_AND_HOLD, RESUME, LOG_ONLY}`, enable flag), and is the only publisher of `cmd_vel`.
+4. **Explain** — an advisory **local LLM** (llama-server sidecar, Qwen2.5-1.5B-Instruct Q4_K_M on Jetson) annotates events for operators. Runs with schema-constrained JSON decoding. **Never on the safety-critical path** — the Recover tier's allowlist is the hard gate.
 
-All three nodes publish to `/helix/faults` using a custom `FaultEvent.msg` type. A fault injector node is included for local demonstration and testing.
+Hot-path sensing nodes are being ported from Python to C++ so HELIX can coexist on the Jetson with the robot's Nav2 + perception stack without RAM or CPU pressure. See [`docs/CPP_PORT_DESIGN_ANOMALY_DETECTOR.md`](docs/CPP_PORT_DESIGN_ANOMALY_DETECTOR.md).
 
 Offline benchmarks (pure-Python ports of the detection logic) are provided for evaluating algorithmic performance without a ROS 2 runtime.
-
-## What This Is Not
-
-This repository does **not** contain:
-
-- A recovery or self-healing engine
-- LLM-based diagnosis
-- A web dashboard or operator UI
-- Persistent event storage
-- Hardware deployment artifacts or robot-specific code (though hardware evaluation has been conducted — see `docs/GO2_HARDWARE_EVIDENCE.md`)
-
-A `RecoveryHint.msg` is defined in `helix_msgs` but is not used by any node in this codebase.
 
 ## Architecture Overview
 
@@ -40,27 +34,35 @@ A `RecoveryHint.msg` is defined in `helix_msgs` but is not used by any node in t
 </p>
 
 ```text
-monitored ROS 2 graph
-        |
-        +--> /diagnostics -------------------+
-        |                                    |
-        +--> /helix/metrics -----------------+--> helix_core
-        |                                    |    - heartbeat_monitor
-        +--> log stream / fault rules -------+    - anomaly_detector
-                                                  - log_parser
-                                                  |
-                                                  +--> /helix/faults (FaultEvent)
+  monitored ROS 2 graph
+          |
+          v
+  +-----------------+      +------------------+      +------------------+      +------------------+
+  |    SENSE        |      |    DIAGNOSE      |      |    RECOVER       |      |    EXPLAIN       |
+  |  helix_core     | ---> |  helix_diagnosis | ---> |  helix_recovery  |      |  helix_explanat. |
+  |  helix_sensing_ |      |  (rules R1-R4)   |      |  (allowlist +    |      |  (local LLM,     |
+  |  cpp (port)     |      |                  |      |   safety env.)   |      |   advisory)      |
+  |  helix_adapter  |      +------------------+      +------------------+      +------------------+
+  +-----------------+               |                          |                        ^
+          |                         v                          v                        |
+          |            /helix/recovery_hints         /cmd_vel + lifecycle         /helix/faults
+          +--> /helix/faults ---------------------------------------------------------+
 ```
 
 More detail: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Packages
 
-| Package | Contents |
-|---|---|
-| `helix_msgs` | `FaultEvent.msg`, `RecoveryHint.msg` (defined but unused) |
-| `helix_core` | `anomaly_detector.py`, `heartbeat_monitor.py`, `log_parser.py` |
-| `helix_bringup` | Launch file, YAML config, `fault_injector.py` |
+| Package | Language | Role | Contents |
+|---|---|---|---|
+| `helix_msgs` | msg | msgs | `FaultEvent`, `RecoveryHint`, `RecoveryAction`, `GetContext` srv |
+| `helix_core` | Python | Sense | `anomaly_detector`, `heartbeat_monitor`, `log_parser` (reference implementation) |
+| `helix_sensing_cpp` | C++ | Sense | C++ port of `anomaly_detector` (RollingStats kernel + LifecycleNode component). Launch-gated, Python stays default until hardware parity re-confirmed. |
+| `helix_adapter` | Python | Sense | Lifecycle nodes bridging robot-specific telemetry (topic-rate monitor, JSON state parser, pose drift) to `/helix/metrics` |
+| `helix_diagnosis` | Python | Diagnose | `context_buffer`, `diagnosis_node` (IDLE ↔ STOP_AND_HOLD state machine), pure-function `rules` |
+| `helix_recovery` | Python | Recover | `recovery_node` with `SafetyEnvelope` (enable/cooldown/allowlist). Only publisher of `cmd_vel`. |
+| `helix_explanation` | Python | Explain | `llm_explainer` + `llm_client` — llama-server sidecar client, `response_format: json_schema`, ThreadPoolExecutor, deterministic fallback. Advisory only. |
+| `helix_bringup` | Python | Ops | Launch files, YAML config, `fault_injector` |
 
 ## Quick Start
 
@@ -135,18 +137,31 @@ An evaluator can reproduce the following locally:
 
 Steps 1, 2, 4, and 6 require ROS 2 Humble. The `ros:humble-ros-base` Docker image is a known-good environment. Steps 3 and 5 run with standard Python 3.10+. All result artifacts are stored in `results/`.
 
+## Project Direction
+
+HELIX is being shipped as a **public repo + demo video** — not a paper. The deliverable is a working self-healing system that other roboticists can install and adapt. Four pillars:
+
+1. **Closed-loop self-healing** — detect → diagnose → recover → explain, on GO2 + Jetson.
+2. **C/C++ on hot paths** — Python is a RAM/latency liability on Jetson at steady-state. Hot-path sensing nodes are being ported to C++ (AnomalyDetector landed; HeartbeatMonitor, LogParser, adapter rate-monitor to follow). Target: <30% of Python RSS baseline.
+3. **Local LLM for heal / flag / predict** — Qwen2.5-1.5B-Instruct Q4_K_M via llama-server sidecar on Jetson Orin NX (~1.5-1.7 GB RSS). Schema-constrained JSON output. Advisory only; never a control input.
+4. **Hardware-validated** — seven lab sessions on a live GO2 as of 2026-04-17 (see below).
+
+See [`docs/LLAMA_SERVER_JETSON_SETUP.md`](docs/LLAMA_SERVER_JETSON_SETUP.md) for the Jetson deployment runbook and [`docs/CPP_PORT_DESIGN_ANOMALY_DETECTOR.md`](docs/CPP_PORT_DESIGN_ANOMALY_DETECTOR.md) for the C++ port design.
+
 ## Research Context
 
-HELIX is designed with the Unitree GO2 quadruped and NVIDIA Jetson Orin NX as a target deployment platform. The sensing logic is platform-independent and has been validated both in offline benchmarks and through a hardware evaluation on the live GO2 (2026-04-03).
+Target platform: Unitree GO2 quadruped + NVIDIA Jetson Orin NX 16 GB. The sensing and recovery logic is platform-independent; adapter nodes isolate robot-specific telemetry.
 
-Hardware evaluation demonstrated:
-- HELIX ROS 2 nodes running on the PC while observing the live GO2 ROS 2 graph
-- A passive adapter bridging GO2 standard topics to HELIX's `/helix/metrics` input
-- Real FaultEvent detection from a LiDAR rate anomaly on the GO2 via the adapter
-- Algorithmic benchmarks running on the Jetson Orin NX (64K samples/sec, 636x operational headroom)
-- Cross-device DDS latency of 0.81 ms (one-way) between PC and Jetson
+Hardware validation across seven lab sessions (2026-04-03 → 2026-04-17) demonstrated:
+- HELIX lifecycle nodes running persistently on the Jetson alongside the live GO2 stack
+- 30-minute persistent deployment with all success criteria green (Session 5)
+- 1-hour stability run with RSS plateau, refuting earlier leak concerns (Session 7)
+- IMU-excluded overhead: 6-node sum 47.6% → 5.86% core CPU (-88%)
+- Real FaultEvent detection from LiDAR rate anomalies on the GO2 via the adapter
+- Ground-truth fault injection with ~1.8 s end-to-end detection latency
+- Algorithmic benchmarks on Jetson Orin NX (62-64K samples/sec)
 
-HELIX has **not** been deployed as a persistent monitoring system on the GO2. The adapter-based detection was a controlled evaluation, not continuous deployment. See `docs/GO2_HARDWARE_EVIDENCE.md` for full evidence, scope, and limitations.
+See `docs/GO2_HARDWARE_EVIDENCE.md` for full evidence, scope, and limitations.
 
 ## Author
 
