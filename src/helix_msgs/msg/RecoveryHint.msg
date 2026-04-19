@@ -1,11 +1,13 @@
-# RecoveryHint — forward-looking interface definition
+# RecoveryHint — emitted by DiagnosisNode, consumed by RecoveryNode.
 #
-# This message type is defined for future use by a recovery planning
-# subsystem. It is NOT published, subscribed to, or processed by any
-# node in the current codebase. Its presence does not indicate that
-# recovery functionality is implemented.
+# fault_id       correlates with the FaultEvent that triggered this hint
+# suggested_action  STOP_AND_HOLD | RESUME | LOG_ONLY (enforced by RecoveryNode allowlist)
+# confidence     0.0 - 1.0
+# reasoning      short human-readable rationale
+# rule_matched   rule identifier from rules.py (R1, R2, R3, R4, ...)
 
 string fault_id
 string suggested_action
 float32 confidence
 string reasoning
+string rule_matched

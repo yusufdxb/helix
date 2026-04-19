@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>helix_sensing_cpp</name>
+  <version>0.1.0</version>
+  <description>
+    C++ rclcpp_lifecycle port of the HELIX anomaly detector. Drop-in
+    replacement for the Python helix_core.anomaly_detector node:
+    same node name (helix_anomaly_detector), same parameters, same
+    topics (/diagnostics, /helix/metrics -> /helix/faults), same
+    FaultEvent rounding behavior. Adds a cooldown-based suppression
+    parameter (emit_cooldown_s) to replace the Python flood behavior
+    while keeping legacy behavior available (emit_cooldown_s = 0.0).
+  </description>
+  <maintainer email="yusuf.a.guenena@gmail.com">yusufdxb</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>rclcpp_components</depend>
+  <depend>std_msgs</depend>
+  <depend>diagnostic_msgs</depend>
+  <depend>lifecycle_msgs</depend>
+  <depend>helix_msgs</depend>
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
