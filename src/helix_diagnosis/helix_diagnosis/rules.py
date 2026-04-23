@@ -31,12 +31,27 @@ class HintShape:
 
 
 def _metric_name(fault_event: Any) -> Optional[str]:
-    """Pull metric_name from fault_event.context_keys/context_values."""
+    """Pull metric name from fault_event.context_keys/context_values.
+
+    Emitter (helix_core.anomaly_detector) writes the key as ``metric_name``.
+    Older callers used ``metric``; we accept either for forward/backward compat.
+    """
     try:
-        idx = list(fault_event.context_keys).index('metric')
-        return fault_event.context_values[idx]
-    except (ValueError, AttributeError):
+        keys = list(fault_event.context_keys)
+    except (TypeError, AttributeError):
         return None
+    for k in ('metric_name', 'metric'):
+        try:
+            idx = keys.index(k)
+        except ValueError:
+            continue
+        return fault_event.context_values[idx]
+    return None
+
+
+def _fault_source_id(fault) -> str:
+    """FaultEvent has no fault_id field — use node_name as the correlation key."""
+    return getattr(fault, 'node_name', '') or ''
 
 
 def _rule_r1(fault, ctx, state) -> Optional[HintShape]:
@@ -44,12 +59,18 @@ def _rule_r1(fault, ctx, state) -> Optional[HintShape]:
         return None
     if fault.fault_type != 'ANOMALY':
         return None
-    if _metric_name(fault) != 'utlidar_rate':
+    metric = _metric_name(fault)
+    # Match any utlidar-family rate metric (cloud, imu, robot_odom, robot_pose).
+    # Emitter currently writes 'rate_hz/utlidar_<topic>'; historical tests used
+    # the symbolic name 'utlidar_rate'.
+    if metric is None:
+        return None
+    if not (metric.startswith('rate_hz/utlidar') or metric == 'utlidar_rate'):
         return None
     if fault.severity < SEVERITY_ERROR:
         return None
     return HintShape(
-        fault_id=fault.fault_id,
+        fault_id=_fault_source_id(fault),
         suggested_action='STOP_AND_HOLD',
         confidence=0.9,
         reasoning='LiDAR rate anomaly at ERROR severity — stop and hold',
@@ -80,7 +101,7 @@ def _rule_r3(fault, ctx, state) -> Optional[HintShape]:
     if fault.severity != SEVERITY_CRITICAL:
         return None
     return HintShape(
-        fault_id=fault.fault_id,
+        fault_id=_fault_source_id(fault),
         suggested_action='STOP_AND_HOLD',
         confidence=0.7,
         reasoning='Critical log pattern detected — defensive stop',
@@ -94,7 +115,7 @@ def _rule_r4(fault, ctx, state) -> Optional[HintShape]:
     if fault.fault_type != 'CRASH':
         return None
     return HintShape(
-        fault_id=fault.fault_id,
+        fault_id=_fault_source_id(fault),
         suggested_action='LOG_ONLY',
         confidence=0.5,
         reasoning='Node crash detected — logged, no actuation (scope limit)',

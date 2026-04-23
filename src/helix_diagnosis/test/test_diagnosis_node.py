@@ -8,14 +8,14 @@ from helix_diagnosis.diagnosis_node import (
 )
 
 
-def _fault(ft='ANOMALY', sev=2, metric='utlidar_rate', fid='f1', ts=0.0):
+def _fault(ft='ANOMALY', sev=2, metric='rate_hz/utlidar_cloud', node_name=None, ts=0.0):
     return SimpleNamespace(
-        fault_id=fid,
+        node_name=node_name if node_name is not None else metric,
         fault_type=ft,
         severity=sev,
         detail='',
         timestamp=ts,
-        context_keys=['metric'],
+        context_keys=['metric_name'],
         context_values=[metric],
     )
 
@@ -55,6 +55,6 @@ def test_new_anomaly_resets_clear_timer():
     sm = DiagnosisStateMachine()
     sm.process_fault(_fault(), now_seconds=1.0)
     sm.tick(now_seconds=2.5)                   # 1.5s clear
-    sm.process_fault(_fault(fid='f2'), now_seconds=2.8)  # new fault resets
+    sm.process_fault(_fault(node_name='f2'), now_seconds=2.8)  # new fault resets
     hint = sm.tick(now_seconds=5.0)             # 2.2s since reset — should NOT resume
     assert hint is None
