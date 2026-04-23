@@ -125,12 +125,32 @@ class AnomalyDetector(LifecycleNode):
         Z-score is evaluated BEFORE appending so that anomalous values do not
         immediately contaminate the baseline statistics. This ensures consecutive
         violations remain detectable even when multiple spikes occur in sequence.
+
+        NaN handling: topic_rate_monitor emits NaN when a watched topic has
+        gone silent for the full rolling window (see rate_window.rate_or_nan).
+        Z-score arithmetic on NaN produces NaN, which fails every threshold
+        comparison — so without this branch a silent topic would produce zero
+        anomalies. Treat NaN as a violation of the same shape as a z-score
+        breach so that the existing consecutive_trigger + R1 path still fires.
         """
         with self._data_lock:
             if metric_name not in self._windows:
                 self._windows[metric_name] = deque(maxlen=self._window_size)
                 self._consecutive[metric_name] = 0
             window = self._windows[metric_name]
+
+            if math.isnan(value):
+                # Stale topic — don't pollute the window with NaN (would
+                # poison all future z-scores) but count it as a violation.
+                self._consecutive[metric_name] += 1
+                consecutive = self._consecutive[metric_name]
+                self.get_logger().warn(
+                    f"Metric '{metric_name}' stale (NaN) — "
+                    f"consecutive violation #{consecutive}"
+                )
+                if consecutive >= self._consecutive_trigger:
+                    self._emit_stale_fault(metric_name, consecutive)
+                return
 
             if len(window) >= 2:
                 # Compute mean/std from historical samples (before this new value)
@@ -205,6 +225,36 @@ class AnomalyDetector(LifecycleNode):
         self.get_logger().info(
             f"FaultEvent emitted: ANOMALY for '{metric_name}' "
             f"(zscore={zscore:.2f}, consecutive={consecutive})"
+        )
+
+    def _emit_stale_fault(self, metric_name: str, consecutive: int) -> None:
+        """Build and publish an ANOMALY FaultEvent for a stale (NaN) metric.
+
+        Same fault_type ('ANOMALY') as the z-score path so R1 in
+        helix_diagnosis catches both without a new rule; downstream consumers
+        can disambiguate via context_keys['violation_type'] == 'stale'.
+        """
+        msg = FaultEvent()
+        msg.node_name = metric_name
+        msg.fault_type = "ANOMALY"
+        msg.severity = 2
+        msg.detail = (
+            f"Metric '{metric_name}' stale — no samples in window "
+            f"on {consecutive} consecutive checks"
+        )
+        msg.timestamp = time.time()
+        msg.context_keys = [
+            "metric_name", "violation_type", "consecutive_count",
+        ]
+        msg.context_values = [
+            metric_name,
+            "stale",
+            str(consecutive),
+        ]
+        self._fault_pub.publish(msg)
+        self.get_logger().info(
+            f"FaultEvent emitted: ANOMALY (stale) for '{metric_name}' "
+            f"consecutive={consecutive}"
         )
 
 

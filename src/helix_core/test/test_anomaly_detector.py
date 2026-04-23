@@ -117,3 +117,52 @@ def test_anomaly_detection(detector_node):
         f"Expected ANOMALY FaultEvent, got: {[(f.fault_type, f.node_name) for f in received_faults]}"
     )
     assert anomaly_faults[0].severity == 2
+
+
+def test_stale_topic_fires_anomaly(detector_node):
+    """NaN metric values (topic_rate_monitor's stale signal) must produce an
+    ANOMALY FaultEvent tagged with violation_type='stale' in context.
+
+    Regression coverage for the product gap found in Session 8 (2026-04-23):
+    a silent topic produced 0 anomalies because z-score of NaN is NaN and
+    failed every threshold comparison.
+
+    This hits _process_sample directly (rather than round-tripping through
+    /helix/metrics) because the node-level integration test above
+    (test_anomaly_detection) is load-sensitive to whatever else is
+    publishing on /helix/metrics during the run; unit-level coverage is
+    stable and faster.
+    """
+    from helix_msgs.msg import FaultEvent
+
+    emitted = []
+    original = detector_node._fault_pub.publish
+    detector_node._fault_pub.publish = lambda msg: emitted.append(msg)
+    try:
+        nan_label = "test_metric_stale_unit"
+        for _ in range(5):
+            detector_node._process_sample(nan_label, float("nan"))
+    finally:
+        detector_node._fault_pub.publish = original
+
+    stale_faults = [
+        f for f in emitted
+        if f.fault_type == "ANOMALY" and f.node_name == nan_label
+    ]
+    assert len(stale_faults) >= 1, (
+        f"Expected stale ANOMALY FaultEvent, got: "
+        f"{[(f.fault_type, f.node_name) for f in emitted]}"
+    )
+    first = stale_faults[0]
+    assert isinstance(first, FaultEvent)
+    keys = list(first.context_keys)
+    vals = list(first.context_values)
+    assert "violation_type" in keys, (
+        f"Expected 'violation_type' in context_keys, got {keys}"
+    )
+    assert vals[keys.index("violation_type")] == "stale"
+    assert first.severity == 2
+    assert "stale" in first.detail.lower()
+    # NaN must NOT poison the window — no floats landed in the rolling buffer.
+    assert nan_label in detector_node._windows
+    assert len(detector_node._windows[nan_label]) == 0
