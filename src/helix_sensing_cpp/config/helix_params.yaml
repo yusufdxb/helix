@@ -14,7 +14,10 @@
 
 helix_anomaly_detector:
   ros__parameters:
-    zscore_threshold: 3.0
+    # 3.0 → 4.0 (Session 8, 2026-04-23): idle jitter of /utlidar/robot_odom
+    # crossed z=3 repeatedly in steady state. See
+    # hardware_eval_20260423/results/closed_loop_demo.md.
+    zscore_threshold: 4.0
     consecutive_trigger: 3
     window_size: 60
     emit_cooldown_s: 1.0
