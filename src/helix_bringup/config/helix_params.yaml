@@ -6,7 +6,12 @@ helix_heartbeat_monitor:
 
 helix_anomaly_detector:
   ros__parameters:
-    zscore_threshold: 3.0
+    # Raised from 3.0 to 4.0 after Session 8 (2026-04-23) hardware data:
+    # natural idle jitter of /utlidar/robot_odom crossed z=3 ~6 times in
+    # 7 min of standing idle, producing STOP_AND_HOLD hints on noise.
+    # Session 8 observed real anomalies land well above 4.0 (z=6.7 IMU,
+    # z=5.2 cloud, z=21 startup), so the headroom is real.
+    zscore_threshold: 4.0
     consecutive_trigger: 3
     window_size: 60
 
