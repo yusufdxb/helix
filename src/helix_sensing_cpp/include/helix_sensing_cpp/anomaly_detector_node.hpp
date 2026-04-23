@@ -74,6 +74,11 @@ private:
     double value, double mean, double std_, double zscore, int consecutive,
     MetricState & state);
 
+  // Stale path emission: used when a metric arrives as NaN, which
+  // topic_rate_monitor emits for a silent topic. Same fault_type as the
+  // z-score path so R1 in helix_diagnosis catches both without a new rule.
+  void emit_stale_fault(const std::string & metric_name, int consecutive);
+
   // Wall-clock in seconds since epoch — RCL_SYSTEM_TIME matches
   // Python time.time() for the FaultEvent.timestamp field.
   double system_time_now();
