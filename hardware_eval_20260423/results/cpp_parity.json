@@ -1,0 +1,5369 @@
+{
+  "pid": 12495,
+  "regex": "/lib/helix_sensing_cpp/helix_anomaly_detector",
+  "started": 1776976601.6035738,
+  "duration_req_s": 1800.0,
+  "duration_actual_s": 1798.2834906578064,
+  "interval_s": 2.0,
+  "sample_count": 891,
+  "rss_kb": {
+    "min": 19220,
+    "max": 20532,
+    "mean": 20288.45342312009,
+    "first": 19220,
+    "last": 20532
+  },
+  "pcpu": {
+    "min": 0.8,
+    "max": 0.9,
+    "mean": 0.8006734006733937
+  },
+  "samples": [
+    {
+      "rss_kb": 19220,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 0.01850414276123047
+    },
+    {
+      "rss_kb": 19220,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 2.0400266647338867
+    },
+    {
+      "rss_kb": 19220,
+      "pcpu": 0.9,
+      "comm": "helix_anomaly_d",
+      "t": 4.06032657623291
+    },
+    {
+      "rss_kb": 19220,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 6.080437183380127
+    },
+    {
+      "rss_kb": 19220,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 8.099505186080933
+    },
+    {
+      "rss_kb": 19220,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 10.121297597885132
+    },
+    {
+      "rss_kb": 19220,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 12.141316175460815
+    },
+    {
+      "rss_kb": 19220,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 14.161447048187256
+    },
+    {
+      "rss_kb": 19220,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 16.182299852371216
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 18.20610022544861
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 20.227096557617188
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 22.248196125030518
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 24.267812728881836
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 26.287332773208618
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 28.307555198669434
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 30.32750391960144
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 32.34851622581482
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 34.36742615699768
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 36.387577295303345
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 38.40735602378845
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 40.43123245239258
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 42.45365810394287
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 44.47730493545532
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 46.49750590324402
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 48.517725229263306
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 50.5362446308136
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 52.55736327171326
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 54.58112978935242
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 56.60146641731262
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 58.62152624130249
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 60.64469289779663
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 62.66365957260132
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 64.68519687652588
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 66.70541381835938
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 68.72635459899902
+    },
+    {
+      "rss_kb": 19480,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 70.74681377410889
+    },
+    {
+      "rss_kb": 19744,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 72.76676869392395
+    },
+    {
+      "rss_kb": 19744,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 74.78766441345215
+    },
+    {
+      "rss_kb": 19744,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 76.80727171897888
+    },
+    {
+      "rss_kb": 19744,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 78.82743263244629
+    },
+    {
+      "rss_kb": 19744,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 80.84947085380554
+    },
+    {
+      "rss_kb": 19744,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 82.86983752250671
+    },
+    {
+      "rss_kb": 19744,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 84.89042115211487
+    },
+    {
+      "rss_kb": 19744,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 86.91065526008606
+    },
+    {
+      "rss_kb": 19744,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 88.9314022064209
+    },
+    {
+      "rss_kb": 19744,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 90.95260095596313
+    },
+    {
+      "rss_kb": 19744,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 92.97102117538452
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.9,
+      "comm": "helix_anomaly_d",
+      "t": 94.99107384681702
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.9,
+      "comm": "helix_anomaly_d",
+      "t": 97.01206922531128
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.9,
+      "comm": "helix_anomaly_d",
+      "t": 99.03247737884521
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.9,
+      "comm": "helix_anomaly_d",
+      "t": 101.05207991600037
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 103.07258653640747
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.9,
+      "comm": "helix_anomaly_d",
+      "t": 105.09200310707092
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 107.11252021789551
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 109.13232350349426
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 111.15282654762268
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 113.17252159118652
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 115.1916069984436
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 117.21316289901733
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 119.23620557785034
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 121.25772094726562
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 123.27785611152649
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 125.30072379112244
+    },
+    {
+      "rss_kb": 20008,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 127.32038855552673
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 129.34001636505127
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 131.35923218727112
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 133.37917971611023
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 135.39941096305847
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 137.42013359069824
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 139.43941044807434
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 141.46059036254883
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 143.48316645622253
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 145.50402569770813
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 147.52411031723022
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 149.54479002952576
+    },
+    {
+      "rss_kb": 20272,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 151.565288066864
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 153.58678913116455
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 155.60825538635254
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 157.6286542415619
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 159.6521451473236
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 161.67189645767212
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 163.69133853912354
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 165.7116973400116
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 167.73211193084717
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 169.75258612632751
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 171.77136421203613
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 173.7922089099884
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 175.81244206428528
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 177.83120226860046
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 179.85152983665466
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 181.87138605117798
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 183.89123821258545
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 185.9125304222107
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 187.933411359787
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 189.95716261863708
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 191.97925639152527
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 193.99961948394775
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 196.01990866661072
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 198.0394642353058
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 200.0598783493042
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 202.08006143569946
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 204.1004593372345
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 206.11920619010925
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 208.1392502784729
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 210.15951347351074
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 212.18283581733704
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 214.2050347328186
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 216.22447156906128
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 218.24354100227356
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 220.26323580741882
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 222.28412985801697
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 224.30341482162476
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 226.32327485084534
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 228.34504652023315
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 230.36546540260315
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 232.38639187812805
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 234.40767526626587
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 236.42815399169922
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 238.4474012851715
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 240.46727299690247
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 242.48889994621277
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 244.50770235061646
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 246.5271110534668
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 248.54765725135803
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 250.56807613372803
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 252.58838391304016
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 254.60914516448975
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 256.62994480133057
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 258.65030002593994
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 260.67345452308655
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 262.6946425437927
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 264.715158700943
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 266.7354516983032
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 268.7552032470703
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 270.7770116329193
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 272.79685401916504
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 274.81533336639404
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 276.8361487388611
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 278.85591983795166
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 280.87554121017456
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 282.8974986076355
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 284.9185390472412
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 286.93886399269104
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 288.96005868911743
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 290.98008608818054
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 293.00055980682373
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 295.0192725658417
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 297.0389518737793
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 299.0612208843231
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 301.0856144428253
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 303.1060085296631
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 305.1279580593109
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 307.14793133735657
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 309.16785287857056
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 311.18713450431824
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 313.20728731155396
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 315.2272152900696
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 317.2494442462921
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 319.2721064090729
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 321.29154992103577
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 323.3112437725067
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 325.33203506469727
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 327.3540632724762
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 329.3742787837982
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 331.3955326080322
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 333.41616225242615
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 335.4352750778198
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 337.45685029029846
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 339.4764323234558
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 341.495245218277
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 343.51527309417725
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 345.53584384918213
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 347.55632996559143
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 349.5778112411499
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 351.5983350276947
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 353.618412733078
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 355.6396555900574
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 357.65965700149536
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 359.67933535575867
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 361.6996088027954
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 363.7194936275482
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 365.74108266830444
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 367.7619698047638
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 369.7830765247345
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 371.8042414188385
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 373.8236861228943
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 375.8441388607025
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 377.8631432056427
+    },
+    {
+      "rss_kb": 19496,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 379.88323163986206
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 381.9039406776428
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 383.9245276451111
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 385.9431960582733
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 387.96450424194336
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 389.9833288192749
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 392.00766801834106
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 394.02813720703125
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 396.0496039390564
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 398.07053565979004
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 400.0910186767578
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 402.11136770248413
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 404.13122510910034
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 406.15156841278076
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 408.1713857650757
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 410.19118666648865
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 412.21137976646423
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 414.2319438457489
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 416.2518129348755
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 418.27413296699524
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 420.29588532447815
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 422.3162958621979
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 424.3369596004486
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 426.35530281066895
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 428.37518763542175
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 430.39533376693726
+    },
+    {
+      "rss_kb": 19756,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 432.4153001308441
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 434.43538546562195
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 436.45532298088074
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 438.4786627292633
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 440.50015687942505
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 442.5200071334839
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 444.5396318435669
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 446.5632185935974
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 448.5842254161835
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 450.6035988330841
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 452.62416672706604
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 454.64309549331665
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 456.6633052825928
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 458.6833019256592
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 460.70314168930054
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 462.7237854003906
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 464.7435657978058
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 466.76474165916443
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 468.7837653160095
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 470.8034710884094
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 472.8236598968506
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 474.8440465927124
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 476.86306071281433
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 478.8838777542114
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 480.9040403366089
+    },
+    {
+      "rss_kb": 20020,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 482.92303228378296
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 484.9430956840515
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 486.96325635910034
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 488.98347902297974
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 491.00703167915344
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 493.02843976020813
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 495.04903268814087
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 497.0684425830841
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 499.08698320388794
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 501.1069655418396
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 503.12730717658997
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 505.1470446586609
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 507.16711616516113
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 509.1868529319763
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 511.2069263458252
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 513.2274262905121
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 515.2481021881104
+    },
+    {
+      "rss_kb": 20284,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 517.2682027816772
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 519.2877037525177
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 521.3071575164795
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 523.3282718658447
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 525.3488283157349
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 527.3671734333038
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 529.3881418704987
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 531.4094564914703
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 533.4294576644897
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 535.4508221149445
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 537.4734964370728
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 539.4947307109833
+    },
+    {
+      "rss_kb": 19740,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 541.5159616470337
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 543.5352101325989
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 545.555248260498
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 547.5762803554535
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 549.5950844287872
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 551.6152501106262
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 553.6366817951202
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 555.6600704193115
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 557.6801800727844
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 559.6998400688171
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 561.7194771766663
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 563.7406032085419
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 565.7601342201233
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 567.7796845436096
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 569.7991349697113
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 571.8193292617798
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 573.8399486541748
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 575.8591828346252
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 577.8791363239288
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 579.8994600772858
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 581.9199883937836
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 583.9425270557404
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 585.9651725292206
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 587.9855608940125
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 590.0062396526337
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 592.0274939537048
+    },
+    {
+      "rss_kb": 20004,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 594.0480103492737
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 596.0685119628906
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 598.0878250598907
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 600.1072742938995
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 602.1275396347046
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 604.1483492851257
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 606.1683609485626
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 608.1876809597015
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 610.2080662250519
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 612.227034330368
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 614.2478559017181
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 616.2675387859344
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 618.2871527671814
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 620.3072905540466
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 622.3273251056671
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 624.3480293750763
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 626.3669502735138
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 628.3883275985718
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 630.4083454608917
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 632.4281764030457
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 634.4477212429047
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 636.4691519737244
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 638.4893128871918
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 640.5096681118011
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 642.5297961235046
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 644.5501840114594
+    },
+    {
+      "rss_kb": 20268,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 646.5737519264221
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 648.5940177440643
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 650.6143615245819
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 652.6365945339203
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 654.656131029129
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 656.6757252216339
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 658.6950042247772
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 660.7149724960327
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 662.7354154586792
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 664.7554564476013
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 666.7754673957825
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 668.7963871955872
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 670.815256357193
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 672.8361392021179
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 674.8562362194061
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 676.8757565021515
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 678.8960855007172
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 680.9171562194824
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 682.9372158050537
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 684.95751786232
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 686.9778506755829
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 688.998429775238
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 691.0189416408539
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 693.0411138534546
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 695.0612709522247
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 697.0827302932739
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 699.1034111976624
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 701.1233866214752
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 703.1452443599701
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 705.1654145717621
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 707.1857089996338
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 709.2059996128082
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 711.2268333435059
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 713.246829032898
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 715.268709897995
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 717.2874672412872
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 719.3074252605438
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 721.3281950950623
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 723.3485629558563
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 725.3681545257568
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 727.3886420726776
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 729.4074399471283
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 731.4272696971893
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 733.4474687576294
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 735.4684891700745
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 737.4878046512604
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 739.508727312088
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 741.529712677002
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 743.5545516014099
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 745.579395532608
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 747.6018948554993
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 749.6219663619995
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 751.6420614719391
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 753.662359714508
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 755.6824612617493
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 757.7048466205597
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 759.7246282100677
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 761.7472331523895
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 763.7706847190857
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 765.7900166511536
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 767.8103499412537
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 769.8304388523102
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 771.8508145809174
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 773.8708996772766
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 775.8891408443451
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 777.9094231128693
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 779.9298853874207
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 781.951996088028
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 783.9711172580719
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 785.9950807094574
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 788.0160613059998
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 790.0383393764496
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 792.0590672492981
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 794.0808110237122
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 796.0995125770569
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 798.1192257404327
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 800.1391098499298
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 802.1589295864105
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 804.1789977550507
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 806.1991393566132
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 808.2194871902466
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 810.239111661911
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 812.2598526477814
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 814.2799160480499
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 816.299882888794
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 818.3192279338837
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 820.3401470184326
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 822.3591992855072
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 824.3791193962097
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 826.3992178440094
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 828.4189903736115
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 830.4391098022461
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 832.4626121520996
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 834.4838547706604
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 836.5060293674469
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 838.5271489620209
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 840.5506691932678
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 842.5710866451263
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 844.5921385288239
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 846.6123905181885
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 848.6317000389099
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 850.651177406311
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 852.6710398197174
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 854.6917595863342
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 856.7121040821075
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 858.7317650318146
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 860.7517039775848
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 862.7714369297028
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 864.7910075187683
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 866.8096036911011
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 868.8301374912262
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 870.8527376651764
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 872.8728399276733
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 874.8913307189941
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 876.9133179187775
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 878.9381098747253
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 880.9586043357849
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 882.9816930294037
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 885.0015993118286
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 887.0223486423492
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 889.0426094532013
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 891.0635266304016
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 893.0841031074524
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 895.1032326221466
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 897.125702381134
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 899.1486678123474
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 901.1681935787201
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 903.1883883476257
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 905.2098107337952
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 907.2299258708954
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 909.2527370452881
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 911.271824836731
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 913.2910861968994
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 915.3110477924347
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 917.3311011791229
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 919.3529307842255
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 921.3712713718414
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 923.391900062561
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 925.411740064621
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 927.4318718910217
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 929.451413154602
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 931.4715490341187
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 933.4913492202759
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 935.5109949111938
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 937.5310006141663
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 939.552702665329
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 941.57324051857
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 943.5936050415039
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 945.6138014793396
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 947.6341276168823
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 949.6552743911743
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 951.6754977703094
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 953.695467710495
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 955.7160975933075
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 957.7352302074432
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 959.756313085556
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 961.7774083614349
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 963.7974328994751
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 965.8212940692902
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 967.8481278419495
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 969.8721475601196
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 971.8925874233246
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 973.9131572246552
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 975.933491230011
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 977.9550030231476
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 979.9751174449921
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 981.9951677322388
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 984.0150938034058
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 986.0353534221649
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 988.0595324039459
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 990.0810782909393
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 992.1041023731232
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 994.1244766712189
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 996.1450386047363
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 998.1632144451141
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1000.1832113265991
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1002.2045693397522
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1004.2241895198822
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1006.2431192398071
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1008.2636470794678
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1010.2889664173126
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1012.3117492198944
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1014.3314301967621
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1016.3527483940125
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1018.3721423149109
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1020.3926770687103
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1022.4111824035645
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1024.4312694072723
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1026.4514029026031
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1028.4714784622192
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1030.4912648200989
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1032.511666059494
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1034.5323011875153
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1036.5534269809723
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1038.576694726944
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1040.5953335762024
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1042.6156778335571
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1044.6353681087494
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1046.6553180217743
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1048.6760828495026
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1050.6954946517944
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1052.7169735431671
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1054.7351932525635
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1056.7594759464264
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1058.7805366516113
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1060.8000009059906
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1062.8199365139008
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1064.8402898311615
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1066.8596065044403
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1068.880214691162
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1070.9005165100098
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1072.9190237522125
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1074.939243555069
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1076.9592654705048
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1078.9827196598053
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1081.0038890838623
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1083.0242850780487
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1085.0466225147247
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1087.0685362815857
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1089.0888826847076
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1091.1072125434875
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1093.1271674633026
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1095.1473648548126
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1097.1672050952911
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1099.1882786750793
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1101.2100059986115
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1103.232619524002
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1105.2535300254822
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1107.2765064239502
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1109.2950909137726
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1111.3161363601685
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1113.335762500763
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1115.355093240738
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1117.3755011558533
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1119.395231962204
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1121.415471315384
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1123.4375455379486
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1125.4576778411865
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1127.4789175987244
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1129.5000314712524
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1131.5198922157288
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1133.539585351944
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1135.560335636139
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1137.5799808502197
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1139.599828004837
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1141.62056350708
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1143.6392149925232
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1145.6594178676605
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1147.6793479919434
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1149.6993412971497
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1151.7194030284882
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1153.7401294708252
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1155.7603921890259
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1157.78000998497
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1159.7994859218597
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1161.8191511631012
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1163.8400702476501
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1165.8597538471222
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1167.8798897266388
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1169.899183511734
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1171.9204995632172
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1173.9393420219421
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1175.959617614746
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1177.9797065258026
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1180.0018136501312
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1182.0224423408508
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1184.0430290699005
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1186.063179731369
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1188.0840919017792
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1190.1035449504852
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1192.124053478241
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1194.143958568573
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1196.1631813049316
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1198.183070898056
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1200.2038238048553
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1202.2245042324066
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1204.244294643402
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1206.2664749622345
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1208.2885220050812
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1210.307288646698
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1212.3284170627594
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1214.3479282855988
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1216.368804216385
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1218.388142824173
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1220.407565355301
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1222.427092552185
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1224.4490342140198
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1226.4683394432068
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1228.4881014823914
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1230.5076582431793
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1232.527582168579
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1234.5487794876099
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1236.5689311027527
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1238.5879967212677
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1240.6074256896973
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1242.6273260116577
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1244.6472616195679
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1246.6688928604126
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1248.6894807815552
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1250.715223789215
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1252.7352735996246
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1254.756982088089
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1256.7775728702545
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1258.79816532135
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1260.818263053894
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1262.8390593528748
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1264.8593080043793
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1266.879539012909
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1268.8994324207306
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1270.919474363327
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1272.939798116684
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1274.9603462219238
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1276.9798352718353
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1278.9994368553162
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1281.0193321704865
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1283.0394480228424
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1285.0597524642944
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1287.0805406570435
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1289.1009602546692
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1291.1205379962921
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1293.1390347480774
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1295.160624742508
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1297.1815977096558
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1299.2024290561676
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1301.223403453827
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1303.2438914775848
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1305.2649683952332
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1307.2833280563354
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1309.3030784130096
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1311.3247039318085
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1313.3442792892456
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1315.363434791565
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1317.385619878769
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1319.4106867313385
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1321.4349493980408
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1323.4557831287384
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1325.476373910904
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1327.4953825473785
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1329.515964269638
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1331.535573720932
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1333.556483745575
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1335.5760383605957
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1337.5963866710663
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1339.6153359413147
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1341.6406989097595
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1343.6625814437866
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1345.6838195323944
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1347.7038638591766
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1349.7233226299286
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1351.744882106781
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1353.7635867595673
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1355.784655570984
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1357.8047795295715
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1359.824598312378
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1361.845501422882
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1363.8703439235687
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1365.8893647193909
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1367.910171031952
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1369.9329385757446
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1371.9527966976166
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1373.971274614334
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1375.9913582801819
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1378.01194357872
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1380.0321321487427
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1382.053186416626
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1384.079491853714
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1386.1041312217712
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1388.1233248710632
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1390.1431758403778
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1392.1646893024445
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1394.184208869934
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1396.2031502723694
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1398.2232642173767
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1400.244458436966
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1402.2648022174835
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1404.283450603485
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1406.3029747009277
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1408.32333111763
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1410.3452234268188
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1412.3680639266968
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1414.386879682541
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1416.4072923660278
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1418.4284975528717
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1420.4480803012848
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1422.4684233665466
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1424.4871091842651
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1426.5072915554047
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1428.526995897293
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1430.5472476482391
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1432.567702293396
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1434.592725276947
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1436.613819360733
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1438.634369134903
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1440.6552085876465
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1442.6762483119965
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1444.6960997581482
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1446.7155435085297
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1448.7358586788177
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1450.7552976608276
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1452.77534866333
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1454.7955112457275
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1456.8164539337158
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1458.8382740020752
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1460.8588750362396
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1462.87979388237
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1464.8992068767548
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1466.9193058013916
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1468.9391012191772
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1470.9601986408234
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1472.979548215866
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1475.0007665157318
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1477.0191388130188
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1479.0395648479462
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1481.0629270076752
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1483.0838186740875
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1485.1033389568329
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1487.1232838630676
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1489.1434953212738
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1491.1633331775665
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1493.1831495761871
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1495.2030935287476
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1497.2236256599426
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1499.24325299263
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1501.2632400989532
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1503.283774137497
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1505.3042602539062
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1507.3236565589905
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1509.3453636169434
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1511.3684258460999
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1513.3885552883148
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1515.408614397049
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1517.4271128177643
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1519.4487481117249
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1521.469311952591
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1523.4912180900574
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1525.5113906860352
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1527.5354309082031
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1529.5561010837555
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1531.5776045322418
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1533.5977897644043
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1535.618305683136
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1537.6383500099182
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1539.65887093544
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1541.679060459137
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1543.699406862259
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1545.7194001674652
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1547.7429196834564
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1549.7668874263763
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1551.787121295929
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1553.8072350025177
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1555.8271300792694
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1557.849145412445
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1559.8711218833923
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1561.8919806480408
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1563.911985874176
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1565.9336228370667
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1567.9537987709045
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1569.9748249053955
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1571.9961006641388
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1574.016093492508
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1576.0361754894257
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1578.0553607940674
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1580.0761816501617
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1582.0956919193268
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1584.11523604393
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1586.1357474327087
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1588.1572151184082
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1590.1800453662872
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1592.2029881477356
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1594.2273807525635
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1596.2489886283875
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1598.2672531604767
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1600.2888805866241
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1602.3071711063385
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1604.3273832798004
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1606.3479645252228
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1608.367266178131
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1610.3884952068329
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1612.4072375297546
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1614.4273235797882
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1616.4476327896118
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1618.4709477424622
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1620.4939272403717
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1622.515769958496
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1624.536494255066
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1626.5550556182861
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1628.5770328044891
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1630.5952455997467
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1632.6150484085083
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1634.63507938385
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1636.6551611423492
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1638.6752898693085
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1640.6960735321045
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1642.7162909507751
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1644.7358005046844
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1646.7556211948395
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1648.7754426002502
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1650.795483827591
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1652.8151869773865
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1654.83602643013
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1656.8555800914764
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1658.8774194717407
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1660.8975565433502
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1662.9178161621094
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1664.9385862350464
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1666.9597418308258
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1668.9808268547058
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1670.999517917633
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1673.0194563865662
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1675.0390946865082
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1677.0591192245483
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1679.0807592868805
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1681.1004648208618
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1683.1192121505737
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1685.1393065452576
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1687.1624665260315
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1689.1852414608002
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1691.20547914505
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1693.2262752056122
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1695.2468490600586
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1697.2669653892517
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1699.2879757881165
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1701.3071031570435
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1703.327559709549
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1705.3478789329529
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1707.3674006462097
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1709.3883728981018
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1711.4073991775513
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1713.4291489124298
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1715.4522631168365
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1717.4718906879425
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1719.4911954402924
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1721.5110750198364
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1723.5310745239258
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1725.5510528087616
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1727.5716536045074
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1729.5915985107422
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1731.6113512516022
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1733.63121509552
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1735.65327501297
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1737.6773557662964
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1739.7011318206787
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1741.7213191986084
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1743.7414190769196
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1745.7618505954742
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1747.7828516960144
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1749.8013501167297
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1751.8218014240265
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1753.8440148830414
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1755.863229751587
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1757.8834564685822
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1759.9041652679443
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1761.9239196777344
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1763.9439475536346
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1765.9635381698608
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1767.983417749405
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1770.0044853687286
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1772.023204088211
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1774.0432229042053
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1776.0631031990051
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1778.0841727256775
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1780.1033210754395
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1782.1231842041016
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1784.1432089805603
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1786.1648111343384
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1788.1840941905975
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1790.2040629386902
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1792.2233204841614
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1794.2433078289032
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1796.2632405757904
+    },
+    {
+      "rss_kb": 20532,
+      "pcpu": 0.8,
+      "comm": "helix_anomaly_d",
+      "t": 1798.2834906578064
+    }
+  ]
+}
