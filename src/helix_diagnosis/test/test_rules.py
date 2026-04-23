@@ -4,15 +4,21 @@ from types import SimpleNamespace
 from helix_diagnosis.rules import STATE_IDLE, STATE_STOP_AND_HOLD, evaluate
 
 
-def _fault(fault_type='ANOMALY', metric='utlidar_rate', severity=2, fault_id='f1'):
-    """Build a minimal FaultEvent-shaped object for rule evaluation."""
+def _fault(fault_type='ANOMALY', metric='rate_hz/utlidar_cloud', severity=2,
+           node_name='rate_hz/utlidar_cloud'):
+    """Build a FaultEvent-shaped object matching the live emitter schema.
+
+    helix_core.anomaly_detector writes ``context_keys=['metric_name', ...]``
+    with value like ``'rate_hz/utlidar_cloud'`` and uses ``node_name`` as the
+    correlation identifier (FaultEvent has no fault_id field).
+    """
     return SimpleNamespace(
-        fault_id=fault_id,
+        node_name=node_name,
         fault_type=fault_type,
         severity=severity,          # 1=WARN, 2=ERROR, 3=CRITICAL
         detail='',
         timestamp=0.0,
-        context_keys=['metric'],
+        context_keys=['metric_name'],
         context_values=[metric],
     )
 
@@ -32,7 +38,7 @@ def test_r1_fires_on_lidar_rate_anomaly_error():
     assert hint is not None
     assert hint.suggested_action == 'STOP_AND_HOLD'
     assert hint.rule_matched == 'R1'
-    assert hint.fault_id == 'f1'
+    assert hint.fault_id == 'rate_hz/utlidar_cloud'  # from fault.node_name
 
 
 def test_r1_does_not_fire_on_warn_severity():
