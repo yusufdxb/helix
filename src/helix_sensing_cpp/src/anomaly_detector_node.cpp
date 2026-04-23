@@ -193,6 +193,43 @@ void AnomalyDetectorNode::process_sample(const std::string & metric_name, double
   }
   MetricState & state = it->second;
 
+  // Stale path: topic_rate_monitor emits NaN when the watched topic has no
+  // samples in its rolling window. Z-score of NaN is NaN and fails every
+  // threshold comparison, so without this branch a silent topic produces
+  // zero anomalies. Treat NaN as a violation of the same shape as a
+  // z-score breach (same counter, same consecutive_trigger gate, same
+  // cooldown); do NOT push NaN to RollingStats — it would poison every
+  // future mean/std for this metric.
+  //
+  // Mirrors helix_core.anomaly_detector._process_sample's isnan branch
+  // (PR #7); keep the two in sync so the C++ port remains drop-in.
+  if (std::isnan(value)) {
+    state.consecutive += 1;
+    const int consecutive = state.consecutive;
+    RCLCPP_WARN(
+      get_logger(),
+      "Metric '%s' stale (NaN) - consecutive violation #%d",
+      metric_name.c_str(), consecutive);
+    if (consecutive >= consecutive_trigger_) {
+      const double now = system_time_now();
+      const bool cooldown_expired =
+        emit_cooldown_s_ <= 0.0 ||
+        state.last_emit_time == 0.0 ||
+        (now - state.last_emit_time) >= emit_cooldown_s_;
+      if (cooldown_expired) {
+        state.last_emit_time = now;
+        emit_stale_fault(metric_name, consecutive);
+      } else {
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Metric '%s' stale ANOMALY suppressed by emit_cooldown_s=%.3f "
+          "(since last: %.3fs)",
+          metric_name.c_str(), emit_cooldown_s_, now - state.last_emit_time);
+      }
+    }
+    return;
+  }
+
   // Evaluate Z-score against the CURRENT window (before push), so a streak
   // of anomalies doesn't poison its own baseline — matches Python.
   const ZScoreResult r = state.stats.evaluate(value);
@@ -291,6 +328,35 @@ void AnomalyDetectorNode::emit_anomaly_fault(
     get_logger(),
     "FaultEvent emitted: ANOMALY for '%s' (zscore=%.2f, consecutive=%d)",
     metric_name.c_str(), zscore, consecutive);
+}
+
+void AnomalyDetectorNode::emit_stale_fault(
+  const std::string & metric_name, int consecutive)
+{
+  helix_msgs::msg::FaultEvent msg;
+  msg.node_name = metric_name;
+  msg.fault_type = "ANOMALY";
+  msg.severity = 2;
+
+  std::ostringstream detail;
+  detail << "Metric '" << metric_name << "' stale - no samples in window on "
+         << consecutive << " consecutive checks";
+  msg.detail = detail.str();
+
+  msg.timestamp = system_time_now();
+
+  msg.context_keys = {"metric_name", "violation_type", "consecutive_count"};
+  msg.context_values = {metric_name, "stale", std::to_string(consecutive)};
+
+  if (fault_pub_ && fault_pub_->is_activated()) {
+    fault_pub_->publish(msg);
+  }
+  ++fault_count_;
+
+  RCLCPP_INFO(
+    get_logger(),
+    "FaultEvent emitted: ANOMALY (stale) for '%s' consecutive=%d",
+    metric_name.c_str(), consecutive);
 }
 
 double AnomalyDetectorNode::system_time_now()
