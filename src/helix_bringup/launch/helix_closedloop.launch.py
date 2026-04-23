@@ -38,11 +38,10 @@ from launch.actions import (
 )
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import LifecycleNode, Node
 from launch_ros.event_handlers import OnStateTransition
 from launch_ros.events.lifecycle import ChangeState
-from launch_ros.substitutions import FindPackageShare
 from lifecycle_msgs.msg import Transition
 
 from launch import LaunchDescription
