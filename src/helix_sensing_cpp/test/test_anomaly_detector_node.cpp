@@ -401,6 +401,96 @@ TEST_F(RosFixture, WindowCapacityRollover)
   EXPECT_EQ(node->fault_count_for_test(), 0u);
 }
 
+// ── Row 15: NaN (stale) fires ANOMALY with violation_type='stale' ───────
+// Parity with Python PR #7: a silent upstream topic (topic_rate_monitor
+// emits NaN for a stale metric) must produce an ANOMALY FaultEvent, not
+// silently drop through the z-score path.
+TEST_F(RosFixture, StaleNaNTripleFiresAnomaly)
+{
+  auto node = make_active_node(3.0, 3, 60, 0.0);
+  // Three consecutive NaNs hit the trigger; emit.
+  node->process_sample_for_test("m_stale", std::nan(""));
+  node->process_sample_for_test("m_stale", std::nan(""));
+  node->process_sample_for_test("m_stale", std::nan(""));
+  EXPECT_GE(node->fault_count_for_test(), 1u);
+}
+
+// ── Row 16: NaN must not poison the rolling window ──────────────────────
+// Same metric receiving NaNs then real samples must still compute a valid
+// z-score — proves NaN never lands in RollingStats.
+TEST_F(RosFixture, StaleNaNDoesNotPoisonWindow)
+{
+  auto node = make_active_node(3.0, 3, 60, 0.0);
+  // Interleave NaNs with real samples; the counter resets to 0 on the
+  // real sample because the z-score branch either fires or else-resets.
+  // But consecutive_trigger=3 NaNs still fires once first.
+  for (int i = 0; i < 3; ++i) {
+    node->process_sample_for_test("m_mixed", std::nan(""));
+  }
+  EXPECT_GE(node->fault_count_for_test(), 1u);
+  const auto baseline_count = node->fault_count_for_test();
+
+  // Now feed real samples — z-scores must be meaningful (no NaN).
+  for (int i = 0; i < 30; ++i) {
+    node->process_sample_for_test("m_mixed", 5.0 + (i % 3) * 0.01);
+  }
+  // Mild noise; no spike; no new fault beyond the stale one above.
+  EXPECT_EQ(node->fault_count_for_test(), baseline_count);
+
+  // One big real spike crossing the threshold; z-score math must work
+  // (would be NaN if NaN had poisoned the window).
+  for (int i = 0; i < 3; ++i) {
+    node->process_sample_for_test("m_mixed", 100.0);
+  }
+  EXPECT_GT(node->fault_count_for_test(), baseline_count);
+}
+
+// ── Row 17: stale fault carries violation_type='stale' in context ───────
+TEST_F(RosFixture, StaleFaultContextKey)
+{
+  auto node = make_active_node(3.0, 3, 60, 0.0);
+
+  auto sub_node = rclcpp::Node::make_shared("test_stale_fault_sub");
+  std::vector<helix_msgs::msg::FaultEvent> received;
+  std::mutex mu;
+  auto sub = sub_node->create_subscription<helix_msgs::msg::FaultEvent>(
+    "/helix/faults", 10,
+    [&](helix_msgs::msg::FaultEvent::SharedPtr msg) {
+      std::lock_guard<std::mutex> lock(mu);
+      received.push_back(*msg);
+    });
+
+  rclcpp::executors::SingleThreadedExecutor exec;
+  exec.add_node(node->get_node_base_interface());
+  exec.add_node(sub_node);
+
+  for (int i = 0; i < 3; ++i) {
+    node->process_sample_for_test("rate_hz/fake_stale", std::nan(""));
+  }
+  for (int i = 0; i < 40; ++i) {
+    exec.spin_some();
+    std::this_thread::sleep_for(5ms);
+  }
+
+  exec.remove_node(sub_node);
+  exec.remove_node(node->get_node_base_interface());
+
+  std::lock_guard<std::mutex> lock(mu);
+  ASSERT_GE(received.size(), 1u);
+  const auto & f = received.front();
+  EXPECT_EQ(f.fault_type, "ANOMALY");
+  EXPECT_EQ(f.severity, 2);
+  EXPECT_EQ(f.node_name, "rate_hz/fake_stale");
+  ASSERT_EQ(f.context_keys.size(), 3u);
+  EXPECT_EQ(f.context_keys[0], "metric_name");
+  EXPECT_EQ(f.context_keys[1], "violation_type");
+  EXPECT_EQ(f.context_keys[2], "consecutive_count");
+  EXPECT_EQ(f.context_values[0], "rate_hz/fake_stale");
+  EXPECT_EQ(f.context_values[1], "stale");
+  EXPECT_EQ(f.context_values[2], "3");
+  EXPECT_NE(f.detail.find("stale"), std::string::npos);
+}
+
 int main(int argc, char ** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
