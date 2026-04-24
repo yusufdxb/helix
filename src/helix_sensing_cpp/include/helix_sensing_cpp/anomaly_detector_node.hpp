@@ -13,6 +13,7 @@
 //                 consecutive_trigger (int, default 3)
 //                 window_size (int, default 60)
 //                 emit_cooldown_s (double, default 1.0; 0.0 = legacy flood)
+//                 min_anomaly_duration_s (double, default 2.0; 0.0 = no gate)
 //
 // QoS: reliable depth 10 for all I/O (matches the Python node's default
 // QoS). Q2 from the design doc resolved to "reliable, depth 10".
@@ -60,6 +61,7 @@ private:
     RollingStats stats;
     int consecutive = 0;
     double last_emit_time = 0.0;  // seconds since epoch, 0.0 == never
+    double anomaly_start_time = 0.0;  // monotonic seconds, 0.0 == not active
     explicit MetricState(std::size_t win)
     : stats(win) {}
   };
@@ -83,11 +85,16 @@ private:
   // Python time.time() for the FaultEvent.timestamp field.
   double system_time_now();
 
+  // Steady (monotonic) clock in seconds — used for duration gating so
+  // that system-clock adjustments don't affect anomaly timing.
+  double steady_time_now();
+
   // Parameters (latched at configure).
   double zscore_threshold_ = 3.0;
   int consecutive_trigger_ = 3;
   int window_size_ = 60;
   double emit_cooldown_s_ = 1.0;
+  double min_anomaly_duration_s_ = 2.0;
 
   mutable std::mutex data_mutex_;
   std::unordered_map<std::string, MetricState> metrics_;

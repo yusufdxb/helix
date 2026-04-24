@@ -23,6 +23,7 @@ from helix_msgs.msg import FaultEvent
 DEFAULT_ZSCORE_THRESHOLD: float = 3.0
 DEFAULT_CONSECUTIVE_TRIGGER: int = 3
 DEFAULT_WINDOW_SIZE: int = 60
+DEFAULT_MIN_ANOMALY_DURATION_S: float = 2.0
 FLAT_SIGNAL_EPSILON: float = 1e-6
 
 
@@ -36,11 +37,16 @@ class AnomalyDetector(LifecycleNode):
         self.declare_parameter("zscore_threshold", DEFAULT_ZSCORE_THRESHOLD)
         self.declare_parameter("consecutive_trigger", DEFAULT_CONSECUTIVE_TRIGGER)
         self.declare_parameter("window_size", DEFAULT_WINDOW_SIZE)
+        self.declare_parameter(
+            "min_anomaly_duration_s", DEFAULT_MIN_ANOMALY_DURATION_S
+        )
 
         # metric_name -> deque of float samples
         self._windows: Dict[str, Deque[float]] = {}
         # metric_name -> consecutive violation count
         self._consecutive: Dict[str, int] = {}
+        # metric_name -> monotonic time when anomaly streak started (None = not active)
+        self._anomaly_start: Dict[str, float] = {}
         self._data_lock: threading.Lock = threading.Lock()
 
         self._fault_pub = None
@@ -54,6 +60,9 @@ class AnomalyDetector(LifecycleNode):
         self._zscore_threshold = self.get_parameter("zscore_threshold").value
         self._consecutive_trigger = self.get_parameter("consecutive_trigger").value
         self._window_size = self.get_parameter("window_size").value
+        self._min_anomaly_duration_s = self.get_parameter(
+            "min_anomaly_duration_s"
+        ).value
 
         self._fault_pub = self.create_publisher(FaultEvent, "/helix/faults", 10)
         self._diagnostics_sub = self.create_subscription(
@@ -65,7 +74,8 @@ class AnomalyDetector(LifecycleNode):
         self.get_logger().info(
             f"AnomalyDetector configured — zscore_threshold={self._zscore_threshold} "
             f"consecutive_trigger={self._consecutive_trigger} "
-            f"window_size={self._window_size}"
+            f"window_size={self._window_size} "
+            f"min_anomaly_duration_s={self._min_anomaly_duration_s}"
         )
         return TransitionCallbackReturn.SUCCESS
 
@@ -90,6 +100,7 @@ class AnomalyDetector(LifecycleNode):
         with self._data_lock:
             self._windows.clear()
             self._consecutive.clear()
+            self._anomaly_start.clear()
         return TransitionCallbackReturn.SUCCESS
 
     # ── Callbacks ────────────────────────────────────────────────────────────
@@ -133,6 +144,8 @@ class AnomalyDetector(LifecycleNode):
         anomalies. Treat NaN as a violation of the same shape as a z-score
         breach so that the existing consecutive_trigger + R1 path still fires.
         """
+        now = time.monotonic()
+
         with self._data_lock:
             if metric_name not in self._windows:
                 self._windows[metric_name] = deque(maxlen=self._window_size)
@@ -144,12 +157,28 @@ class AnomalyDetector(LifecycleNode):
                 # poison all future z-scores) but count it as a violation.
                 self._consecutive[metric_name] += 1
                 consecutive = self._consecutive[metric_name]
+
+                # Track duration: record when the anomaly streak started.
+                if metric_name not in self._anomaly_start:
+                    self._anomaly_start[metric_name] = now
+
                 self.get_logger().warn(
                     f"Metric '{metric_name}' stale (NaN) — "
                     f"consecutive violation #{consecutive}"
                 )
                 if consecutive >= self._consecutive_trigger:
-                    self._emit_stale_fault(metric_name, consecutive)
+                    elapsed = now - self._anomaly_start[metric_name]
+                    if (
+                        self._min_anomaly_duration_s <= 0.0
+                        or elapsed >= self._min_anomaly_duration_s
+                    ):
+                        self._emit_stale_fault(metric_name, consecutive)
+                    else:
+                        self.get_logger().debug(
+                            f"Metric '{metric_name}' stale ANOMALY suppressed by "
+                            f"min_anomaly_duration_s={self._min_anomaly_duration_s} "
+                            f"(elapsed={elapsed:.3f}s)"
+                        )
                 return
 
             if len(window) >= 2:
@@ -170,15 +199,32 @@ class AnomalyDetector(LifecycleNode):
                         self._consecutive[metric_name] += 1
                         consecutive = self._consecutive[metric_name]
 
+                        # Track duration: record when the anomaly streak started.
+                        if metric_name not in self._anomaly_start:
+                            self._anomaly_start[metric_name] = now
+
                         self.get_logger().warn(
                             f"Metric '{metric_name}' Z-score={zscore:.2f} "
                             f"(consecutive violation #{consecutive})"
                         )
 
                         if consecutive >= self._consecutive_trigger:
-                            self._emit_anomaly_fault(
-                                metric_name, value, mean, std, zscore, consecutive
-                            )
+                            elapsed = now - self._anomaly_start[metric_name]
+                            if (
+                                self._min_anomaly_duration_s <= 0.0
+                                or elapsed >= self._min_anomaly_duration_s
+                            ):
+                                self._emit_anomaly_fault(
+                                    metric_name, value, mean, std, zscore,
+                                    consecutive,
+                                )
+                            else:
+                                self.get_logger().debug(
+                                    f"Metric '{metric_name}' ANOMALY suppressed by "
+                                    f"min_anomaly_duration_s="
+                                    f"{self._min_anomaly_duration_s} "
+                                    f"(elapsed={elapsed:.3f}s)"
+                                )
                     else:
                         if self._consecutive[metric_name] > 0:
                             self.get_logger().debug(
@@ -186,6 +232,8 @@ class AnomalyDetector(LifecycleNode):
                                 "resetting consecutive counter"
                             )
                         self._consecutive[metric_name] = 0
+                        # Reset duration tracker when metric returns to normal.
+                        self._anomaly_start.pop(metric_name, None)
 
             # Always append after evaluating — keeps baseline from being poisoned
             window.append(value)
