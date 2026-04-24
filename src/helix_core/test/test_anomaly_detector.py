@@ -10,16 +10,25 @@ import time
 
 import pytest
 import rclpy
+import rclpy.parameter
 from rclpy.executors import SingleThreadedExecutor
 from std_msgs.msg import Float64MultiArray, MultiArrayDimension, MultiArrayLayout
 
 
 @pytest.fixture(scope="module")
 def detector_node():
-    """Create, configure, and activate the AnomalyDetector node."""
+    """Create, configure, and activate the AnomalyDetector node.
+
+    min_anomaly_duration_s is set to 0.0 so that existing tests (which
+    fire spikes in rapid succession) are not affected by the duration gate.
+    """
     from helix_core.anomaly_detector import AnomalyDetector
 
     node = AnomalyDetector()
+    # Override min_anomaly_duration_s to 0.0 for backward-compatible tests.
+    node.set_parameters(
+        [rclpy.parameter.Parameter("min_anomaly_duration_s", value=0.0)]
+    )
     node.trigger_configure()
     node.trigger_activate()
     yield node
@@ -166,3 +175,165 @@ def test_stale_topic_fires_anomaly(detector_node):
     # NaN must NOT poison the window — no floats landed in the rolling buffer.
     assert nan_label in detector_node._windows
     assert len(detector_node._windows[nan_label]) == 0
+
+
+# ── Min-anomaly-duration gate tests ─────────────────────────────────────
+# These tests create fresh AnomalyDetector nodes with controlled
+# min_anomaly_duration_s settings. They call _process_sample directly
+# (unit-level) to avoid DDS timing flakiness.
+
+
+def _make_duration_detector(min_duration: float):
+    """Create, configure, and activate a fresh AnomalyDetector with the
+    given min_anomaly_duration_s. Uses 0.0 consecutive_trigger so the
+    gate is purely about duration. Returns the node.
+    """
+    from helix_core.anomaly_detector import AnomalyDetector
+
+    node = AnomalyDetector()
+    node.set_parameters([
+        rclpy.parameter.Parameter("min_anomaly_duration_s", value=min_duration),
+    ])
+    node.trigger_configure()
+    node.trigger_activate()
+    return node
+
+
+def _teardown_node(node):
+    node.trigger_deactivate()
+    node.trigger_cleanup()
+    node.destroy_node()
+
+
+def test_brief_spike_no_fault():
+    """A brief spike (< min_anomaly_duration_s) must NOT emit a fault."""
+    node = _make_duration_detector(min_duration=2.0)
+    emitted = []
+    original = node._fault_pub.publish
+    node._fault_pub.publish = lambda msg: emitted.append(msg)
+    try:
+        metric = "test_brief_spike"
+        # Build baseline
+        for i in range(25):
+            node._process_sample(metric, 10.0 + (i % 3) * 0.1)
+        # 3 rapid spikes — consecutive_trigger met, but duration < 2.0s
+        for _ in range(3):
+            node._process_sample(metric, 100.0)
+        assert len(emitted) == 0, (
+            f"Expected no fault for brief spike, got {len(emitted)}"
+        )
+    finally:
+        node._fault_pub.publish = original
+        _teardown_node(node)
+
+
+def test_sustained_anomaly_emits_fault():
+    """A sustained anomaly (>= min_anomaly_duration_s) MUST emit a fault."""
+    node = _make_duration_detector(min_duration=0.5)
+    emitted = []
+    original = node._fault_pub.publish
+    node._fault_pub.publish = lambda msg: emitted.append(msg)
+    try:
+        metric = "test_sustained"
+        # Build baseline
+        for i in range(25):
+            node._process_sample(metric, 10.0 + (i % 3) * 0.1)
+        # First spike: starts the duration timer
+        node._process_sample(metric, 100.0)
+        # Wait past the duration gate
+        time.sleep(0.6)
+        # Two more spikes — now consecutive_trigger is met AND duration >= 0.5s
+        node._process_sample(metric, 100.0)
+        node._process_sample(metric, 100.0)
+        assert len(emitted) >= 1, (
+            f"Expected fault for sustained anomaly, got {len(emitted)}"
+        )
+    finally:
+        node._fault_pub.publish = original
+        _teardown_node(node)
+
+
+def test_timer_resets_on_normal():
+    """When metric returns to normal, the anomaly start timer must reset.
+    A subsequent brief spike should not carry forward the old start time.
+    """
+    node = _make_duration_detector(min_duration=0.5)
+    emitted = []
+    original = node._fault_pub.publish
+    node._fault_pub.publish = lambda msg: emitted.append(msg)
+    try:
+        metric = "test_timer_reset"
+        # Build baseline
+        for i in range(25):
+            node._process_sample(metric, 10.0 + (i % 3) * 0.1)
+        # Start an anomaly streak
+        node._process_sample(metric, 100.0)
+        # Wait so time has passed
+        time.sleep(0.3)
+        # Return to normal — resets the timer
+        node._process_sample(metric, 10.1)
+        # Verify timer was reset
+        assert metric not in node._anomaly_start, (
+            "Expected anomaly_start timer to be cleared after normal sample"
+        )
+        # New brief spike streak — should NOT emit because timer was reset
+        # and the new streak hasn't lasted 0.5s
+        node._process_sample(metric, 100.0)
+        node._process_sample(metric, 100.0)
+        node._process_sample(metric, 100.0)
+        assert len(emitted) == 0, (
+            f"Expected no fault after timer reset, got {len(emitted)}"
+        )
+    finally:
+        node._fault_pub.publish = original
+        _teardown_node(node)
+
+
+def test_default_min_duration_is_2s():
+    """The default min_anomaly_duration_s must be 2.0 seconds."""
+    from helix_core.anomaly_detector import DEFAULT_MIN_ANOMALY_DURATION_S
+
+    assert DEFAULT_MIN_ANOMALY_DURATION_S == 2.0
+
+
+def test_zero_duration_disables_gate():
+    """Setting min_anomaly_duration_s=0.0 must emit faults immediately
+    (backwards-compatible with the pre-gate behavior).
+    """
+    node = _make_duration_detector(min_duration=0.0)
+    emitted = []
+    original = node._fault_pub.publish
+    node._fault_pub.publish = lambda msg: emitted.append(msg)
+    try:
+        metric = "test_zero_duration"
+        # Build baseline
+        for i in range(25):
+            node._process_sample(metric, 10.0 + (i % 3) * 0.1)
+        # 3 rapid spikes — should emit immediately despite no elapsed time
+        for _ in range(3):
+            node._process_sample(metric, 100.0)
+        assert len(emitted) >= 1, (
+            f"Expected immediate fault with duration=0.0, got {len(emitted)}"
+        )
+    finally:
+        node._fault_pub.publish = original
+        _teardown_node(node)
+
+
+def test_stale_nan_respects_duration_gate():
+    """NaN (stale) path must also respect min_anomaly_duration_s."""
+    node = _make_duration_detector(min_duration=2.0)
+    emitted = []
+    original = node._fault_pub.publish
+    node._fault_pub.publish = lambda msg: emitted.append(msg)
+    try:
+        metric = "test_stale_duration"
+        # 5 rapid NaN samples — consecutive_trigger met, but < 2.0s elapsed
+        for _ in range(5):
+            node._process_sample(metric, float("nan"))
+        assert len(emitted) == 0, (
+            f"Expected no stale fault for brief NaN burst, got {len(emitted)}"
+        )
+    finally:
+        node._fault_pub.publish = original
+        _teardown_node(node)

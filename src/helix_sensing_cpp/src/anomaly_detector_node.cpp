@@ -67,6 +67,7 @@ AnomalyDetectorNode::AnomalyDetectorNode(const rclcpp::NodeOptions & options)
   declare_parameter<int>("consecutive_trigger", 3);
   declare_parameter<int>("window_size", 60);
   declare_parameter<double>("emit_cooldown_s", 1.0);
+  declare_parameter<double>("min_anomaly_duration_s", 2.0);
 }
 
 AnomalyDetectorNode::CallbackReturn
@@ -76,6 +77,7 @@ AnomalyDetectorNode::on_configure(const rclcpp_lifecycle::State &)
   consecutive_trigger_ = static_cast<int>(get_parameter("consecutive_trigger").as_int());
   window_size_ = static_cast<int>(get_parameter("window_size").as_int());
   emit_cooldown_s_ = get_parameter("emit_cooldown_s").as_double();
+  min_anomaly_duration_s_ = get_parameter("min_anomaly_duration_s").as_double();
 
   if (window_size_ <= 0) {
     RCLCPP_ERROR(
@@ -99,8 +101,9 @@ AnomalyDetectorNode::on_configure(const rclcpp_lifecycle::State &)
   RCLCPP_INFO(
     get_logger(),
     "AnomalyDetectorNode configured - zscore_threshold=%.3f consecutive_trigger=%d "
-    "window_size=%d emit_cooldown_s=%.3f",
-    zscore_threshold_, consecutive_trigger_, window_size_, emit_cooldown_s_);
+    "window_size=%d emit_cooldown_s=%.3f min_anomaly_duration_s=%.3f",
+    zscore_threshold_, consecutive_trigger_, window_size_, emit_cooldown_s_,
+    min_anomaly_duration_s_);
   return CallbackReturn::SUCCESS;
 }
 
@@ -206,11 +209,29 @@ void AnomalyDetectorNode::process_sample(const std::string & metric_name, double
   if (std::isnan(value)) {
     state.consecutive += 1;
     const int consecutive = state.consecutive;
+
+    // Track duration: record when the anomaly streak started.
+    const double mono_now = steady_time_now();
+    if (state.anomaly_start_time == 0.0) {
+      state.anomaly_start_time = mono_now;
+    }
+
     RCLCPP_WARN(
       get_logger(),
       "Metric '%s' stale (NaN) - consecutive violation #%d",
       metric_name.c_str(), consecutive);
     if (consecutive >= consecutive_trigger_) {
+      const double elapsed = mono_now - state.anomaly_start_time;
+      const bool duration_ok =
+        min_anomaly_duration_s_ <= 0.0 || elapsed >= min_anomaly_duration_s_;
+      if (!duration_ok) {
+        RCLCPP_DEBUG(
+          get_logger(),
+          "Metric '%s' stale ANOMALY suppressed by min_anomaly_duration_s=%.3f "
+          "(elapsed=%.3fs)",
+          metric_name.c_str(), min_anomaly_duration_s_, elapsed);
+        return;
+      }
       const double now = system_time_now();
       const bool cooldown_expired =
         emit_cooldown_s_ <= 0.0 ||
@@ -234,10 +255,17 @@ void AnomalyDetectorNode::process_sample(const std::string & metric_name, double
   // of anomalies doesn't poison its own baseline — matches Python.
   const ZScoreResult r = state.stats.evaluate(value);
 
+  const double mono_now = steady_time_now();
+
   if (r.status == ZScoreStatus::kOk) {
     if (r.zscore > zscore_threshold_) {
       state.consecutive += 1;
       const int consecutive = state.consecutive;
+
+      // Track duration: record when the anomaly streak started.
+      if (state.anomaly_start_time == 0.0) {
+        state.anomaly_start_time = mono_now;
+      }
 
       RCLCPP_WARN(
         get_logger(),
@@ -245,24 +273,36 @@ void AnomalyDetectorNode::process_sample(const std::string & metric_name, double
         metric_name.c_str(), r.zscore, consecutive);
 
       if (consecutive >= consecutive_trigger_) {
-        // Cooldown gate: emit_cooldown_s_ <= 0 means legacy flood (emit
-        // every sample). Otherwise only emit when now - last_emit >= cooldown.
-        const double now = system_time_now();
-        const bool cooldown_expired =
-          emit_cooldown_s_ <= 0.0 ||
-          state.last_emit_time == 0.0 ||
-          (now - state.last_emit_time) >= emit_cooldown_s_;
+        const double elapsed = mono_now - state.anomaly_start_time;
+        const bool duration_ok =
+          min_anomaly_duration_s_ <= 0.0 || elapsed >= min_anomaly_duration_s_;
 
-        if (cooldown_expired) {
-          state.last_emit_time = now;
-          emit_anomaly_fault(
-            metric_name, value, r.mean, r.std, r.zscore, consecutive, state);
-        } else {
+        if (!duration_ok) {
           RCLCPP_DEBUG(
             get_logger(),
-            "Metric '%s' ANOMALY suppressed by emit_cooldown_s=%.3f "
-            "(since last: %.3fs)",
-            metric_name.c_str(), emit_cooldown_s_, now - state.last_emit_time);
+            "Metric '%s' ANOMALY suppressed by min_anomaly_duration_s=%.3f "
+            "(elapsed=%.3fs)",
+            metric_name.c_str(), min_anomaly_duration_s_, elapsed);
+        } else {
+          // Cooldown gate: emit_cooldown_s_ <= 0 means legacy flood (emit
+          // every sample). Otherwise only emit when now - last_emit >= cooldown.
+          const double now = system_time_now();
+          const bool cooldown_expired =
+            emit_cooldown_s_ <= 0.0 ||
+            state.last_emit_time == 0.0 ||
+            (now - state.last_emit_time) >= emit_cooldown_s_;
+
+          if (cooldown_expired) {
+            state.last_emit_time = now;
+            emit_anomaly_fault(
+              metric_name, value, r.mean, r.std, r.zscore, consecutive, state);
+          } else {
+            RCLCPP_DEBUG(
+              get_logger(),
+              "Metric '%s' ANOMALY suppressed by emit_cooldown_s=%.3f "
+              "(since last: %.3fs)",
+              metric_name.c_str(), emit_cooldown_s_, now - state.last_emit_time);
+          }
         }
       }
     } else {
@@ -273,6 +313,8 @@ void AnomalyDetectorNode::process_sample(const std::string & metric_name, double
           metric_name.c_str(), r.zscore);
       }
       state.consecutive = 0;
+      // Reset duration tracker when metric returns to normal.
+      state.anomaly_start_time = 0.0;
     }
   } else if (r.status == ZScoreStatus::kFlat) {
     RCLCPP_DEBUG(
@@ -363,6 +405,12 @@ double AnomalyDetectorNode::system_time_now()
 {
   const rclcpp::Time t = system_clock_.now();
   return static_cast<double>(t.nanoseconds()) / 1e9;
+}
+
+double AnomalyDetectorNode::steady_time_now()
+{
+  const auto tp = std::chrono::steady_clock::now();
+  return std::chrono::duration<double>(tp.time_since_epoch()).count();
 }
 
 void AnomalyDetectorNode::process_sample_for_test(

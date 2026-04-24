@@ -14,6 +14,10 @@ helix_anomaly_detector:
     zscore_threshold: 4.0
     consecutive_trigger: 3
     window_size: 60
+    # Minimum seconds an anomaly must persist before emitting a fault.
+    # Filters transient idle-jitter spikes while still catching sustained
+    # faults. Set to 0.0 to disable (immediate emission, legacy behavior).
+    min_anomaly_duration_s: 2.0
 
 helix_log_parser:
   ros__parameters:

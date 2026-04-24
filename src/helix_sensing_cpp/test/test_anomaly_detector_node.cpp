@@ -79,7 +79,8 @@ std::shared_ptr<AnomalyDetectorNode> make_active_node(
   double zscore = 3.0,
   int consecutive = 3,
   int window_size = 60,
-  double cooldown = 1.0)
+  double cooldown = 1.0,
+  double min_duration = 0.0)
 {
   rclcpp::NodeOptions opts;
   opts.parameter_overrides(
@@ -88,6 +89,7 @@ std::shared_ptr<AnomalyDetectorNode> make_active_node(
       rclcpp::Parameter("consecutive_trigger", consecutive),
       rclcpp::Parameter("window_size", window_size),
       rclcpp::Parameter("emit_cooldown_s", cooldown),
+      rclcpp::Parameter("min_anomaly_duration_s", min_duration),
     });
   auto node = std::make_shared<AnomalyDetectorNode>(opts);
   node->configure();
@@ -489,6 +491,82 @@ TEST_F(RosFixture, StaleFaultContextKey)
   EXPECT_EQ(f.context_values[1], "stale");
   EXPECT_EQ(f.context_values[2], "3");
   EXPECT_NE(f.detail.find("stale"), std::string::npos);
+}
+
+// ── Min-anomaly-duration gate tests ─────────────────────────────────────
+
+// Brief spike (< min_anomaly_duration_s) must NOT emit.
+TEST_F(RosFixture, DurationGateBriefSpikeNoEmit)
+{
+  auto node = make_active_node(3.0, 3, 60, 0.0, 2.0);  // 2s duration gate
+  for (int i = 0; i < 25; ++i) {
+    node->process_sample_for_test("m_dur_brief", 10.0 + (i % 3) * 0.1);
+  }
+  // Three rapid spikes — consecutive_trigger met, but < 2.0s elapsed.
+  node->process_sample_for_test("m_dur_brief", 100.0);
+  node->process_sample_for_test("m_dur_brief", 100.0);
+  node->process_sample_for_test("m_dur_brief", 100.0);
+  EXPECT_EQ(node->fault_count_for_test(), 0u);
+}
+
+// Sustained anomaly (>= min_anomaly_duration_s) MUST emit.
+TEST_F(RosFixture, DurationGateSustainedEmits)
+{
+  auto node = make_active_node(3.0, 3, 60, 0.0, 0.3);  // 0.3s duration gate
+  for (int i = 0; i < 25; ++i) {
+    node->process_sample_for_test("m_dur_sust", 10.0 + (i % 3) * 0.1);
+  }
+  // First spike: starts the timer.
+  node->process_sample_for_test("m_dur_sust", 100.0);
+  // Wait past the duration gate.
+  std::this_thread::sleep_for(400ms);
+  // Two more spikes — now the gate is satisfied.
+  node->process_sample_for_test("m_dur_sust", 100.0);
+  node->process_sample_for_test("m_dur_sust", 100.0);
+  EXPECT_GE(node->fault_count_for_test(), 1u);
+}
+
+// Timer resets when metric returns to normal.
+TEST_F(RosFixture, DurationGateTimerResetsOnNormal)
+{
+  auto node = make_active_node(3.0, 3, 60, 0.0, 0.3);
+  for (int i = 0; i < 25; ++i) {
+    node->process_sample_for_test("m_dur_rst", 10.0 + (i % 3) * 0.1);
+  }
+  // Start anomaly streak.
+  node->process_sample_for_test("m_dur_rst", 100.0);
+  std::this_thread::sleep_for(200ms);
+  // Return to normal — resets the timer.
+  node->process_sample_for_test("m_dur_rst", 10.1);
+  // New brief spike streak — timer was reset, so should NOT emit.
+  node->process_sample_for_test("m_dur_rst", 100.0);
+  node->process_sample_for_test("m_dur_rst", 100.0);
+  node->process_sample_for_test("m_dur_rst", 100.0);
+  EXPECT_EQ(node->fault_count_for_test(), 0u);
+}
+
+// min_anomaly_duration_s=0.0 disables the gate (immediate emission).
+TEST_F(RosFixture, DurationGateZeroDisabled)
+{
+  auto node = make_active_node(3.0, 3, 60, 0.0, 0.0);
+  for (int i = 0; i < 25; ++i) {
+    node->process_sample_for_test("m_dur_zero", 10.0 + (i % 3) * 0.1);
+  }
+  node->process_sample_for_test("m_dur_zero", 100.0);
+  node->process_sample_for_test("m_dur_zero", 100.0);
+  node->process_sample_for_test("m_dur_zero", 100.0);
+  EXPECT_GE(node->fault_count_for_test(), 1u);
+}
+
+// NaN (stale) path must also respect min_anomaly_duration_s.
+TEST_F(RosFixture, DurationGateStaleNaNRespected)
+{
+  auto node = make_active_node(3.0, 3, 60, 0.0, 2.0);  // 2s duration gate
+  for (int i = 0; i < 5; ++i) {
+    node->process_sample_for_test("m_dur_stale", std::nan(""));
+  }
+  // Consecutive trigger met, but < 2.0s elapsed — no fault.
+  EXPECT_EQ(node->fault_count_for_test(), 0u);
 }
 
 int main(int argc, char ** argv)
