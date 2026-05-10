@@ -1,0 +1,44 @@
+# twist_mux priority arbitration for the HELIX closed loop.
+#
+# Wiring (highest priority wins when multiple topics publish within timeout):
+#   /teleop/cmd_vel  (priority 200)  operator override, always wins
+#   /helix/cmd_vel   (priority 100)  HELIX recovery (zero-twist STOP_AND_HOLD)
+#   /nav/cmd_vel     (priority  50)  autonomy / planner output
+#
+# Output topic is `cmd_vel` (remapped from the upstream default `cmd_vel_out`
+# in `helix_closedloop.launch.py`). The GO2 sport-mode bridge and the
+# Isaac Sim bridge both consume `/cmd_vel`, so this single topic covers
+# both targets.
+#
+# Failsafe behavior: each input has a `timeout`. If no message arrives within
+# that window, twist_mux discards it from arbitration and falls through to
+# the next-highest live input. If every input is stale, twist_mux publishes
+# zero on `cmd_vel`.
+#
+# HELIX safety note: /helix/cmd_vel sits BELOW /teleop/cmd_vel on purpose,
+# so an operator joystick can always preempt a recovery-tier hold. It sits
+# ABOVE /nav/cmd_vel so a recovery STOP wins over autonomy commands.
+twist_mux:
+  ros__parameters:
+    topics:
+      teleop:
+        topic:    /teleop/cmd_vel
+        timeout:  0.5
+        priority: 200
+      helix_recovery:
+        topic:    /helix/cmd_vel
+        timeout:  0.5
+        priority: 100
+      navigation:
+        topic:    /nav/cmd_vel
+        timeout:  0.5
+        priority: 50
+    # No active locks defined. We declare a single dummy lock with timeout 0.0
+    # (twist_mux requires the `locks` parameter to be populated, an empty map
+    # raises rclcpp::exceptions::InvalidParameterValueException at startup).
+    # priority 0 means this lock can never preempt any input.
+    locks:
+      unused:
+        topic:    /helix/_twist_mux_unused_lock
+        timeout:  0.0
+        priority: 0

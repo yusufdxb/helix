@@ -13,6 +13,7 @@
   <depend>helix_msgs</depend>
   <depend>helix_core</depend>
   <depend>ros2launch</depend>
+  <exec_depend>twist_mux</exec_depend>
 
   <buildtool_depend>ament_python</buildtool_depend>
 
