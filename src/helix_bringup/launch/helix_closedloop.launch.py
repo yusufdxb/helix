@@ -78,6 +78,7 @@ def generate_launch_description() -> LaunchDescription:
     bringup_share = get_package_share_directory("helix_bringup")
     sensing_launch = os.path.join(bringup_share, "launch", "helix_sensing.launch.py")
     adapter_launch = os.path.join(bringup_share, "launch", "helix_adapter.launch.py")
+    twist_mux_config = os.path.join(bringup_share, "config", "twist_mux.yaml")
 
     # --- launch args ----------------------------------------------------------
     sim_mode_arg = DeclareLaunchArgument(
@@ -127,7 +128,33 @@ def generate_launch_description() -> LaunchDescription:
         default_value="false",
         description=(
             "If true, the explainer calls the local llama-server sidecar. "
-            "Default false — explainer emits deterministic templates only."
+            "Default false, explainer emits deterministic templates only."
+        ),
+    )
+    enable_twist_mux_arg = DeclareLaunchArgument(
+        "enable_twist_mux",
+        default_value="true",
+        description=(
+            "Start the twist_mux arbiter that fans /helix/cmd_vel, "
+            "/teleop/cmd_vel, and /nav/cmd_vel onto the muxed cmd_vel "
+            "output. Set false if an external mux is already running."
+        ),
+    )
+    cmd_vel_out_arg = DeclareLaunchArgument(
+        "cmd_vel_out",
+        default_value="/cmd_vel",
+        description=(
+            "Topic that twist_mux publishes the muxed velocity onto. "
+            "Default /cmd_vel matches the GO2 sport-mode bridge and the "
+            "Isaac Sim go2_ros2_bridge subscriber."
+        ),
+    )
+    twist_mux_config_arg = DeclareLaunchArgument(
+        "twist_mux_config",
+        default_value=twist_mux_config,
+        description=(
+            "Path to the twist_mux YAML. Defaults to the package-installed "
+            "config/twist_mux.yaml."
         ),
     )
 
@@ -183,6 +210,23 @@ def generate_launch_description() -> LaunchDescription:
         output="screen",
     )
 
+    # --- twist_mux arbiter ----------------------------------------------------
+    # Subscribes to /teleop/cmd_vel (priority 200), /helix/cmd_vel (100),
+    # /nav/cmd_vel (50). Publishes the winning twist on cmd_vel_out
+    # (default /cmd_vel). twist_mux's upstream output topic is named
+    # cmd_vel_out, which we remap to the configurable cmd_vel_out arg so
+    # the GO2 sport-mode bridge and the Isaac Sim bridge both pick it up.
+    twist_mux_node = Node(
+        package="twist_mux",
+        executable="twist_mux",
+        name="twist_mux",
+        namespace="",
+        parameters=[LaunchConfiguration("twist_mux_config")],
+        remappings=[("cmd_vel_out", LaunchConfiguration("cmd_vel_out"))],
+        condition=IfCondition(LaunchConfiguration("enable_twist_mux")),
+        output="screen",
+    )
+
     # --- lifecycle auto-activation -------------------------------------------
     diag_cond = IfCondition(LaunchConfiguration("auto_activate_diagnosis"))
     recov_cond = IfCondition(LaunchConfiguration("auto_activate_recovery"))
@@ -195,12 +239,16 @@ def generate_launch_description() -> LaunchDescription:
         recovery_enabled_arg,
         recovery_cooldown_arg,
         llm_enabled_arg,
+        enable_twist_mux_arg,
+        cmd_vel_out_arg,
+        twist_mux_config_arg,
         sense_include,
         adapter_include,
         context_buffer,
         diagnosis_node,
         recovery_node,
         llm_explainer,
+        twist_mux_node,
     ]
     actions.extend(_auto_activate(context_buffer, diag_cond))
     actions.extend(_auto_activate(diagnosis_node, diag_cond))

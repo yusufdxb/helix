@@ -16,4 +16,12 @@ twist_mux:
         topic:    /teleop/cmd_vel
         timeout:  0.5
         priority: 30
-    locks: {}
+    # twist_mux refuses to start with `locks: {}` (rclcpp raises
+    # InvalidParameterValueException). Declare a single dummy lock with
+    # priority 0 + timeout 0 to satisfy the parameter declaration without
+    # ever preempting a real input. Mirrors helix_bringup/config/twist_mux.yaml.
+    locks:
+      unused:
+        topic:    /helix/_twist_mux_unused_lock
+        timeout:  0.0
+        priority: 0
