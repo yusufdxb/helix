@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-      - run: pip install pytest pytest-timeout
+      - run: pip install pytest pytest-timeout pyyaml
       - name: Run root-level pytest
         run: python3 -m pytest tests/ -v --timeout=30 --ignore=tests/sim_integration
 
@@ -49,7 +49,8 @@ jobs:
             ros-humble-geometry-msgs \
             ros-humble-rclcpp-lifecycle \
             ros-humble-rclcpp-components \
-            ros-humble-ament-cmake-gtest
+            ros-humble-ament-cmake-gtest \
+            ros-humble-twist-mux
           pip install pytest-timeout aiofiles
 
       - name: Build workspace
@@ -60,16 +61,26 @@ jobs:
             helix_sensing_cpp \
             helix_diagnosis helix_recovery helix_explanation
 
-      - name: Run unit tests (Python packages — one invocation per package for rclpy isolation)
+      - name: Run unit tests (Python packages, one invocation per package for rclpy isolation)
         run: |
           . /opt/ros/humble/setup.sh
           . install/setup.sh
+          # Unique ROS_DOMAIN_ID so the twist_mux integration test's
+          # subprocess and the test rclpy.init share a domain and don't
+          # cross-talk with anything running on the host.
+          export ROS_DOMAIN_ID=77
           set -e
           for pkg in helix_core helix_adapter helix_diagnosis helix_recovery helix_explanation; do
             echo "::group::pytest $pkg"
             python3 -m pytest "src/$pkg/test/" -v --timeout=30
             echo "::endgroup::"
           done
+          # helix_bringup's twist_mux integration test starts a real
+          # twist_mux subprocess and waits for DDS discovery; give it
+          # a longer timeout than the pure-function tests need.
+          echo "::group::pytest helix_bringup"
+          python3 -m pytest src/helix_bringup/test/ -v --timeout=60
+          echo "::endgroup::"
 
       - name: Run C++ tests (helix_sensing_cpp)
         run: |
