@@ -47,20 +47,25 @@ Offline benchmarks (pure-Python ports of the detection logic) are provided for e
   <img src="docs/images/architecture.svg" width="680"/>
 </p>
 
-```text
-  monitored ROS 2 graph
-          |
-          v
-  +-----------------+      +------------------+      +------------------+      +------------------+
-  |    SENSE        |      |    DIAGNOSE      |      |    RECOVER       |      |    EXPLAIN       |
-  |  helix_core     | ---> |  helix_diagnosis | ---> |  helix_recovery  |      |  helix_explanat. |
-  |  helix_sensing_ |      |  (rules R1-R4)   |      |  (allowlist +    |      |  (local LLM,     |
-  |  cpp (port)     |      |                  |      |   safety env.)   |      |   advisory)      |
-  |  helix_adapter  |      +------------------+      +------------------+      +------------------+
-  +-----------------+               |                          |                        ^
-          |                         v                          v                        |
-          |            /helix/recovery_hints         /cmd_vel + lifecycle         /helix/faults
-          +--> /helix/faults ---------------------------------------------------------+
+```mermaid
+graph LR
+    GRAPH(["monitored ROS 2 graph"])
+    SENSE["<b>SENSE</b><br/>helix_core<br/>helix_sensing_cpp (port)<br/>helix_adapter"]
+    DIAGNOSE["<b>DIAGNOSE</b><br/>helix_diagnosis<br/>(rules R1-R4)"]
+    RECOVER["<b>RECOVER</b><br/>helix_recovery<br/>(allowlist +<br/>safety env.)"]
+    EXPLAIN["<b>EXPLAIN</b><br/>helix_explanation<br/>(local LLM,<br/>advisory)"]
+    CMDVEL(["/cmd_vel + lifecycle"])
+
+    GRAPH --> SENSE
+    SENSE -- "/helix/faults" --> DIAGNOSE
+    DIAGNOSE -- "/helix/recovery_hints" --> RECOVER
+    RECOVER --> CMDVEL
+    SENSE -- "/helix/faults" --> EXPLAIN
+
+    classDef tier fill:#1f2937,stroke:#60a5fa,stroke-width:2px,color:#f9fafb;
+    classDef io fill:#374151,stroke:#9ca3af,color:#f9fafb;
+    class SENSE,DIAGNOSE,RECOVER,EXPLAIN tier;
+    class GRAPH,CMDVEL io;
 ```
 
 More detail: [ARCHITECTURE.md](ARCHITECTURE.md)
