@@ -1,8 +1,5 @@
 """Tests for the recovery tier: the pure SafetyEnvelope plus node-level
 lifecycle and hint-handling behaviour."""
-from rclpy.parameter import Parameter
-
-from helix_msgs.msg import RecoveryHint
 from helix_recovery.recovery_node import (
     ACTION_LOG_ONLY,
     ACTION_RESUME,
@@ -10,7 +7,9 @@ from helix_recovery.recovery_node import (
     RecoveryNode,
     SafetyEnvelope,
 )
+from rclpy.parameter import Parameter
 
+from helix_msgs.msg import RecoveryHint
 
 # --- SafetyEnvelope (pure, no ROS 2 spin) -----------------------------------
 
