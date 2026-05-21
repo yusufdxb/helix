@@ -87,7 +87,7 @@ Baseline: 60 samples from Laplace(loc=10.0, scale=1.0). Positive: 3 consecutive 
 | 3.0 | **0.0%** | 50.0% | 100% | 100% | 0.0% |
 | 4.0 | 0.0% | 0.5% | 33.0% | 100% | 0.0% |
 
-**Key finding:** The Z-score detector struggles significantly with heavy-tailed noise. At the default threshold (Z=3.0), a 3-sigma spike is undetectable — the Laplace distribution's heavy tails inflate the window's standard deviation, making moderate anomalies invisible. Reliable detection requires spikes at 8+ multiples of the noise scale.
+**Key finding:** The Z-score detector struggles significantly with heavy-tailed noise. At the benchmark threshold of Z=3.0 (the operational default in `helix_params.yaml` was later raised to Z=4.0 to suppress idle-jitter false positives observed in Session 8), a 3-sigma spike is undetectable: the Laplace distribution's heavy tails inflate the window's standard deviation, making moderate anomalies invisible. Reliable detection requires spikes at 8+ multiples of the noise scale.
 
 ### Scenario 2: Gradual Drift
 

@@ -1,98 +1,159 @@
-# HELIX Sensing Architecture
+# HELIX Architecture
 
-This document describes the fault sensing architecture implemented in this repository. HELIX is a detection and reporting layer — it does not include recovery execution, diagnosis, or operator tooling.
+HELIX is a four-tier self-healing layer for ROS 2 robots. It monitors the live
+graph, classifies anomalies into recovery hints, applies a strict safety
+envelope before any actuation, and produces operator-readable explanations.
 
-## Sensing Scope
+The four tiers run as independent ROS 2 lifecycle nodes connected through
+three HELIX topics:
 
-The sensing layer is organized around three questions:
+| Tier | Package | Subscribes | Publishes |
+|---|---|---|---|
+| Sense | `helix_core`, `helix_sensing_cpp`, `helix_adapter` | live ROS 2 graph, `/helix/metrics` | `/helix/faults` (FaultEvent) |
+| Diagnose | `helix_diagnosis` | `/helix/faults` | `/helix/recovery_hints` (RecoveryHint) |
+| Recover | `helix_recovery` | `/helix/recovery_hints` | `/helix/cmd_vel` (Twist), `/helix/recovery_actions` (audit) |
+| Explain | `helix_explanation` | `/helix/faults` | operator-facing summaries (advisory, off the safety path) |
 
-1. **Is a node still alive?** — Heartbeat monitoring with configurable timeouts
-2. **Are numeric metrics drifting?** — Rolling Z-score anomaly detection
-3. **Are logs showing failure signatures?** — Regex-based log pattern matching
+The overview diagram lives in the project README (`## Architecture`); this
+document is the prose detail.
 
-When any of these conditions is detected, the system publishes a structured `FaultEvent` message to `/helix/faults`.
+## Sense
 
-## Packages
+Three lifecycle nodes publish structured `FaultEvent` messages to
+`/helix/faults`:
 
-### `helix_msgs`
+- **`anomaly_detector`** (`helix_core`, with a C++ port in
+  `helix_sensing_cpp`). Subscribes to `/helix/metrics`, keeps a rolling
+  per-metric window, and evaluates each new sample's z-score against the
+  window *before* appending it, so the new sample cannot contaminate the
+  baseline it is judged against. A fault fires only when the z-score crosses
+  the configured threshold on `consecutive_trigger` samples in a row. NaN
+  samples (from stale upstream topics) are counted as violations.
+- **`heartbeat_monitor`** (`helix_core`). Subscribes to expected heartbeat
+  topics. A fault fires when a monitored topic misses `miss_threshold`
+  consecutive heartbeats within the configured timeout.
+- **`log_parser`** (`helix_core`). Matches `/rosout` (or any configured log
+  topic) against a regex rule set, emitting a fault on each match.
 
-Custom ROS 2 message definitions:
+`helix_adapter` bridges robot-specific telemetry into the HELIX shape so the
+sensing nodes can run against robots that do not natively publish
+`/helix/metrics`. Three lifecycle nodes ship today: `topic_rate_monitor`
+(per-topic message rate as `rate_hz/<topic>`; NaN when stale),
+`json_state_parser` (extracts numeric and boolean fields from JSON payloads),
+and `pose_drift_monitor` (rolling displacement rate).
 
-- `FaultEvent.msg` — structured fault report (used by all three sensing nodes)
-- `RecoveryHint.msg` — defined for future use; not referenced by any node in this codebase
+## Diagnose
 
-### `helix_core`
+`helix_diagnosis` is a lifecycle node with a small state machine
+(`IDLE` / `STOP_AND_HOLD`) and a first-match-wins rule table:
 
-Three lifecycle-managed sensing nodes:
+- **R1.** A `rate_hz/utlidar*` ANOMALY at ERROR severity emits a
+  STOP_AND_HOLD hint with confidence 0.9.
+- **R2.** A RESUME hint fires from a timer once the anomaly stream has been
+  quiet for `anomaly_clear_seconds`.
+- **R3.** A LOG_PATTERN fault emits a STOP_AND_HOLD hint.
+- **R4.** A heartbeat-loss CRASH fault emits a STOP_AND_HOLD hint.
 
-- **`heartbeat_monitor.py`** — Subscribes to expected heartbeat topics. When a monitored node fails to publish within a configurable timeout for a threshold number of consecutive misses, emits a `FaultEvent`.
+The rules live in `helix_diagnosis.rules` as pure functions and are
+unit-testable without ROS 2. `RecoveryHint` messages are published to
+`/helix/recovery_hints`.
 
-- **`anomaly_detector.py`** — Subscribes to `/helix/metrics`. Maintains a rolling window of recent samples and computes a Z-score for each incoming value. If the Z-score exceeds the configured threshold for a configurable number of consecutive samples, emits a `FaultEvent`.
+A `/helix/get_context` client is created at configure time for future
+context-aware rules; the rules currently match on `FaultEvent` fields alone
+and the client is not yet exercised.
 
-- **`log_parser.py`** — Matches incoming log entries against a set of configured regex rules. When a pattern matches, emits a `FaultEvent` with the rule name and matched content.
+## Recover
 
-### `helix_adapter`
+`helix_recovery` is the only node in HELIX that publishes actuation
+commands. It consumes `RecoveryHint` messages, applies the `SafetyEnvelope`
+(enable flag, per-fault-type cooldown, action allowlist
+`{STOP_AND_HOLD, RESUME, LOG_ONLY}`), and emits an audit `RecoveryAction`
+on every decision (`ACCEPTED`, `SUPPRESSED_DISABLED`,
+`SUPPRESSED_ALLOWLIST`, `SUPPRESSED_COOLDOWN`).
 
-Three lifecycle-managed adapter nodes that bridge non-standard robot topics into HELIX's `/helix/metrics` so the `helix_core` AnomalyDetector can run against a robot that does not natively publish HELIX-shaped inputs:
+When holding a STOP, the node publishes a literal zero `Twist` to
+`/helix/cmd_vel` at 20 Hz. The intended downstream is `twist_mux`, which
+arbitrates HELIX (priority 100) against an operator joystick
+(`/teleop/cmd_vel`, priority 200, which always wins) and the autonomy stack
+(`/nav/cmd_vel`, priority 50). RESUME is exempt from cooldown so a safety
+stop can never suppress its own release.
 
-- **`topic_rate_monitor.py`** — Subscribes to a configured set of topics (default: GO2 IMU / odom / pose / cloud / GNSS / multiplestate), tracks callback-arrival timestamps in a rolling window, and publishes per-topic `rate_hz/<topic>` to `/helix/metrics`. Stale topics emit NaN.
-- **`json_state_parser.py`** — Subscribes to `std_msgs/String` topics (default: `/gnss`, `/multiplestate`), parses JSON payloads, and republishes selected numeric and boolean fields as labeled metrics.
-- **`pose_drift_monitor.py`** — Subscribes to a `geometry_msgs/PoseStamped` topic and publishes a rolling displacement-rate metric.
+`auto_activate_recovery` is `false` by default in the bringup; recovery is
+intentionally opt-in.
 
-These replace the predecessor monolithic `passive_adapter.py` script (now archived under `hardware_eval_20260406/scripts/`); the canonical main-branch path is `ros2 launch helix_bringup helix_adapter.launch.py`.
+## Explain
 
-### `helix_bringup`
+`helix_explanation` is an advisory tier. It wraps a `llama-server` sidecar
+(Qwen2.5-1.5B-Instruct Q4_K_M on the Jetson) and generates a plain-language
+summary for each `FaultEvent`. The LLM call runs inside a
+`ThreadPoolExecutor` so it cannot back-pressure the ROS executor;
+schema-constrained JSON decoding (`response_format: json_schema`) keeps the
+output parseable; a deterministic template is always published *first* and
+the LLM annotation arrives later, if at all. The Recover allowlist is the
+hard safety gate; the Explain tier never publishes actuation.
 
-Integration and demonstration:
+`llm_enabled` ships `false` by default. The Jetson llama-server deployment
+runbook is in [`docs/LLAMA_SERVER_JETSON_SETUP.md`](LLAMA_SERVER_JETSON_SETUP.md);
+it has not yet been exercised in a hardware session.
 
-- Launch file for the sensing stack (`helix_sensing.launch.py`) — auto-transitions the three `helix_core` lifecycle nodes through `configure → active`
-- Launch file for the adapter stack (`helix_adapter.launch.py`) — auto-transitions the three `helix_adapter` lifecycle nodes
-- YAML configuration for thresholds, timeouts, log rules, and adapter sources
-- `fault_injector.py` (executable: `helix_fault_injector`) — publishes synthetic anomalies and stops heartbeats for local testing
+## Lifecycle and Bringup
 
-## Data Flow
+All HELIX nodes are ROS 2 managed (lifecycle) nodes. `helix_bringup`
+provides:
 
-```text
-/diagnostics ------------------------------+
-                                           |
-/helix/metrics ----------------------------+--> helix_core sensing nodes
-                                           |         |
-configured log rules / injected faults ----+         |
-                                                     v
-                                              /helix/faults (FaultEvent)
-```
-
-Each sensing node independently subscribes to its input source, processes data, and publishes `FaultEvent` messages to the shared `/helix/faults` topic. There is no inter-node coordination within the sensing layer.
+- `helix_sensing.launch.py` auto-transitions the three `helix_core` nodes
+  through `configure -> active`.
+- `helix_adapter.launch.py` does the same for the three `helix_adapter`
+  nodes.
+- `helix_closedloop.launch.py` brings up the full Sense + Adapter +
+  Diagnose + Recover stack, plus an optional `twist_mux` with the canonical
+  config at `src/helix_bringup/config/twist_mux.yaml`.
+- `fault_injector` publishes synthetic anomalies for local testing.
 
 ## Design Choices
 
-### Lifecycle nodes
+### Evaluate-before-append on the Z-score window
 
-All three monitors are implemented as ROS 2 lifecycle (managed) nodes. This allows controlled startup sequencing — nodes can be configured before activation and cleanly deactivated without killing the process. It also makes the sensing layer compatible with ROS 2 launch-time lifecycle management.
+The anomaly detector evaluates `(sample - window_mean) / window_std`
+against the *existing* history before appending the new sample. A spike
+cannot inflate the baseline it is being compared against.
 
-### Structured fault events
+### Pure-function rule and envelope cores
 
-Faults are reported as typed ROS 2 messages (`FaultEvent`) rather than free-form log output. This makes downstream consumption deterministic — any future recovery layer, dashboard, or logging system can subscribe to `/helix/faults` without parsing strings.
+`helix_diagnosis.rules` and `helix_recovery.SafetyEnvelope` are deliberately
+ROS-free and pure-function. Every safety-relevant branch is exercised by
+unit tests without an `rclpy` spin (allowlist, cooldown, RESUME exemption,
+disabled rejection). This is what makes the recovery tier auditable from
+the test suite alone.
 
-### Conservative Z-score evaluation
+### Recovery is the only `cmd_vel` publisher
 
-The anomaly detector computes its Z-score against the existing history window **before** appending the new sample. This prevents the anomalous value from contaminating the baseline statistics it is being evaluated against. The detection is also gated by a `consecutive_trigger` parameter — a single outlier does not produce a fault event.
+By design, only `helix_recovery` writes to `/helix/cmd_vel`. The intended
+downstream is `twist_mux` arbitrating HELIX against teleop and the autonomy
+stack, so a node crash here results in `twist_mux` timing the input out and
+emitting zero rather than an indeterminate command. The fail-safe behaviour
+is asserted in `test_twist_mux_model.py`; hardware verification against the
+real `twist_mux` under total input dropout is still owed.
 
-### Testable core logic
+### RESUME is exempt from cooldown
 
-The sensing nodes are designed so their core detection logic can be exercised in unit tests via `rclpy` without requiring a full multi-node ROS 2 deployment.
+`SafetyEnvelope.evaluate` skips the cooldown check when the action is
+`RESUME`, and a RESUME never writes a cooldown bucket. The cooldown exists
+only to damp STOP_AND_HOLD flapping; a state-clearing release must not be
+suppressible by the stop it is clearing. Regression tests cover this.
 
-## Proposed Extensions (Not Implemented)
+## Hardware Validation Boundary
 
-The following are research directions documented for context. None are present in this codebase:
+Eight lab sessions on a Unitree GO2 with a Jetson Orin NX (2026-04-03 to
+2026-04-23) cover persistent Jetson deployment, hardware-validated detection
+on live LiDAR rate anomalies, ground-truth fault injection at ~1.8 s
+end-to-end, and the Session 8 closed-loop run (30 anomalies, 14 hints, 14
+audited actions, 3,064 zero-twist commands in a 7m19s bag).
 
-- Recovery planning and action execution
-- Recovery verification loop (confirm that a recovery action resolved the fault)
-- Operator-facing event dashboard
-- Hardware deployment on the Unitree GO2 / Jetson Orin Nano platform
-- LLM-assisted diagnosis after deterministic detection
-- Persistent event storage (SQLite or similar)
+What is *not* validated: continuous field deployment, multi-day stability,
+and physical actuation closure. `/helix/cmd_vel` had zero downstream
+subscribers in Session 8; wiring it through `twist_mux` on the robot is the
+next milestone.
 
-## Architecture Diagram Note
-
-The diagram at `docs/images/architecture.svg` depicts the **target deployment context**, including the GO2 quadruped and Jetson Orin hardware. The sensing logic in this repository is platform-independent and has been validated through offline benchmarks, in-process ROS 2 unit tests, and four bounded hardware sessions on the live GO2 (longest run: 30 minutes on Jetson Orin NX). It has not been deployed as a persistent monitoring service. See `docs/GO2_HARDWARE_EVIDENCE.md` and `docs/LIMITATIONS.md` for the exact reproducibility boundary.
+Full evidence: [`docs/GO2_HARDWARE_EVIDENCE.md`](GO2_HARDWARE_EVIDENCE.md).
+Honest limits: [`docs/LIMITATIONS.md`](LIMITATIONS.md).

@@ -1,6 +1,8 @@
-# HELIX — Self-Healing Middleware for ROS 2 Robots
+# HELIX
 
-> A closed-loop self-healing system for ROS 2: detect faults, diagnose root cause, recover safely, explain what happened. Validated on a Unitree GO2 + Jetson Orin NX.
+> Self-healing middleware for ROS 2 robots: detect faults, diagnose root cause,
+> recover safely, explain what happened. Validated on a Unitree GO2 and Jetson
+> Orin NX across eight hardware lab sessions.
 
 [![CI](https://github.com/yusufdxb/helix/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/yusufdxb/helix/actions/workflows/ci.yml)
 [![ROS 2 Humble](https://img.shields.io/badge/ROS2-Humble-blue)](https://docs.ros.org/en/humble/)
@@ -10,42 +12,50 @@
 
 ---
 
-## Status
+## Demo
 
-| Tier | State | Validation |
-|---|---|---|
-| **Sense** (`helix_core`, `helix_adapter`) | stable | Hardware-validated — 8 GO2 + Jetson lab sessions (2026-04-03 → 2026-04-23) |
-| **Sense — C++ port** (`helix_sensing_cpp`) | work-in-progress | 30-min hardware parity run done (2026-04-23): -56% RSS, -60% CPU vs Python, but 44% RSS missed the 30% design-doc target. Remains launch-gated (`use_cpp_anomaly=false`). |
-| **Diagnose** (`helix_diagnosis`) | work-in-progress | 16/16 unit tests green on Jetson (live-schema fixtures); closed-loop validated on live GO2 in Session 8 *after* R1 schema fix (branch `fix/r1-anomaly-schema-mismatch`, not yet on `main`). |
-| **Recover** (`helix_recovery`) | work-in-progress | Hardware-validated end-to-end in Session 8: 14 hints consumed, allowlist + cooldown audited. Caveat: `/helix/cmd_vel` has 0 downstream subscribers — STOP_AND_HOLD is currently a void publish (not yet wired to twist_mux fallback). |
-| **Explain** (`helix_explanation`) | work-in-progress | 26 unit tests green; ships `llm_enabled=false`; Jetson llama-server deployment pending |
+<p align="center">
+  <a href="https://youtu.be/PbKXB91-NSY">
+    <img src="https://img.youtube.com/vi/PbKXB91-NSY/maxresdefault.jpg" width="760" alt="HELIX demo: self-healing closed loop on a live GO2">
+  </a>
+</p>
 
-Last stable release without the closed-loop stack: [`v0.2.1`](https://github.com/yusufdxb/helix/releases/tag/v0.2.1). Current self-healing work is tagged [`v0.3.0-wip-self-healing`](https://github.com/yusufdxb/helix/releases/tag/v0.3.0-wip-self-healing).
+A 90-second walkthrough of the four-tier closed loop (Sense, Diagnose, Recover,
+Explain), replayed from the Session 8 hardware bag: 30 anomalies &rarr;
+14 recovery hints &rarr; 14 recovery actions &rarr; 3,064 zero-twist
+`/helix/cmd_vel` messages on a live Unitree GO2 and Jetson Orin NX.
 
 ---
 
-## What This Is
+## What HELIX Does
 
-HELIX is a four-tier self-healing stack for ROS 2 robots:
+A robot fault rarely announces itself. A sensor's rate drifts, a topic goes
+quiet, and the stack keeps driving on stale data until something downstream
+fails. HELIX is a four-tier layer that watches the ROS 2 graph and closes the
+loop on that failure mode.
 
-1. **Sense** — lifecycle nodes monitor the ROS 2 graph and emit structured `FaultEvent` messages
-   - Anomaly detector (rolling Z-score, Python + **C++ port**)
-   - Heartbeat monitor (topic-rate liveness)
-   - Log parser (regex rule matching)
-   - Adapter nodes bridging robot-specific telemetry to `/helix/metrics`
-2. **Diagnose** — a lifecycle node runs deterministic rules (R1–R4) against fault streams + context snapshots and publishes `RecoveryHint` suggestions. Pure-function rules are unit-testable without ROS 2.
-3. **Recover** — a lifecycle node consumes hints, enforces a strict safety envelope (cooldown, allowlist `{STOP_AND_HOLD, RESUME, LOG_ONLY}`, enable flag), and is the only publisher of `cmd_vel`.
-4. **Explain** — an advisory **local LLM** (llama-server sidecar, Qwen2.5-1.5B-Instruct Q4_K_M on Jetson) annotates events for operators. Runs with schema-constrained JSON decoding. **Never on the safety-critical path** — the Recover tier's allowlist is the hard gate.
+1. **Sense.** Lifecycle nodes monitor the ROS 2 graph and emit structured
+   `FaultEvent` messages: a rolling Z-score anomaly detector (Python reference
+   plus a C++ port), a heartbeat monitor for topic-rate liveness, a regex log
+   parser, and adapter nodes that bridge robot-specific telemetry to
+   `/helix/metrics`.
+2. **Diagnose.** A lifecycle node runs deterministic rules (R1 to R4) against
+   the fault stream and context snapshots, publishing `RecoveryHint`
+   suggestions. The pure-function rules are unit-testable without ROS 2.
+3. **Recover.** A lifecycle node consumes hints, enforces a strict safety
+   envelope (cooldown, an allowlist of `{STOP_AND_HOLD, RESUME, LOG_ONLY}`, and
+   an enable flag), and is the only publisher of `cmd_vel`.
+4. **Explain.** An advisory local LLM (Qwen2.5-1.5B-Instruct Q4_K_M via a
+   llama-server sidecar) annotates events for operators with schema-constrained
+   JSON output. It is never on the safety-critical path; the Recover allowlist
+   is the hard gate.
 
-Hot-path sensing nodes are being ported from Python to C++ so HELIX can coexist on the Jetson with the robot's Nav2 + perception stack without RAM or CPU pressure. See [`docs/CPP_PORT_DESIGN_ANOMALY_DETECTOR.md`](docs/CPP_PORT_DESIGN_ANOMALY_DETECTOR.md).
+Hot-path sensing nodes are being ported from Python to C++ so HELIX can coexist
+on the Jetson with the robot's Nav2 and perception stack without RAM or CPU
+pressure. Offline benchmarks (pure-Python ports of the detection logic) let you
+evaluate algorithmic performance without a ROS 2 runtime.
 
-Offline benchmarks (pure-Python ports of the detection logic) are provided for evaluating algorithmic performance without a ROS 2 runtime.
-
-## Architecture Overview
-
-<p align="center">
-  <img src="docs/images/architecture.svg" width="680"/>
-</p>
+## Architecture
 
 ```mermaid
 graph LR
@@ -68,19 +78,35 @@ graph LR
     class GRAPH,CMDVEL io;
 ```
 
-More detail: [ARCHITECTURE.md](ARCHITECTURE.md)
+Full detail: [ARCHITECTURE.md](ARCHITECTURE.md). Design notes for the C++ port:
+[`docs/CPP_PORT_DESIGN_ANOMALY_DETECTOR.md`](docs/CPP_PORT_DESIGN_ANOMALY_DETECTOR.md).
+
+## Status
+
+| Tier | State | Validation |
+|---|---|---|
+| **Sense** (`helix_core`, `helix_adapter`) | stable | Hardware-validated across 8 GO2 and Jetson lab sessions (2026-04-03 to 2026-04-23). |
+| **Sense, C++ port** (`helix_sensing_cpp`) | work in progress | 30-min hardware parity run (2026-04-23): -56% RSS, -60% CPU vs Python, though 44% RSS missed the 30% design-doc target. Launch-gated (`use_cpp_anomaly=false`). |
+| **Diagnose** (`helix_diagnosis`) | work in progress | 16/16 unit tests green on Jetson (live-schema fixtures). Closed-loop validated on a live GO2 in Session 8 after the R1 schema fix (branch `fix/r1-anomaly-schema-mismatch`, not yet on `main`). |
+| **Recover** (`helix_recovery`) | work in progress | Validated end-to-end in Session 8: 14 hints consumed, allowlist and cooldown audited. Caveat: `/helix/cmd_vel` has 0 downstream subscribers, so STOP_AND_HOLD is currently a void publish (not yet wired to a twist_mux fallback). |
+| **Explain** (`helix_explanation`) | work in progress | 26 unit tests green. Ships `llm_enabled=false`; Jetson llama-server deployment pending. |
+
+Last stable release without the closed-loop stack:
+[`v0.2.1`](https://github.com/yusufdxb/helix/releases/tag/v0.2.1). Current
+self-healing work is tagged
+[`v0.3.0-wip-self-healing`](https://github.com/yusufdxb/helix/releases/tag/v0.3.0-wip-self-healing).
 
 ## Packages
 
-| Package | Language | Role | Contents |
+| Package | Language | Tier | Contents |
 |---|---|---|---|
-| `helix_msgs` | msg | msgs | `FaultEvent`, `RecoveryHint`, `RecoveryAction`, `GetContext` srv |
+| `helix_msgs` | msg | shared | `FaultEvent`, `RecoveryHint`, `RecoveryAction`, `GetContext` srv |
 | `helix_core` | Python | Sense | `anomaly_detector`, `heartbeat_monitor`, `log_parser` (reference implementation) |
-| `helix_sensing_cpp` | C++ | Sense | C++ port of `anomaly_detector` (RollingStats kernel + LifecycleNode component). Launch-gated, Python stays default until hardware parity re-confirmed. |
+| `helix_sensing_cpp` | C++ | Sense | C++ port of `anomaly_detector` (RollingStats kernel + LifecycleNode component). Launch-gated; Python stays default until hardware parity is re-confirmed. |
 | `helix_adapter` | Python | Sense | Lifecycle nodes bridging robot-specific telemetry (topic-rate monitor, JSON state parser, pose drift) to `/helix/metrics` |
-| `helix_diagnosis` | Python | Diagnose | `context_buffer`, `diagnosis_node` (IDLE ↔ STOP_AND_HOLD state machine), pure-function `rules` |
-| `helix_recovery` | Python | Recover | `recovery_node` with `SafetyEnvelope` (enable/cooldown/allowlist). Only publisher of `cmd_vel`. |
-| `helix_explanation` | Python | Explain | `llm_explainer` + `llm_client` — llama-server sidecar client, `response_format: json_schema`, ThreadPoolExecutor, deterministic fallback. Advisory only. |
+| `helix_diagnosis` | Python | Diagnose | `context_buffer`, `diagnosis_node` (IDLE / STOP_AND_HOLD state machine), pure-function `rules` |
+| `helix_recovery` | Python | Recover | `recovery_node` with `SafetyEnvelope` (enable, cooldown, allowlist). Only publisher of `cmd_vel`. |
+| `helix_explanation` | Python | Explain | `llm_explainer` and `llm_client`: llama-server sidecar client, `response_format: json_schema`, ThreadPoolExecutor, deterministic fallback. Advisory only. |
 | `helix_bringup` | Python | Ops | Launch files, YAML config, `fault_injector` |
 
 ## Quick Start
@@ -97,27 +123,22 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
-### Launch the sensing stack
+### Run
 
 ```bash
+# launch the sensing stack
 ros2 launch helix_bringup helix_sensing.launch.py
-```
 
-### Inject faults (separate terminal)
-
-```bash
+# inject faults (separate terminal)
 ros2 run helix_bringup fault_injector
-```
 
-### Run benchmarks (no ROS required)
-
-```bash
+# standalone benchmarks (no ROS 2 required)
 python3 benchmark_helix.py
 ```
 
 ## Evaluation
 
-Five benchmark suites evaluate the sensing components:
+Five benchmark suites evaluate the sensing components.
 
 | Benchmark | Key Result | ROS 2? |
 |-----------|-----------|--------|
@@ -126,13 +147,15 @@ Five benchmark suites evaluate the sensing components:
 | Realistic anomaly detection | 96.5% TPR at Z=3.0 with marginal anomalies; 0% TPR for 3-sigma in Laplace noise | No |
 | Log parser accuracy | 22/22 correct, ~248K msg/sec throughput | No |
 | GO2 attachability | 2/4 HELIX inputs natively available; 54 topics adaptable | No |
-| Adapter-based detection | 4 real FaultEvents from live GO2 LiDAR rate anomaly | Yes |
+| Adapter-based detection | 4 real FaultEvents from a live GO2 LiDAR rate anomaly | Yes |
 
-Full results, methodology, and caveats: [RESULTS.md](RESULTS.md)
+Full results, methodology, and caveats: [RESULTS.md](RESULTS.md). Known
+limitations: [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md).
 
 ## Testing
 
-Unit tests exercise the three `helix_core` nodes via `rclpy` in isolation. ROS 2 Humble is required.
+Unit tests exercise the `helix_core` nodes via `rclpy` in isolation. ROS 2
+Humble is required.
 
 ```bash
 cd ~/helix_ws
@@ -141,52 +164,77 @@ colcon test --packages-select helix_core
 colcon test-result --verbose
 ```
 
-Full details: [TESTING.md](TESTING.md)
+Full details: [TESTING.md](TESTING.md).
 
-## Artifact Scope
+## Reproducing the Closed-Loop Demo
 
-An evaluator can reproduce the following locally:
+The R1 schema fix the Session 8 closed loop depends on landed on `main` in
+commit `82f7a15` (merged from `fix/r1-anomaly-schema-mismatch`), so the demo
+reproduces from `main` via `ros2 launch helix_bringup helix_closedloop.launch.py`.
+See
+[`hardware_eval_20260423/results/closed_loop_demo.md`](hardware_eval_20260423/results/closed_loop_demo.md)
+for the bag-level evidence (30 faults &rarr; 14 hints &rarr; 14 actions &rarr;
+3,064 zero-twist commands in a 7m19s run).
 
-1. **Build** — `colcon build` in a ROS 2 Humble environment
-2. **Unit tests** — `colcon test --packages-select helix_core` (requires ROS 2 Humble)
-3. **Standalone benchmarks** — `python3 benchmark_helix.py`, `python3 scripts/bench_realistic_anomalies.py`, `python3 scripts/bench_log_parser.py` (no ROS 2 required)
-4. **End-to-end latency** — `python3 scripts/bench_e2e_latency.py` (requires ROS 2 Humble + built workspace)
-5. **GO2 gap analysis** — `python3 scripts/go2_topic_gap_analysis.py` (no ROS 2 required)
-6. **Live demo** — launch the sensing stack and inject faults in simulation
+An evaluator can otherwise reproduce, on a ROS 2 Humble environment
+(the `ros:humble-ros-base` Docker image is a known-good setup):
 
-Steps 1, 2, 4, and 6 require ROS 2 Humble. The `ros:humble-ros-base` Docker image is a known-good environment. Steps 3 and 5 run with standard Python 3.10+. All result artifacts are stored in `results/`.
+1. **Build:** `colcon build`
+2. **Unit tests:** `colcon test --packages-select helix_core`
+3. **Standalone benchmarks:** `python3 benchmark_helix.py`,
+   `python3 scripts/bench_realistic_anomalies.py`,
+   `python3 scripts/bench_log_parser.py` (no ROS 2 required)
+4. **End-to-end latency:** `python3 scripts/bench_e2e_latency.py`
+5. **GO2 gap analysis:** `python3 scripts/go2_topic_gap_analysis.py` (no ROS 2 required)
+6. **Live demo:** launch the sensing stack and inject faults in simulation
 
-**Reproducibility note (closed-loop demo).** The Session 8 closed-loop demonstration (SENSE → DIAGNOSE → RECOVER on live GO2) requires the R1 schema fix on branch `fix/r1-anomaly-schema-mismatch @ e821b47`. `main` does not yet contain this fix; reproducing the demo from `main` will produce 0 recovery hints because R1 silently fails to match live ANOMALYs. See `hardware_eval_20260423/results/closed_loop_demo.md`.
+Result artifacts are stored in `results/`.
 
-## Project Direction
+## Hardware Validation
 
-HELIX is being shipped as a **public repo + demo video**. The deliverable is a working self-healing system that other roboticists can install and adapt. Four pillars:
+Target platform: Unitree GO2 quadruped with an NVIDIA Jetson Orin NX 16 GB. The
+sensing and recovery logic is platform-independent; adapter nodes isolate the
+robot-specific telemetry.
 
-1. **Closed-loop self-healing** — detect → diagnose → recover → explain, on GO2 + Jetson.
-2. **C/C++ on hot paths** — Python is a RAM/latency liability on Jetson at steady-state. Hot-path sensing nodes are being ported to C++ (AnomalyDetector landed; HeartbeatMonitor, LogParser, adapter rate-monitor to follow). Target: <30% of Python RSS baseline.
-3. **Local LLM for heal / flag / predict** — Qwen2.5-1.5B-Instruct Q4_K_M via llama-server sidecar on Jetson Orin NX (~1.5-1.7 GB RSS). Schema-constrained JSON output. Advisory only; never a control input.
-4. **Hardware-validated** — eight lab sessions on a live GO2 as of 2026-04-23 (see below).
+Eight lab sessions (2026-04-03 to 2026-04-23) demonstrated:
 
-See [`docs/LLAMA_SERVER_JETSON_SETUP.md`](docs/LLAMA_SERVER_JETSON_SETUP.md) for the Jetson deployment runbook and [`docs/CPP_PORT_DESIGN_ANOMALY_DETECTOR.md`](docs/CPP_PORT_DESIGN_ANOMALY_DETECTOR.md) for the C++ port design.
-
-## Research Context
-
-Target platform: Unitree GO2 quadruped + NVIDIA Jetson Orin NX 16 GB. The sensing and recovery logic is platform-independent; adapter nodes isolate robot-specific telemetry.
-
-Hardware validation across eight lab sessions (2026-04-03 → 2026-04-23) demonstrated:
 - HELIX lifecycle nodes running persistently on the Jetson alongside the live GO2 stack
-- 30-minute persistent deployment with all success criteria green (Session 5)
-- 1-hour stability run with RSS plateau, refuting earlier leak concerns (Session 7)
-- IMU-excluded overhead: 6-node sum 47.6% → 5.86% core CPU (-88%)
-- Real FaultEvent detection from LiDAR rate anomalies on the GO2 via the adapter
+- A 30-minute persistent deployment with all success criteria green (Session 5)
+- A 1-hour stability run with an RSS plateau, refuting earlier leak concerns (Session 7)
+- IMU-excluded overhead: 6-node sum from 47.6% to 5.86% core CPU (-88%)
+- Real `FaultEvent` detection from LiDAR rate anomalies on the GO2 via the adapter
 - Ground-truth fault injection with ~1.8 s end-to-end detection latency
-- Algorithmic benchmarks on Jetson Orin NX (62-64K samples/sec)
-- Session 8 (2026-04-23): end-to-end closed-loop on live GO2 — 30 faults → 14 recovery hints (R1 STOP_AND_HOLD + R2 RESUME) → 14 audited actions (allowlist + cooldown); 30-min C++ anomaly-detector parity run at -56% RSS / -60% CPU vs Python (RSS missed 30% design target at 44%). Closed-loop required an R1 schema fix on a feature branch — see Reproducibility note above.
+- Algorithmic benchmarks on the Jetson Orin NX (62-64K samples/sec)
+- Session 8: end-to-end closed loop on a live GO2, 30 faults &rarr; 14 recovery
+  hints (R1 STOP_AND_HOLD and R2 RESUME) &rarr; 14 audited actions (allowlist
+  and cooldown); a 30-min C++ anomaly-detector parity run at -56% RSS and
+  -60% CPU vs Python (RSS missed the 30% design target at 44%)
 
-See `docs/GO2_HARDWARE_EVIDENCE.md` for full evidence, scope, and limitations.
+Full evidence, scope, and limitations: [`docs/GO2_HARDWARE_EVIDENCE.md`](docs/GO2_HARDWARE_EVIDENCE.md).
+
+## Roadmap
+
+HELIX ships as a public repo and demo video: a working self-healing system that
+other roboticists can install and adapt. Three forward pillars:
+
+1. **Close the recovery loop physically.** Wire `/helix/cmd_vel` through a
+   `twist_mux` fallback so STOP_AND_HOLD reaches the robot, not a void publish.
+2. **C/C++ on the hot paths.** Python is a RAM and latency liability on the
+   Jetson at steady state. The anomaly detector port has landed; the heartbeat
+   monitor, log parser, and adapter rate-monitor follow. Target: under 30% of
+   the Python RSS baseline.
+3. **Local LLM for heal, flag, and predict.** Qwen2.5-1.5B-Instruct Q4_K_M via
+   a llama-server sidecar on the Jetson (~1.5 to 1.7 GB RSS), schema-constrained
+   JSON output, advisory only. See
+   [`docs/LLAMA_SERVER_JETSON_SETUP.md`](docs/LLAMA_SERVER_JETSON_SETUP.md) for
+   the Jetson deployment runbook.
 
 ## Author
 
 **Yusuf Guenena**
-M.S. Robotics Engineering — Wayne State University
-[linkedin.com/in/yusuf-guenena](https://linkedin.com/in/yusuf-guenena) · [github.com/yusufdxb](https://github.com/yusufdxb)
+M.S. Robotics Engineering, Wayne State University
+[linkedin.com/in/yusuf-guenena](https://linkedin.com/in/yusuf-guenena) &middot; [github.com/yusufdxb](https://github.com/yusufdxb)
+
+## License
+
+MIT. See [LICENSE](LICENSE).
