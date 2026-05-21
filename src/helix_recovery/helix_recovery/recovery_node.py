@@ -46,11 +46,16 @@ class SafetyEnvelope:
             return EnvelopeResult('SUPPRESSED_DISABLED', False, 'recovery.enabled is false')
         if action not in ALLOWED_ACTIONS:
             return EnvelopeResult('SUPPRESSED_ALLOWLIST', False, f'{action} not in allowlist')
-        last = self._last_action_time.get(fault_type)
-        if last is not None and (now - last) < self.cooldown_seconds:
-            return EnvelopeResult('SUPPRESSED_COOLDOWN', False,
-                                  f'cooldown active for {fault_type} ({now - last:.2f}s)')
-        self._last_action_time[fault_type] = now
+        # RESUME ends a STOP_AND_HOLD. It must never be rate-limited by the
+        # cooldown of the stop it is clearing, or a safety stop could suppress
+        # its own release and hold the robot longer than the fault lasts.
+        # Cooldown exists only to damp STOP_AND_HOLD flapping.
+        if action != ACTION_RESUME:
+            last = self._last_action_time.get(fault_type)
+            if last is not None and (now - last) < self.cooldown_seconds:
+                return EnvelopeResult('SUPPRESSED_COOLDOWN', False,
+                                      f'cooldown active for {fault_type} ({now - last:.2f}s)')
+            self._last_action_time[fault_type] = now
         publish = action in PUBLISHING_ACTIONS
         return EnvelopeResult('ACCEPTED', publish, f'action {action} accepted')
 
@@ -93,15 +98,35 @@ class RecoveryNode(LifecycleNode):
         if self._publish_timer is not None:
             self._publish_timer.cancel()
             self._publish_timer = None
+        # Drop any in-progress hold so a later re-activate cannot resurrect a
+        # stale STOP with no live fault behind it.
+        self._current_action = None
         return super().on_deactivate(state)
+
+    def on_cleanup(self, state: State) -> TransitionCallbackReturn:
+        """Destroy publishers created in on_configure; return to unconfigured."""
+        if self._pub_cmd is not None:
+            self.destroy_publisher(self._pub_cmd)
+            self._pub_cmd = None
+        if self._pub_audit is not None:
+            self.destroy_publisher(self._pub_audit)
+            self._pub_audit = None
+        self._envelope = None
+        self._current_action = None
+        return TransitionCallbackReturn.SUCCESS
+
+    def on_shutdown(self, state: State) -> TransitionCallbackReturn:
+        """Release resources on shutdown from any lifecycle state."""
+        return self.on_cleanup(state)
 
     def _now(self) -> float:
         return self.get_clock().now().nanoseconds / 1e9
 
     def _on_hint(self, msg: RecoveryHint) -> None:
-        # Derive fault_type for cooldown keying. RecoveryHint doesn't carry it directly;
-        # we use the rule_matched as a rough proxy since rule IDs map 1:1 to fault_type
-        # in v1 (R1→ANOMALY, R2→no-fault, R3→LOG_PATTERN, R4→CRASH).
+        # Cooldown is keyed by fault_type. RecoveryHint carries no fault_type,
+        # so rule_matched is the proxy (R1 -> ANOMALY, R3 -> LOG_PATTERN,
+        # R4 -> CRASH). R2 emits RESUME, which the envelope exempts from
+        # cooldown, so its key is never consulted.
         fault_type = _rule_to_fault_type(msg.rule_matched)
         result = self._envelope.evaluate(msg.suggested_action, fault_type, self._now())
         self._audit(msg, result)
@@ -131,7 +156,7 @@ class RecoveryNode(LifecycleNode):
 def _rule_to_fault_type(rule: str) -> str:
     return {
         'R1': 'ANOMALY',
-        'R2': 'ANOMALY',     # RESUME also keyed under ANOMALY (same cooldown bucket)
+        'R2': 'ANOMALY',     # R2 emits RESUME; the envelope exempts RESUME from cooldown
         'R3': 'LOG_PATTERN',
         'R4': 'CRASH',
     }.get(rule, 'UNKNOWN')
