@@ -1,11 +1,14 @@
 """
-DiagnosisNode — lifecycle node.
+DiagnosisNode (lifecycle).
 
 Subscribes to /helix/faults (FaultEvent).
-Queries /helix/get_context service on each fault.
-Runs rules from helix_diagnosis.rules.evaluate.
+Runs rules from helix_diagnosis.rules.evaluate against each fault.
 Publishes /helix/recovery_hints (RecoveryHint).
-Also ticks a timer to fire state-driven rules (R2 RESUME).
+Ticks a timer to fire state-driven rules (R2 RESUME).
+
+A /helix/get_context client is created in on_configure but is currently
+unused; the rule path matches on FaultEvent fields alone. Whether to wire
+ContextBuffer into the rules or remove the client is a pending design call.
 """
 from typing import Optional
 
