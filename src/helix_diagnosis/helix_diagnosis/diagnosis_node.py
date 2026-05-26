@@ -37,6 +37,16 @@ class DiagnosisStateMachine:
         hint = evaluate(fault_event, ctx, self.current_state)
         if hint is not None and hint.suggested_action == 'STOP_AND_HOLD':
             self.current_state = STATE_STOP_AND_HOLD
+            # R2 (RESUME) is driven by tick(), which only runs once
+            # _last_anomaly_time is set. A STOP_AND_HOLD reached via a
+            # non-ANOMALY rule (R3, critical log pattern) would otherwise
+            # leave _last_anomaly_time None, so tick() returns None forever
+            # and the robot is held with no release path. Refresh the clear
+            # timer on every stop-producing fault so an R3 stop is
+            # releasable after ANOMALY_CLEAR_WINDOW_SECONDS and a repeated
+            # R3 fault still pushes the RESUME out, exactly as a repeated
+            # ANOMALY does.
+            self._last_anomaly_time = now_seconds
         return hint
 
     def tick(self, now_seconds: float) -> Optional[HintShape]:
