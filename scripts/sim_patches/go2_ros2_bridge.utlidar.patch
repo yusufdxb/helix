@@ -3,7 +3,7 @@
 # same topic name in sim as on the real GO2.
 #
 # Target file (outside this repo):
-#   ~/IsaacLab/scripts/reinforcement_learning/rsl_rl/go2_ros2_bridge.py
+#   ~/Sim/IsaacLab/scripts/reinforcement_learning/rsl_rl/go2_ros2_bridge.py
 #
 # Apply with: `patch -p1 < go2_ros2_bridge.utlidar.patch` from that directory,
 # or apply the three hunks by hand (they are small and readable).
