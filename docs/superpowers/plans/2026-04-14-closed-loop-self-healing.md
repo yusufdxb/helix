@@ -1547,7 +1547,7 @@ git commit -m "config: twist_mux priority arbitration for helix/cmd_vel"
 ### Task 3.2 — Extend Isaac Sim bridge to publish synthetic `/utlidar/cloud`
 
 **Files:**
-- Modify: `~/IsaacLab/scripts/reinforcement_learning/rsl_rl/go2_ros2_bridge.py`
+- Modify: `~/Sim/IsaacLab/scripts/reinforcement_learning/rsl_rl/go2_ros2_bridge.py`
 
 (Note: this file is outside the repo. Commit the diff as a patch inside the repo at `scripts/sim_patches/go2_ros2_bridge.utlidar.patch` so the change is tracked and reproducible.)
 
@@ -1589,7 +1589,7 @@ Expected: ~10 Hz.
 - [ ] **Step 4: Save diff as a patch file in the repo**
 
 ```bash
-cd ~/IsaacLab
+cd ~/Sim/IsaacLab
 git diff scripts/reinforcement_learning/rsl_rl/go2_ros2_bridge.py > ~/workspace/helix/scripts/sim_patches/go2_ros2_bridge.utlidar.patch
 ```
 

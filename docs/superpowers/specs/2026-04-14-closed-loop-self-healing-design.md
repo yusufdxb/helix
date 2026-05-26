@@ -219,7 +219,7 @@ R2 is stateful. The `DiagnosisNode` keeps a small state machine (`IDLE` / `STOP_
 
 ## 8. Simulation harness
 
-Built on the existing, working `~/IsaacLab/scripts/reinforcement_learning/rsl_rl/go2_ros2_bridge.py` (verified 2026-04-14 end-to-end for `/go2/cmd_vel`, `/go2/odom`, `/go2/joint_states`, `/go2/imu`).
+Built on the existing, working `~/Sim/IsaacLab/scripts/reinforcement_learning/rsl_rl/go2_ros2_bridge.py` (verified 2026-04-14 end-to-end for `/go2/cmd_vel`, `/go2/odom`, `/go2/joint_states`, `/go2/imu`).
 
 **Sim topic bridging:** the Isaac Sim bridge currently publishes `/go2/*` topics and does not publish `/utlidar/cloud` (the topic the real GO2 publishes and that `PassiveAdapter` monitors). Two options for P3:
 
