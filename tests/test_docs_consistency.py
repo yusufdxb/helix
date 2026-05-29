@@ -5,6 +5,7 @@ JSON artifacts in results/.  This catches the class of regression where
 docs are updated but JSON is not (or vice versa).
 """
 
+import glob
 import json
 import os
 import re
@@ -124,6 +125,67 @@ class TestBagRateDurations(unittest.TestCase):
     def test_gnss_duration(self):
         dur = self.data["results"]["/gnss"]["duration_sec"]
         self.assertIn(str(dur), self.md)
+
+
+class TestNoOrphanSurveyReference(unittest.TestCase):
+    """No tracked doc or source may cite the never-committed local-LLM
+    survey note.
+
+    Guards a specific orphan-reference regression: `llm_explainer.py` and
+    `LLAMA_SERVER_JETSON_SETUP.md` both cited
+    `notes/local_llm_survey_2026-04-18.md` as a source of record, but that
+    file was never committed and does not exist anywhere in the tree
+    (verified: `find . -name local_llm_survey_2026-04-18.md` returns
+    nothing). The model-selection content it described now lives inside
+    `LLAMA_SERVER_JETSON_SETUP.md` itself, so the citations must point
+    there instead of at a phantom file.
+
+    This test is intentionally narrow: it does not flag session-relative
+    `hardware_eval_*/notes/*.md` references (those are real artifacts in
+    the per-session dirs) nor forward references to unrun protocols.
+    """
+
+    ORPHAN = "local_llm_survey_2026-04-18.md"
+    SKIP_DIRS = ("/build/", "/install/", "/log/", "/hardware_eval_",
+                 "/.git/", "/__pycache__/")
+
+    def _scan_files(self):
+        patterns = ("docs/**/*.md", "src/**/*.py", "*.md")
+        seen = set()
+        for pat in patterns:
+            for path in glob.glob(os.path.join(ROOT, pat), recursive=True):
+                norm = path.replace(os.sep, "/")
+                if any(s in norm for s in self.SKIP_DIRS):
+                    continue
+                seen.add(path)
+        return sorted(seen)
+
+    def test_survey_note_actually_absent(self):
+        # If someone later commits the survey note, this test should be
+        # revisited rather than silently passing on a stale assumption.
+        matches = glob.glob(
+            os.path.join(ROOT, "**", self.ORPHAN), recursive=True)
+        repo_matches = [
+            m for m in matches
+            if not any(s in m.replace(os.sep, "/") for s in self.SKIP_DIRS)
+        ]
+        self.assertEqual(
+            repo_matches, [],
+            f"{self.ORPHAN} now exists in the tree; update this guard.",
+        )
+
+    def test_no_orphan_survey_citation(self):
+        offenders = []
+        for path in self._scan_files():
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+            if self.ORPHAN in text:
+                offenders.append(os.path.relpath(path, ROOT))
+        self.assertEqual(
+            offenders, [],
+            f"Dangling citation of {self.ORPHAN} in:\n  "
+            + "\n  ".join(offenders),
+        )
 
 
 if __name__ == "__main__":

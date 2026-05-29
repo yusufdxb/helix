@@ -14,7 +14,7 @@ Two paths:
      diagnostics on /helix/llm_diagnostics, and on failure/timeout
      simply skips — the template string has already been published.
 
-Survey doc: notes/local_llm_survey_2026-04-18.md
+Model selection and deployment: docs/LLAMA_SERVER_JETSON_SETUP.md
 """
 from __future__ import annotations
 
