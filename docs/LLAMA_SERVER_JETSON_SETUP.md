@@ -9,7 +9,8 @@
 
 This is a runbook, not a quickstart. The steps here produce a
 repeatable deployment that auto-starts on boot and survives ROS 2
-restarts. Source of record: `local_llm_survey_2026-04-18.md`.
+restarts. This document is the source of record for the HELIX
+local-LLM deployment, including model selection.
 
 > **Safety reminder:** the LLM is advisory only. The RecoveryNode
 > allowlist (`STOP_AND_HOLD / RESUME / LOG_ONLY`) is the hard gate.
@@ -393,4 +394,3 @@ ros2 topic echo /helix/llm_diagnostics
 - Jetson AI Lab llama.cpp tutorial: <https://www.jetson-ai-lab.com/tutorials/>
 - Qwen2.5-1.5B-Instruct GGUF: <https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF>
 - Gemma-3-1B-it GGUF: <https://huggingface.co/unsloth/gemma-3-1b-it-GGUF>
-- HELIX local-LLM survey: `notes/local_llm_survey_2026-04-18.md`

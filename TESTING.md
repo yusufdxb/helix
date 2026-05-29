@@ -69,8 +69,8 @@ colcon test-result --verbose
 ```
 
 Or with pytest directly (after `source install/setup.bash` for the sourced
-suite; the root-level suite runs without ROS). The Python suite is 149 tests
-across all packages as of 2026-05-21:
+suite; the root-level suite runs without ROS). The Python suite is 153 tests
+across all packages as of 2026-05-29:
 
 ```bash
 # Sourced ROS package tests — run one invocation per package so each gets a
