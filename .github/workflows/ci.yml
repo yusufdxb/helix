@@ -11,8 +11,8 @@ jobs:
     name: Lint (ruff)
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - run: pip install ruff
@@ -22,8 +22,8 @@ jobs:
     name: Root tests (repo-integrity, no ROS)
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - run: pip install pytest pytest-timeout pyyaml
@@ -36,7 +36,7 @@ jobs:
     container:
       image: ros:humble-ros-base
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install dependencies
         run: |
