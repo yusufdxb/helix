@@ -1,4 +1,4 @@
-# HELIX Session 8 — Closed-loop hardware demo (post R1 fix)
+# HELIX Session 8: Closed-loop hardware demo (post R1 fix)
 
 **Date:** 2026-04-23
 **Bag:** `bags/post_fix_demo/post_fix_demo_0.db3` (75 MB, 7m19s)
@@ -18,7 +18,7 @@
 
 Of the 30 faults, **R1 correctly matched only utlidar-family metrics**
 (robot_odom × 6, imu × 4). Non-utlidar ANOMALYs (`rate_hz/gnss`,
-`rate_hz/multiplestate`) produced no hints — R1's prefix filter works.
+`rate_hz/multiplestate`) produced no hints, R1's prefix filter works.
 
 R2 RESUME rule fired 5× after the 3.1 s anomaly-clear window. Of those,
 2 were ACCEPTED and 3 SUPPRESSED_COOLDOWN because they arrived inside
@@ -63,7 +63,7 @@ Tests: **16/16 pass on Jetson** (`pytest` under real `helix_msgs` import).
    - A dedicated stale-topic fault path in `topic_rate_monitor`, OR
    - Treat NaN as a high-severity rate anomaly in `anomaly_detector`.
 3. **Wire `/helix/cmd_vel` to twist_mux fallback.** 0 subscribers today
-   — the "robot holds" claim is logically correct but physically vacuous.
+   - the "robot holds" claim is logically correct but physically vacuous.
    Phase 2 work.
 4. **Push fix branch + open PR.** Branch `fix/r1-anomaly-schema-mismatch`
    committed locally on T7. Needs GitHub push + PR review. Kept off
@@ -79,16 +79,16 @@ Tests: **16/16 pass on Jetson** (`pytest` under real `helix_msgs` import).
 
 ## Artifacts
 
-- `bags/post_fix_demo/` — demo bag (75 MB)
-- `notes/SESSION_NOTES.md` — running narrative
-- `logs/jetson_colcon_build.log` — build output
-- `logs/jetson_prestash_RESULTS_benchmark.patch` — pre-sync stash backup
-- `logs/decode_faults.py` + `decode_all.py` — bag inspection helpers
+- `bags/post_fix_demo/`: demo bag (75 MB)
+- `notes/SESSION_NOTES.md`: running narrative
+- `logs/jetson_colcon_build.log`: build output
+- `logs/jetson_prestash_RESULTS_benchmark.patch`: pre-sync stash backup
+- `logs/decode_faults.py` + `decode_all.py`: bag inspection helpers
   (kept under `/tmp` on lab PC)
 
 ## Repo state
 
 - T7 `repo_clone` branch `fix/r1-anomaly-schema-mismatch` @ `e821b47`
 - Jetson `~/yusuf/helix` rebuilt with branch content (not in repo HEAD
-  — local install/symlink build picks up the edited src/ files)
+  - local install/symlink build picks up the edited src/ files)
 - Main unchanged at `4c43778`
