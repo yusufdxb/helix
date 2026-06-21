@@ -1,4 +1,4 @@
-# Results — HELIX Fault Sensing Benchmarks
+# Results: HELIX Fault Sensing Benchmarks
 
 This document integrates all quantitative evaluation results for the HELIX fault sensing prototype. Results are organized by evaluation type and explicitly scoped.
 
@@ -8,13 +8,13 @@ This document integrates all quantitative evaluation results for the HELIX fault
 
 **Script:** `benchmark_helix.py` | **Output:** `results/standalone_benchmark.md`, `benchmark_results.json`
 
-These benchmarks run pure-Python ports of the detection logic — **no ROS 2 runtime, no message transport**. They characterize algorithmic correctness and throughput in isolation.
+These benchmarks run pure-Python ports of the detection logic, **no ROS 2 runtime, no message transport**. They characterize algorithmic correctness and throughput in isolation.
 
 ```bash
 python3 benchmark_helix.py   # no ROS 2 required
 ```
 
-### AnomalyDetector — Detection Latency
+### AnomalyDetector: Detection Latency
 
 Z-score threshold: 3.0, consecutive_trigger: 3, window_size: 60.
 Signal: baseline mean=10.0 (noise sigma ~0.08), spike value=100.0.
@@ -23,12 +23,12 @@ Measured on PC (Intel i7-7700 @ 3.60 GHz), 2026-04-03.
 | Metric | Value |
 |--------|-------|
 | Samples to detection (mean) | 3 |
-| Detection latency — mean | 0.049 ms |
-| Detection latency — p95 | 0.068 ms |
+| Detection latency, mean | 0.049 ms |
+| Detection latency, p95 | 0.068 ms |
 | Trials | 200 |
 | Detected | 200/200 |
 
-### AnomalyDetector — Throughput
+### AnomalyDetector: Throughput
 
 Single-threaded pure-Python `_process_sample` loop. Window size: 60. Samples: 100,000.
 Measured on PC (Intel i7-7700 @ 3.60 GHz), 2026-04-03.
@@ -43,17 +43,17 @@ At 100 samples/sec operational load (10 Hz x 10 metrics), the Jetson runs at <0.
 
 **Note:** Earlier runs on different hardware reported ~331K samples/sec. The numbers above are from the current benchmark script on the current test hardware and are authoritative. See `benchmark_results.json` for exact values.
 
-### AnomalyDetector — TPR / FPR (Trivial Baseline)
+### AnomalyDetector: TPR / FPR (Trivial Baseline)
 
 200 positive trials (spike=100 sigma) + 200 negative trials (noise delta <= 0.15).
 
 | Z-score Threshold | TPR | FPR |
 |-------------------|-----|-----|
-| 1.5 — 5.0 | 100.0% | 0.0% |
+| 1.5-5.0 | 100.0% | 0.0% |
 
 **Caveat:** The perfect separation reflects the extreme gap between normal noise (sigma ~0.08) and injected spikes (~1125 sigma). Any threshold-based detector would achieve these results on this data. See Section 2 for non-trivial evaluation.
 
-### HeartbeatMonitor — Miss Detection Latency
+### HeartbeatMonitor: Miss Detection Latency
 
 Config: timeout=0.1s, miss_threshold=3, check_interval=0.05s. 30 trials.
 Measured on PC (Intel i7-7700), 2026-04-03.
@@ -63,7 +63,7 @@ Measured on PC (Intel i7-7700), 2026-04-03.
 | Mean detection latency | 200.7 ms |
 | p95 detection latency | 202.0 ms |
 
-At production config (miss_threshold=3, check_interval=0.5s), expected latency is ~1.5–2.0s.
+At production config (miss_threshold=3, check_interval=0.5s), expected latency is ~1.5-2.0s.
 
 ---
 
@@ -87,7 +87,7 @@ Baseline: 60 samples from Laplace(loc=10.0, scale=1.0). Positive: 3 consecutive 
 | 3.0 | **0.0%** | 50.0% | 100% | 100% | 0.0% |
 | 4.0 | 0.0% | 0.5% | 33.0% | 100% | 0.0% |
 
-**Key finding:** The Z-score detector struggles significantly with heavy-tailed noise. At the default threshold (Z=3.0), a 3-sigma spike is undetectable — the Laplace distribution's heavy tails inflate the window's standard deviation, making moderate anomalies invisible. Reliable detection requires spikes at 8+ multiples of the noise scale.
+**Key finding:** The Z-score detector struggles significantly with heavy-tailed noise. At the default threshold (Z=3.0), a 3-sigma spike is undetectable, the Laplace distribution's heavy tails inflate the window's standard deviation, making moderate anomalies invisible. Reliable detection requires spikes at 8+ multiples of the noise scale.
 
 ### Scenario 2: Gradual Drift
 
@@ -126,7 +126,7 @@ Baseline: N(10.0, 1.0). Positive: 3 consecutive samples at [3.5, 4.0, 5.0] sigma
 | 3.5 | 48.5% | 0.0% |
 | 4.0 | 8.0% | 0.0% |
 
-**Key finding:** At Z=3.0, even near-threshold anomalies (smallest spike is 3.5 sigma) are detected at 96.5%. But the threshold is sensitive — Z=3.5 cuts TPR to 48.5%. This shows meaningful trade-offs that the trivial benchmark cannot reveal.
+**Key finding:** At Z=3.0, even near-threshold anomalies (smallest spike is 3.5 sigma) are detected at 96.5%. But the threshold is sensitive, Z=3.5 cuts TPR to 48.5%. This shows meaningful trade-offs that the trivial benchmark cannot reveal.
 
 ---
 
@@ -134,7 +134,7 @@ Baseline: N(10.0, 1.0). Positive: 3 consecutive samples at [3.5, 4.0, 5.0] sigma
 
 **Script:** `scripts/bench_e2e_latency.py` | **Output:** `results/e2e_latency_results.json`
 
-This benchmark measures latency through the **actual ROS 2 callback path** — not a pure-Python port:
+This benchmark measures latency through the **actual ROS 2 callback path**: not a pure-Python port:
 
 ```
 publish Float64MultiArray → AnomalyDetector callback → Z-score → FaultEvent → subscriber callback
@@ -169,7 +169,7 @@ This does not measure multi-process or network latency. In a deployed system wit
 
 **Script:** `scripts/bench_log_parser.py` | **Output:** `results/log_parser_results.json`
 
-Evaluates the log parser's regex-based detection against 5 configured rules. Standalone Python — no ROS 2 required.
+Evaluates the log parser's regex-based detection against 5 configured rules. Standalone Python, no ROS 2 required.
 
 ```bash
 python3 scripts/bench_log_parser.py
@@ -189,7 +189,7 @@ python3 scripts/bench_log_parser.py
 
 Overall: 22/22 correct.
 
-**Edge case examples:** "costmap failed" (no "to initialize") correctly does not match. "estop was disengaged" correctly matches `hardware_estop` — this is a semantic false positive the rule cannot distinguish.
+**Edge case examples:** "costmap failed" (no "to initialize") correctly does not match. "estop was disengaged" correctly matches `hardware_estop`: this is a semantic false positive the rule cannot distinguish.
 
 ### Throughput
 
@@ -211,7 +211,7 @@ Overall: 22/22 correct.
 | Same rule, different nodes | 2 | 2 | Yes |
 | Different rules, same node | 2 | 2 | Yes |
 
-**Limitations:** Detection accuracy is tested against a hand-crafted corpus of 22 messages. The rules are evaluated against their own design intent — not against a corpus of real robot logs. Coverage is limited to the 5 pre-configured rules.
+**Limitations:** Detection accuracy is tested against a hand-crafted corpus of 22 messages. The rules are evaluated against their own design intent, not against a corpus of real robot logs. Coverage is limited to the 5 pre-configured rules.
 
 ---
 
@@ -244,7 +244,7 @@ python3 scripts/attachability_matrix.py            # live graph analysis
 
 ---
 
-## 6. Hardware Evaluation — GO2 + Jetson Orin NX
+## 6. Hardware Evaluation: GO2 + Jetson Orin NX
 
 **Date:** 2026-04-03. **Platform:** Live Unitree GO2 at 192.168.123.161, Jetson Orin NX at 192.168.123.18, PC at 192.168.123.10.
 
@@ -274,7 +274,7 @@ The LiDAR point cloud topic experienced a real rate fluctuation that the adapter
 | 3 HELIX nodes only | 41.4 MB | 41.7 MB | 10.7% | 20.0% | 0 |
 | 3 HELIX nodes + adapter | 41.7 MB | 42.1 MB | 22.3% | 49.9% | 4 |
 
-Measured on PC (i7-7700). Overhead on the Jetson Orin NX would differ — see algorithmic benchmark comparison for scaling factors (Jetson runs at 64–79% of PC throughput).
+Measured on PC (i7-7700). Overhead on the Jetson Orin NX would differ, see algorithmic benchmark comparison for scaling factors (Jetson runs at 64-79% of PC throughput).
 
 ### Cross-Platform Benchmark Comparison
 

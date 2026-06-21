@@ -13,13 +13,13 @@ end-to-end system tests. No actual robot hardware is involved.
 
 ### What Is Covered
 
-- **Anomaly detection threshold behavior** — verifies that the Z-score detector fires on injected spikes and does not fire on normal data
-- **Heartbeat timeout behavior** — verifies that missed heartbeats trigger fault events after the configured threshold
-- **Log parsing and rule matching** — verifies that configured regex patterns match expected log entries and produce structured fault events
-- **Adapter bridges** — rate-window, JSON state, and pose-drift monitors that feed `/helix/metrics`
-- **Diagnosis tier** — the pure `rules` functions (R1–R4) and the `DiagnosisStateMachine` (IDLE / STOP_AND_HOLD transitions, RESUME clear window)
-- **Recovery tier** — the pure `SafetyEnvelope` (enable flag, allowlist, per-fault cooldown, RESUME cooldown exemption) and `RecoveryNode` lifecycle / hint handling, including `RecoveryHint` consumption and zero-twist publication
-- **Explanation tier** — the deterministic template formatter and the local-LLM client (HTTP layer mocked)
+- **Anomaly detection threshold behavior**: verifies that the Z-score detector fires on injected spikes and does not fire on normal data
+- **Heartbeat timeout behavior**: verifies that missed heartbeats trigger fault events after the configured threshold
+- **Log parsing and rule matching**: verifies that configured regex patterns match expected log entries and produce structured fault events
+- **Adapter bridges**: rate-window, JSON state, and pose-drift monitors that feed `/helix/metrics`
+- **Diagnosis tier**: the pure `rules` functions (R1-R4) and the `DiagnosisStateMachine` (IDLE / STOP_AND_HOLD transitions, RESUME clear window)
+- **Recovery tier**: the pure `SafetyEnvelope` (enable flag, allowlist, per-fault cooldown, RESUME cooldown exemption) and `RecoveryNode` lifecycle / hint handling, including `RecoveryHint` consumption and zero-twist publication
+- **Explanation tier**: the deterministic template formatter and the local-LLM client (HTTP layer mocked)
 
 ### What Is Not Covered
 
@@ -73,7 +73,7 @@ suite; the root-level suite runs without ROS). The Python suite is 153 tests
 across all packages as of 2026-05-29:
 
 ```bash
-# Sourced ROS package tests — run one invocation per package so each gets a
+# Sourced ROS package tests: run one invocation per package so each gets a
 # fresh rclpy context (mirrors CI):
 for pkg in helix_core helix_adapter helix_diagnosis helix_recovery \
            helix_explanation helix_bringup; do

@@ -1,11 +1,11 @@
-# C++ Port Design — `AnomalyDetector`
+# C++ Port Design: `AnomalyDetector`
 
 **Status:** Proposed
 **Scope:** `helix_core.anomaly_detector` (Python, rclpy) → `helix_sensing_cpp::anomaly_detector` (C++, rclcpp_lifecycle)
 **Target branch:** `feat/self-healing-closed-loop` (branch off for `feat/cpp-port-anomaly`)
 **Author:** Yusuf Guenena (HELIX)
 **Date:** 2026-04-18
-**Related:** `docs/GO2_HARDWARE_EVIDENCE.md` §15–17 (Session 7 baseline), `src/helix_adapter_cpp/` (pattern reference — already uses `rclcpp_lifecycle` + `ament_cmake_gtest`)
+**Related:** `docs/GO2_HARDWARE_EVIDENCE.md` §15-17 (Session 7 baseline), `src/helix_adapter_cpp/` (pattern reference, already uses `rclcpp_lifecycle` + `ament_cmake_gtest`)
 
 ---
 
@@ -15,9 +15,9 @@ Python (`rclpy`) is the current RAM and CPU liability on the onboard Jetson Orin
 
 - Session 7 1-hour plateau: **257 → 282 MB RSS** across 6 lifecycle nodes (~47 MB per process).
 - Adapter CPU: **~48 % of one core** with `/utlidar/imu` in the topic list (Session 7 §17).
-- `helix_anomaly_detector` specifically burns 1.80 %–2.21 % CPU and contributes ~45 MB RSS (rclpy runtime, interpreter, bound msg types).
+- `helix_anomaly_detector` specifically burns 1.80 %-2.21 % CPU and contributes ~45 MB RSS (rclpy runtime, interpreter, bound msg types).
 
-The Python Z-score maths is already fast (0.049 ms mean per sample, Session 7 §16). The cost is **executor dispatch, Python msg deserialization, and the interpreter's baseline RSS** — none of which the algorithm owns. A 1:1 C++ rewrite eliminates that overhead without touching behavior.
+The Python Z-score maths is already fast (0.049 ms mean per sample, Session 7 §16). The cost is **executor dispatch, Python msg deserialization, and the interpreter's baseline RSS**: none of which the algorithm owns. A 1:1 C++ rewrite eliminates that overhead without touching behavior.
 
 **Project targets (from HELIX goals):**
 
@@ -62,16 +62,16 @@ Declared in `on_configure`, defaults from `helix_params.yaml`:
 | `consecutive_trigger` | `3` | int |
 | `window_size` | `60` | int |
 
-Internal constant: `FLAT_SIGNAL_EPSILON = 1e-6` — skip Z-score if window std is below this.
+Internal constant: `FLAT_SIGNAL_EPSILON = 1e-6`: skip Z-score if window std is below this.
 
 ### 2.5 Lifecycle transitions
 
 - `on_configure`: read params, create publisher + two subscribers, log the three parameter values.
-- `on_activate`: log only. (Python `rclpy.lifecycle` does not gate publishing on activation the way rclcpp does — see §7.)
+- `on_activate`: log only. (Python `rclpy.lifecycle` does not gate publishing on activation the way rclcpp does, see §7.)
 - `on_deactivate`: log only.
 - `on_cleanup`: destroy pub/subs, clear `_windows` and `_consecutive` under the lock.
 
-### 2.6 Algorithm — Z-score with "evaluate-before-append"
+### 2.6 Algorithm: Z-score with "evaluate-before-append"
 
 Per incoming sample `(metric_name, value)`:
 
@@ -81,7 +81,7 @@ Per incoming sample `(metric_name, value)`:
    - Compute `mean = sum(samples)/N`, `variance = sum((s - mean)**2)/N` (**population variance**, not sample), `std = sqrt(variance)`.
    - If `std < 1e-6` → flat signal, log debug, **do not** touch the consecutive counter.
    - Else `zscore = abs((value - mean)/std)`.
-     - If `zscore > threshold`: increment consecutive; if consecutive ≥ `consecutive_trigger`, emit a FaultEvent (and keep the counter — it is not reset on emit).
+     - If `zscore > threshold`: increment consecutive; if consecutive ≥ `consecutive_trigger`, emit a FaultEvent (and keep the counter, it is not reset on emit).
      - Else: reset consecutive to 0.
 4. Append `value` to the deque **after** the check. This is the key correctness property: anomalous samples never poison the baseline.
 
@@ -118,7 +118,7 @@ The **formatting precision** (4, 4, 6, 2) and the `timestamp = time.time()` wall
 
 `src/helix_core/test/test_anomaly_detector.py`:
 
-- Only **one** functional test: `test_anomaly_detection` — publishes 25 noisy samples then 3 spikes on `/helix/metrics`, asserts at least one ANOMALY FaultEvent with `severity == 2`.
+- Only **one** functional test: `test_anomaly_detection`: publishes 25 noisy samples then 3 spikes on `/helix/metrics`, asserts at least one ANOMALY FaultEvent with `severity == 2`.
 - No unit tests of the rolling-stats math itself (it's inlined in `_process_sample`).
 - No test for `/diagnostics` path.
 - No test for flat-signal epsilon skip.
@@ -134,7 +134,7 @@ The **formatting precision** (4, 4, 6, 2) and the `timestamp = time.time()` wall
 
 New ament_cmake package at `src/helix_sensing_cpp/`, mirroring the pattern already used by `helix_adapter_cpp/`. The three other Python nodes (`heartbeat_monitor`, `log_parser`, `topic_rate_monitor` lives in `helix_adapter_cpp`) will land here too, so the package is named for the **sensing tier**, not this one node.
 
-Alternative considered: add alongside inside `helix_adapter_cpp/`. Rejected — `helix_adapter_cpp` is the adapter-layer package (rate monitoring lives there conceptually); sensing logic belongs in its own package.
+Alternative considered: add alongside inside `helix_adapter_cpp/`. Rejected, `helix_adapter_cpp` is the adapter-layer package (rate monitoring lives there conceptually); sensing logic belongs in its own package.
 
 ### 3.2 File layout
 
@@ -157,7 +157,7 @@ src/helix_sensing_cpp/
 
 ### 3.3 Class split
 
-**`helix_sensing_cpp::RollingStats`** — pure C++, no ROS deps.
+**`helix_sensing_cpp::RollingStats`**: pure C++, no ROS deps.
 
 ```cpp
 class RollingStats {
@@ -184,9 +184,9 @@ class RollingStats {
 };
 ```
 
-Note: `RollingStats` is **per-metric**. The node owns an `std::unordered_map<std::string, RollingStats>`. No internal mutex in `RollingStats` — the node serializes access via the executor (single-threaded executor by default) or an outer mutex if we ever move to multi-threaded.
+Note: `RollingStats` is **per-metric**. The node owns an `std::unordered_map<std::string, RollingStats>`. No internal mutex in `RollingStats`: the node serializes access via the executor (single-threaded executor by default) or an outer mutex if we ever move to multi-threaded.
 
-**`AnomalyDetectorNode : public rclcpp_lifecycle::LifecycleNode`** — in `anomaly_detector_node.cpp`.
+**`AnomalyDetectorNode : public rclcpp_lifecycle::LifecycleNode`**: in `anomaly_detector_node.cpp`.
 
 - Owns the map of `RollingStats`.
 - Holds `LifecyclePublisher<helix_msgs::msg::FaultEvent>` and two subscriptions.
@@ -206,7 +206,7 @@ Note: `RollingStats` is **per-metric**. The node owns an `std::unordered_map<std
 
 ### 3.5 Executable name
 
-- Executable / lifecycle node name: **`helix_anomaly_detector`** — identical to Python. This lets us swap the launch file via package name only.
+- Executable / lifecycle node name: **`helix_anomaly_detector`**: identical to Python. This lets us swap the launch file via package name only.
 - Installed to `lib/helix_sensing_cpp/helix_anomaly_detector`.
 
 ---
@@ -301,7 +301,7 @@ endif()
 ament_package()
 ```
 
-`rclcpp_components_register_node` gives us **both** a standalone executable (`helix_anomaly_detector`) and a loadable component in one declaration — so the same artifact works standalone or inside a `component_container` for intra-process zero-copy.
+`rclcpp_components_register_node` gives us **both** a standalone executable (`helix_anomaly_detector`) and a loadable component in one declaration, so the same artifact works standalone or inside a `component_container` for intra-process zero-copy.
 
 ---
 
@@ -311,13 +311,13 @@ ament_package()
 
 Three tiers, cheap → expensive:
 
-1. **Unit — `RollingStats`.** A Python script dumps reference `(value, mean, std, zscore, consecutive, triggered)` tuples from the current Python `_process_sample` loop on a fixed seed + fixed sample stream (noisy baseline + spikes + flat regions). Check in as `test/fixtures/rolling_stats_golden.csv`. The gtest reads it, re-runs through `RollingStats::evaluate`, and asserts field equality within `1e-12` absolute / `1e-9` relative. Catches numerical drift vs the Python implementation directly.
+1. **Unit, `RollingStats`.** A Python script dumps reference `(value, mean, std, zscore, consecutive, triggered)` tuples from the current Python `_process_sample` loop on a fixed seed + fixed sample stream (noisy baseline + spikes + flat regions). Check in as `test/fixtures/rolling_stats_golden.csv`. The gtest reads it, re-runs through `RollingStats::evaluate`, and asserts field equality within `1e-12` absolute / `1e-9` relative. Catches numerical drift vs the Python implementation directly.
 2. **Node-level gtest.** Same shape as `test_anomaly_detector.py`: in-process publisher of `Float64MultiArray`, subscriber of `FaultEvent`, spin the node, assert at least one ANOMALY event. Ports the existing pytest 1:1.
 3. **Bag-replay side-by-side.** Capture a 10-min rosbag from the Jetson (`/diagnostics`, `/helix/metrics`) during a known-good idle GO2 run (artifact already exists: `hardware_eval_20260416/jetson_live_copy_phase3/`). Replay once into the Python node (on a PC, namespace `/py/`), once into the C++ node (namespace `/cpp/`). Diff the resulting `FaultEvent` streams by `(metric_name, round(timestamp, 2), context_values)`. Accept if:
    - Same number of events.
    - Same metric names in the same order.
    - Matching `zscore` to 2 dp (Python rounds to 2 dp in `context_values`).
-   - `timestamp` within 100 ms (wall-clock, different processes — can't be exact).
+   - `timestamp` within 100 ms (wall-clock, different processes, can't be exact).
 
 ### 6.2 Test parity matrix
 
@@ -341,7 +341,7 @@ All ports use the same rclcpp in-process publisher/subscriber pattern that `heli
 
 ### 6.3 Numerical equivalence note
 
-Python uses IEEE 754 double precision; C++ `double` is the same type on the Jetson (aarch64, GCC). Same summation order, same subtraction pattern → bitwise-equal mean and variance. The only float divergence risk is `std::round` vs Python `round()`: Python uses banker's rounding (round half to even), C++ `std::round` rounds half away from zero. **Mitigation:** match Python exactly by using `std::lrint` with `std::fesetround(FE_TONEAREST)`, or simpler — format through `std::ostringstream` with `std::fixed` + `std::setprecision`, which already rounds half-to-even on most libstdc++. Decide + unit-test in test #13.
+Python uses IEEE 754 double precision; C++ `double` is the same type on the Jetson (aarch64, GCC). Same summation order, same subtraction pattern → bitwise-equal mean and variance. The only float divergence risk is `std::round` vs Python `round()`: Python uses banker's rounding (round half to even), C++ `std::round` rounds half away from zero. **Mitigation:** match Python exactly by using `std::lrint` with `std::fesetround(FE_TONEAREST)`, or simpler, format through `std::ostringstream` with `std::fixed` + `std::setprecision`, which already rounds half-to-even on most libstdc++. Decide + unit-test in test #13.
 
 ---
 
@@ -349,8 +349,8 @@ Python uses IEEE 754 double precision; C++ `double` is the same type on the Jets
 
 | Metric | Python (Session 7) | Target | Expected C++ |
 |---|---:|---:|---:|
-| Per-node RSS | ~47 MB | < 14 MB | ~8–10 MB |
-| CPU on one Jetson core | 1.80–2.21 % | < 10 % | < 0.3 % |
+| Per-node RSS | ~47 MB | < 14 MB | ~8-10 MB |
+| CPU on one Jetson core | 1.80-2.21 % | < 10 % | < 0.3 % |
 | Per-sample Z-score latency (mean) | 0.0488 ms | < 0.02 ms | < 0.005 ms |
 | Per-sample Z-score latency (p95) | 0.0506 ms | < 0.02 ms | < 0.010 ms |
 
@@ -376,8 +376,8 @@ Benchmark: extend `benchmark_helix.py` with a `--cpp` flag that exercises the ne
    - Confirm parity diff (§6.1 tier 3).
    - Commit parity report under `hardware_eval_YYYYMMDD/cpp_port_parity/`.
 3. **Launch-file flag.**
-   - In `helix_bringup/launch/helix_sensing.launch.py`, add `use_cpp_anomaly:=false` (default false — Python remains the prod path until hardware-confirmed). When true, swap the `LifecycleNode(package='helix_core', executable='helix_anomaly_detector')` entry for `LifecycleNode(package='helix_sensing_cpp', executable='helix_anomaly_detector')`. Node **name** stays identical so `helix_params.yaml` keys still bind.
-   - No change to `helix_params.yaml` — same three params, same names, same types.
+   - In `helix_bringup/launch/helix_sensing.launch.py`, add `use_cpp_anomaly:=false` (default false, Python remains the prod path until hardware-confirmed). When true, swap the `LifecycleNode(package='helix_core', executable='helix_anomaly_detector')` entry for `LifecycleNode(package='helix_sensing_cpp', executable='helix_anomaly_detector')`. Node **name** stays identical so `helix_params.yaml` keys still bind.
+   - No change to `helix_params.yaml`: same three params, same names, same types.
 4. **Hardware re-test (one CaresLab session, part of Phase 5).**
    - Cold-boot Jetson → launch with `use_cpp_anomaly:=true`.
    - 60-min run parallel to a concurrent 60-min run with `use_cpp_anomaly:=false` on separate boots (can't run both on same Jetson simultaneously because node names collide).
@@ -395,30 +395,30 @@ At every stage, rollback is a launch-file flag flip (`use_cpp_anomaly:=false`) o
 
 | # | Risk | Likelihood | Mitigation |
 |---|---|---|---|
-| R1 | Population-variance formula divergence (Python uses N, not N-1) — a future "clean up the maths" refactor could silently change this | Med | `RollingStats` doc-comments cite this explicitly; test #2 locks golden values |
+| R1 | Population-variance formula divergence (Python uses N, not N-1), a future "clean up the maths" refactor could silently change this | Med | `RollingStats` doc-comments cite this explicitly; test #2 locks golden values |
 | R2 | `std::round` half-away-from-zero vs Python banker's rounding diverging `context_values` strings | Med | Test #13; use stream formatter, verify on aarch64 libstdc++ |
-| R3 | `time.time()` (Python wall-clock seconds) vs `now().seconds()` of a `rclcpp::Clock(RCL_SYSTEM_TIME)` — both are `CLOCK_REALTIME`-based on Linux so they match, but nonzero skew is theoretically possible | Low | Use `rclcpp::Clock(RCL_SYSTEM_TIME).now().seconds()` explicitly, not `node->now()` (which is ROS time and can be sim-time) |
+| R3 | `time.time()` (Python wall-clock seconds) vs `now().seconds()` of a `rclcpp::Clock(RCL_SYSTEM_TIME)`: both are `CLOCK_REALTIME`-based on Linux so they match, but nonzero skew is theoretically possible | Low | Use `rclcpp::Clock(RCL_SYSTEM_TIME).now().seconds()` explicitly, not `node->now()` (which is ROS time and can be sim-time) |
 | R4 | Lifecycle timing difference: rclcpp `LifecyclePublisher` hard-gates publishing on active state; rclpy's does not. A call to `publish()` from an `on_configure`-time callback would silently drop in C++ but succeed in Python | Low | Publisher is only used from subscription callbacks, which fire post-activate; still, log a warn if `publish()` is called on an inactive publisher (via a helper) |
-| R5 | Parameter typing: Python accepts any scalar; C++ `declare_parameter<int>("window_size", 60)` is strict, and YAML `window_size: 60` will bind — but `window_size: 60.0` in YAML would fail | Low | Keep `helix_params.yaml` integer-typed; `ParamsReadFromYaml` gtest confirms; also add a runtime check that `window_size >= 2` |
-| R6 | Intra-process zero-copy changes the RSS accounting (shared allocations don't double-count) — comparing per-node RSS to the Python baseline is not apples-to-apples once we containerize | Med | For the first hardware test, run the C++ node standalone (not in a container) so RSS is directly comparable to Python. Container comparisons are a separate experiment |
-| R7 | `helix_msgs` needs to be built in C++ mode | None | It already is — it's a `rosidl_generate_interfaces` package and `helix_adapter_cpp` consumes it via `find_package(helix_msgs REQUIRED)`. No change needed |
-| R8 | Current Python test suite has only one functional test — there is no Python reference for most edge cases (flat signal, non-numeric diagnostics KV, on_cleanup behavior) | **Flagged** | The C++ port is the forcing function to write these. Tests 3–13 are new against the current-behavior spec captured in §2. If a Python behavior surprise turns up mid-port, file an issue and either amend §2 or fix Python first |
+| R5 | Parameter typing: Python accepts any scalar; C++ `declare_parameter<int>("window_size", 60)` is strict, and YAML `window_size: 60` will bind, but `window_size: 60.0` in YAML would fail | Low | Keep `helix_params.yaml` integer-typed; `ParamsReadFromYaml` gtest confirms; also add a runtime check that `window_size >= 2` |
+| R6 | Intra-process zero-copy changes the RSS accounting (shared allocations don't double-count), comparing per-node RSS to the Python baseline is not apples-to-apples once we containerize | Med | For the first hardware test, run the C++ node standalone (not in a container) so RSS is directly comparable to Python. Container comparisons are a separate experiment |
+| R7 | `helix_msgs` needs to be built in C++ mode | None | It already is, it's a `rosidl_generate_interfaces` package and `helix_adapter_cpp` consumes it via `find_package(helix_msgs REQUIRED)`. No change needed |
+| R8 | Current Python test suite has only one functional test, there is no Python reference for most edge cases (flat signal, non-numeric diagnostics KV, on_cleanup behavior) | **Flagged** | The C++ port is the forcing function to write these. Tests 3-13 are new against the current-behavior spec captured in §2. If a Python behavior surprise turns up mid-port, file an issue and either amend §2 or fix Python first |
 
 **Open questions for review:**
 
-- ~~Q1~~ **RESOLVED 2026-04-18:** Level-triggered with cooldown. New param `emit_cooldown_s` (double, default `1.0`). On each emit, record `last_emit_time`; subsequent samples that meet the consecutive threshold are suppressed until `now - last_emit_time >= emit_cooldown_s`. `emit_cooldown_s = 0.0` reproduces the legacy Python flood behavior for back-compat. **Critical constraint:** cooldown MUST be strictly less than `ANOMALY_CLEAR_WINDOW_SECONDS` (3.0 s, defined in `helix_diagnosis/rules.py`) so the R2 RESUME rule does not fire spuriously during sustained anomalies. The DiagnosisNode state machine updates `_last_anomaly_time` on every incoming ANOMALY FaultEvent; R2 uses `now - _last_anomaly_time >= 3.0` as the clear test. A cooldown of 1.0 s keeps `_last_anomaly_time` refreshed at 1 Hz during sustained faults, which is well inside the 3.0 s window. **This is a behavior change from legacy Python** — enabled by default in the C++ port; Python can opt-in by adding the same cooldown logic (separate follow-up). Parity tests against legacy flood behavior use `emit_cooldown_s: 0.0`; new default-cooldown behavior gets its own dedicated tests.
+- ~~Q1~~ **RESOLVED 2026-04-18:** Level-triggered with cooldown. New param `emit_cooldown_s` (double, default `1.0`). On each emit, record `last_emit_time`; subsequent samples that meet the consecutive threshold are suppressed until `now - last_emit_time >= emit_cooldown_s`. `emit_cooldown_s = 0.0` reproduces the legacy Python flood behavior for back-compat. **Critical constraint:** cooldown MUST be strictly less than `ANOMALY_CLEAR_WINDOW_SECONDS` (3.0 s, defined in `helix_diagnosis/rules.py`) so the R2 RESUME rule does not fire spuriously during sustained anomalies. The DiagnosisNode state machine updates `_last_anomaly_time` on every incoming ANOMALY FaultEvent; R2 uses `now - _last_anomaly_time >= 3.0` as the clear test. A cooldown of 1.0 s keeps `_last_anomaly_time` refreshed at 1 Hz during sustained faults, which is well inside the 3.0 s window. **This is a behavior change from legacy Python**: enabled by default in the C++ port; Python can opt-in by adding the same cooldown logic (separate follow-up). Parity tests against legacy flood behavior use `emit_cooldown_s: 0.0`; new default-cooldown behavior gets its own dedicated tests.
 - Q2: Should `/helix/metrics` subscription use `BestEffort` QoS to match the high-rate adapter? Current Python is reliable-depth-100; if the adapter switches to best-effort later, the detector must follow.
 
 ---
 
 ## 10. Out of scope for this doc
 
-- Port of `HeartbeatMonitor` — own design doc, same pattern.
-- Port of `LogParser` — own design doc; carries a YAML rules-file concern not present here.
-- Port of `topic_rate_monitor` — already done in `helix_adapter_cpp`.
-- Recovery layer (`helix_recovery`), diagnosis layer (`helix_diagnosis`), LLM/explanation tier (`helix_explanation`) — separate architecture work.
-- Switching to multi-threaded executors or hardware-clock timestamps — orthogonal and not required to hit the performance targets.
-- Packaging / DEB for Jetson deployment — current colcon-in-place flow is sufficient for Phase 5.
+- Port of `HeartbeatMonitor`: own design doc, same pattern.
+- Port of `LogParser`: own design doc; carries a YAML rules-file concern not present here.
+- Port of `topic_rate_monitor`: already done in `helix_adapter_cpp`.
+- Recovery layer (`helix_recovery`), diagnosis layer (`helix_diagnosis`), LLM/explanation tier (`helix_explanation`), separate architecture work.
+- Switching to multi-threaded executors or hardware-clock timestamps, orthogonal and not required to hit the performance targets.
+- Packaging / DEB for Jetson deployment, current colcon-in-place flow is sufficient for Phase 5.
 
 ---
 

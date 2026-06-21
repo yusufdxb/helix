@@ -1,4 +1,4 @@
-# llama-server on Jetson Orin NX — HELIX Deployment Runbook
+# llama-server on Jetson Orin NX: HELIX Deployment Runbook
 
 **Target hardware:** NVIDIA Jetson Orin NX 16 GB (GO2 onboard compute).
 **JetPack:** 6.2 with Super Mode enabled (verify before running).
@@ -29,7 +29,7 @@ Verify each before you start.
 cat /etc/nv_tegra_release
 # Expect something like: R36 (release), REVISION: 4.0, ...
 
-# Current power model — 25W / MAXN_SUPER is what we want
+# Current power model: 25W / MAXN_SUPER is what we want
 sudo /usr/sbin/nvpmodel -q
 sudo /usr/sbin/nvpmodel -m 0        # MAXN / MAXN_SUPER depending on device
 sudo /usr/bin/jetson_clocks         # pin clocks high
@@ -97,12 +97,12 @@ cmake --build build --config Release -j$(nproc)
 Notes:
 
 - **`CMAKE_CUDA_ARCHITECTURES=87`** is Ampere/Orin (SM 8.7). Do not
-  leave this unset — the default `native` has been unreliable on
+  leave this unset, the default `native` has been unreliable on
   Jetson.
 - **`LLAMA_CURL=on`** lets `llama-server` pull HF URLs directly; we
   don't use that for HELIX (we pre-download the model), but it keeps
   the feature consistent with upstream docs.
-- Build takes ~10–15 minutes on Orin NX. Use `ccache` (already
+- Build takes ~10-15 minutes on Orin NX. Use `ccache` (already
   installed) to speed up re-builds.
 - If the build fails with a missing CUDA math header, re-run with
   `-DGGML_CUDA_FORCE_CUBLAS=on` and report upstream.
@@ -124,7 +124,7 @@ Qwen2.5-1.5B-Instruct Q4_K_M from the official Qwen GGUF repo
 mkdir -p /opt/helix/models
 cd /opt/helix/models
 
-# Primary — Qwen2.5-1.5B-Instruct Q4_K_M
+# Primary: Qwen2.5-1.5B-Instruct Q4_K_M
 curl -L -o qwen2.5-1.5b-instruct-q4_k_m.gguf \
   https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf
 
@@ -138,13 +138,13 @@ sha256sum qwen2.5-1.5b-instruct-q4_k_m.gguf \
 
 **Hash pin:** on first download, commit the produced `.sha256` file to
 the HELIX deployment repo (not this runbook) so subsequent installs
-can verify integrity. Do **not** hardcode a hash here — the
+can verify integrity. Do **not** hardcode a hash here, the
 HuggingFace revision may change under us.
 
 > HuggingFace model card:
 > <https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF>
 
-### 3.1 Backup model — Gemma-3-1B-it Q4_K_M
+### 3.1 Backup model: Gemma-3-1B-it Q4_K_M
 
 Only if Qwen2.5 fails the memory or latency budget on the target
 Jetson. Gemma carries a custom Google license with prohibited-use
@@ -189,13 +189,13 @@ Flag rationale:
 |---|---|
 | `--ctx-size 1024` | Survey §6 cap: keeps KV cache under budget. |
 | `--parallel 1` | Single request in flight (2 GB RAM cap). |
-| `--n-gpu-layers -1` | Full GPU offload — Orin NX has enough VRAM for 1.5B Q4. |
+| `--n-gpu-layers -1` | Full GPU offload, Orin NX has enough VRAM for 1.5B Q4. |
 | `--threads 4` | Prompt processing CPU threads. Orin NX has 8 A78AE cores; leave headroom for ROS. |
 | `--host 127.0.0.1` | Loopback only. Do not expose 8080 outside the robot. |
 | `--alias ...` | Model alias returned in OpenAI-compat responses; the ROS client's `llama_model` param must match. |
 
 Expose `response_format: json_schema` is on by default in modern
-builds — no extra flag needed.
+builds, no extra flag needed.
 
 ### 4.2 Health check
 
@@ -242,7 +242,7 @@ allowlist values. Anything else is a server / model / flag problem.
 
 ---
 
-## 5. systemd unit — auto-start on boot
+## 5. systemd unit: auto-start on boot
 
 Drop this file at `/etc/systemd/system/helix-llama-server.service`:
 
@@ -296,9 +296,9 @@ systemctl status helix-llama-server.service --no-pager
 journalctl -u helix-llama-server.service -n 50 --no-pager
 ```
 
-On boot the model takes ~10–15 s to warm up. During that window the
+On boot the model takes ~10-15 s to warm up. During that window the
 `helix_explanation` node's LLM calls will time out and the
-deterministic template path will still run — that's by design.
+deterministic template path will still run, that's by design.
 
 ---
 

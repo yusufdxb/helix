@@ -1,4 +1,4 @@
-# Results — HELIX Fault Sensing Benchmarks
+# Results: HELIX Fault Sensing Benchmarks
 
 This document integrates all quantitative evaluation results for the HELIX fault sensing prototype. Results are organized by evaluation type and explicitly scoped.
 
@@ -8,13 +8,13 @@ This document integrates all quantitative evaluation results for the HELIX fault
 
 **Script:** `benchmark_helix.py` | **Output:** `results/standalone_benchmark.md`, `benchmark_results.json`
 
-These benchmarks run pure-Python ports of the detection logic — **no ROS 2 runtime, no message transport**. They characterize algorithmic correctness and throughput in isolation.
+These benchmarks run pure-Python ports of the detection logic, **no ROS 2 runtime, no message transport**. They characterize algorithmic correctness and throughput in isolation.
 
 ```bash
 python3 benchmark_helix.py   # no ROS 2 required
 ```
 
-### AnomalyDetector — Detection Latency
+### AnomalyDetector: Detection Latency
 
 Z-score threshold: 3.0, consecutive_trigger: 3, window_size: 60.
 Signal: baseline mean=10.0 (noise sigma ~0.08), spike value=100.0.
@@ -23,12 +23,12 @@ Measured on PC (Intel i7-7700 @ 3.60 GHz), 2026-04-03.
 | Metric | Value |
 |--------|-------|
 | Samples to detection (mean) | 3 |
-| Detection latency — mean | 0.049 ms |
-| Detection latency — p95 | 0.068 ms |
+| Detection latency, mean | 0.049 ms |
+| Detection latency, p95 | 0.068 ms |
 | Trials | 200 |
 | Detected | 200/200 |
 
-### AnomalyDetector — Throughput
+### AnomalyDetector: Throughput
 
 Single-threaded pure-Python `_process_sample` loop. Window size: 60. Samples: 100,000.
 Measured on PC (Intel i7-7700 @ 3.60 GHz), 2026-04-03.
@@ -43,17 +43,17 @@ At 100 samples/sec operational load (10 Hz x 10 metrics), the Jetson runs at <0.
 
 **Note:** Earlier runs on different hardware reported ~331K samples/sec. The numbers above are from the hardware evaluation session (2026-04-03). The Jetson figures are stored in `hardware_eval_20260403/`, not in the main `results/` directory.
 
-### AnomalyDetector — TPR / FPR (Trivial Baseline)
+### AnomalyDetector: TPR / FPR (Trivial Baseline)
 
 200 positive trials (spike=100 sigma) + 200 negative trials (noise delta <= 0.15).
 
 | Z-score Threshold | TPR | FPR |
 |-------------------|-----|-----|
-| 1.5 — 5.0 | 100.0% | 0.0% |
+| 1.5-5.0 | 100.0% | 0.0% |
 
 **Caveat:** The perfect separation reflects the extreme gap between normal noise (sigma ~0.08) and injected spikes (~1125 sigma). Any threshold-based detector would achieve these results on this data. See Section 2 for non-trivial evaluation.
 
-### HeartbeatMonitor — Miss Detection Latency
+### HeartbeatMonitor: Miss Detection Latency
 
 Config: timeout=0.1s, miss_threshold=3, check_interval=0.05s. 30 trials.
 Measured on PC (Intel i7-7700), 2026-04-03.
@@ -63,7 +63,7 @@ Measured on PC (Intel i7-7700), 2026-04-03.
 | Mean detection latency | 200.7 ms |
 | p95 detection latency | 202.0 ms |
 
-At production config (miss_threshold=3, check_interval=0.5s), expected latency is ~1.5–2.0s.
+At production config (miss_threshold=3, check_interval=0.5s), expected latency is ~1.5-2.0s.
 
 ---
 
@@ -126,7 +126,7 @@ Baseline: N(10.0, 1.0). Positive: 3 consecutive samples at [3.5, 4.0, 5.0] sigma
 | 3.5 | 48.5% | 0.0% |
 | 4.0 | 8.0% | 0.0% |
 
-**Key finding:** At Z=3.0, even near-threshold anomalies (smallest spike is 3.5 sigma) are detected at 96.5%. But the threshold is sensitive — Z=3.5 cuts TPR to 48.5%. This shows meaningful trade-offs that the trivial benchmark cannot reveal.
+**Key finding:** At Z=3.0, even near-threshold anomalies (smallest spike is 3.5 sigma) are detected at 96.5%. But the threshold is sensitive, Z=3.5 cuts TPR to 48.5%. This shows meaningful trade-offs that the trivial benchmark cannot reveal.
 
 ---
 
@@ -134,7 +134,7 @@ Baseline: N(10.0, 1.0). Positive: 3 consecutive samples at [3.5, 4.0, 5.0] sigma
 
 **Script:** `scripts/bench_e2e_latency.py` | **Output:** `results/e2e_latency_results.json`
 
-This benchmark measures latency through the **actual ROS 2 callback path** — not a pure-Python port:
+This benchmark measures latency through the **actual ROS 2 callback path**: not a pure-Python port:
 
 ```
 publish Float64MultiArray → AnomalyDetector callback → Z-score → FaultEvent → subscriber callback
@@ -169,7 +169,7 @@ This does not measure multi-process or network latency. In a deployed system wit
 
 **Script:** `scripts/bench_log_parser.py` | **Output:** `results/log_parser_results.json`
 
-Evaluates the log parser's regex-based detection against 5 configured rules. Standalone Python — no ROS 2 required.
+Evaluates the log parser's regex-based detection against 5 configured rules. Standalone Python, no ROS 2 required.
 
 ```bash
 python3 scripts/bench_log_parser.py
@@ -189,7 +189,7 @@ python3 scripts/bench_log_parser.py
 
 Overall: 22/22 correct.
 
-**Edge case examples:** "costmap failed" (no "to initialize") correctly does not match. "estop was disengaged" correctly matches `hardware_estop` — this is a semantic false positive the rule cannot distinguish.
+**Edge case examples:** "costmap failed" (no "to initialize") correctly does not match. "estop was disengaged" correctly matches `hardware_estop`: this is a semantic false positive the rule cannot distinguish.
 
 ### Throughput
 
@@ -212,7 +212,7 @@ Overall: 22/22 correct.
 | Same rule, different nodes | 2 | 2 | Yes |
 | Different rules, same node | 2 | 2 | Yes |
 
-**Limitations:** Detection accuracy is tested against a hand-crafted corpus of 22 messages. The rules are evaluated against their own design intent — not against a corpus of real robot logs. Coverage is limited to the 5 pre-configured rules.
+**Limitations:** Detection accuracy is tested against a hand-crafted corpus of 22 messages. The rules are evaluated against their own design intent, not against a corpus of real robot logs. Coverage is limited to the 5 pre-configured rules.
 
 ---
 
@@ -236,16 +236,16 @@ python3 scripts/attachability_matrix.py            # live graph analysis
 
 | HELIX Input | GO2 Status (resolved 2026-04-15) |
 |-------------|---------------------------------|
-| /diagnostics | NOT reliably published — observed once in Session 1 (twist_mux, ~2 Hz), absent in Sessions 2 and 5 across 6 sport-API modes under `motion_switcher = normal`. See `docs/GO2_HARDWARE_EVIDENCE.md` §7 / §9. |
+| /diagnostics | NOT reliably published, observed once in Session 1 (twist_mux, ~2 Hz), absent in Sessions 2 and 5 across 6 sport-API modes under `motion_switcher = normal`. See `docs/GO2_HARDWARE_EVIDENCE.md` §7 / §9. |
 | /helix/heartbeat | Not published |
 | /helix/metrics | Not published (bridged via the `helix_adapter` package) |
 | /rosout | Available |
 
-**Result:** Only 1 of 4 HELIX input channels (`/rosout`) is reliably native on the GO2 under default operating conditions; `/diagnostics` is not (see resolved status above). The other two HELIX inputs (`/helix/metrics`, `/helix/heartbeat`) are HELIX-internal topics that no robot publishes by default. The `helix_adapter` ROS 2 package (`helix_topic_rate_monitor`, `helix_json_state_parser`, `helix_pose_drift_monitor` — launch with `ros2 launch helix_bringup helix_adapter.launch.py`) bridges 5 additional topic rate streams, 2 JSON state streams, and pose displacement into `/helix/metrics`, enabling HELIX's anomaly detector to operate on live GO2 data. The Session 1 / Session 2 hardware results were produced by the predecessor monolithic `passive_adapter.py` script (now archived under `hardware_eval_20260406/scripts/`). See `docs/GO2_HARDWARE_EVIDENCE.md` for full analysis.
+**Result:** Only 1 of 4 HELIX input channels (`/rosout`) is reliably native on the GO2 under default operating conditions; `/diagnostics` is not (see resolved status above). The other two HELIX inputs (`/helix/metrics`, `/helix/heartbeat`) are HELIX-internal topics that no robot publishes by default. The `helix_adapter` ROS 2 package (`helix_topic_rate_monitor`, `helix_json_state_parser`, `helix_pose_drift_monitor`: launch with `ros2 launch helix_bringup helix_adapter.launch.py`) bridges 5 additional topic rate streams, 2 JSON state streams, and pose displacement into `/helix/metrics`, enabling HELIX's anomaly detector to operate on live GO2 data. The Session 1 / Session 2 hardware results were produced by the predecessor monolithic `passive_adapter.py` script (now archived under `hardware_eval_20260406/scripts/`). See `docs/GO2_HARDWARE_EVIDENCE.md` for full analysis.
 
 ---
 
-## 6. Hardware Evaluation — GO2 + Jetson Orin NX
+## 6. Hardware Evaluation: GO2 + Jetson Orin NX
 
 **Date:** 2026-04-03. **Platform:** Live Unitree GO2 at 192.168.123.161, Jetson Orin NX at 192.168.123.18, PC at 192.168.123.10.
 
@@ -262,7 +262,7 @@ HELIX's anomaly detector ran on the PC while a passive adapter bridged live GO2 
 | RSS memory | 41.7 MB mean | ibid. |
 | CPU usage | 22.3% mean (multi-threaded executor) | ibid. |
 
-The LiDAR point cloud topic experienced a rate fluctuation that the adapter converted into a metric stream, and HELIX's Z-score detector flagged as anomalous. Whether this fluctuation represents a genuine sensor fault or normal DDS transport jitter is unknown — no ground-truth labeling exists.
+The LiDAR point cloud topic experienced a rate fluctuation that the adapter converted into a metric stream, and HELIX's Z-score detector flagged as anomalous. Whether this fluctuation represents a genuine sensor fault or normal DDS transport jitter is unknown, no ground-truth labeling exists.
 
 **What this demonstrates:** HELIX's detection logic can flag rate fluctuations in GO2 sensor data when bridged through a lightweight adapter.
 
@@ -275,7 +275,7 @@ The LiDAR point cloud topic experienced a rate fluctuation that the adapter conv
 | 3 HELIX nodes only | 41.4 MB | 41.7 MB | 10.7% | 20.0% | 0 |
 | 3 HELIX nodes + adapter | 41.7 MB | 42.1 MB | 22.3% | 49.9% | 4 |
 
-Measured on PC (i7-7700). Overhead on the Jetson Orin NX would differ — see algorithmic benchmark comparison for scaling factors (Jetson runs at 64–79% of PC throughput).
+Measured on PC (i7-7700). Overhead on the Jetson Orin NX would differ, see algorithmic benchmark comparison for scaling factors (Jetson runs at 64-79% of PC throughput).
 
 ### Cross-Platform Benchmark Comparison
 
@@ -288,7 +288,7 @@ Source: `hardware_eval_20260403/results/jetson_vs_pc_benchmarks.json`
 | Detection latency | 0.049 ms | 0.049 ms | 1.0x |
 | Heartbeat miss latency | 200.7 ms | 200.7 ms | 1.0x |
 
-**Note:** The PC log parser throughput here (248K) differs from the value in `results/log_parser_results.json` (777K) because these are separate benchmark runs on different dates. The Jetson figures have no corresponding artifact in `results/` — they are stored only in `hardware_eval_20260403/`.
+**Note:** The PC log parser throughput here (248K) differs from the value in `results/log_parser_results.json` (777K) because these are separate benchmark runs on different dates. The Jetson figures have no corresponding artifact in `results/`: they are stored only in `hardware_eval_20260403/`.
 
 ### GO2 Topic Rate Stability
 
@@ -309,7 +309,7 @@ Computed from 153 live GO2 topics by `scripts/attachability_matrix.py`:
 
 | Metric | Value |
 |--------|-------|
-| Native HELIX input coverage | 1/4 (`/rosout` only — see `docs/GO2_HARDWARE_EVIDENCE.md` §7 for the superseded 2/4 figure based on a non-reproducible `/diagnostics` sighting) |
+| Native HELIX input coverage | 1/4 (`/rosout` only, see `docs/GO2_HARDWARE_EVIDENCE.md` §7 for the superseded 2/4 figure based on a non-reproducible `/diagnostics` sighting) |
 | Standard-type topics | 83/153 (54%) |
 | Demonstrated adapter topics | 24 |
 | Candidate adapter topics (String heuristic) | 30 |

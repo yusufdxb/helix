@@ -29,7 +29,7 @@ All benchmarks run on identical Python scripts, same random seeds.
 | Detection latency | 0.049 ms | 0.049 ms | 1.0x | <100 ms |
 | Heartbeat miss latency | 200.7 ms | 200.7 ms | 1.0x | <2 s |
 
-**Finding**: The Jetson achieves 63–79% of PC throughput. At HELIX's operational rate (~100 samples/sec), the Jetson exceeds requirements by >600x. Algorithmic overhead is negligible on the target hardware.
+**Finding**: The Jetson achieves 63-79% of PC throughput. At HELIX's operational rate (~100 samples/sec), the Jetson exceeds requirements by >600x. Algorithmic overhead is negligible on the target hardware.
 
 ### 2. Cross-Device DDS Latency
 
@@ -42,7 +42,7 @@ Measured via 50 round-trip echo exchanges (PC publish → Jetson echo → PC rec
 | P95 RTT | 2.31 ms |
 | Delivery | 50/50 (100%) |
 
-**Finding**: Cross-device ROS 2 message transport adds <1 ms one-way latency. At HELIX's 10 Hz monitoring rate, this is 0.81% of the sensing period — negligible.
+**Finding**: Cross-device ROS 2 message transport adds <1 ms one-way latency. At HELIX's 10 Hz monitoring rate, this is 0.81% of the sensing period, negligible.
 
 ### 3. Jetson Resource Headroom
 
@@ -52,7 +52,7 @@ Baseline measurement while GO2 stack (103 topics) is running, no HELIX:
 |----------|-------|---------------|
 | CPU idle | 82.4% | <0.5% of one core |
 | RAM free | 13.0 GB / 15.7 GB | <50 MB additional |
-| Thermal | 43–48°C (throttle at 85°C) | +0.2°C |
+| Thermal | 43-48°C (throttle at 85°C) | +0.2°C |
 | Cores | 4 of 8 online | Needs 1 core |
 
 **Finding**: The Jetson has massive headroom. HELIX's lifecycle nodes would consume <0.5% of a single core and <50 MB RAM.
@@ -76,12 +76,12 @@ Baseline measurement while GO2 stack (103 topics) is running, no HELIX:
 
 | Scenario | Session | Executed? | Finding |
 |----------|---------|-----------|---------|
-| External topic injection | Apr 3 | Yes | Zero /rosout reaction from GO2 — DDS isolation confirmed |
+| External topic injection | Apr 3 | Yes | Zero /rosout reaction from GO2, DDS isolation confirmed |
 | Topic rate baseline | Apr 3 | Yes | Stable rates: IMU ±1%, odom ±1% across captures |
 | /rosout error injection | Apr 6 | Yes | 5 ERROR-level messages injected; detectable by HELIX log_parser; zero GO2 impact |
 | DDS load impact | Apr 6 | Yes | 1000 Hz test traffic → 0.05% pose rate change (noise level) |
-| Node lifecycle observation | — | No | Nodes not discoverable from external machines |
-| Network latency perturbation | — | No | Deferred — requires human operator present |
+| Node lifecycle observation |, | No | Nodes not discoverable from external machines |
+| Network latency perturbation |, | No | Deferred, requires human operator present |
 
 **Finding**: The GO2's topic rates are highly stable, making rate-based anomaly detection viable. DDS monitoring traffic has negligible impact on robot topics. Node-level monitoring requires a different approach (topic liveness, not node discovery).
 
@@ -101,7 +101,7 @@ A passive adapter (`scripts/passive_adapter.py`) bridged 5 GO2 topic rate stream
 
 ### 7. /diagnostics Discovery
 
-`/diagnostics` is published by GO2's `twist_mux` node at ~2 Hz with velocity topic masking status and timing. This was not observed in the April 2 capture, and was again absent on April 6, confirming it activates only under certain operating modes (likely when twist_mux is actively selecting between velocity command sources). **Native HELIX input coverage should be stated as 1–2/4 depending on GO2 operating mode.**
+`/diagnostics` is published by GO2's `twist_mux` node at ~2 Hz with velocity topic masking status and timing. This was not observed in the April 2 capture, and was again absent on April 6, confirming it activates only under certain operating modes (likely when twist_mux is actively selecting between velocity command sources). **Native HELIX input coverage should be stated as 1-2/4 depending on GO2 operating mode.**
 
 ### 8. Cross-Session Reproducibility (Session 2, April 6)
 
@@ -156,16 +156,16 @@ Published 1000 Hz String messages on /helix_test_load alongside live GO2 topics:
 
 ### What Would Make HELIX Attachable Today
 
-1. **Topic rate monitor** — subscribe to high-rate topics (IMU, odom, lidar) and compute rolling rate statistics. Deviation = fault signal.
-2. **JSON state parser** — parse /multiplestate and /servicestate strings to extract structured state for anomaly detection.
-3. **Pose drift monitor** — subscribe to /utlidar/robot_pose and compute rolling displacement statistics.
+1. **Topic rate monitor**: subscribe to high-rate topics (IMU, odom, lidar) and compute rolling rate statistics. Deviation = fault signal.
+2. **JSON state parser**: parse /multiplestate and /servicestate strings to extract structured state for anomaly detection.
+3. **Pose drift monitor**: subscribe to /utlidar/robot_pose and compute rolling displacement statistics.
 4. **Build unitree_go packages** on the PC/Jetson to unlock /lowstate (joint temperatures, motor currents) and /sportmodestate (gait mode, foot forces).
 
 ## Evidence Classification
 
 ### Observed on Hardware
 - Hardware specs and thermal state of Jetson Orin NX (two sessions: Apr 3, Apr 6)
-- GO2 topic landscape with 103–153 active topics (varies by session/operating mode)
+- GO2 topic landscape with 103-153 active topics (varies by session/operating mode)
 - DDS cross-device latency (PC <-> Jetson): 0.81 ms one-way (Apr 3)
 - DDS local loopback latency on Jetson: 0.487 ms (Apr 6)
 - HELIX algorithmic performance on Jetson: 64K samp/s (reproduced within 1% across sessions)
@@ -177,15 +177,15 @@ Published 1000 Hz String messages on /helix_test_load alongside live GO2 topics:
 - Passive adapter bridging GO2 topics to /helix/metrics
 - **6 FaultEvents total: 4 from LiDAR rate (Apr 3), 2 from pose rate (Apr 6)**
 - /diagnostics published intermittently by GO2's twist_mux (present Apr 3, absent Apr 6)
-- Measured HELIX overhead: 39.4–41.7 MB RSS, 15.9–22.3% CPU (PC, with adapter)
+- Measured HELIX overhead: 39.4-41.7 MB RSS, 15.9-22.3% CPU (PC, with adapter)
 - **Cross-session topic rate stability: CV < 0.001 across 3-day gap (Apr 3 vs Apr 6)**
 - **DDS monitoring load impact: 0.05% on robot topic rates (negligible)**
 - **/rosout error injection: feasible, detectable, safe, zero GO2 impact**
 
 ### Inferred from Hardware
-- HELIX resource overhead on Jetson — projected from PC measurement x scaling factor
-- Long-term rate stability beyond 5 minutes — extrapolated from in-window stability
-- Adapter viability for sustained monitoring — demonstrated for 120 seconds max
+- HELIX resource overhead on Jetson, projected from PC measurement x scaling factor
+- Long-term rate stability beyond 5 minutes, extrapolated from in-window stability
+- Adapter viability for sustained monitoring, demonstrated for 120 seconds max
 
 ### Not Yet Validated
 - HELIX running as persistent ROS 2 service on GO2/Jetson

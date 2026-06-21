@@ -63,7 +63,7 @@ install(DIRECTORY config
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # Disable copyright check (no LICENSE in package) — other linters still run.
+  # Disable copyright check (no LICENSE in package): other linters still run.
   set(ament_cmake_copyright_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
