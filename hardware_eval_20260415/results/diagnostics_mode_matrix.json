@@ -1,0 +1,106 @@
+{
+  "task": "Task 5 — /diagnostics mode dependency on GO2",
+  "session_date": "2026-04-15",
+  "method": "interactive sport-API mode cycling, /diagnostics info+hz captured per state",
+  "test_environment": {
+    "go2_address": "192.168.123.161 (MCU)",
+    "jetson_address": "192.168.0.2 (WiFi) / 192.168.123.18 (wired)",
+    "rmw": "rmw_cyclonedds_cpp",
+    "cyclonedds_uri": "file:///home/unitree/unitree_ros2/cyclonedds_ws/src/cyclonedds.xml",
+    "captured_from": "Jetson payload, helix_ws + unitree_ros2 sourced"
+  },
+  "diagnostics_publisher_in_any_state": false,
+  "diagnostics_observed_rate_hz": 0.0,
+  "states_tested": [
+    {
+      "label": "baseline_idle",
+      "sport_api_id_sent": null,
+      "robot_pose": "lying (post-boot idle)",
+      "sport_mode": 0,
+      "body_height_m": null,
+      "diagnostics_publisher_count": 0,
+      "diagnostics_subscription_count": 0,
+      "diagnostics_topic_status": "Unknown topic — never appeared in graph",
+      "rate_hz": 0.0,
+      "ts_captured": 1776290682
+    },
+    {
+      "label": "damp_on_standing",
+      "sport_api_id_sent": 1001,
+      "robot_pose": "STANDING when Damp issued — robot released motors and collapsed",
+      "sport_mode": 0,
+      "body_height_m": null,
+      "diagnostics_publisher_count": 0,
+      "diagnostics_subscription_count": 0,
+      "diagnostics_topic_status": "Unknown topic",
+      "rate_hz": 0.0,
+      "ts_captured": 1776290697,
+      "incident": "Damp on a standing robot caused a controlled collapse (the robot fell). See incident_damp_collapse.md. No damage."
+    },
+    {
+      "label": "recovery_stand",
+      "sport_api_id_sent": 1006,
+      "robot_pose": "lifted from belly to standing",
+      "sport_mode": 0,
+      "body_height_m": 0.3217897415161133,
+      "diagnostics_publisher_count": 0,
+      "diagnostics_subscription_count": 0,
+      "diagnostics_topic_status": "Unknown topic",
+      "rate_hz": 0.0,
+      "ts_captured": 1776294250
+    },
+    {
+      "label": "balance_stand_walk",
+      "sport_api_id_sent": 1002,
+      "robot_pose": "standing, balance engaged",
+      "sport_mode": 0,
+      "body_height_m": 0.32178783416748047,
+      "diagnostics_publisher_count": 0,
+      "diagnostics_subscription_count": 0,
+      "diagnostics_topic_status": "Unknown topic",
+      "rate_hz": 0.0,
+      "ts_captured": 1776294272
+    },
+    {
+      "label": "obstacles_avoid_on",
+      "obstacles_avoid_api_id_sent": 1001,
+      "obstacles_avoid_parameter": "{\"enable\":true}",
+      "robot_pose": "standing",
+      "sport_mode": 0,
+      "body_height_m": 0.3217830955982208,
+      "diagnostics_publisher_count": 0,
+      "diagnostics_subscription_count": 0,
+      "diagnostics_topic_status": "Unknown topic",
+      "rate_hz": 0.0,
+      "ts_captured": 1776294295
+    },
+    {
+      "label": "stand_down_then_damp",
+      "sport_api_ids_sent": [1005, 1001],
+      "robot_pose": "lowered to lay, motors released",
+      "sport_mode": 0,
+      "body_height_m": 0.07215333729982376,
+      "diagnostics_publisher_count": 0,
+      "diagnostics_subscription_count": 0,
+      "diagnostics_topic_status": "Unknown topic",
+      "rate_hz": 0.0,
+      "ts_captured": 1776294325
+    }
+  ],
+  "states_NOT_tested": [
+    {
+      "label": "motion_switcher_ai",
+      "reason": "Skipped for safety. Switching motion_switcher to 'ai' mode could engage autonomous AI behavior with the robot moving on its own, which the operator could not safely monitor over remote SSH after the Damp-collapse incident earlier in the session. The Session 2 (`docs/GO2_HARDWARE_EVIDENCE.md`) claim that `twist_mux` publishes /diagnostics specifically related to whatever mode Session 2 was in — most plausibly motion_switcher 'ai'. That hypothesis is therefore NOT falsified by this session's data."
+    },
+    {
+      "label": "motion_switcher_advanced",
+      "reason": "Same rationale as motion_switcher_ai."
+    }
+  ],
+  "conclusion": [
+    "Across 6 sport-API states (idle/lay, damp-on-standing, recovery_stand, balance_stand, obstacles_avoid_on, stand_down+damp) under motion_switcher's default 'normal' mode, /diagnostics never appeared in the GO2 graph: Publisher count: 0 every capture. `ros2 topic hz` consistently reported 'topic does not appear to be published yet'.",
+    "Sides decisively with `docs/GO2_ATTACHABILITY_UPDATE.md` (Session 1, 2026-04-03) for the 'normal' motion_switcher mode.",
+    "Does NOT confirm or refute `docs/GO2_HARDWARE_EVIDENCE.md` Session-2 claim that `twist_mux` publishes /diagnostics, because the 'ai' / 'advanced' motion_switcher modes were not exercised this session (operator-safety reason). To resolve the doc conflict definitively, a future session with a spotter physically able to E-stop must cycle motion_switcher modes."
+  ],
+  "doc_update_recommendation": "docs/GO2_ATTACHABILITY_UPDATE.md should be amended to add 'extends across all sport-API states under motion_switcher=normal' and add a footnote that the 'ai' mode case is open. docs/GO2_HARDWARE_EVIDENCE.md's twist_mux/2-of-4 claim should be marked as 'pending re-verification — not reproduced 2026-04-15 in normal mode'."
+}

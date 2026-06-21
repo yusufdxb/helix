@@ -1,0 +1,2 @@
+[INFO] [1776219644.264477600] [helix_heartbeat_monitor]: HeartbeatMonitor configured — timeout=0.3s miss_threshold=3 check_interval=0.5s
+[INFO] [1776219646.855932992] [helix_heartbeat_monitor]: HeartbeatMonitor activated.

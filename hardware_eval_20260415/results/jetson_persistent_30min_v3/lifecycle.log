@@ -1,0 +1,14 @@
+Transitioning successful
+Transitioning successful
+Transitioning successful
+Transitioning successful
+Transitioning successful
+Transitioning successful
+--- t0 lifecycle ---
+helix_heartbeat_monitor: active [3]
+helix_anomaly_detector: active [3]
+helix_log_parser: active [3]
+--- end lifecycle ---
+helix_heartbeat_monitor: active [3]
+helix_anomaly_detector: active [3]
+helix_log_parser: active [3]

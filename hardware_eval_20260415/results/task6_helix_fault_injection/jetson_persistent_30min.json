@@ -1,0 +1,100 @@
+{
+  "task": "Task 3 \u2014 30-min Jetson persistent deployment vs live GO2",
+  "duration_target_s": 1800,
+  "duration_actual_s": 716,
+  "samples": 70,
+  "fault_count_total": 1,
+  "thermal": {
+    "cpu_max_c": 55.156,
+    "gpu_max_c": 51.125,
+    "soc_max_c": 53.437,
+    "tj_max_c": 55.937,
+    "throttle_observed": false,
+    "tegra_samples": 730
+  },
+  "nodes": {
+    "helix_heartbeat_monitor": {
+      "rss_kb": {
+        "min": 37328,
+        "max": 39572,
+        "mean": 38510.80597014925,
+        "n": 67
+      },
+      "cpu_pct": {
+        "min": 0.6,
+        "max": 2.3,
+        "mean": 0.7895522388059709,
+        "n": 67
+      },
+      "first_death_elapsed_s": 681,
+      "state_active_throughout": false,
+      "first": [
+        "active [3]",
+        "active [3]",
+        "active [3]"
+      ],
+      "last": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "helix_anomaly_detector": {
+      "rss_kb": {
+        "min": 35236,
+        "max": 37208,
+        "mean": 36222.86567164179,
+        "n": 67
+      },
+      "cpu_pct": {
+        "min": 0.4,
+        "max": 2.2,
+        "mean": 0.585074626865671,
+        "n": 67
+      },
+      "first_death_elapsed_s": 681,
+      "state_active_throughout": false,
+      "first": [
+        "active [3]",
+        "active [3]",
+        "active [3]"
+      ],
+      "last": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "helix_log_parser": {
+      "rss_kb": {
+        "min": 35244,
+        "max": 36824,
+        "mean": 36006.50746268657,
+        "n": 67
+      },
+      "cpu_pct": {
+        "min": 0.3,
+        "max": 2.1,
+        "mean": 0.5686567164179097,
+        "n": 67
+      },
+      "first_death_elapsed_s": 681,
+      "state_active_throughout": false,
+      "first": [
+        "active [3]",
+        "active [3]",
+        "active [3]"
+      ],
+      "last": [
+        "",
+        "",
+        ""
+      ]
+    }
+  },
+  "success_criteria": {
+    "no_oom": false,
+    "no_thermal_throttle": true,
+    "lifecycle_active_throughout": false
+  }
+}
