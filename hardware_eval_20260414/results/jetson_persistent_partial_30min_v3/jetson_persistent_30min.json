@@ -1,0 +1,104 @@
+{
+  "task": "Task 3 \u2014 30-min Jetson persistent deployment vs live GO2",
+  "status": "PARTIAL \u2014 concurrent activity on Jetson killed nodes mid-run",
+  "target_duration_s": 1800,
+  "actual_sampler_duration_s": 1465,
+  "valid_window_s": 866,
+  "samples": 77,
+  "sample_period_s": 15,
+  "fault_count_total": 0,
+  "thermal": {
+    "cpu_max_c": 63.687,
+    "gpu_max_c": 59.593,
+    "soc_max_c": 61.687,
+    "tj_max_c": 63.781,
+    "throttle_observed": false,
+    "tegra_samples": 1591
+  },
+  "nodes": {
+    "helix_heartbeat_monitor": {
+      "rss_kb": {
+        "min": 35080,
+        "max": 40632,
+        "mean": 37986.04651162791,
+        "n": 43
+      },
+      "cpu_pct": {
+        "min": 0.6,
+        "max": 2.3,
+        "mean": 0.7581395348837217,
+        "n": 43
+      },
+      "first_death_elapsed_s": 866,
+      "state_active_throughout": false,
+      "first_3": [
+        "active [3]",
+        "active [3]",
+        "active [3]"
+      ],
+      "last_3": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "helix_anomaly_detector": {
+      "rss_kb": {
+        "min": 35132,
+        "max": 44128,
+        "mean": 39082.88372093023,
+        "n": 43
+      },
+      "cpu_pct": {
+        "min": 0.4,
+        "max": 2.2,
+        "mean": 0.5627906976744179,
+        "n": 43
+      },
+      "first_death_elapsed_s": 866,
+      "state_active_throughout": false,
+      "first_3": [
+        "active [3]",
+        "active [3]",
+        "active [3]"
+      ],
+      "last_3": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "helix_log_parser": {
+      "rss_kb": {
+        "min": 36932,
+        "max": 39644,
+        "mean": 38438.976744186046,
+        "n": 43
+      },
+      "cpu_pct": {
+        "min": 0.4,
+        "max": 2.1,
+        "mean": 0.5488372093023249,
+        "n": 43
+      },
+      "first_death_elapsed_s": 866,
+      "state_active_throughout": false,
+      "first_3": [
+        "active [3]",
+        "active [3]",
+        "active [3]"
+      ],
+      "last_3": [
+        "",
+        "",
+        ""
+      ]
+    }
+  },
+  "caveats": [
+    "Concurrent come-here + phoenix Claude session running on same Jetson during run.",
+    "Nodes died silently at elapsed 866s \u2014 no traceback in per-node logs (hb.log/ad.log/lp.log end at activation INFO).",
+    "Valid window: 0 to 866s (~14.4 min). After 866s sampler shows pid=0 / state empty.",
+    "Thermal/lifecycle/RSS data within valid window IS reliable. CPU/RSS were stable, no thermal throttle, lifecycle ACTIVE."
+  ]
+}

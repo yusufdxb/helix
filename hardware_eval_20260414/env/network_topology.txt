@@ -1,0 +1,46 @@
+=== Network Topology Evidence ===
+Date: 2026-04-14T19:53:39Z
+
+--- PC interface addresses ---
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+enp0s31f6        UP             192.168.123.10/24 fe80::c721:884:f228:9c7b/64 
+wlx3c64cf2d28e2  UP             35.16.34.115/17 fe80::dadb:242e:11e5:386/64 
+
+--- PC default route ---
+default via 35.16.0.1 dev wlx3c64cf2d28e2 proto dhcp metric 600 
+
+--- Ping Jetson (192.168.123.18) ---
+PING 192.168.123.18 (192.168.123.18) 56(84) bytes of data.
+64 bytes from 192.168.123.18: icmp_seq=1 ttl=64 time=0.171 ms
+64 bytes from 192.168.123.18: icmp_seq=2 ttl=64 time=0.146 ms
+64 bytes from 192.168.123.18: icmp_seq=3 ttl=64 time=0.121 ms
+64 bytes from 192.168.123.18: icmp_seq=4 ttl=64 time=0.117 ms
+64 bytes from 192.168.123.18: icmp_seq=5 ttl=64 time=0.150 ms
+
+--- 192.168.123.18 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4106ms
+rtt min/avg/max/mdev = 0.117/0.141/0.171/0.019 ms
+
+--- Ping GO2 (192.168.123.161) ---
+PING 192.168.123.161 (192.168.123.161) 56(84) bytes of data.
+64 bytes from 192.168.123.161: icmp_seq=1 ttl=64 time=0.172 ms
+64 bytes from 192.168.123.161: icmp_seq=2 ttl=64 time=0.151 ms
+64 bytes from 192.168.123.161: icmp_seq=3 ttl=64 time=0.168 ms
+64 bytes from 192.168.123.161: icmp_seq=4 ttl=64 time=0.174 ms
+64 bytes from 192.168.123.161: icmp_seq=5 ttl=64 time=0.155 ms
+
+--- 192.168.123.161 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4092ms
+rtt min/avg/max/mdev = 0.151/0.164/0.174/0.009 ms
+
+--- Jetson -> GO2 ping (from Jetson) ---
+PING 192.168.123.161 (192.168.123.161) 56(84) bytes of data.
+64 bytes from 192.168.123.161: icmp_seq=1 ttl=64 time=0.166 ms
+64 bytes from 192.168.123.161: icmp_seq=2 ttl=64 time=0.149 ms
+64 bytes from 192.168.123.161: icmp_seq=3 ttl=64 time=0.146 ms
+64 bytes from 192.168.123.161: icmp_seq=4 ttl=64 time=0.155 ms
+64 bytes from 192.168.123.161: icmp_seq=5 ttl=64 time=0.145 ms
+
+--- 192.168.123.161 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4086ms
+rtt min/avg/max/mdev = 0.145/0.152/0.166/0.007 ms

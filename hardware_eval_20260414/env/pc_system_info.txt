@@ -1,0 +1,35 @@
+=== PC System Info ===
+Date: 2026-04-14T19:53:11Z
+
+--- uname -a ---
+Linux careslab-OptiPlex-7050 6.8.0-107-generic #107~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Mar 18 23:40:43 UTC  x86_64 x86_64 x86_64 GNU/Linux
+
+--- CPU ---
+CPU(s):                                  8
+Model name:                              Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz
+Thread(s) per core:                      2
+Core(s) per socket:                      4
+Socket(s):                               1
+CPU max MHz:                             4200.0000
+CPU min MHz:                             800.0000
+NUMA node0 CPU(s):                       0-7
+
+--- Memory ---
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi        12Gi       318Mi       686Mi       2.2Gi       1.6Gi
+Swap:          2.0Gi        47Mi       2.0Gi
+
+--- OS ---
+Distributor ID:	Ubuntu
+Description:	Ubuntu 22.04.5 LTS
+Release:	22.04
+Codename:	jammy
+
+--- ROS ---
+ROS_DISTRO=humble
+ros-humble-desktop 0.10.0-1jammy.20251228.131203
+ros-humble-rclcpp 16.0.17-1jammy.20251227.170054
+ros-humble-rclcpp-action 16.0.17-1jammy.20251228.083819
+ros-humble-rclcpp-components 16.0.17-1jammy.20251228.083802
+ros-humble-rclcpp-lifecycle 16.0.17-1jammy.20251228.083827
+ros-humble-rmw-cyclonedds-cpp 1.3.4-1jammy.20251218.032849
