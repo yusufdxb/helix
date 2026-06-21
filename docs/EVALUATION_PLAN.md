@@ -1,4 +1,4 @@
-# Evaluation Plan — HELIX
+# Evaluation Plan: HELIX
 
 Practical evaluation roadmap for a credible workshop paper submission. Organized by what has been validated, what is missing, and what would strengthen the contribution.
 
@@ -18,7 +18,7 @@ These benchmarks exist in `benchmark_helix.py` and results are recorded in `benc
 
 ### Key caveat
 
-The TPR/FPR result (100%/0% across all thresholds) reflects the test design, not real-world performance. The positive signal is a 100.0 step change against a baseline of ~10.0 with standard deviation ~0.08. Any threshold-based detector would achieve perfect separation on this data. The negative trials use perturbations of at most 0.15 from the mean — well within 1 sigma. This benchmark validates that the implementation is correct, not that it performs well under realistic conditions.
+The TPR/FPR result (100%/0% across all thresholds) reflects the test design, not real-world performance. The positive signal is a 100.0 step change against a baseline of ~10.0 with standard deviation ~0.08. Any threshold-based detector would achieve perfect separation on this data. The negative trials use perturbations of at most 0.15 from the mean, well within 1 sigma. This benchmark validates that the implementation is correct, not that it performs well under realistic conditions.
 
 ---
 
@@ -40,7 +40,7 @@ These experiments address gaps that a reviewer would likely flag.
 
 ### 2. Gradual drift anomalies
 
-**Why:** The current benchmark only tests step changes (instant jump to 100.0). Real faults often manifest as gradual drift — e.g., a sensor slowly going out of calibration.
+**Why:** The current benchmark only tests step changes (instant jump to 100.0). Real faults often manifest as gradual drift, e.g., a sensor slowly going out of calibration.
 
 **Experiment:**
 - Generate ramp anomalies: baseline + linear drift over N samples
@@ -112,7 +112,7 @@ Run a robot model (e.g., TurtleBot3) in Gazebo, inject sensor faults (frozen IMU
 
 ### 9. Comparison with ROS 2 built-in diagnostics
 
-Benchmark against `diagnostic_aggregator` and `diagnostic_updater` — the standard ROS 2 approach to health monitoring. Compare: detection latency, configurability, and message expressiveness.
+Benchmark against `diagnostic_aggregator` and `diagnostic_updater`: the standard ROS 2 approach to health monitoring. Compare: detection latency, configurability, and message expressiveness.
 
 ### 10. On-device profiling on Jetson Orin
 

@@ -1,4 +1,4 @@
-# GO2 Attachability Update — Hardware-Grounded
+# GO2 Attachability Update: Hardware-Grounded
 
 Based on hardware evidence collected 2026-04-03 from a live Unitree GO2 quadruped.
 
@@ -8,7 +8,7 @@ HELIX subscribes to 4 input channels. On the GO2:
 
 | Channel | Required Type | GO2 Status | Evidence |
 |---------|--------------|------------|---------|
-| `/diagnostics` | DiagnosticArray | NOT PUBLISHED | Confirmed via `ros2 topic info /diagnostics` — "Unknown topic" |
+| `/diagnostics` | DiagnosticArray | NOT PUBLISHED | Confirmed via `ros2 topic info /diagnostics`: "Unknown topic" |
 | `/helix/heartbeat` | String | NOT PUBLISHED | Not in topic list (103 topics enumerated) |
 | `/helix/metrics` | Float64MultiArray | NOT PUBLISHED | Not in topic list |
 | `/rosout` | Log | AVAILABLE | 5+ publishers observed; messages captured in bags |
@@ -50,8 +50,8 @@ The GO2 follows none of these conventions:
 ### Custom-Type Streams (Require unitree_go Package)
 | Topic | Rate | Content | Monitoring Value |
 |-------|------|---------|------------------|
-| /lowstate | ~500 Hz | Motor currents, joint temperatures, battery | HIGH — critical fault signals |
-| /sportmodestate | ~500 Hz | Gait mode, foot forces, body state | HIGH — locomotion health |
+| /lowstate | ~500 Hz | Motor currents, joint temperatures, battery | HIGH, critical fault signals |
+| /sportmodestate | ~500 Hz | Gait mode, foot forces, body state | HIGH, locomotion health |
 | /lf/lowstate | ~50 Hz | Low-frequency variant | MODERATE |
 | /lf/sportmodestate | ~50 Hz | Low-frequency variant | MODERATE |
 
@@ -59,28 +59,28 @@ The GO2 follows none of these conventions:
 
 ### Phase 1: Passive monitoring with zero GO2 changes (2-3 days)
 
-1. **Topic rate monitor node** — Subscribe to IMU, odom, lidar topics. Compute 5-second rolling rate. Deviation >10% from baseline = fault event. This is the lowest-effort, highest-value addition.
+1. **Topic rate monitor node**: Subscribe to IMU, odom, lidar topics. Compute 5-second rolling rate. Deviation >10% from baseline = fault event. This is the lowest-effort, highest-value addition.
 
-2. **JSON state parser node** — Parse /multiplestate, /gnss, /servicestate strings. Extract numeric values. Publish as Float64MultiArray on /helix/metrics. HELIX anomaly detector works immediately.
+2. **JSON state parser node**: Parse /multiplestate, /gnss, /servicestate strings. Extract numeric values. Publish as Float64MultiArray on /helix/metrics. HELIX anomaly detector works immediately.
 
-3. **Pose drift monitor** — Subscribe to /utlidar/robot_pose. Compute rolling displacement rate. Unexpected acceleration/stationarity = fault signal.
+3. **Pose drift monitor**: Subscribe to /utlidar/robot_pose. Compute rolling displacement rate. Unexpected acceleration/stationarity = fault signal.
 
 ### Phase 2: Custom message integration (1-2 weeks)
 
 4. **Build unitree_go packages** on Jetson/PC from `~/go2_ws/src/unitree_ros2/`
-5. **LowState adapter** — Extract battery voltage, joint temperatures, motor currents → /helix/metrics
-6. **SportModeState adapter** — Extract gait mode transitions → log events on /rosout
+5. **LowState adapter**: Extract battery voltage, joint temperatures, motor currents → /helix/metrics
+6. **SportModeState adapter**: Extract gait mode transitions → log events on /rosout
 
 ### Phase 3: Full HELIX deployment (2-4 weeks)
 
-7. **Heartbeat publisher per GO2 node** — Infer node liveness from topic activity
-8. **Hardware-specific log rules** — Regex patterns for GO2-specific errors
-9. **DDS-aware monitoring** — Participant discovery, QoS health
-10. **On-device profiling** — Full HELIX stack on Jetson under thermal stress
+7. **Heartbeat publisher per GO2 node**: Infer node liveness from topic activity
+8. **Hardware-specific log rules**: Regex patterns for GO2-specific errors
+9. **DDS-aware monitoring**: Participant discovery, QoS health
+10. **On-device profiling**: Full HELIX stack on Jetson under thermal stress
 
 ## Design Implications for Paper
 
-The gap between HELIX's current interfaces and the GO2's topic landscape is not an architectural failure — it reveals a design assumption:
+The gap between HELIX's current interfaces and the GO2's topic landscape is not an architectural failure, it reveals a design assumption:
 
 > HELIX assumes the monitored graph follows ROS 2 conventions (/diagnostics, standard types, heartbeat protocols). Real robots like the GO2 use proprietary message types and non-standard communication patterns.
 

@@ -58,7 +58,7 @@ Artifacts stored at: `T7 SSD: hardware_eval_20260403/`
 ### EXP-8: External Topic Injection (Perturbation A)
 - **What**: Published 5 test messages to /helix_test_topic; 20 from Jetson
 - **Where**: `bags/perturbation_test_publish/`, `bags/helix_rosout_perturbation/`
-- **Claim supported**: "External topic injection does not disturb GO2 — safe perturbation baseline"
+- **Claim supported**: "External topic injection does not disturb GO2, safe perturbation baseline"
 - **Evidence strength**: Moderate
 - **Finding**: Zero /rosout reaction from GO2 nodes
 
@@ -149,5 +149,5 @@ Artifacts stored at: `T7 SSD: hardware_eval_20260403/`
 | "Rate-based detection is viable" | EXP-9 + EXP-10 rate stability + cross-session CV | YES -- stable baselines + demonstrated detection |
 | "Results are reproducible" | Apr 3 vs Apr 6 comparison (<1% delta, identical accuracy) | YES -- strong reproducibility evidence |
 | "Monitoring is safe for robot" | EXP-8 + EXP-11 + EXP-12 perturbation tests | YES -- zero impact on GO2 operation |
-| "HELIX monitors GO2 faults" | — | NO -- rate anomaly != confirmed fault |
-| "HELIX is deployed on GO2" | — | NO -- controlled evaluations, not deployment |
+| "HELIX monitors GO2 faults" |, | NO -- rate anomaly != confirmed fault |
+| "HELIX is deployed on GO2" |, | NO -- controlled evaluations, not deployment |

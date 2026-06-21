@@ -58,7 +58,7 @@ Artifacts stored at: `T7 SSD: hardware_eval_20260403/`
 ### EXP-8: External Topic Injection (Perturbation A)
 - **What**: Published 5 test messages to /helix_test_topic; 20 from Jetson
 - **Where**: `bags/perturbation_test_publish/`, `bags/helix_rosout_perturbation/`
-- **Claim supported**: "External topic injection does not disturb GO2 — safe perturbation baseline"
+- **Claim supported**: "External topic injection does not disturb GO2, safe perturbation baseline"
 - **Evidence strength**: Moderate
 - **Finding**: Zero /rosout reaction from GO2 nodes
 
@@ -115,18 +115,18 @@ Artifacts stored at: `T7 SSD: hardware_eval_20260403/`
 
 | Paper Claim | Evidence | Defensible? |
 |-------------|----------|-------------|
-| "Runs on Jetson Orin NX" | EXP-2 benchmarks on actual Jetson | YES — algorithmic benchmark, not full ROS 2 stack |
-| "Negligible overhead on target hardware" | EXP-4 resource baseline + EXP-2 comparison | YES — projected, not measured with HELIX nodes running |
-| "Sub-millisecond cross-device latency" | EXP-3 DDS RTT measurements | YES — 0.81 ms one-way |
+| "Runs on Jetson Orin NX" | EXP-2 benchmarks on actual Jetson | YES, algorithmic benchmark, not full ROS 2 stack |
+| "Negligible overhead on target hardware" | EXP-4 resource baseline + EXP-2 comparison | YES, projected, not measured with HELIX nodes running |
+| "Sub-millisecond cross-device latency" | EXP-3 DDS RTT measurements | YES, 0.81 ms one-way |
 | "GO2 publishes observable data" | EXP-5, EXP-6, EXP-7 bag captures | YES |
-| "HELIX can monitor GO2 faults" | No experiment | NO — HELIX nodes never ran against GO2 data |
-| "Adapter architecture is feasible" | EXP-5 topic analysis + EXP-6 data samples | PARTIAL — feasibility argument, not implementation |
-| "Rate-based detection is viable" | EXP-9 rate stability + EXP-2 detection accuracy | PARTIAL — stable baselines exist, detection not demonstrated |
-| "HELIX runs as persistent service on Jetson against live GO2 (≥30 min)" | EXP-15 | YES — Session 5, 1780 s, all success_criteria true |
-| "Log-pattern detection works end-to-end on hardware with low latency" | EXP-17 inject 1 | YES — Session 5, 1.8 s detection of nav2_costmap_fail pattern |
-| "HELIX detects sensor / hardware anomalies on GO2" | EXP-17 inject 2,4 | NO — Session 5 negative results document the attachability gap |
+| "HELIX can monitor GO2 faults" | No experiment | NO, HELIX nodes never ran against GO2 data |
+| "Adapter architecture is feasible" | EXP-5 topic analysis + EXP-6 data samples | PARTIAL, feasibility argument, not implementation |
+| "Rate-based detection is viable" | EXP-9 rate stability + EXP-2 detection accuracy | PARTIAL, stable baselines exist, detection not demonstrated |
+| "HELIX runs as persistent service on Jetson against live GO2 (≥30 min)" | EXP-15 | YES, Session 5, 1780 s, all success_criteria true |
+| "Log-pattern detection works end-to-end on hardware with low latency" | EXP-17 inject 1 | YES, Session 5, 1.8 s detection of nav2_costmap_fail pattern |
+| "HELIX detects sensor / hardware anomalies on GO2" | EXP-17 inject 2,4 | NO, Session 5 negative results document the attachability gap |
 
-## Experiments — Session 5 (2026-04-15)
+## Experiments: Session 5 (2026-04-15)
 
 Artifacts: `T7:LABWORK/HELIX/hardware_eval_20260415/`
 
@@ -135,10 +135,10 @@ Artifacts: `T7:LABWORK/HELIX/hardware_eval_20260415/`
   `log_parser`) launched on Jetson Orin NX with `setsid + nohup ros2 run` per
   node, ran for 1780 s
 - **Where**: `results/jetson_persistent_30min_v3/`
-  - `jetson_persistent_30min.json` — summary with success_criteria
-  - `sampler.jsonl` — 90 samples, 15 s period (actual ~20 s/sample due to
+  - `jetson_persistent_30min.json`: summary with success_criteria
+  - `sampler.jsonl`: 90 samples, 15 s period (actual ~20 s/sample due to
     per-sample lifecycle gets)
-  - `tegrastats.log` — 1790 samples, 1 Hz
+  - `tegrastats.log`: 1790 samples, 1 Hz
   - `lifecycle.log`, `hb.log`, `ad.log`, `lp.log`, `mid_run_monitor.log`
 - **Claim supported**: "HELIX runs as a persistent service on the target hardware"
 - **Evidence strength**: Strong
@@ -150,7 +150,7 @@ Artifacts: `T7:LABWORK/HELIX/hardware_eval_20260415/`
   and recorded `/diagnostics` publishers + rate per state
 - **Where**: `results/diagnostics_mode_matrix.json` + `results/task5_diagnostics_modes_partial/`
 - **Claim supported**: `GO2_ATTACHABILITY_UPDATE.md` claim that `/diagnostics`
-  is not natively published — extended from default-mode to all
+  is not natively published, extended from default-mode to all
   motion_switcher=normal sport states
 - **Evidence strength**: Strong (for normal mode); modes `ai` / `advanced` not tested
 - **Key finding**: 0 publishers in every state. Note: `notes/incident_damp_collapse.md`
