@@ -1,2 +1,0 @@
-hb_starter=17432 ad_starter=17433 lp_starter=17434
-tegra_pid=17992 faults_pid=17993

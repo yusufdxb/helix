@@ -11,7 +11,7 @@ IMPORTANT: `ros2 run` spawns a shell wrapper around the actual node
 process. This script follows the child-process tree to measure the
 real node PID, not the wrapper.
 
-Works on x86 (mewtwo) without a live robot -- the nodes start, subscribe
+Works on an x86 dev workstation without a live robot -- the nodes start, subscribe
 to empty topics, and sit idle.  We measure *startup* RSS, which on
 Session 8 hardware was 19.8 MB for C++ and ~45 MB for Python, so idle
 measurement is representative of the rclcpp/rclpy runtime baseline.

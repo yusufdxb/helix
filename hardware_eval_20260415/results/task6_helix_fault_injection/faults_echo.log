@@ -1,8 +1,0 @@
-node_name: '<string length: <11>>'
-fault_type: '<string length: <11>>'
-severity: 3
-detail: '<string length: <107>>'
-timestamp: 1776295111.8036711
-context_keys: '<sequence type: string, length: 4>'
-context_values: '<sequence type: string, length: 4>'
----

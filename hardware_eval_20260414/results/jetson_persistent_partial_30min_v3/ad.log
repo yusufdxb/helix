@@ -1,2 +1,0 @@
-[INFO] [1776219649.517596480] [helix_anomaly_detector]: AnomalyDetector configured — zscore_threshold=3.0 consecutive_trigger=3 window_size=60
-[INFO] [1776219652.100621536] [helix_anomaly_detector]: AnomalyDetector activated.

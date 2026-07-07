@@ -1,5 +1,0 @@
-# Node list from PC at 2026-04-14T19:53:39Z
-# count: 0
-# ---
-# CycloneDDS multicast discovery often does not enumerate remote nodes;
-# topic discovery above is the authoritative signal.

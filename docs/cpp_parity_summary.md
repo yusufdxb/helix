@@ -3,7 +3,7 @@
 **Target doc:** `docs/CPP_PORT_DESIGN_ANOMALY_DETECTOR.md`
 **Baseline doc:** `docs/GO2_HARDWARE_EVIDENCE.md` §15-17 (Session 7)
 **Raw JSON:** `results/cpp_parity.json` (891 samples @ 2 s interval)
-**Raw bag:** `bags/cpp_parity/cpp_parity_demo/cpp_parity_demo_0.db3` (1 MB)
+**Raw bag:** `cpp_parity_demo_0.db3` (1 MB, archived offline)
 
 ## Measured
 

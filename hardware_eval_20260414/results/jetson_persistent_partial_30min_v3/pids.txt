@@ -1,2 +1,0 @@
-hb_starter=20313 ad_starter=20314 lp_starter=20315
-tegra_pid=20622 faults_pid=20623

@@ -369,7 +369,7 @@ Benchmark: extend `benchmark_helix.py` with a `--cpp` flag that exercises the ne
    - Implement `RollingStats` + unit tests.
    - Generate golden CSV from Python.
    - Implement `AnomalyDetectorNode` + node-level gtest.
-   - `colcon build` + `colcon test` clean on mewtwo.
+   - `colcon build` + `colcon test` clean on the dev workstation.
 2. **Side-by-side bag replay (PC).**
    - Replay `hardware_eval_20260416/jetson_live_copy_phase3/` bag.
    - Run Python node as `/py/helix_anomaly_detector`, C++ node as `/cpp/helix_anomaly_detector`.
@@ -424,9 +424,9 @@ At every stage, rollback is a launch-file flag flip (`use_cpp_anomaly:=false`) o
 
 ## 11. Checklist before merge
 
-- [ ] `RollingStats` unit tests green on mewtwo
+- [ ] `RollingStats` unit tests green on the dev workstation
 - [ ] Golden CSV regenerated and committed under `src/helix_sensing_cpp/test/fixtures/`
-- [ ] Node-level gtest green on mewtwo
+- [ ] Node-level gtest green on the dev workstation
 - [ ] Bag-replay parity report committed
 - [ ] Launch file gated behind `use_cpp_anomaly` (default false)
 - [ ] One CaresLab hardware run: RSS < 30 % of Session 7 per-node, CPU < 10 % on a Jetson core, FaultEvent stream matches within tolerance

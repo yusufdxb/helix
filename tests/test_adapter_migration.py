@@ -3,9 +3,9 @@
 The original `scripts/passive_adapter.py` was a monolithic Python script that
 bridged GO2 standard topics into `/helix/metrics`. It has been replaced by the
 packaged `helix_adapter` ROS 2 lifecycle nodes (topic_rate_monitor,
-json_state_parser, pose_drift_monitor). The archived script remains in
-`hardware_eval_20260406/scripts/` as evidence of what produced the Session 1
-and Session 2 hardware results, but it is no longer the canonical adapter
+json_state_parser, pose_drift_monitor). The original script is archived offline (T7: hardware_eval_20260406/scripts/)
+as evidence of what produced the Session 1 and Session 2 hardware results,
+but it is no longer the canonical adapter
 path.
 
 These tests guard against the migration regressing into a half-state:

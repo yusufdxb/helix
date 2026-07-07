@@ -1,2 +1,0 @@
-# Raw rosbag db3 files stay on T7 filesystem only; metadata.yaml is versioned.
-*.db3

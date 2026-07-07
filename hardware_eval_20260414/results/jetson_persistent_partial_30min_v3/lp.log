@@ -1,2 +1,0 @@
-[INFO] [1776219654.769525152] [helix_log_parser]: Loaded 5 rules from '/home/unitree/helix_ws/install/helix_bringup/share/helix_bringup/config/log_rules.yaml'
-[INFO] [1776219657.327703936] [helix_log_parser]: LogParser activated with 5 rules, dedup_window=5.0s

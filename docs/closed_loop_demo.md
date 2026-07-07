@@ -1,9 +1,8 @@
 # HELIX Session 8: Closed-loop hardware demo (post R1 fix)
 
 **Date:** 2026-04-23
-**Bag:** `bags/post_fix_demo/post_fix_demo_0.db3` (75 MB, 7m19s)
-**Fix branch:** `fix/r1-anomaly-schema-mismatch` @ `e821b47` (T7 repo_clone)
-**Jetson commit:** unpushed rebuild, matches T7 branch content
+**Bag:** `post_fix_demo_0.db3` (75 MB, 7m19s, archived offline)
+**Fix:** `fix/r1-anomaly-schema-mismatch` @ `e821b47`, since merged to `main` (`82f7a15`)
 
 ## Result
 
@@ -65,9 +64,7 @@ Tests: **16/16 pass on Jetson** (`pytest` under real `helix_msgs` import).
 3. **Wire `/helix/cmd_vel` to twist_mux fallback.** 0 subscribers today
    - the "robot holds" claim is logically correct but physically vacuous.
    Phase 2 work.
-4. **Push fix branch + open PR.** Branch `fix/r1-anomaly-schema-mismatch`
-   committed locally on T7. Needs GitHub push + PR review. Kept off
-   main until reviewed.
+4. **Push fix branch + open PR.** Done since: merged to `main` as `82f7a15`.
 
 ## Operator notes
 
@@ -79,16 +76,6 @@ Tests: **16/16 pass on Jetson** (`pytest` under real `helix_msgs` import).
 
 ## Artifacts
 
-- `bags/post_fix_demo/`: demo bag (75 MB)
-- `notes/SESSION_NOTES.md`: running narrative
-- `logs/jetson_colcon_build.log`: build output
-- `logs/jetson_prestash_RESULTS_benchmark.patch`: pre-sync stash backup
-- `logs/decode_faults.py` + `decode_all.py`: bag inspection helpers
-  (kept under `/tmp` on lab PC)
-
-## Repo state
-
-- T7 `repo_clone` branch `fix/r1-anomaly-schema-mismatch` @ `e821b47`
-- Jetson `~/yusuf/helix` rebuilt with branch content (not in repo HEAD
-  - local install/symlink build picks up the edited src/ files)
-- Main unchanged at `4c43778`
+Raw session artifacts (demo bag, build logs, session notes) are archived
+offline; the message counts and findings above were extracted from the
+`post_fix_demo` bag.

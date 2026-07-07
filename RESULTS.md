@@ -335,7 +335,6 @@ Full results: `results/attachability_matrix.json`
 | Bag rate analysis | `python3 scripts/bag_rate_analysis.py <bag>` | Yes (rosbag2) |
 | HELIX overhead | `python3 scripts/measure_helix_overhead.py` | Yes (Humble + helix_msgs) |
 | Adapter (canonical) | `ros2 launch helix_bringup helix_adapter.launch.py` | Yes (live GO2 or sim_mode:=true) |
-| Adapter (archived monolithic) | `python3 hardware_eval_20260406/scripts/passive_adapter.py` | Yes (live GO2; reproduces Session 1/2 results) |
 | Unit tests | `colcon test --packages-select helix_core` | Yes (Humble) |
 
 All JSON result artifacts are stored in `results/`.

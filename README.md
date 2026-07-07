@@ -172,7 +172,7 @@ The R1 schema fix the Session 8 closed loop depends on landed on `main` in
 commit `82f7a15` (merged from `fix/r1-anomaly-schema-mismatch`), so the demo
 reproduces from `main` via `ros2 launch helix_bringup helix_closedloop.launch.py`.
 See
-[`hardware_eval_20260423/results/closed_loop_demo.md`](hardware_eval_20260423/results/closed_loop_demo.md)
+[`docs/closed_loop_demo.md`](docs/closed_loop_demo.md)
 for the bag-level evidence (30 faults &rarr; 14 hints &rarr; 14 actions &rarr;
 3,064 zero-twist commands in a 7m19s run).
 

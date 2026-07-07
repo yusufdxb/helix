@@ -1,7 +1,0 @@
-# /diagnostics sample captured 2026-04-14T19:54:08Z
-# PC env: CYCLONEDDS_URI=file:///home/careslab/cyclonedds_go2.xml ROS_DOMAIN_ID=0
----
-Unknown topic '/diagnostics'
----
-# Attempting 5s hz measurement:
-WARNING: topic [/diagnostics] does not appear to be published yet

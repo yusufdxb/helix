@@ -1,6 +1,0 @@
---- topic info ---
-Unknown topic '/diagnostics'
-
---- topic hz tail ---
-WARNING: topic [/diagnostics] does not appear to be published yet
---- sportmodestate.mode = 0

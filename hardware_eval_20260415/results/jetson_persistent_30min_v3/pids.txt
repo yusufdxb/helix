@@ -1,2 +1,0 @@
-hb_starter=4994 ad_starter=4995 lp_starter=4996
-tegra_pid=5327 faults_pid=5328
