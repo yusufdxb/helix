@@ -35,13 +35,13 @@ Measured on PC (Intel i7-7700 @ 3.60 GHz), 2026-04-03.
 
 | Metric | Value | Source |
 |--------|-------|--------|
-| Throughput (PC) | ~81,000 samples/sec | `hardware_eval_20260403/results/jetson_vs_pc_benchmarks.json` |
+| Throughput (PC) | ~81,000 samples/sec | `T7 SSD: hardware_eval_20260403/results/jetson_vs_pc_benchmarks.json` |
 | Throughput (Jetson Orin NX) | ~64,000 samples/sec | ibid. |
 | Wall time (PC) | 1.24 s | `results/standalone_benchmark.md` |
 
 At 100 samples/sec operational load (10 Hz x 10 metrics), the Jetson runs at <0.2% of single-core capacity (636x headroom). Actual ROS 2 node performance will differ due to message serialization, callback scheduling, and runtime overhead.
 
-**Note:** Earlier runs on different hardware reported ~331K samples/sec. The numbers above are from the hardware evaluation session (2026-04-03). The Jetson figures are stored in `hardware_eval_20260403/`, not in the main `results/` directory.
+**Note:** Earlier runs on different hardware reported ~331K samples/sec. The numbers above are from the hardware evaluation session (2026-04-03). The Jetson figures are stored in `T7 SSD: hardware_eval_20260403/`, not in the main `results/` directory.
 
 ### AnomalyDetector: TPR / FPR (Trivial Baseline)
 
@@ -199,9 +199,9 @@ Overall: 22/22 correct.
 |--------|-------|--------|
 | Throughput (PC) | ~777,000 msg/sec | `results/log_parser_results.json` (2026-04-02) |
 | Elapsed (PC) | 0.013 s | ibid. |
-| Throughput (Jetson Orin NX) | ~156,000 msg/sec | `hardware_eval_20260403/results/jetson_vs_pc_benchmarks.json` |
+| Throughput (Jetson Orin NX) | ~156,000 msg/sec | `T7 SSD: hardware_eval_20260403/results/jetson_vs_pc_benchmarks.json` |
 
-**Note:** The PC throughput above is from `results/log_parser_results.json` (777,029 msg/sec, 10K messages in 0.01287 s). An earlier run on different hardware reported ~248K msg/sec; the difference is due to hardware/run conditions. The Jetson figure comes from a separate benchmark run stored in `hardware_eval_20260403/`.
+**Note:** The PC throughput above is from `results/log_parser_results.json` (777,029 msg/sec, 10K messages in 0.01287 s). An earlier run on different hardware reported ~248K msg/sec; the difference is due to hardware/run conditions. The Jetson figure comes from a separate benchmark run stored in `T7 SSD: hardware_eval_20260403/`.
 
 ### Dedup Validation
 
@@ -279,7 +279,7 @@ Measured on PC (i7-7700). Overhead on the Jetson Orin NX would differ, see algor
 
 ### Cross-Platform Benchmark Comparison
 
-Source: `hardware_eval_20260403/results/jetson_vs_pc_benchmarks.json`
+Source: `T7 SSD: hardware_eval_20260403/results/jetson_vs_pc_benchmarks.json`
 
 | Metric | PC (i7-7700) | Jetson Orin NX | Ratio |
 |--------|-------------|----------------|-------|
@@ -288,7 +288,7 @@ Source: `hardware_eval_20260403/results/jetson_vs_pc_benchmarks.json`
 | Detection latency | 0.049 ms | 0.049 ms | 1.0x |
 | Heartbeat miss latency | 200.7 ms | 200.7 ms | 1.0x |
 
-**Note:** The PC log parser throughput here (248K) differs from the value in `results/log_parser_results.json` (777K) because these are separate benchmark runs on different dates. The Jetson figures have no corresponding artifact in `results/`: they are stored only in `hardware_eval_20260403/`.
+**Note:** The PC log parser throughput here (248K) differs from the value in `results/log_parser_results.json` (777K) because these are separate benchmark runs on different dates. The Jetson figures have no corresponding artifact in `results/`: they are stored only in `T7 SSD: hardware_eval_20260403/`.
 
 ### GO2 Topic Rate Stability
 

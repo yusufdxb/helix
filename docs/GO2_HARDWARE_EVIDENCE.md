@@ -1,6 +1,6 @@
 # GO2 Hardware Evidence Summary
 
-Evidence collected across two sessions (2026-04-03 and 2026-04-06) from a live Unitree GO2 quadruped, Jetson Orin NX companion, and development PC. Artifacts stored on T7 SSD at `hardware_eval_20260403/` and `hardware_eval_20260406/`.
+Evidence collected across two sessions (2026-04-03 and 2026-04-06) from a live Unitree GO2 quadruped, Jetson Orin NX companion, and development PC. Artifacts stored on T7 SSD at `T7 SSD: hardware_eval_20260403/` and `hardware_eval_20260406/`.
 
 **Session 1 (2026-04-03):** HELIX ROS 2 nodes ran on the live GO2 graph for the first time. A passive adapter bridging GO2 topic rates to `/helix/metrics` enabled the anomaly detector to emit 4 FaultEvents from a LiDAR rate fluctuation (unconfirmed as fault). `/diagnostics` was observed once with a `twist_mux` publisher present.
 
@@ -36,7 +36,7 @@ All benchmarks run on identical Python scripts, same random seeds.
 ### 2. Cross-Device DDS Latency
 
 Measured via 50 round-trip echo exchanges (PC publish → Jetson echo → PC receive).
-**Source:** `hardware_eval_20260403/results/cross_device_latency.txt` (no JSON artifact in `results/`).
+**Source:** `T7 SSD: hardware_eval_20260403/results/cross_device_latency.txt` (no JSON artifact in `results/`).
 
 | Metric | Value |
 |--------|-------|
@@ -52,7 +52,7 @@ Measured via 50 round-trip echo exchanges (PC publish → Jetson echo → PC rec
 ### 3. Jetson Resource Headroom
 
 Baseline measurement while GO2 stack (103 topics) is running, no HELIX.
-**Source:** `hardware_eval_20260403/results/jetson_resource_baseline.txt` (no JSON artifact in `results/`).
+**Source:** `T7 SSD: hardware_eval_20260403/results/jetson_resource_baseline.txt` (no JSON artifact in `results/`).
 
 | Resource | Value | HELIX Estimate |
 |----------|-------|---------------|
@@ -84,7 +84,7 @@ Baseline measurement while GO2 stack (103 topics) is running, no HELIX.
 
 | Scenario | Executed? | Finding | Evidence |
 |----------|-----------|---------|----------|
-| External topic injection | Yes | Zero /rosout reaction from GO2, DDS isolation confirmed | Bag files in `hardware_eval_20260403/bags/` |
+| External topic injection | Yes | Zero /rosout reaction from GO2, DDS isolation confirmed | Bag files in `T7 SSD: hardware_eval_20260403/bags/` |
 | Topic rate baseline | Yes | Stable rates: IMU ±1%, odom ±1% across captures | `results/bag_rate_analysis_cross_3bags.json` |
 | Node lifecycle observation | No | Nodes not discoverable from external machines |, |
 | Network latency perturbation | No | Deferred, requires human operator present |, |
