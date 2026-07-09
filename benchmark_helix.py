@@ -345,8 +345,8 @@ python3 -m pytest test/ -v
 
 | Test | Status |
 |------|--------|
-| `test_anomaly_detection` | ✅ |
-| `test_crash_detection` | ✅ |
+| `test_anomaly_detection` | pass |
+| `test_crash_detection` | pass |
 
 See `TESTING.md` for full test setup instructions.
 """
