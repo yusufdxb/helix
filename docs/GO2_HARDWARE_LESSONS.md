@@ -1,6 +1,6 @@
 # GO2 Hardware Lessons
 
-This document describes concrete reasons the current HELIX design does not transfer cleanly to the Unitree GO2 quadruped platform with a Jetson Orin companion computer. These observations are based on direct inspection of the GO2's ROS 2 topic landscape and development experience with the Jetson Orin.
+Concrete reasons the current HELIX design does not transfer cleanly to the Unitree GO2 with a Jetson Orin companion computer, based on direct inspection of the GO2's ROS 2 topic landscape and development experience on the Jetson.
 
 ## 1. Custom Message Types
 

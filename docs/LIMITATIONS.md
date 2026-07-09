@@ -1,6 +1,6 @@
 # Limitations
 
-This document provides a candid accounting of the limitations of the HELIX prototype in its current state.
+Known limitations of the HELIX prototype in its current state.
 
 ## Synthetic Benchmark Limits
 
