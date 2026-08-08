@@ -15,6 +15,7 @@ import rclpy
 from rcl_interfaces.msg import Log
 from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 
+from helix_core.heartbeat import Heartbeat
 from helix_msgs.msg import FaultEvent
 
 # ── Constants ────────────────────────────────────────────────────────────────
@@ -29,6 +30,7 @@ class LogParser(LifecycleNode):
     def __init__(self) -> None:
         """Initialize node and declare parameters."""
         super().__init__("helix_log_parser")
+        self._heartbeat = Heartbeat(self)
 
         self.declare_parameter("rules_file_path", DEFAULT_RULES_FILE_PATH)
         self.declare_parameter("dedup_window_sec", DEFAULT_DEDUP_WINDOW_SEC)
@@ -71,6 +73,7 @@ class LogParser(LifecycleNode):
 
     def on_activate(self, state: State) -> TransitionCallbackReturn:
         """Activate the log parser."""
+        self._heartbeat.start()
         self.get_logger().info(
             f"LogParser activated with {len(self._rules)} rules, "
             f"dedup_window={self._dedup_window}s"
@@ -79,6 +82,7 @@ class LogParser(LifecycleNode):
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
         """Deactivate the log parser."""
+        self._heartbeat.stop()
         self.get_logger().info("LogParser deactivated.")
         return TransitionCallbackReturn.SUCCESS
 

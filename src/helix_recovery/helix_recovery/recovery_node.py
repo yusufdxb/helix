@@ -1,5 +1,5 @@
 """
-RecoveryNode — lifecycle node.
+RecoveryNode lifecycle node.
 
 The only node in HELIX that publishes actuation commands.
 All safety checks live here: enable flag, per-fault cooldown, action allowlist.
@@ -10,6 +10,7 @@ from typing import Dict, Optional
 
 import rclpy
 from geometry_msgs.msg import Twist
+from helix_core.heartbeat import Heartbeat
 from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 
 from helix_msgs.msg import RecoveryAction, RecoveryHint
@@ -34,17 +35,21 @@ class EnvelopeResult:
 
 
 class SafetyEnvelope:
-    """Pure — unit-testable without ROS 2."""
+    """Pure and unit-testable without ROS 2."""
 
-    def __init__(self, enabled: bool, cooldown_seconds: float):
+    def __init__(self, enabled: bool, cooldown_seconds: float,
+                 allowed_actions=None):
         self.enabled = enabled
         self.cooldown_seconds = cooldown_seconds
+        self.allowed_actions = set(
+            ALLOWED_ACTIONS if allowed_actions is None else allowed_actions
+        )
         self._last_action_time: Dict[str, float] = {}
 
     def evaluate(self, action: str, fault_type: str, now: float) -> EnvelopeResult:
         if not self.enabled:
             return EnvelopeResult('SUPPRESSED_DISABLED', False, 'recovery.enabled is false')
-        if action not in ALLOWED_ACTIONS:
+        if action not in self.allowed_actions:
             return EnvelopeResult('SUPPRESSED_ALLOWLIST', False, f'{action} not in allowlist')
         # RESUME ends a STOP_AND_HOLD. It must never be rate-limited by the
         # cooldown of the stop it is clearing, or a safety stop could suppress
@@ -64,8 +69,10 @@ class RecoveryNode(LifecycleNode):
 
     def __init__(self):
         super().__init__('helix_recovery_node')
+        self._heartbeat = Heartbeat(self)
         self.declare_parameter('enabled', False)
         self.declare_parameter('cooldown_seconds', 5.0)
+        self.declare_parameter('allowed_actions', sorted(ALLOWED_ACTIONS))
 
         self._envelope: Optional[SafetyEnvelope] = None
         self._sub = None
@@ -80,18 +87,31 @@ class RecoveryNode(LifecycleNode):
     def on_configure(self, state: State) -> TransitionCallbackReturn:
         enabled = self.get_parameter('enabled').value
         cooldown = self.get_parameter('cooldown_seconds').value
-        self._envelope = SafetyEnvelope(enabled=enabled, cooldown_seconds=cooldown)
+        allowed_actions = set(self.get_parameter('allowed_actions').value)
+        unsupported = allowed_actions - ALLOWED_ACTIONS
+        if unsupported:
+            self.get_logger().error(
+                f'allowed_actions contains unsupported values: {sorted(unsupported)}'
+            )
+            return TransitionCallbackReturn.FAILURE
+        self._envelope = SafetyEnvelope(
+            enabled=enabled,
+            cooldown_seconds=cooldown,
+            allowed_actions=allowed_actions,
+        )
         self._pub_cmd = self.create_lifecycle_publisher(Twist, '/helix/cmd_vel', 10)
         self._pub_audit = self.create_lifecycle_publisher(RecoveryAction, '/helix/recovery_actions', 10)
         return TransitionCallbackReturn.SUCCESS
 
     def on_activate(self, state: State) -> TransitionCallbackReturn:
+        self._heartbeat.start()
         self._sub = self.create_subscription(RecoveryHint, '/helix/recovery_hints', self._on_hint, 10)
         # Publish-timer is idle until _current_action set to STOP.
         self._publish_timer = self.create_timer(1.0 / PUBLISH_HZ, self._on_publish_tick)
         return super().on_activate(state)
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
+        self._heartbeat.stop()
         if self._sub is not None:
             self.destroy_subscription(self._sub)
             self._sub = None

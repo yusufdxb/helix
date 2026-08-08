@@ -17,6 +17,7 @@ from diagnostic_msgs.msg import DiagnosticArray
 from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 from std_msgs.msg import Float64MultiArray
 
+from helix_core.heartbeat import Heartbeat
 from helix_msgs.msg import FaultEvent
 
 # ── Constants ────────────────────────────────────────────────────────────────
@@ -33,6 +34,7 @@ class AnomalyDetector(LifecycleNode):
     def __init__(self) -> None:
         """Initialize node and declare parameters."""
         super().__init__("helix_anomaly_detector")
+        self._heartbeat = Heartbeat(self)
 
         self.declare_parameter("zscore_threshold", DEFAULT_ZSCORE_THRESHOLD)
         self.declare_parameter("consecutive_trigger", DEFAULT_CONSECUTIVE_TRIGGER)
@@ -81,11 +83,13 @@ class AnomalyDetector(LifecycleNode):
 
     def on_activate(self, state: State) -> TransitionCallbackReturn:
         """Activate the anomaly detector."""
+        self._heartbeat.start()
         self.get_logger().info("AnomalyDetector activated.")
         return TransitionCallbackReturn.SUCCESS
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
         """Deactivate the anomaly detector."""
+        self._heartbeat.stop()
         self.get_logger().info("AnomalyDetector deactivated.")
         return TransitionCallbackReturn.SUCCESS
 
