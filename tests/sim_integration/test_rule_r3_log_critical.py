@@ -14,6 +14,8 @@ from pathlib import Path
 import pytest
 from rosbags.highlevel import AnyReader
 
+from scripts.validate_closed_loop_bag import helix_typestore
+
 SCENARIO_DURATION_S = 40.0
 LOG_INJECT_DELAY_S = 15.0
 
@@ -56,7 +58,7 @@ def scenario_run(tmp_path_factory):
 
 def _read_topic(bag_dir: Path, topic: str):
     msgs = []
-    with AnyReader([bag_dir]) as reader:
+    with AnyReader([bag_dir], default_typestore=helix_typestore()) as reader:
         connections = [c for c in reader.connections if c.topic == topic]
         for conn, ts, raw in reader.messages(connections=connections):
             msg = reader.deserialize(raw, conn.msgtype)

@@ -15,6 +15,8 @@ from pathlib import Path
 import pytest
 from rosbags.highlevel import AnyReader
 
+from scripts.validate_closed_loop_bag import helix_typestore
+
 SCENARIO_DURATION_S = 40.0
 CRASH_DELAY_S = 15.0
 TARGET_NODE = 'helix_context_buffer'
@@ -47,14 +49,19 @@ def scenario_run(tmp_path_factory):
     finally:
         if crasher.poll() is None:
             os.killpg(os.getpgid(crasher.pid), signal.SIGTERM)
-        crasher.wait(timeout=5.0)
+        crash_rc = crasher.wait(timeout=5.0)
+
+    # Without this the injector can fail to find the node, kill nothing, and
+    # every assertion below reports "no CRASH observed" as if the detector
+    # were broken. Fail at the real cause instead.
+    assert crash_rc == 0, f'crash injector did not kill {TARGET_NODE} (rc={crash_rc})'
 
     return out_dir / 'bag'
 
 
 def _read_topic(bag_dir: Path, topic: str):
     msgs = []
-    with AnyReader([bag_dir]) as reader:
+    with AnyReader([bag_dir], default_typestore=helix_typestore()) as reader:
         connections = [c for c in reader.connections if c.topic == topic]
         for conn, ts, raw in reader.messages(connections=connections):
             msg = reader.deserialize(raw, conn.msgtype)
@@ -75,28 +82,30 @@ def test_r4_emits_log_only_hint(scenario_run):
     assert r4_hints, 'no R4 LOG_ONLY hint observed'
 
 
-def test_r4_audits_accepted_without_publishing_cmd_vel(scenario_run):
-    # R4's ACCEPTED LOG_ONLY action must not produce any helix/cmd_vel publish
-    # after it fires. We locate the first LOG_ONLY audit and confirm no
-    # subsequent Twist was emitted on /helix/cmd_vel as a direct consequence.
-    actions = _read_topic(scenario_run, '/helix/recovery_actions')
-    log_only = [(ts, m) for ts, m in actions
-                if m.action == 'LOG_ONLY' and m.status == 'ACCEPTED']
-    assert log_only, 'no ACCEPTED LOG_ONLY audit observed'
+def test_r4_never_turns_a_crash_into_actuation(scenario_run):
+    """The crash must be audited as LOG_ONLY and never as a stop.
 
-    first_log_only_ts = log_only[0][0]
-    cmds = _read_topic(scenario_run, '/helix/cmd_vel')
-    # Any cmd_vel already in flight from an earlier ANOMALY run is fine; we
-    # assert that the LOG_ONLY path itself does NOT start a new publish stream
-    # within the 500 ms window after the audit.
-    window_ns = 500_000_000
-    within_window = [ts for ts, _ in cmds
-                     if 0 <= ts - first_log_only_ts < window_ns]
-    # This is a soft assertion: if any anomalies were already active, the
-    # 20 Hz STOP stream would produce messages — but R4 alone must never
-    # cause a fresh start. The closed-loop orchestrator sets the schedule to
-    # flat 10 Hz, so no anomaly stream is expected in an R4-only scenario.
-    assert not within_window, (
-        f'R4 LOG_ONLY should not publish cmd_vel; saw {len(within_window)} '
-        f'message(s) within 500 ms of the audit'
+    Counting cmd_vel messages in a window after the audit does not test this.
+    Any concurrent rule holding a stop keeps a 20 Hz zero-twist stream running
+    for its own reasons, and without an upstream /utlidar/cloud publisher R1
+    reads the topic as stale and does exactly that for the whole scenario. So
+    assert attribution instead: nothing derived from the CRASH fault may ever
+    become an actuating action.
+    """
+    faults = _read_topic(scenario_run, '/helix/faults')
+    crashes = [m for _, m in faults if m.fault_type == 'CRASH']
+    assert crashes, 'no CRASH FaultEvent observed'
+    crash_ids = {m.node_name for m in crashes}
+
+    actions = _read_topic(scenario_run, '/helix/recovery_actions')
+    from_crash = [m for _, m in actions if m.fault_id in crash_ids]
+    assert from_crash, f'no recovery action attributed to {crash_ids}'
+
+    assert all(m.action == 'LOG_ONLY' for m in from_crash), (
+        'CRASH produced a non-LOG_ONLY action: '
+        f'{sorted({m.action for m in from_crash})}'
+    )
+    assert any(m.status == 'ACCEPTED' for m in from_crash), (
+        'LOG_ONLY was never ACCEPTED: '
+        f'{sorted({m.status for m in from_crash})}'
     )
