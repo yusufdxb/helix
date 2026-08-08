@@ -1,0 +1,32 @@
+# PROPOSAL ONLY. This file is not loaded by anything.
+# Measured replacement for the guessed operating point in
+# src/helix_bringup/config/helix_params.yaml. See analysis/README.md for the
+# numbers and analysis/results/ for the raw sweep output.
+#
+# Changes vs the shipped values:
+#   zscore_threshold      4.0 -> 3.5
+#   window_size            60 -> 120
+#   consecutive_trigger     3 -> 3    (unchanged)
+#   min_anomaly_duration_s 2.0 -> 2.0 (unchanged)
+#
+# Measured on REAL idle GO2 telemetry (901.5 s across three captures):
+#   0 false faults, 0 false STOP_AND_HOLD commands (same as shipped).
+#   Longest run of consecutive above-threshold idle samples: 2.
+#   Emission needs 5 (consecutive_trigger 3, then 2.0 s at the 2 Hz metric
+#   cadence), so the margin is 2 observed against 5 required.
+#
+# Measured on SYNTHETIC fault onsets injected into that real baseline
+# (62 injections per fault model), recommended vs shipped:
+#   topic death (NaN)          62/62 vs 62/62
+#   50 percent rate collapse   62/62 vs  0/62
+#   10 sigma sustained step    60/62 vs  1/62
+#    5 sigma sustained step    36/62 vs  0/62
+#   5 sigma ramp over 30 s     19/62 vs 16/62
+#   median detection latency   2.5 s  vs 2.5 s (unchanged)
+
+helix_anomaly_detector:
+  ros__parameters:
+    zscore_threshold: 3.5
+    consecutive_trigger: 3
+    window_size: 120
+    min_anomaly_duration_s: 2.0

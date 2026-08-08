@@ -1,0 +1,407 @@
+[
+ {
+  "statistic": "zscore",
+  "window_size": 20,
+  "n_scores": 5999,
+  "p50": 0.8563160144528769,
+  "p99": 3.8742918461294,
+  "p999": 11.561244979566972,
+  "max": 25.39728365578738,
+  "max_per_metric": {
+   "rate_hz/gnss": 12.959476179249,
+   "rate_hz/multiplestate": 7.9529062288245695,
+   "rate_hz/utlidar_cloud": 25.39728365578738,
+   "rate_hz/utlidar_imu": 7.0285133710346415,
+   "rate_hz/utlidar_robot_pose": 4.535435025591913,
+   "rate_hz/sportmodestate": 5.613228689405621
+  },
+  "max_consecutive_run": {
+   "2.0": 9,
+   "2.5": 5,
+   "3.0": 5,
+   "3.5": 3,
+   "4.0": 2,
+   "5.0": 2,
+   "6.0": 2,
+   "8.0": 1
+  }
+ },
+ {
+  "statistic": "zscore",
+  "window_size": 30,
+  "n_scores": 5999,
+  "p50": 0.7781654388913306,
+  "p99": 3.5774814218250466,
+  "p999": 9.6385347391749,
+  "max": 25.934920715936045,
+  "max_per_metric": {
+   "rate_hz/gnss": 9.6385347391749,
+   "rate_hz/multiplestate": 4.3635202468528,
+   "rate_hz/utlidar_cloud": 25.934920715936045,
+   "rate_hz/utlidar_imu": 6.001025759624307,
+   "rate_hz/utlidar_robot_pose": 5.1065204473900065,
+   "rate_hz/sportmodestate": 5.296807104388134
+  },
+  "max_consecutive_run": {
+   "2.0": 11,
+   "2.5": 6,
+   "3.0": 4,
+   "3.5": 3,
+   "4.0": 2,
+   "5.0": 1,
+   "6.0": 1,
+   "8.0": 1
+  }
+ },
+ {
+  "statistic": "zscore",
+  "window_size": 60,
+  "n_scores": 5999,
+  "p50": 0.6641996079317721,
+  "p99": 3.2588892352268712,
+  "p999": 7.0388191256709955,
+  "max": 17.578754606273346,
+  "max_per_metric": {
+   "rate_hz/gnss": 7.536298553194691,
+   "rate_hz/multiplestate": 4.126680741744986,
+   "rate_hz/utlidar_cloud": 17.578754606273346,
+   "rate_hz/utlidar_imu": 3.5791283028832543,
+   "rate_hz/utlidar_robot_pose": 4.993450219990134,
+   "rate_hz/sportmodestate": 4.1022613620290596
+  },
+  "max_consecutive_run": {
+   "2.0": 18,
+   "2.5": 11,
+   "3.0": 6,
+   "3.5": 3,
+   "4.0": 2,
+   "5.0": 1,
+   "6.0": 1,
+   "8.0": 1
+  }
+ },
+ {
+  "statistic": "zscore",
+  "window_size": 120,
+  "n_scores": 5999,
+  "p50": 0.6236373049869124,
+  "p99": 2.957802384218936,
+  "p999": 4.970019071150022,
+  "max": 12.866448492719867,
+  "max_per_metric": {
+   "rate_hz/gnss": 4.970019071150022,
+   "rate_hz/multiplestate": 4.126680741744986,
+   "rate_hz/utlidar_cloud": 12.866448492719867,
+   "rate_hz/utlidar_imu": 3.064207244248731,
+   "rate_hz/utlidar_robot_pose": 3.3542284314735342,
+   "rate_hz/sportmodestate": 3.150630576904225
+  },
+  "max_consecutive_run": {
+   "2.0": 11,
+   "2.5": 4,
+   "3.0": 2,
+   "3.5": 2,
+   "4.0": 2,
+   "5.0": 1,
+   "6.0": 1,
+   "8.0": 1
+  }
+ },
+ {
+  "statistic": "zscore",
+  "window_size": 180,
+  "n_scores": 5999,
+  "p50": 0.5971688368928728,
+  "p99": 2.844740897220715,
+  "p999": 4.590119967793208,
+  "max": 12.866448492719867,
+  "max_per_metric": {
+   "rate_hz/gnss": 4.590119967793208,
+   "rate_hz/multiplestate": 4.126680741744986,
+   "rate_hz/utlidar_cloud": 12.866448492719867,
+   "rate_hz/utlidar_imu": 3.0658284628993338,
+   "rate_hz/utlidar_robot_pose": 3.341674244227998,
+   "rate_hz/sportmodestate": 3.082047533270811
+  },
+  "max_consecutive_run": {
+   "2.0": 11,
+   "2.5": 5,
+   "3.0": 2,
+   "3.5": 2,
+   "4.0": 1,
+   "5.0": 1,
+   "6.0": 1,
+   "8.0": 1
+  }
+ },
+ {
+  "statistic": "mad",
+  "window_size": 20,
+  "n_scores": 5996,
+  "p50": 0.8585435870203135,
+  "p99": 7.417088982116461,
+  "p999": 25.830771204497065,
+  "max": 80.00837649164195,
+  "max_per_metric": {
+   "rate_hz/gnss": 30.394627676310606,
+   "rate_hz/multiplestate": 40.44465401298905,
+   "rate_hz/utlidar_cloud": 80.00837649164195,
+   "rate_hz/utlidar_imu": 11.75226773674651,
+   "rate_hz/utlidar_robot_pose": 20.330827085809165,
+   "rate_hz/sportmodestate": 9.903088537598894
+  },
+  "max_consecutive_run": {
+   "2.0": 12,
+   "2.5": 10,
+   "3.0": 10,
+   "3.5": 10,
+   "4.0": 10,
+   "5.0": 9,
+   "6.0": 7,
+   "8.0": 6
+  }
+ },
+ {
+  "statistic": "mad",
+  "window_size": 30,
+  "n_scores": 5996,
+  "p50": 0.8085849832911597,
+  "p99": 5.592930821718939,
+  "p999": 20.426616494826277,
+  "max": 80.00837649164195,
+  "max_per_metric": {
+   "rate_hz/gnss": 14.403265447009046,
+   "rate_hz/multiplestate": 40.44465401298905,
+   "rate_hz/utlidar_cloud": 80.00837649164195,
+   "rate_hz/utlidar_imu": 8.102409565894005,
+   "rate_hz/utlidar_robot_pose": 20.330827085809165,
+   "rate_hz/sportmodestate": 6.977479595678224
+  },
+  "max_consecutive_run": {
+   "2.0": 16,
+   "2.5": 11,
+   "3.0": 10,
+   "3.5": 10,
+   "4.0": 7,
+   "5.0": 5,
+   "6.0": 4,
+   "8.0": 2
+  }
+ },
+ {
+  "statistic": "mad",
+  "window_size": 60,
+  "n_scores": 5996,
+  "p50": 0.7413571173769804,
+  "p99": 4.449842579617297,
+  "p999": 20.330827085809165,
+  "max": 80.00837649164195,
+  "max_per_metric": {
+   "rate_hz/gnss": 8.740770884761904,
+   "rate_hz/multiplestate": 40.44465401298905,
+   "rate_hz/utlidar_cloud": 80.00837649164195,
+   "rate_hz/utlidar_imu": 4.6657067009097375,
+   "rate_hz/utlidar_robot_pose": 20.330827085809165,
+   "rate_hz/sportmodestate": 4.5040498993497735
+  },
+  "max_consecutive_run": {
+   "2.0": 21,
+   "2.5": 15,
+   "3.0": 13,
+   "3.5": 12,
+   "4.0": 11,
+   "5.0": 3,
+   "6.0": 3,
+   "8.0": 1
+  }
+ },
+ {
+  "statistic": "mad",
+  "window_size": 120,
+  "n_scores": 5996,
+  "p50": 0.7172311174457644,
+  "p99": 3.9469978102366525,
+  "p999": 20.330827085809165,
+  "max": 80.00837649164195,
+  "max_per_metric": {
+   "rate_hz/gnss": 6.04903618567962,
+   "rate_hz/multiplestate": 40.44465401298905,
+   "rate_hz/utlidar_cloud": 80.00837649164195,
+   "rate_hz/utlidar_imu": 3.7066166079141323,
+   "rate_hz/utlidar_robot_pose": 20.330827085809165,
+   "rate_hz/sportmodestate": 3.065764380908914
+  },
+  "max_consecutive_run": {
+   "2.0": 15,
+   "2.5": 13,
+   "3.0": 11,
+   "3.5": 11,
+   "4.0": 8,
+   "5.0": 6,
+   "6.0": 3,
+   "8.0": 1
+  }
+ },
+ {
+  "statistic": "mad",
+  "window_size": 180,
+  "n_scores": 5996,
+  "p50": 0.717567705059397,
+  "p99": 3.7207425447092817,
+  "p999": 19.683110078349134,
+  "max": 80.00837649164195,
+  "max_per_metric": {
+   "rate_hz/gnss": 6.0390719893945395,
+   "rate_hz/multiplestate": 40.44465401298905,
+   "rate_hz/utlidar_cloud": 80.00837649164195,
+   "rate_hz/utlidar_imu": 3.7066166079141323,
+   "rate_hz/utlidar_robot_pose": 20.330827085809165,
+   "rate_hz/sportmodestate": 3.646827352660087
+  },
+  "max_consecutive_run": {
+   "2.0": 15,
+   "2.5": 13,
+   "3.0": 11,
+   "3.5": 11,
+   "4.0": 8,
+   "5.0": 6,
+   "6.0": 3,
+   "8.0": 1
+  }
+ },
+ {
+  "statistic": "ewma",
+  "window_size": 20,
+  "n_scores": 5990,
+  "p50": 0.6611984871481565,
+  "p99": 3.270004847646514,
+  "p999": 13.577342827540969,
+  "max": 140.62818279566198,
+  "max_per_metric": {
+   "rate_hz/gnss": 8.296588235467004,
+   "rate_hz/multiplestate": 32.68761635790327,
+   "rate_hz/utlidar_cloud": 140.62818279566198,
+   "rate_hz/utlidar_imu": 10.386693127034402,
+   "rate_hz/utlidar_robot_pose": 28.11045075061525,
+   "rate_hz/sportmodestate": 12.345048045267236
+  },
+  "max_consecutive_run": {
+   "2.0": 5,
+   "2.5": 3,
+   "3.0": 2,
+   "3.5": 2,
+   "4.0": 2,
+   "5.0": 1,
+   "6.0": 1,
+   "8.0": 1
+  }
+ },
+ {
+  "statistic": "ewma",
+  "window_size": 30,
+  "n_scores": 5990,
+  "p50": 0.6087189313246429,
+  "p99": 3.1734941238222096,
+  "p999": 14.610627638254256,
+  "max": 212.3328553792312,
+  "max_per_metric": {
+   "rate_hz/gnss": 8.2278034186506,
+   "rate_hz/multiplestate": 59.28485443629589,
+   "rate_hz/utlidar_cloud": 212.3328553792312,
+   "rate_hz/utlidar_imu": 14.610627638254256,
+   "rate_hz/utlidar_robot_pose": 44.45431669216866,
+   "rate_hz/sportmodestate": 13.612471210742502
+  },
+  "max_consecutive_run": {
+   "2.0": 5,
+   "2.5": 3,
+   "3.0": 2,
+   "3.5": 2,
+   "4.0": 2,
+   "5.0": 1,
+   "6.0": 1,
+   "8.0": 1
+  }
+ },
+ {
+  "statistic": "ewma",
+  "window_size": 60,
+  "n_scores": 5990,
+  "p50": 0.5330707085371575,
+  "p99": 3.1784484898595906,
+  "p999": 15.570472447772293,
+  "max": 403.65183396314524,
+  "max_per_metric": {
+   "rate_hz/gnss": 6.342705877955501,
+   "rate_hz/multiplestate": 165.84151741445282,
+   "rate_hz/utlidar_cloud": 403.65183396314524,
+   "rate_hz/utlidar_imu": 24.434033809365644,
+   "rate_hz/utlidar_robot_pose": 90.30806097258619,
+   "rate_hz/sportmodestate": 17.53107370984481
+  },
+  "max_consecutive_run": {
+   "2.0": 10,
+   "2.5": 8,
+   "3.0": 5,
+   "3.5": 3,
+   "4.0": 2,
+   "5.0": 2,
+   "6.0": 2,
+   "8.0": 1
+  }
+ },
+ {
+  "statistic": "ewma",
+  "window_size": 120,
+  "n_scores": 5989,
+  "p50": 0.5017650613808098,
+  "p99": 3.8078890528566953,
+  "p999": 15.00108340577152,
+  "max": 700.2847847649708,
+  "max_per_metric": {
+   "rate_hz/gnss": 7.762174983711074,
+   "rate_hz/multiplestate": 8.002629957129857,
+   "rate_hz/utlidar_cloud": 700.2847847649708,
+   "rate_hz/utlidar_imu": 38.118183032091444,
+   "rate_hz/utlidar_robot_pose": 164.69636868561804,
+   "rate_hz/sportmodestate": 23.747103284075685
+  },
+  "max_consecutive_run": {
+   "2.0": 13,
+   "2.5": 11,
+   "3.0": 9,
+   "3.5": 8,
+   "4.0": 5,
+   "5.0": 3,
+   "6.0": 2,
+   "8.0": 2
+  }
+ },
+ {
+  "statistic": "ewma",
+  "window_size": 180,
+  "n_scores": 5989,
+  "p50": 0.5379327256638491,
+  "p99": 4.547980301139586,
+  "p999": 18.220908449650658,
+  "max": 930.2496244935405,
+  "max_per_metric": {
+   "rate_hz/gnss": 9.472409175716715,
+   "rate_hz/multiplestate": 9.700443799733755,
+   "rate_hz/utlidar_cloud": 930.2496244935405,
+   "rate_hz/utlidar_imu": 48.362914176480466,
+   "rate_hz/utlidar_robot_pose": 223.54143059372237,
+   "rate_hz/sportmodestate": 28.683785778589936
+  },
+  "max_consecutive_run": {
+   "2.0": 20,
+   "2.5": 13,
+   "3.0": 11,
+   "3.5": 10,
+   "4.0": 8,
+   "5.0": 5,
+   "6.0": 3,
+   "8.0": 2
+  }
+ }
+]
