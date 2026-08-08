@@ -75,9 +75,29 @@ def test_simulation_closes_the_same_evidence_gate_as_hardware(scenario_records):
 
 
 def test_simulation_captures_a_stale_topic_fault(scenario_records):
+    """The injected topic must go stale, not merely some utlidar topic.
+
+    Matching any metric containing "utlidar" passes on a sibling topic that was
+    never alive in the first place: a simulator that publishes no IMU makes
+    rate_hz/utlidar_imu permanently stale, so this asserted nothing about the
+    injection. Require the metric the injector actually drops, and require the
+    fault to land after the drop rather than before it.
+    """
+    drop = next(
+        (m for m in sorted(scenario_records["markers"], key=lambda m: m["ts"])
+         if m["target_hz"] == 0.0),
+        None,
+    )
+    assert drop is not None, f"no zero-rate injection marker: {scenario_records['markers']}"
+
     stale = [
         fault
         for fault in scenario_records["faults"]
-        if fault["violation_type"] == "stale" and "utlidar" in fault["metric_name"]
+        if fault["violation_type"] == "stale"
+        and "cloud" in fault["metric_name"]
+        and fault["ts"] >= drop["ts"]
     ]
-    assert stale, scenario_records["faults"]
+    assert stale, (
+        "no stale fault on the injected cloud topic after the drop at "
+        f"t={drop['ts']:.2f}; faults were {scenario_records['faults']}"
+    )

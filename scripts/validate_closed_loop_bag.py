@@ -85,11 +85,20 @@ def evaluate(records: dict, max_detection_s: float = 10.0) -> dict:
         ),
         after=hint["ts"],
     )
+    # The 0.25 s bound only means anything for the FIRST stop of an episode.
+    # If a stop was already accepted within the last cooldown_seconds, every
+    # later hint is SUPPRESSED_COOLDOWN until the window expires, so this
+    # measures time-to-cooldown-expiry, not decision latency. A sim run where
+    # HELIX was already holding measured 4.497 s here, and the gaps between
+    # accepted actions in that bag were 4.999, 5.005, 4.998, 5.001, 5.005 s:
+    # the cooldown, exactly. Read a failure here together with whether the
+    # robot was already stopped before injection.
     decision_latency = None if action is None else action["ts"] - hint["ts"]
     checks.append(_check(
         "recovery envelope accepts the same stop decision",
         action is not None and decision_latency <= 0.25,
-        {"action": action, "latency_s": decision_latency, "bound_s": 0.25},
+        {"action": action, "latency_s": decision_latency, "bound_s": 0.25,
+         "note": "bound assumes no cooldown was already running"},
     ))
     if action is None:
         return {

@@ -8,32 +8,68 @@ and `/utlidar/robot_odom`. This file is the exact sequence that makes it run.
 Nothing here weakens the gate. The skip guard and every assertion in
 `scripts/validate_closed_loop_bag.py` are untouched.
 
-## Status as of 2026-08-07: still skipping, one blocker left
+## Status as of 2026-08-08: the LiDAR is fixed, the gate RUNS, and it FAILS
 
-Verified working on mewtwo (Isaac Sim 6.0, IsaacLab 4.5.22, RTX 5070):
+The LiDAR blocker is closed. The gate no longer skips. It now runs against a
+live simulator and fails honestly on three checks, for a reason that has
+nothing to do with the LiDAR. That is progress, not a regression: the previous
+state hid this behind a skip.
 
-- Isaac Sim boots headless with the GO2 scene and reaches its main loop.
-- Cross-runtime DDS works: Isaac's bundled Humble and system Humble discover
-  each other on `ROS_DOMAIN_ID=41` over `rmw_cyclonedds_cpp`.
-- `robot0/odom` publishes at 108 to 133 Hz, and the bridge republishes it as
-  `/utlidar/robot_odom` with a reconstructed twist.
-- The command path drives the body: an 0.20 m/s command on `/cmd_vel` produced
-  a measured 0.355 to 0.575 m/s, and an explicit zero decayed it to 0.004 m/s.
-  Both odometry halves of the gate (>= 0.08 moving, <= 0.03 stopped) are
-  physically achievable, with margin.
+Verified on mewtwo (Isaac Sim 6.0, IsaacLab 4.5.22):
 
-Blocker: **the RTX LiDAR attaches but its scan buffer stays empty**, so
-`robot0/point_cloud2` never publishes and the gate skips on `/utlidar/cloud`.
-`add_rtx_lidar` reports `rtx lidar attached (config=Hesai_XT32_SD10)` and the
-annotator resolves, but `IsaacCreateRTXLidarScanBuffer` returns shape `(0,)`
-every frame. Leading hypothesis, not yet confirmed: the manually created
-replicator render product is never ticked, because IsaacLab's `env.step()`
-drives only the sensors IsaacLab itself manages. The next thing to try is
-forcing a render each step, or registering the LiDAR as an IsaacLab sensor so
-its render product is on IsaacLab's update path.
+- `/robot0/point_cloud2` publishes at **11.2 Hz**, 8175 points per message.
+- `/robot0/odom` publishes at ~18 Hz, and the bridge republishes it as
+  `/utlidar/robot_odom` at 24 to 28 Hz with a reconstructed twist.
+- `/utlidar/cloud` publishes at **11.1 Hz**.
+- The gate runs to completion and returns a real verdict.
 
-Do not work around this by synthesizing a point cloud in the bridge. The gate
-would go green on a sensor that was never alive, which is worse than the skip.
+### The three failing checks, and the one cause behind them
+
+```
+FAIL  mux commanded nonzero motion before injection    nonzero_samples 0 of 98
+FAIL  recovery envelope accepts the same stop decision latency 4.497 s (bound 0.25)
+FAIL  odometry proves physical motion before injection median 0.0042 m/s (needs >= 0.08)
+```
+
+`/helix/cmd_vel` carries a zero command from 21.8 s **before** the injection,
+continuously, all 1545 recorded samples zero. It holds twist_mux priority 100,
+so the muxed `/cmd_vel` is zero for the whole run and the body never moves.
+The first and third failures are the same event seen twice.
+
+HELIX is already in STOP_AND_HOLD when the experiment starts because its SENSE
+tier is faulting on GO2 topics the bridge does not publish at all. The distinct
+fault metrics recorded in the bag are:
+
+```
+pose/displacement_rate_m_s   rate_hz/gnss                rate_hz/multiplestate
+rate_hz/utlidar_imu          rate_hz/utlidar_robot_odom  rate_hz/utlidar_robot_pose
+rate_hz/utlidar_cloud_throttled
+```
+
+The bridge supplies only `/utlidar/cloud` and `/utlidar/robot_odom`. Every
+other topic the SENSE tier watches is permanently absent, HELIX correctly calls
+that a fault, and it correctly refuses to let the robot drive. The stack is
+behaving properly; the simulator's topic surface is incomplete.
+
+**Read the currently-passing `test_simulation_captures_a_stale_topic_fault`
+with suspicion.** It passes on `rate_hz/utlidar_imu`, a topic that was never
+alive, because the assertion only requires `"utlidar" in metric_name`. That is
+the same false-green the bridge's own design comment warns about, landing on a
+sibling topic instead of the cloud. Do not count it as evidence of injected
+LiDAR fault detection until it is pinned to `utlidar_cloud`.
+
+### The remaining work
+
+Extend `scripts/sim_bridge/go2_sim_bridge.py` to cover the rest of the topic
+surface, from real simulator data only:
+
+- `/utlidar/imu` from `robot0/imu` (a rename; go2_omniverse already publishes it).
+- `/utlidar/robot_pose` from `robot0/odom`'s pose half.
+- `gnss` and `multiplestate` have no simulator source. Decide whether HELIX's
+  sim profile should watch them at all, in config, not by suppressing faults.
+
+Do not fix this by synthesizing sensor data in the bridge, and do not relax the
+SENSE thresholds. The gate would go green on a robot HELIX believes is blind.
 
 ## What the bridge exists for
 
@@ -78,15 +114,76 @@ Isaac Sim 6.0 / IsaacLab 4.5.22. They are applied in
    `IsaacCreateRTXLidarScanBuffer`, and `update_meshes_for_cloud2` still called
    `.cpu().numpy()` on buffers that the IsaacLab 4.5 port had already converted
    to numpy.
+4. The annotator must be fetched as
+   `IsaacExtractRTXSensorPointCloudNoAccumulator`, not
+   `IsaacCreateRTXLidarScanBuffer`. See "per-frame output" below.
+5. Clouds are decimated to at most 8192 points before publishing. See
+   "message size" below.
+
+### Config name casing: use `Hesai_XT32_SD10`, not `HESAI_XT32_SD10`
+
+This is the single easiest thing to get wrong, and getting it wrong produces a
+sensor that looks attached and is not the one you asked for.
+
+There are two different resolution paths inside `IsaacSensorCreateRtxLidar`,
+and the name selects between them:
+
+- `Hesai_XT32_SD10` matches the **local JSON profile** shipped at
+  `exts/isaacsim.sensors.rtx/data/lidar_configs/HESAI/Hesai_XT32_SD10.json`.
+  No network. This is the one to use.
+- `HESAI_XT32_SD10` matches a `SUPPORTED_LIDAR_CONFIGS` entry, which is a
+  **remote USD** fetched from `get_assets_root_path()`. On this machine that
+  root resolves to `.../Assets/Isaac/4.5/...`, which returns **HTTP 404**, and
+  Kit logs `No OmniLidar prim found in referenced asset`. Every entry in
+  `SUPPORTED_LIDAR_CONFIGS` is remote, and none of them resolve here.
+
+`do()` is `_add_reference() or _call_replicator_api() or _create_camera_prim()`
+and the last of those always returns a prim, so a wrong name never surfaces as
+an exception. It silently yields Replicator's default rotary profile instead.
+Both wrong names produced an identical ~204k-point generic cloud during this
+work, which is exactly what a healthy sensor looks like from the outside.
+Expect the warning `Config 'Hesai_XT32_SD10' not found` on the correct path:
+that is `_add_reference` declining before the local-JSON path takes over, and
+it is benign. The error you must not see is `No OmniLidar prim found`.
 
 The repo's own `Isaac_sim/Unitree/Unitree_L1.json` is still written against the
 pre-5.0 profile schema (`profile.emitters` dict; Isaac 5/6 want
-`profile.emitterStates` plus `emitterStateCount`) and is **not** usable. Until
-someone migrates it, pass a config that ships with Isaac. `Hesai_XT32_SD10` is
-what this recipe uses: a local single-prim JSON config, no remote-USD variant
-lookup. It is a stand-in for the GO2's real Unitree L1. The gate is a
-*rate*-based staleness test, so the sensor's beam pattern does not affect the
-result, but do not read the point geometry as GO2-accurate.
+`profile.emitterStates` plus `emitterStateCount`) and is **not** usable. The
+HESAI is a stand-in for the GO2's real Unitree L1. The gate is a *rate*-based
+staleness test, so the sensor's beam pattern does not affect the result, but do
+not read the point geometry as GO2-accurate.
+
+### Per-frame output, and why `initialize()` does not do it
+
+`annotator.initialize(enablePerFrameOutput=True)` on
+`IsaacCreateRTXLidarScanBuffer` is silently ignored. In Isaac 6.0's
+`isaacsim.sensors.rtx` extension, `_register_nodes` registers that name with no
+`init_params` at all, and registers a *second* annotator,
+`IsaacExtractRTXSensorPointCloudNoAccumulator`, over the same OGN node type
+with `init_params={"enablePerFrameOutput": True}` baked in. Fetch that second
+name. Fetching the first and calling `initialize` measured 195k to 204k points
+per `get_data()` either way, which is full-revolution accumulation.
+
+### Message size: the cap is not cosmetic
+
+Even on the per-frame annotator, one `get_data()` returns 195k to 204k points,
+because a rendered frame spans ~0.3 s of wall clock here and the RTX sensor
+traces continuously across it. That is ~2.4 MB per `PointCloud2`, and at that
+size the messages never arrive: `ros2 topic hz /robot0/point_cloud2` received
+**zero messages in 20 s** while the publisher was running, and the publish cost
+dragged `/robot0/odom` from 108-133 Hz down to 1.8 Hz. Accumulation-sized
+clouds do not merely waste bandwidth, they stall the sim's main loop.
+
+`ros2.py` therefore strides the returns down to at most 8192 points (~98 KB).
+This decimates real returns, it does not synthesize them: every published point
+is a ray the sensor actually traced that frame, and if the sensor stops there is
+nothing to stride over and nothing is published, so the staleness gate still
+sees a genuinely dead topic.
+
+A related pre-existing bug is fixed alongside it: `pub_robo_data_ros2` took
+`start_time` by value and rebound it locally, so the caller kept passing its
+original value and the `1/20` cadence check was true on every physics step.
+The cadence now lives in module state.
 
 ## The sequence
 
@@ -101,6 +198,22 @@ export ROS_DOMAIN_ID=41
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ./run_sim_humble.sh --headless --enable_cameras --lidar_config Hesai_XT32_SD10
 ```
+
+Measured latencies from the run of 2026-08-08, for reference when comparing a
+later run (all five are recorded even when the gate fails):
+
+| Latency | Measured | Bound |
+| --- | --- | --- |
+| `injection_to_fault` | 0.018 s | 10.0 s |
+| `fault_to_hint` | 0.005 s | 0.25 s |
+| `hint_to_accept` | 4.497 s | 0.25 s (FAIL) |
+| `accept_to_helix_zero` | 0.036 s | 0.25 s |
+| `accept_to_mux_zero` | 0.042 s | 0.50 s |
+
+Four of the five are an order of magnitude inside their bounds. `hint_to_accept`
+is the outlier and it has never been measured against the sim before, so treat
+it as a real finding: the recovery envelope took 4.5 s to accept a decision the
+planner emitted in 5 ms. Investigate it on its own terms, not as noise.
 
 Notes on the flags and env:
 
