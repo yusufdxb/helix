@@ -38,11 +38,11 @@ import math
 from collections import deque
 
 import rclpy
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import PoseStamped, Twist
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
-from sensor_msgs.msg import PointCloud2
+from sensor_msgs.msg import Imu, PointCloud2
 
 # go2_omniverse creates every publisher and subscriber with a bare
 # QoSProfile(depth=10), which is RELIABLE / VOLATILE. Match it exactly on the
@@ -90,6 +90,7 @@ class Go2SimBridge(Node):
         self._cloud_count = 0
         self._odom_count = 0
         self._cmd_count = 0
+        self._imu_count = 0
 
         # Created lazily, on the first cloud actually received from the sim.
         #
@@ -105,11 +106,19 @@ class Go2SimBridge(Node):
         self._cloud_pub = None
         self._odom_pub = self.create_publisher(Odometry, "/utlidar/robot_odom", SIM_QOS)
         self._cmd_pub = self.create_publisher(Twist, f"{prefix}/cmd_vel", SIM_QOS)
+        # The GO2 publishes these two alongside odom, and SENSE monitors their
+        # rate. Without them the adapter reports them permanently stale, HELIX
+        # enters STOP_AND_HOLD before the scenario starts, and the closure gate
+        # can never observe the robot moving. The simulator has real sources for
+        # both: its own IMU, and the pose half of its odometry.
+        self._imu_pub = self.create_publisher(Imu, "/utlidar/imu", SENSOR_QOS)
+        self._pose_pub = self.create_publisher(PoseStamped, "/utlidar/robot_pose", SIM_QOS)
 
         self.create_subscription(
             PointCloud2, f"{prefix}/point_cloud2", self._on_cloud, SIM_QOS
         )
         self.create_subscription(Odometry, f"{prefix}/odom", self._on_odom, SIM_QOS)
+        self.create_subscription(Imu, f"{prefix}/imu", self._on_imu, SENSOR_QOS)
         # /cmd_vel is twist_mux's muxed output. Routing it (and only it) into the
         # simulator is what makes the "robot stopped" half of the closure gate
         # meaningful: the zero that reaches the body is the arbitrated one.
@@ -119,7 +128,8 @@ class Go2SimBridge(Node):
         self.get_logger().info(
             f"bridging {prefix}/point_cloud2 -> /utlidar/cloud, "
             f"{prefix}/odom -> /utlidar/robot_odom (twist reconstructed over "
-            f"{velocity_window_s:.2f}s), /cmd_vel -> {prefix}/cmd_vel"
+            f"{velocity_window_s:.2f}s) and /utlidar/robot_pose, "
+            f"{prefix}/imu -> /utlidar/imu, /cmd_vel -> {prefix}/cmd_vel"
         )
 
     def _on_cloud(self, msg: PointCloud2) -> None:
@@ -161,6 +171,15 @@ class Go2SimBridge(Node):
             msg.twist.twist.linear.z = (position.z - oldest[3]) / dt
             msg.twist.twist.angular.z = _wrap_to_pi(yaw - oldest[4]) / dt
         self._odom_pub.publish(msg)
+
+        pose = PoseStamped()
+        pose.header = msg.header
+        pose.pose = msg.pose.pose
+        self._pose_pub.publish(pose)
+
+    def _on_imu(self, msg: Imu) -> None:
+        self._imu_count += 1
+        self._imu_pub.publish(msg)
 
     def _report(self) -> None:
         speed = 0.0

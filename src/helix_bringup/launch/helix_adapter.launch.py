@@ -22,7 +22,7 @@ from launch.actions import (
     RegisterEventHandler,
 )
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import LifecycleNode
 from launch_ros.event_handlers import OnStateTransition
 from launch_ros.events.lifecycle import ChangeState
@@ -59,7 +59,16 @@ def _auto_activate(node: LifecycleNode, condition):
 
 def generate_launch_description() -> LaunchDescription:
     bringup_share = get_package_share_directory("helix_bringup")
-    params_file = os.path.join(bringup_share, "config", "helix_adapter_params.yaml")
+    # Which topics the adapter monitors is the difference between the hardware
+    # and simulator profiles. Declaring a topic the simulator never publishes
+    # makes it permanently stale, which parks HELIX in STOP_AND_HOLD before any
+    # scenario begins. PythonExpression picks the profile at launch time from
+    # the same sim_mode flag that drives the cloud remap.
+    params_file = PythonExpression([
+        "'", os.path.join(bringup_share, "config", "helix_adapter_params_sim.yaml"),
+        "' if '", LaunchConfiguration("sim_mode"), "'.lower() in ('true', '1') else '",
+        os.path.join(bringup_share, "config", "helix_adapter_params.yaml"), "'",
+    ])
 
     sim_arg = DeclareLaunchArgument(
         "sim_mode",

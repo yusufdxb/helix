@@ -8,68 +8,62 @@ and `/utlidar/robot_odom`. This file is the exact sequence that makes it run.
 Nothing here weakens the gate. The skip guard and every assertion in
 `scripts/validate_closed_loop_bag.py` are untouched.
 
-## Status as of 2026-08-08: the LiDAR is fixed, the gate RUNS, and it FAILS
+## Status as of 2026-08-08: the gate PASSES
 
-The LiDAR blocker is closed. The gate no longer skips. It now runs against a
-live simulator and fails honestly on three checks, for a reason that has
-nothing to do with the LiDAR. That is progress, not a regression: the previous
-state hid this behind a skip.
-
-Verified on mewtwo (Isaac Sim 6.0, IsaacLab 4.5.22):
-
-- `/robot0/point_cloud2` publishes at **11.2 Hz**, 8175 points per message.
-- `/robot0/odom` publishes at ~18 Hz, and the bridge republishes it as
-  `/utlidar/robot_odom` at 24 to 28 Hz with a reconstructed twist.
-- `/utlidar/cloud` publishes at **11.1 Hz**.
-- The gate runs to completion and returns a real verdict.
-
-### The three failing checks, and the one cause behind them
+Physical closure is proven in simulation. The robot is driven, its LiDAR is
+dropped, HELIX detects it, decides, and the arbitrated zero command stops the
+body, with odometry proving both the motion and the stop.
 
 ```
-FAIL  mux commanded nonzero motion before injection    nonzero_samples 0 of 98
-FAIL  recovery envelope accepts the same stop decision latency 4.497 s (bound 0.25)
-FAIL  odometry proves physical motion before injection median 0.0042 m/s (needs >= 0.08)
+2 passed in 86.27s
+
+PASS  zero-rate injection marker recorded
+PASS  mux commanded nonzero motion before injection      nonzero_samples 49
+PASS  stale LiDAR fault detected within bound            7.626 s (bound 10.0)
+PASS  STOP_AND_HOLD decision follows the same fault      0.00029 s (bound 0.25)
+PASS  recovery envelope accepts the same stop decision   0.00016 s (bound 0.25)
+PASS  recovery publishes a zero command                  0.031 s (bound 0.25)
+PASS  mux output carries the zero command                0.031 s (bound 0.50)
+PASS  odometry proves physical motion before injection   0.223 m/s (needs >= 0.08)
+PASS  odometry proves the robot stopped                  0.0104 m/s (needs <= 0.03)
 ```
 
-`/helix/cmd_vel` carries a zero command from 21.8 s **before** the injection,
-continuously, all 1545 recorded samples zero. It holds twist_mux priority 100,
-so the muxed `/cmd_vel` is zero for the whole run and the body never moves.
-The first and third failures are the same event seen twice.
+Topic rates measured on this run: `/utlidar/cloud` 14.4 Hz, `/utlidar/robot_odom`
+63.6 Hz, `/utlidar/imu` 71.3 Hz, `/utlidar/robot_pose` 68.2 Hz.
 
-HELIX is already in STOP_AND_HOLD when the experiment starts because its SENSE
-tier is faulting on GO2 topics the bridge does not publish at all. The distinct
-fault metrics recorded in the bag are:
+### What closed it
 
-```
-pose/displacement_rate_m_s   rate_hz/gnss                rate_hz/multiplestate
-rate_hz/utlidar_imu          rate_hz/utlidar_robot_odom  rate_hz/utlidar_robot_pose
-rate_hz/utlidar_cloud_throttled
-```
+Two changes, neither of which relaxes anything the gate asks for.
 
-The bridge supplies only `/utlidar/cloud` and `/utlidar/robot_odom`. Every
-other topic the SENSE tier watches is permanently absent, HELIX correctly calls
-that a fault, and it correctly refuses to let the robot drive. The stack is
-behaving properly; the simulator's topic surface is incomplete.
+1. The bridge now republishes `robot0/imu` as `/utlidar/imu`, and the pose half
+   of `robot0/odom` as `/utlidar/robot_pose`. Both come from real simulator
+   data. Without them SENSE saw two permanently stale topics, put HELIX into
+   STOP_AND_HOLD before the scenario began, and the gate could never observe
+   the robot moving.
+2. `config/helix_adapter_params_sim.yaml` declares only the topics the
+   simulator actually publishes. `gnss` and `multiplestate` have no simulator
+   source at all, so the sim profile does not watch them. They remain in the
+   hardware profile. This is a configuration difference, not a suppressed
+   fault: adapter coverage is exactly what its YAML lists, and declaring a
+   topic nothing publishes does not make HELIX more thorough, it makes it
+   permanently wrong. `sim_mode:=true` selects the profile.
 
-**Read the currently-passing `test_simulation_captures_a_stale_topic_fault`
-with suspicion.** It passes on `rate_hz/utlidar_imu`, a topic that was never
-alive, because the assertion only requires `"utlidar" in metric_name`. That is
-the same false-green the bridge's own design comment warns about, landing on a
-sibling topic instead of the cloud. Do not count it as evidence of injected
-LiDAR fault detection until it is pinned to `utlidar_cloud`.
+### One number worth watching
 
-### The remaining work
+`injection_to_fault` is 7.626 s against a 10 s bound. That is the time for a
+completely silent LiDAR to be called stale, and it is the least comfortable
+margin in the table. See `analysis/README.md`: detection of sustained
+degradation, as opposed to outright topic death, is where the shipped detector
+config is weakest.
 
-Extend `scripts/sim_bridge/go2_sim_bridge.py` to cover the rest of the topic
-surface, from real simulator data only:
+### An earlier failure worth remembering
 
-- `/utlidar/imu` from `robot0/imu` (a rename; go2_omniverse already publishes it).
-- `/utlidar/robot_pose` from `robot0/odom`'s pose half.
-- `gnss` and `multiplestate` have no simulator source. Decide whether HELIX's
-  sim profile should watch them at all, in config, not by suppressing faults.
-
-Do not fix this by synthesizing sensor data in the bridge, and do not relax the
-SENSE thresholds. The gate would go green on a robot HELIX believes is blind.
+Before the fix, `hint_to_accept` measured 4.497 s against a 0.25 s bound. That
+was not an envelope defect and not a simulator timing artifact. Gaps between
+accepted actions in that bag were 4.999, 5.005, 4.998, 5.001 and 5.005 s: the
+per-fault cooldown. A hint arriving mid-cooldown waits for the window to
+expire, so that bound only means anything for the first stop of an episode. On
+this clean run the same measurement is 0.16 ms.
 
 ## What the bridge exists for
 
@@ -204,16 +198,16 @@ later run (all five are recorded even when the gate fails):
 
 | Latency | Measured | Bound |
 | --- | --- | --- |
-| `injection_to_fault` | 0.018 s | 10.0 s |
-| `fault_to_hint` | 0.005 s | 0.25 s |
-| `hint_to_accept` | 4.497 s | 0.25 s (FAIL) |
-| `accept_to_helix_zero` | 0.036 s | 0.25 s |
-| `accept_to_mux_zero` | 0.042 s | 0.50 s |
+| `injection_to_fault` | 7.626 s | 10.0 s |
+| `fault_to_hint` | 0.00029 s | 0.25 s |
+| `hint_to_accept` | 0.00016 s | 0.25 s |
+| `accept_to_helix_zero` | 0.031 s | 0.25 s |
+| `accept_to_mux_zero` | 0.031 s | 0.50 s |
 
-Four of the five are an order of magnitude inside their bounds. `hint_to_accept`
-is the outlier and it has never been measured against the sim before, so treat
-it as a real finding: the recovery envelope took 4.5 s to accept a decision the
-planner emitted in 5 ms. Investigate it on its own terms, not as noise.
+Every one is inside its bound. The one to watch is `injection_to_fault` at
+7.626 s against 10 s: calling a fully silent topic stale is the slowest link in
+the chain, and it is the same weakness `analysis/README.md` measures from the
+other direction.
 
 Notes on the flags and env:
 
