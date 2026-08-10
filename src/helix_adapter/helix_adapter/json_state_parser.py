@@ -1,4 +1,4 @@
-"""JsonStateParser — HELIX adapter lifecycle node.
+"""JsonStateParser - HELIX adapter lifecycle node.
 
 Subscribes to configured ``std_msgs/String`` topics (GNSS / multiplestate /
 servicestate on the GO2), parses JSON payloads, and republishes numeric and
@@ -82,7 +82,7 @@ class JsonStateParser(LifecycleNode):
         self._metrics_pub = self.create_publisher(
             Float64MultiArray, "/helix/metrics", 10)
         self.get_logger().info(
-            f"JsonStateParser configured — {len(self._sources)} sources"
+            f"JsonStateParser configured - {len(self._sources)} sources"
         )
         return TransitionCallbackReturn.SUCCESS
 

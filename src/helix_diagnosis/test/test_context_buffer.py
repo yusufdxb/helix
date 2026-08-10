@@ -1,4 +1,4 @@
-"""Tests for ContextBuffer — ring behavior and snapshot retrieval."""
+"""Tests for ContextBuffer - ring behavior and snapshot retrieval."""
 from helix_diagnosis.context_buffer import RosoutRing
 
 

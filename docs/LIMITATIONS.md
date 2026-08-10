@@ -8,7 +8,7 @@ The standalone benchmarks test pure-Python ports of the detection logic against 
 
 ## Bounded Hardware Validation
 
-HELIX has been executed on real hardware in eight bounded sessions (2026-04-03 → 2026-04-23); it has **not** been deployed as a persistent monitoring service on any robot. Highlights:
+HELIX has been executed on real hardware in eight bounded sessions (2026-04-03 to 2026-04-23), including a 1780 s persistent Jetson deployment and a separate 1-hour stability run. It has **not** been deployed as an unattended, multi-day monitoring service on any robot. Highlights:
 
 - **Session 1 (2026-04-03)** ran the three `helix_core` lifecycle nodes on a PC observing the live Unitree GO2 graph for 60 s, with a passive adapter bridging GO2 topics into `/helix/metrics`. Four FaultEvents were emitted from a `/utlidar/cloud` rate fluctuation; the fluctuation was not ground-truth labeled.
 - **Session 2 (2026-04-06)** reproduced Session 1 after a 3-day gap (CV < 0.001 across the gap) and emitted 2 new FaultEvents from a `/utlidar/robot_pose` rate anomaly.
@@ -16,7 +16,7 @@ HELIX has been executed on real hardware in eight bounded sessions (2026-04-03 �
 - **Session 7 (2026-04-17)** 1-hour Jetson stability run, RSS plateau confirmed; baseline used for the Session 8 C++ comparison.
 - **Session 8 (2026-04-23)** ran the full SENSE → DIAGNOSE → RECOVER stack on Jetson against the live GO2: 30 ANOMALY faults, 14 recovery hints (9× R1 STOP_AND_HOLD on utlidar metrics, 5× R2 RESUME), 14 audited actions (7 ACCEPTED, 7 SUPPRESSED_COOLDOWN), 3064 zero-twist `/helix/cmd_vel` messages during STOP states. The R1 schema fix the demo depends on landed on `main` in `82f7a15`, merged from `fix/r1-anomaly-schema-mismatch`. Same session: 30-min C++ anomaly-detector parity at −56% RSS / −60% CPU vs Python (RSS missed 30% design-doc target at 44%; CPU passed 12×).
 
-What this is **not**: continuous deployment, ground-truth-labeled fault detection, multi-day stability, or operation under environmental disturbance. Three controlled physical injections in Session 5 (LiDAR cover, USB mic disconnect, `/test/spam` flood) produced 0 FaultEvents, those signals are invisible without an adapter explicitly bridging them. A Session 8 UDP-block injection produced 0 ANOMALYs *during* the drop for a different mechanism (NaN handling, see *Detection Logic Limitations* below). See `docs/GO2_HARDWARE_EVIDENCE.md` and `hardware_eval_20260423/results/closed_loop_demo.md` for full evidence and bag inventory. Raw bags live under `hardware_eval_*/` on the T7 evidence drive; the main branch ships the algorithm, the tests, and the documented launch paths, not the bag artifacts.
+What this is **not**: unattended continuous deployment, ground-truth-labeled fault detection, multi-day stability, or operation under environmental disturbance. Three controlled physical injections in Session 5 (LiDAR cover, USB mic disconnect, `/test/spam` flood) produced 0 FaultEvents, those signals are invisible without an adapter explicitly bridging them. A Session 8 UDP-block injection produced 0 ANOMALYs *during* the drop for a different mechanism (NaN handling, see *Detection Logic Limitations* below). See `docs/GO2_HARDWARE_EVIDENCE.md` and `hardware_eval_20260423/results/closed_loop_demo.md` for full evidence and bag inventory. Raw bags live under `hardware_eval_*/` on the T7 evidence drive; the main branch ships the algorithm, the tests, and the documented launch paths, not the bag artifacts.
 
 ## No Passive or Non-Intrusive Integration
 
@@ -30,7 +30,7 @@ What is **not** validated: the Session 8 GO2 graph had 0 downstream subscribers 
 
 ## No End-to-End Field Deployment
 
-The system has not been tested under real operational conditions. There is no evidence of sustained operation, no measurement of false alarm rates over extended periods, and no evaluation under the environmental disturbances (terrain variation, payload changes, weather, network instability) that characterize field robotics.
+The system has bounded hardware evidence up to one hour, but it has not been tested as an unattended service under representative field conditions. There is no multi-day stability evidence, no false-alarm measurement over a representative operational duty cycle, and no evaluation across the environmental disturbances (terrain variation, payload changes, weather, network instability) that characterize field robotics.
 
 ## No Multi-Robot or Distributed Testing
 

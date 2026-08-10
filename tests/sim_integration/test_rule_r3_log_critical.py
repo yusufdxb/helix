@@ -24,7 +24,7 @@ LOG_INJECT_DELAY_S = 15.0
 def scenario_run(tmp_path_factory):
     out_dir = tmp_path_factory.mktemp('sim_run_r3')
 
-    # Start the orchestrator without a LiDAR-rate-drop schedule — we just need
+    # Start the orchestrator without a LiDAR-rate-drop schedule - we just need
     # the closed loop up and ready to receive a log event. Run with schedule
     # '60:10' so /utlidar/cloud_throttled is steady at 10 Hz for the whole run.
     scenario = subprocess.Popen(
