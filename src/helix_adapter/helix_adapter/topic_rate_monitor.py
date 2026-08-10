@@ -1,4 +1,4 @@
-"""TopicRateMonitor — HELIX adapter lifecycle node.
+"""TopicRateMonitor - HELIX adapter lifecycle node.
 
 Subscribes to configured topics, tracks callback-arrival rate per topic over
 a rolling window, and publishes each topic's Hz as a labeled scalar metric on
@@ -14,6 +14,7 @@ Parameters:
 """
 import rclpy
 from geometry_msgs.msg import PoseStamped
+from helix_core.heartbeat import Heartbeat
 from nav_msgs.msg import Odometry
 from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
@@ -33,7 +34,7 @@ _DEFAULT_TOPICS = [
     "/multiplestate",
 ]
 
-# ROS message type registry — kept small & explicit so failing imports surface
+# ROS message type registry - kept small & explicit so failing imports surface
 # at configure time, not later as KeyError in a callback.
 _TYPE_MAP = {
     "/utlidar/imu": Imu,
@@ -52,6 +53,7 @@ _BEST_EFFORT_TYPES = {Imu, PointCloud2}
 class TopicRateMonitor(LifecycleNode):
     def __init__(self) -> None:
         super().__init__("helix_topic_rate_monitor")
+        self._heartbeat = Heartbeat(self)
         self.declare_parameter("window_sec", 5.0)
         self.declare_parameter("publish_period_sec", 0.5)
         self.declare_parameter("topics", _DEFAULT_TOPICS)
@@ -102,18 +104,20 @@ class TopicRateMonitor(LifecycleNode):
             Float64MultiArray, "/helix/metrics", 10)
 
         self.get_logger().info(
-            f"TopicRateMonitor configured — {len(self._windows)} topics, "
+            f"TopicRateMonitor configured - {len(self._windows)} topics, "
             f"window={window_sec}s"
         )
         return TransitionCallbackReturn.SUCCESS
 
     def on_activate(self, state: State) -> TransitionCallbackReturn:
+        self._heartbeat.start()
         period = float(self.get_parameter("publish_period_sec").value)
         self._timer = self.create_timer(period, self._publish)
         self.get_logger().info("TopicRateMonitor activated.")
         return TransitionCallbackReturn.SUCCESS
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
+        self._heartbeat.stop()
         if self._timer is not None:
             self._timer.cancel()
             self.destroy_timer(self._timer)

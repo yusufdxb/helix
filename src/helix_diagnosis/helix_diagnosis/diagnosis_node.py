@@ -13,6 +13,7 @@ ContextBuffer into the rules or remove the client is a pending design call.
 from typing import Optional
 
 import rclpy
+from helix_core.heartbeat import Heartbeat
 from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 
 from helix_diagnosis.rules import STATE_IDLE, STATE_STOP_AND_HOLD, HintShape, evaluate
@@ -23,7 +24,7 @@ TICK_HZ: float = 10.0
 
 
 class DiagnosisStateMachine:
-    """Pure state machine — unit-testable without ROS 2."""
+    """Pure state machine - unit-testable without ROS 2."""
 
     def __init__(self):
         self.current_state = STATE_IDLE
@@ -75,6 +76,7 @@ class DiagnosisNode(LifecycleNode):
 
     def __init__(self):
         super().__init__('helix_diagnosis_node')
+        self._heartbeat = Heartbeat(self)
         self._sm = DiagnosisStateMachine()
         self._sub = None
         self._pub = None
@@ -87,11 +89,13 @@ class DiagnosisNode(LifecycleNode):
         return TransitionCallbackReturn.SUCCESS
 
     def on_activate(self, state: State) -> TransitionCallbackReturn:
+        self._heartbeat.start()
         self._sub = self.create_subscription(FaultEvent, '/helix/faults', self._on_fault, 10)
         self._tick_timer = self.create_timer(1.0 / TICK_HZ, self._on_tick)
         return super().on_activate(state)
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
+        self._heartbeat.stop()
         if self._sub is not None:
             self.destroy_subscription(self._sub)
             self._sub = None

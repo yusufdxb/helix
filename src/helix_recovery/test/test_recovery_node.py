@@ -56,6 +56,17 @@ def test_allowlist_rejects_unknown_action():
     assert result.publish is False
 
 
+def test_operator_can_disable_automatic_resume():
+    env = SafetyEnvelope(
+        enabled=True,
+        cooldown_seconds=5.0,
+        allowed_actions={ACTION_STOP, ACTION_LOG_ONLY},
+    )
+    result = env.evaluate(action=ACTION_RESUME, fault_type='ANOMALY', now=1.0)
+    assert result.status == 'SUPPRESSED_ALLOWLIST'
+    assert result.publish is False
+
+
 def test_log_only_is_never_published_but_is_accepted():
     env = SafetyEnvelope(enabled=True, cooldown_seconds=5.0)
     result = env.evaluate(action=ACTION_LOG_ONLY, fault_type='CRASH', now=1.0)

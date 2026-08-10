@@ -1,4 +1,4 @@
-"""PoseDriftMonitor — HELIX adapter lifecycle node.
+"""PoseDriftMonitor - HELIX adapter lifecycle node.
 
 Subscribes to a ``geometry_msgs/PoseStamped`` topic, tracks 3D displacement
 between consecutive poses, and publishes the instantaneous displacement rate
@@ -16,6 +16,7 @@ import time
 
 import rclpy
 from geometry_msgs.msg import PoseStamped
+from helix_core.heartbeat import Heartbeat
 from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 from std_msgs.msg import Float64MultiArray
 
@@ -26,6 +27,7 @@ from helix_adapter.pose_drift import DisplacementTracker
 class PoseDriftMonitor(LifecycleNode):
     def __init__(self) -> None:
         super().__init__("helix_pose_drift_monitor")
+        self._heartbeat = Heartbeat(self)
         self.declare_parameter("topic", "/utlidar/robot_pose")
         self.declare_parameter("stale_sec", 5.0)
         self.declare_parameter("min_dt", 1e-3)
@@ -50,17 +52,19 @@ class PoseDriftMonitor(LifecycleNode):
             Float64MultiArray, "/helix/metrics", 10
         )
         self.get_logger().info(
-            f"PoseDriftMonitor configured — topic={topic}"
+            f"PoseDriftMonitor configured - topic={topic}"
         )
         return TransitionCallbackReturn.SUCCESS
 
     def on_activate(self, state: State) -> TransitionCallbackReturn:
+        self._heartbeat.start()
         period = float(self.get_parameter("publish_period_sec").value)
         self._timer = self.create_timer(period, self._publish)
         self.get_logger().info("PoseDriftMonitor activated.")
         return TransitionCallbackReturn.SUCCESS
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
+        self._heartbeat.stop()
         if self._timer is not None:
             self._timer.cancel()
             self.destroy_timer(self._timer)

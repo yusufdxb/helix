@@ -1,5 +1,5 @@
 """
-LogParser — HELIX Phase 1 fault sensing node.
+LogParser - HELIX Phase 1 fault sensing node.
 
 Subscribes to /rosout (rcl_interfaces/msg/Log). Filters for severity >= 40 (ERROR).
 Loads YAML rules at configure time, compiles patterns as regex.
@@ -15,6 +15,7 @@ import rclpy
 from rcl_interfaces.msg import Log
 from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 
+from helix_core.heartbeat import Heartbeat
 from helix_msgs.msg import FaultEvent
 
 # ── Constants ────────────────────────────────────────────────────────────────
@@ -29,6 +30,7 @@ class LogParser(LifecycleNode):
     def __init__(self) -> None:
         """Initialize node and declare parameters."""
         super().__init__("helix_log_parser")
+        self._heartbeat = Heartbeat(self)
 
         self.declare_parameter("rules_file_path", DEFAULT_RULES_FILE_PATH)
         self.declare_parameter("dedup_window_sec", DEFAULT_DEDUP_WINDOW_SEC)
@@ -50,7 +52,7 @@ class LogParser(LifecycleNode):
 
         if not rules_path:
             self.get_logger().warn(
-                "rules_file_path parameter is empty — LogParser will have no rules"
+                "rules_file_path parameter is empty - LogParser will have no rules"
             )
             self._rules = []
         else:
@@ -71,6 +73,7 @@ class LogParser(LifecycleNode):
 
     def on_activate(self, state: State) -> TransitionCallbackReturn:
         """Activate the log parser."""
+        self._heartbeat.start()
         self.get_logger().info(
             f"LogParser activated with {len(self._rules)} rules, "
             f"dedup_window={self._dedup_window}s"
@@ -79,6 +82,7 @@ class LogParser(LifecycleNode):
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
         """Deactivate the log parser."""
+        self._heartbeat.stop()
         self.get_logger().info("LogParser deactivated.")
         return TransitionCallbackReturn.SUCCESS
 
@@ -97,7 +101,7 @@ class LogParser(LifecycleNode):
 
     def _load_rules(self, path: str) -> List[Dict[str, Any]]:
         """Load and validate YAML rules file. Compiles regex patterns in-place."""
-        import yaml  # lazy import — only needed at configure time
+        import yaml  # lazy import - only needed at configure time
 
         with open(path, "r") as f:
             data = yaml.safe_load(f)
@@ -109,7 +113,7 @@ class LogParser(LifecycleNode):
             missing = required - set(rule.keys())
             if missing:
                 self.get_logger().warn(
-                    f"Rule '{rule.get('id', '?')}' missing fields {missing} — skipping"
+                    f"Rule '{rule.get('id', '?')}' missing fields {missing} - skipping"
                 )
                 continue
             rule["_compiled"] = re.compile(rule["pattern"], re.IGNORECASE)

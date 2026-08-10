@@ -1,0 +1,41 @@
+# Adapter coverage for the Isaac Sim twin.
+#
+# Same nodes and same thresholds as helix_adapter_params.yaml. The only
+# difference is which topics are declared, and that is the point: adapter
+# coverage is exactly what this file lists, so declaring a topic the simulator
+# does not publish does not make HELIX more thorough, it makes it permanently
+# wrong. A never-published topic reads as stale forever, which drives SENSE
+# into a standing ANOMALY, R1 into STOP_AND_HOLD before a scenario even starts,
+# and leaves the closure gate unable to observe the robot moving at all.
+#
+# Dropped here relative to hardware:
+#   /gnss           the simulator has no GNSS source
+#   /multiplestate  the simulator has no sport-mode state source
+# Both are real GO2 topics and stay in the hardware profile. Nothing else
+# changes: the LiDAR, odometry, pose and IMU paths under test are identical.
+
+helix_topic_rate_monitor:
+  ros__parameters:
+    window_sec: 5.0
+    publish_period_sec: 0.5
+    topics:
+      - "/utlidar/imu"
+      - "/utlidar/robot_odom"
+      - "/utlidar/robot_pose"
+      - "/utlidar/cloud"
+
+helix_json_state_parser:
+  ros__parameters:
+    publish_period_sec: 0.5
+    # Both hardware sources are GNSS and sport-mode state, neither of which the
+    # simulator provides. An empty list keeps the node running and reporting
+    # nothing, rather than reporting stale metrics for topics that do not exist.
+    sources: []
+
+helix_pose_drift_monitor:
+  ros__parameters:
+    topic: "/utlidar/robot_pose"
+    stale_sec: 5.0
+    min_dt: 0.001
+    publish_period_sec: 0.5
+    metric_name: "pose/displacement_rate_m_s"

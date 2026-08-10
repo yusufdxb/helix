@@ -1,6 +1,6 @@
 """HELIX closed-loop (SENSE + ADAPTER + DIAGNOSE + RECOVER + EXPLAIN) bringup.
 
-Single entrypoint for the self-healing stack. Composes the existing
+Single entrypoint for the runtime reliability stack. Composes the existing
 ``helix_sensing.launch.py`` and ``helix_adapter.launch.py`` (both of which
 already auto-configure and auto-activate their lifecycle nodes), and then
 adds the three closed-loop-tier nodes: diagnosis (context_buffer + state
@@ -8,9 +8,9 @@ machine), recovery (enabled flag + allowlist envelope), and the LLM
 explainer (advisory, llm_enabled gated).
 
 Safety-relevant defaults:
-    recovery_enabled:=false     — actuation path off unless operator asks
-    llm_enabled:=false          — explainer runs template-only
-    use_cpp_anomaly:=false      — Python anomaly detector path
+    recovery_enabled:=false     : actuation path off unless operator asks
+    llm_enabled:=false          : explainer runs template-only
+    use_cpp_anomaly:=false      : Python anomaly detector path
 
 Typical operator sequence on live hardware:
     # bring up the whole stack, recovery held off
@@ -18,12 +18,13 @@ Typical operator sequence on live hardware:
 
     # operator verifies body_height > 0.25m at the robot, then:
     ros2 param set /helix_recovery_node enabled true
+    ros2 param set /helix_recovery_node allowed_actions "['STOP_AND_HOLD', 'LOG_ONLY']"
     ros2 lifecycle set /helix_recovery_node configure
     ros2 lifecycle set /helix_recovery_node activate
 
-This launcher does NOT auto-activate the diagnosis or recovery nodes — they
-come up in ``unconfigured`` so the operator can gate the actuation path on
-body_height verification. Sense + adapter auto-activate as they always have.
+This launcher auto-activates diagnosis by default, but recovery comes up in
+``unconfigured`` so the operator can gate the actuation path on body-height
+verification. Sense and adapter auto-activate as they always have.
 """
 import os
 
@@ -103,7 +104,7 @@ def generate_launch_description() -> LaunchDescription:
         "auto_activate_recovery",
         default_value="false",
         description=(
-            "Auto-configure/activate the recovery node. SAFETY-RELEVANT — "
+            "Auto-configure/activate the recovery node. SAFETY-RELEVANT: "
             "recovery is the only node that publishes cmd_vel. Default false "
             "so the operator can gate on body_height verification at the robot "
             "before enabling the actuation path."
@@ -187,7 +188,7 @@ def generate_launch_description() -> LaunchDescription:
         output="screen",
     )
 
-    # --- recovery tier (actuation — gated) ------------------------------------
+    # --- recovery tier (actuation, gated) -------------------------------------
     recovery_node = LifecycleNode(
         package="helix_recovery",
         executable="helix_recovery_node",

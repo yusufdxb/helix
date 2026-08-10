@@ -11,6 +11,7 @@
   <depend>std_msgs</depend>
   <depend>diagnostic_msgs</depend>
   <depend>rcl_interfaces</depend>
+  <depend>helix_core</depend>
   <depend>helix_msgs</depend>
   <depend>lifecycle_msgs</depend>
 

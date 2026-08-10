@@ -1,82 +1,103 @@
-"""Integration test: end-to-end closed loop with LiDAR rate drop.
+"""End-to-end HELIX closure test against a running Isaac Sim GO2 bridge.
 
-REQUIREMENT: Isaac Sim must be running with the HELIX-patched
-go2_ros2_bridge (publishing /utlidar/cloud @ 10 Hz) before this test is invoked.
-Launch per docs/sim_launch_recipe.md or the daily-log bridge recipe.
+This is the only test that claims PHYSICAL closure: the robot was moving, the
+loop stopped it, and odometry proves it. That claim needs a body to move, so
+the test requires the Isaac Sim GO2 bridge to be publishing /utlidar/cloud and
+/utlidar/robot_odom before it runs, and skips loudly when it is not. It is not
+weakened to pass on a bare workstation, because a green run here is what gates
+the next hardware session.
 """
+
 import subprocess
-from pathlib import Path
 
 import pytest
-from rosbags.highlevel import AnyReader
+
+from scripts.validate_closed_loop_bag import evaluate, load_records
+
+REQUIRED_SIM_TOPICS = ("/utlidar/cloud", "/utlidar/robot_odom")
+
+
+def publisher_count(topic: str) -> int:
+    """Publishers currently advertising `topic`, or 0 if it cannot be queried."""
+    try:
+        result = subprocess.run(
+            ["ros2", "topic", "info", topic],
+            capture_output=True, text=True, timeout=15,
+        )
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return 0
+    for line in result.stdout.splitlines():
+        if line.startswith("Publisher count:"):
+            return int(line.split(":", 1)[1])
+    return 0
+
+
+@pytest.fixture(scope="module", autouse=True)
+def require_sim_bridge():
+    missing = [topic for topic in REQUIRED_SIM_TOPICS if publisher_count(topic) == 0]
+    if missing:
+        pytest.skip(
+            "Isaac Sim GO2 bridge is not publishing "
+            + ", ".join(missing)
+            + ". Physical closure cannot be proven without a moving body; start the "
+              "bridge per docs/sim_launch_recipe.md and re-run.",
+            allow_module_level=False,
+        )
+
 
 SCENARIO_CMD = [
-    'python3', 'scripts/sim_faults/run_closed_loop_scenario.py',
-    '--duration', '80',
-    '--schedule', '20:10,20:1,30:10',
+    "python3",
+    "scripts/sim_faults/run_closed_loop_scenario.py",
+    "--duration",
+    "75",
+    "--schedule",
+    "20:10,20:0,30:10",
+    "--nav-speed",
+    "0.20",
 ]
 
 
-@pytest.fixture(scope='module')
-def scenario_run(tmp_path_factory):
-    out_dir = tmp_path_factory.mktemp('sim_run')
-    cmd = SCENARIO_CMD + ['--artifact-dir', str(out_dir)]
-    subprocess.run(cmd, check=True, timeout=180)
-    return out_dir / 'bag'
+@pytest.fixture(scope="module")
+def scenario_records(tmp_path_factory):
+    output = tmp_path_factory.mktemp("sim_run")
+    subprocess.run(
+        SCENARIO_CMD + ["--artifact-dir", str(output)],
+        check=True,
+        timeout=180,
+    )
+    return load_records(output / "bag")
 
 
-def _read_topic(bag_dir: Path, topic: str):
-    msgs = []
-    with AnyReader([bag_dir]) as reader:
-        connections = [c for c in reader.connections if c.topic == topic]
-        for conn, ts, raw in reader.messages(connections=connections):
-            msg = reader.deserialize(raw, conn.msgtype)
-            msgs.append((ts, msg))
-    return msgs
+def test_simulation_closes_the_same_evidence_gate_as_hardware(scenario_records):
+    result = evaluate(scenario_records)
+    failed = [check for check in result["checks"] if not check["passed"]]
+    assert result["passed"], failed
 
 
-def test_fault_event_fires_within_1s_of_rate_drop(scenario_run):
-    # Rate drop starts at t=20s (per SCENARIO_CMD).
-    faults = _read_topic(scenario_run, '/helix/faults')
-    assert len(faults) > 0, 'no FaultEvent observed'
-    first_ts_s = faults[0][0] / 1e9
-    # Bag relative times start at 0, so fault should fire within ~21s of bag start.
-    assert first_ts_s < 22.0
+def test_simulation_captures_a_stale_topic_fault(scenario_records):
+    """The injected topic must go stale, not merely some utlidar topic.
 
+    Matching any metric containing "utlidar" passes on a sibling topic that was
+    never alive in the first place: a simulator that publishes no IMU makes
+    rate_hz/utlidar_imu permanently stale, so this asserted nothing about the
+    injection. Require the metric the injector actually drops, and require the
+    fault to land after the drop rather than before it.
+    """
+    drop = next(
+        (m for m in sorted(scenario_records["markers"], key=lambda m: m["ts"])
+         if m["target_hz"] == 0.0),
+        None,
+    )
+    assert drop is not None, f"no zero-rate injection marker: {scenario_records['markers']}"
 
-def test_stop_hint_follows_fault_within_100ms(scenario_run):
-    faults = _read_topic(scenario_run, '/helix/faults')
-    hints = _read_topic(scenario_run, '/helix/recovery_hints')
-    stop_hints = [(ts, m) for ts, m in hints if m.suggested_action == 'STOP_AND_HOLD']
-    assert stop_hints, 'no STOP_AND_HOLD hint'
-    delta_ns = stop_hints[0][0] - faults[0][0]
-    assert delta_ns < 100_000_000, f'stop hint {delta_ns / 1e6:.1f}ms after fault'
-
-
-def test_cmd_vel_publishes_zero_within_100ms_of_hint(scenario_run):
-    hints = _read_topic(scenario_run, '/helix/recovery_hints')
-    stop_hints = [(ts, m) for ts, m in hints if m.suggested_action == 'STOP_AND_HOLD']
-    cmds = _read_topic(scenario_run, '/helix/cmd_vel')
-    assert cmds, 'no helix cmd_vel published'
-    first_stop_ts = stop_hints[0][0]
-    later = [ts for ts, _ in cmds if ts >= first_stop_ts]
-    assert later, 'no cmd_vel after stop hint'
-    delta_ns = later[0] - first_stop_ts
-    assert delta_ns < 100_000_000
-
-
-def test_resume_hint_after_rate_recovers(scenario_run):
-    hints = _read_topic(scenario_run, '/helix/recovery_hints')
-    resume = [ts for ts, m in hints if m.suggested_action == 'RESUME']
-    assert resume, 'no RESUME hint observed'
-
-
-def test_audit_log_has_accepted_events(scenario_run):
-    actions = _read_topic(scenario_run, '/helix/recovery_actions')
-    accepted = [m for _, m in actions if m.status == 'ACCEPTED']
-    assert len(accepted) >= 2   # at least STOP + RESUME
-
-
-def test_explanations_published(scenario_run):
-    expl = _read_topic(scenario_run, '/helix/explanations')
-    assert len(expl) >= 1
+    stale = [
+        fault
+        for fault in scenario_records["faults"]
+        if fault["violation_type"] == "stale"
+        and "cloud" in fault["metric_name"]
+        and fault["ts"] >= drop["ts"]
+    ]
+    assert stale, (
+        "no stale fault on the injected cloud topic after the drop at "
+        f"t={drop['ts']:.2f}; faults were {scenario_records['faults']}"
+    )

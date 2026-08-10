@@ -188,5 +188,27 @@ class TestNoOrphanSurveyReference(unittest.TestCase):
         )
 
 
+class TestCurrentCapabilityClaims(unittest.TestCase):
+    """Public scope statements must reflect capabilities already in the tree."""
+
+    def test_limitations_acknowledge_bounded_persistent_runs(self):
+        path = os.path.join(ROOT, "docs", "LIMITATIONS.md")
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        self.assertIn("a 1780 s persistent Jetson deployment", text)
+        self.assertIn("a separate 1-hour stability run", text)
+        self.assertNotIn(
+            "not been deployed as a persistent monitoring service", text
+        )
+        self.assertNotIn("There is no evidence of sustained operation", text)
+
+    def test_architecture_does_not_call_recovery_unimplemented(self):
+        path = os.path.join(ROOT, "docs", "images", "architecture.svg")
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        self.assertIn("diagnosis, gated recovery, replay dashboard", text)
+        self.assertNotIn("not implemented): recovery engine", text)
+
+
 if __name__ == "__main__":
     unittest.main()

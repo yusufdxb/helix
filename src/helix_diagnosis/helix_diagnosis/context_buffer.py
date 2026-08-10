@@ -1,5 +1,5 @@
 """
-ContextBuffer — lifecycle node that maintains a bounded /rosout ring,
+ContextBuffer - lifecycle node that maintains a bounded /rosout ring,
 latest /helix/metrics snapshot, and latest /helix/node_health snapshot.
 Serves GetContext srv.
 """
@@ -10,6 +10,7 @@ from typing import Deque, List
 
 import rclpy
 from diagnostic_msgs.msg import DiagnosticArray
+from helix_core.heartbeat import Heartbeat
 from rcl_interfaces.msg import Log
 from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 from std_msgs.msg import Float64MultiArray
@@ -19,8 +20,22 @@ from helix_msgs.srv import GetContext
 ROSOUT_RING_CAPACITY: int = 200
 
 
+def diagnostic_level(level) -> int:
+    """Normalise DiagnosticStatus.level to an int.
+
+    ``level`` is a ROS ``byte`` field. rclpy on Humble hands it over as a
+    one-byte ``bytes`` object, and ``int(b'\\x00')`` raises ValueError, which
+    killed this node inside its own subscription callback about a second
+    after activation, every run. Other client libraries and distros deliver a
+    plain int, so accept both.
+    """
+    if isinstance(level, (bytes, bytearray)):
+        return int.from_bytes(level, 'little')
+    return int(level)
+
+
 class RosoutRing:
-    """Pure bounded ring — unit-testable without ROS 2."""
+    """Pure bounded ring - unit-testable without ROS 2."""
 
     def __init__(self, capacity: int = ROSOUT_RING_CAPACITY):
         self._buf: Deque[str] = deque(maxlen=capacity)
@@ -40,6 +55,7 @@ class ContextBuffer(LifecycleNode):
 
     def __init__(self):
         super().__init__('helix_context_buffer')
+        self._heartbeat = Heartbeat(self)
         self._ring = RosoutRing()
         self._latest_metrics: str = '{}'
         self._latest_health: str = '{}'
@@ -54,6 +70,7 @@ class ContextBuffer(LifecycleNode):
         return TransitionCallbackReturn.SUCCESS
 
     def on_activate(self, state: State) -> TransitionCallbackReturn:
+        self._heartbeat.start()
         self._sub_rosout = self.create_subscription(Log, '/rosout', self._on_rosout, 100)
         self._sub_metrics = self.create_subscription(
             Float64MultiArray, '/helix/metrics', self._on_metrics, 10)
@@ -63,6 +80,7 @@ class ContextBuffer(LifecycleNode):
         return TransitionCallbackReturn.SUCCESS
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
+        self._heartbeat.stop()
         for sub in (self._sub_rosout, self._sub_metrics, self._sub_health):
             if sub is not None:
                 self.destroy_subscription(sub)
@@ -76,7 +94,7 @@ class ContextBuffer(LifecycleNode):
         self._latest_metrics = json.dumps({'data': list(msg.data)})
 
     def _on_health(self, msg: DiagnosticArray) -> None:
-        statuses = [{'name': s.name, 'level': int(s.level), 'message': s.message}
+        statuses = [{'name': s.name, 'level': diagnostic_level(s.level), 'message': s.message}
                     for s in msg.status]
         self._latest_health = json.dumps({'status': statuses})
 
