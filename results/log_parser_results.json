@@ -1,6 +1,6 @@
 {
   "timestamp": "2026-04-02T18:36:32-0400",
-  "rules_file": "/home/yusuf/workspace/helix/src/helix_bringup/config/log_rules.yaml",
+  "rules_file": "<repo>/src/helix_bringup/config/log_rules.yaml",
   "num_rules": 5,
   "accuracy": {
     "total_cases": 22,

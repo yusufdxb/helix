@@ -24,7 +24,7 @@ TICK_HZ: float = 10.0
 
 
 class DiagnosisStateMachine:
-    """Pure state machine — unit-testable without ROS 2."""
+    """Pure state machine, unit-testable without ROS 2."""
 
     def __init__(self):
         self.current_state = STATE_IDLE

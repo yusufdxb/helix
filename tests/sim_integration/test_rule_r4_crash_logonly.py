@@ -2,7 +2,7 @@
 
 R4 semantics (rules.py): CRASH → LOG_ONLY. The SafetyEnvelope marks
 LOG_ONLY as ACCEPTED but `publish=false`, so no zero-Twist is emitted on
-/helix/cmd_vel — the recovery layer intentionally stays out of the way
+/helix/cmd_vel, the recovery layer intentionally stays out of the way
 and leaves the decision to a higher tier.
 
 REQUIREMENT: Isaac Sim bridge running before invoking.

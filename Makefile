@@ -2,7 +2,7 @@
 .PHONY: test test-sim build clean
 
 # Disable pytest plugin autoload to avoid the broken anyio/pytest-asyncio combo
-# at /home/yusuf/.local/lib/python3.10/site-packages/anyio/pytest_plugin.py
+# at <site-packages>/anyio/pytest_plugin.py
 # which fails with `No module named '_pytest.scope'` on pytest 6.2.5.
 export PYTEST_DISABLE_PLUGIN_AUTOLOAD := 1
 

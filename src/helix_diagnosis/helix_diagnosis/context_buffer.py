@@ -1,5 +1,5 @@
 """
-ContextBuffer — lifecycle node that maintains a bounded /rosout ring,
+ContextBuffer, lifecycle node that maintains a bounded /rosout ring,
 latest /helix/metrics snapshot, and latest /helix/node_health snapshot.
 Serves GetContext srv.
 """
@@ -35,7 +35,7 @@ def diagnostic_level(level) -> int:
 
 
 class RosoutRing:
-    """Pure bounded ring — unit-testable without ROS 2."""
+    """Pure bounded ring, unit-testable without ROS 2."""
 
     def __init__(self, capacity: int = ROSOUT_RING_CAPACITY):
         self._buf: Deque[str] = deque(maxlen=capacity)

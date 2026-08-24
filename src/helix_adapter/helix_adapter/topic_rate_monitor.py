@@ -1,4 +1,4 @@
-"""TopicRateMonitor — HELIX adapter lifecycle node.
+"""TopicRateMonitor, HELIX adapter lifecycle node.
 
 Subscribes to configured topics, tracks callback-arrival rate per topic over
 a rolling window, and publishes each topic's Hz as a labeled scalar metric on
@@ -34,7 +34,7 @@ _DEFAULT_TOPICS = [
     "/multiplestate",
 ]
 
-# ROS message type registry — kept small & explicit so failing imports surface
+# ROS message type registry, kept small & explicit so failing imports surface
 # at configure time, not later as KeyError in a callback.
 _TYPE_MAP = {
     "/utlidar/imu": Imu,
@@ -104,7 +104,7 @@ class TopicRateMonitor(LifecycleNode):
             Float64MultiArray, "/helix/metrics", 10)
 
         self.get_logger().info(
-            f"TopicRateMonitor configured — {len(self._windows)} topics, "
+            f"TopicRateMonitor configured, {len(self._windows)} topics, "
             f"window={window_sec}s"
         )
         return TransitionCallbackReturn.SUCCESS

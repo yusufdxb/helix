@@ -1,5 +1,5 @@
 """
-AnomalyDetector — HELIX Phase 1 fault sensing node.
+AnomalyDetector, HELIX Phase 1 fault sensing node.
 
 Subscribes to /diagnostics (DiagnosticArray) and /helix/metrics (Float64MultiArray).
 Maintains a rolling window of `window_size` samples per metric.
@@ -74,7 +74,7 @@ class AnomalyDetector(LifecycleNode):
             Float64MultiArray, "/helix/metrics", self._on_metric, 100
         )
         self.get_logger().info(
-            f"AnomalyDetector configured — zscore_threshold={self._zscore_threshold} "
+            f"AnomalyDetector configured, zscore_threshold={self._zscore_threshold} "
             f"consecutive_trigger={self._consecutive_trigger} "
             f"window_size={self._window_size} "
             f"min_anomaly_duration_s={self._min_anomaly_duration_s}"
@@ -124,7 +124,7 @@ class AnomalyDetector(LifecycleNode):
         """Process a metric from /helix/metrics; label comes from layout.dim[0].label."""
         if not msg.layout.dim:
             self.get_logger().warn(
-                "Received Float64MultiArray with no dim labels — skipping"
+                "Received Float64MultiArray with no dim labels, skipping"
             )
             return
         metric_name = msg.layout.dim[0].label
@@ -144,7 +144,7 @@ class AnomalyDetector(LifecycleNode):
         NaN handling: topic_rate_monitor emits NaN when a watched topic has
         gone silent for the full rolling window (see rate_window.rate_or_nan).
         Z-score arithmetic on NaN produces NaN, which fails every threshold
-        comparison — so without this branch a silent topic would produce zero
+        comparison, so without this branch a silent topic would produce zero
         anomalies. Treat NaN as a violation of the same shape as a z-score
         breach so that the existing consecutive_trigger + R1 path still fires.
         """
@@ -157,7 +157,7 @@ class AnomalyDetector(LifecycleNode):
             window = self._windows[metric_name]
 
             if math.isnan(value):
-                # Stale topic — don't pollute the window with NaN (would
+                # Stale topic, don't pollute the window with NaN (would
                 # poison all future z-scores) but count it as a violation.
                 self._consecutive[metric_name] += 1
                 consecutive = self._consecutive[metric_name]
@@ -167,7 +167,7 @@ class AnomalyDetector(LifecycleNode):
                     self._anomaly_start[metric_name] = now
 
                 self.get_logger().warn(
-                    f"Metric '{metric_name}' stale (NaN) — "
+                    f"Metric '{metric_name}' stale (NaN), "
                     f"consecutive violation #{consecutive}"
                 )
                 if consecutive >= self._consecutive_trigger:
@@ -194,7 +194,7 @@ class AnomalyDetector(LifecycleNode):
 
                 if std < FLAT_SIGNAL_EPSILON:
                     self.get_logger().debug(
-                        f"Metric '{metric_name}' is flat (std={std:.2e}) — skipping Z-score"
+                        f"Metric '{metric_name}' is flat (std={std:.2e}), skipping Z-score"
                     )
                 else:
                     zscore = abs((value - mean) / std)
@@ -232,14 +232,14 @@ class AnomalyDetector(LifecycleNode):
                     else:
                         if self._consecutive[metric_name] > 0:
                             self.get_logger().debug(
-                                f"Metric '{metric_name}' Z-score dropped to {zscore:.2f} — "
+                                f"Metric '{metric_name}' Z-score dropped to {zscore:.2f}, "
                                 "resetting consecutive counter"
                             )
                         self._consecutive[metric_name] = 0
                         # Reset duration tracker when metric returns to normal.
                         self._anomaly_start.pop(metric_name, None)
 
-            # Always append after evaluating — keeps baseline from being poisoned
+            # Always append after evaluating, keeps baseline from being poisoned
             window.append(value)
 
     def _emit_anomaly_fault(
@@ -291,7 +291,7 @@ class AnomalyDetector(LifecycleNode):
         msg.fault_type = "ANOMALY"
         msg.severity = 2
         msg.detail = (
-            f"Metric '{metric_name}' stale — no samples in window "
+            f"Metric '{metric_name}' stale, no samples in window "
             f"on {consecutive} consecutive checks"
         )
         msg.timestamp = time.time()

@@ -449,7 +449,7 @@ function setHold(on, t){
   el('rec-sub').textContent = on ? 'zero twist @ 20 Hz' : '/helix/cmd_vel silent';
   el('tier-rec').classList.toggle('armed', on);
   el('env-state').textContent = on ? 'HOLDING' : 'IDLE';
-  el('env-cmd').textContent = on ? 'lx 0.000  az 0.000  @ 20 Hz' : '—';
+  el('env-cmd').textContent = on ? 'lx 0.000  az 0.000  @ 20 Hz' : ', ';
   if (on) line(t, 'HOLD', 'k-hold', 'zero-twist stream opened on <b>/helix/cmd_vel</b>');
   else if (t) line(t, 'HOLD', 'k-hold', 'zero-twist stream closed');
 }
@@ -493,7 +493,7 @@ function reset(to){
   setHold(false, 0);
   el('diag-state').textContent = 'IDLE'; el('diag-sub').textContent = 'no rule matched';
   el('diag-dot').className = 'dot'; el('tier-diag').classList.remove('armed');
-  el('env-last').textContent = '—'; el('env-last').style.color = 'var(--ink)';
+  el('env-last').textContent = ', '; el('env-last').style.color = 'var(--ink)';
   clock = to; tick(to);
 }
 

@@ -1,4 +1,4 @@
-"""PoseDriftMonitor — HELIX adapter lifecycle node.
+"""PoseDriftMonitor, HELIX adapter lifecycle node.
 
 Subscribes to a ``geometry_msgs/PoseStamped`` topic, tracks 3D displacement
 between consecutive poses, and publishes the instantaneous displacement rate
@@ -52,7 +52,7 @@ class PoseDriftMonitor(LifecycleNode):
             Float64MultiArray, "/helix/metrics", 10
         )
         self.get_logger().info(
-            f"PoseDriftMonitor configured — topic={topic}"
+            f"PoseDriftMonitor configured, topic={topic}"
         )
         return TransitionCallbackReturn.SUCCESS
 
