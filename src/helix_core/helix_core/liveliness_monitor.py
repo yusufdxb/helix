@@ -18,7 +18,7 @@ one dead node. It intentionally does NOT implement the WindowedWatchdog
 variant (liveliness + deadline, tolerating N violations): that needs a
 second QoS policy (deadline) and a violation counter per node, which is a
 real extension but out of scope for proving the mechanism here. See
-docs/POSITIONING.md for the tradeoff writeup.
+docs/comparison.md for the tradeoff writeup.
 
 SCOPE NOTE: this node is net-new and is not wired into helix_bringup's
 launch files or into the nine existing lifecycle nodes by this change: that

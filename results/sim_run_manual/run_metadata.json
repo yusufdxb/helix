@@ -1,0 +1,66 @@
+{
+  "commands": {
+    "inject": [
+      "python3",
+      "scripts/sim_faults/inject_lidar_rate_drop.py",
+      "--schedule",
+      "20:10,20:0,30:10"
+    ],
+    "launch": [
+      "ros2",
+      "launch",
+      "helix_bringup",
+      "helix_closedloop.launch.py",
+      "sim_mode:=true",
+      "enable_twist_mux:=true",
+      "auto_activate_recovery:=true",
+      "recovery_enabled:=true",
+      "cmd_vel_out:=/cmd_vel"
+    ],
+    "navigate": [
+      "ros2",
+      "topic",
+      "pub",
+      "--rate",
+      "10",
+      "/nav/cmd_vel",
+      "geometry_msgs/msg/Twist",
+      "{linear: {x: 0.2}}"
+    ],
+    "record": [
+      "ros2",
+      "bag",
+      "record",
+      "-s",
+      "mcap",
+      "-o",
+      "results/sim_run_manual/bag",
+      "/helix/experiment_marker",
+      "/helix/faults",
+      "/helix/recovery_hints",
+      "/helix/recovery_actions",
+      "/helix/cmd_vel",
+      "/cmd_vel",
+      "/nav/cmd_vel",
+      "/utlidar/cloud_throttled",
+      "/utlidar/robot_odom"
+    ]
+  },
+  "duration_s": 75.0,
+  "mode": "simulation",
+  "nav_speed_m_s": 0.2,
+  "recorded_topics": [
+    "/helix/experiment_marker",
+    "/helix/faults",
+    "/helix/recovery_hints",
+    "/helix/recovery_actions",
+    "/helix/cmd_vel",
+    "/cmd_vel",
+    "/nav/cmd_vel",
+    "/utlidar/cloud_throttled",
+    "/utlidar/robot_odom"
+  ],
+  "schedule": "20:10,20:0,30:10",
+  "schema_version": 1,
+  "storage": "mcap"
+}

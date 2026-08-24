@@ -30,7 +30,7 @@ only publisher of `/helix/cmd_vel` and is gated by an enable flag, a 5 s
 per-fault cooldown, and an action allowlist. It has been run end to end on a
 live GO2 across eight lab sessions, most recently a 439 s idle run that
 produced 30 detected faults, 14 recovery hints, 14 audited recovery actions,
-and 3,064 zero-twist commands. [`docs/POSITIONING.md`](docs/POSITIONING.md) is
+and 3,064 zero-twist commands. [`docs/comparison.md`](docs/comparison.md) is
 the honest version of this paragraph: it compares HELIX against
 `diagnostic_updater`, `software_watchdogs`, `system_modes`, Nav2 recovery, and
 `twist_mux`, and says plainly where HELIX duplicates each one.
@@ -183,7 +183,7 @@ python3 -m pytest tests/test_detector_sweep.py -q
 
 ## Positioning against the ROS 2 ecosystem
 
-[`docs/POSITIONING.md`](docs/POSITIONING.md) is a package-by-package comparison
+[`docs/comparison.md`](docs/comparison.md) is a package-by-package comparison
 against `diagnostic_updater` / `diagnostic_aggregator`, `ros-safety/software_watchdogs`,
 `system_modes`, Nav2 recovery behaviors, and `twist_mux`. It names the parts of
 HELIX that plainly duplicate existing, better-maintained packages (its node

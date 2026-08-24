@@ -123,7 +123,27 @@ def evaluate(records: dict, max_detection_s: float = 10.0) -> dict:
     ))
 
     pre_odom = _window(records["odom"], drop_ts - 3.0, drop_ts - 0.1)
-    post_odom = _window(records["odom"], action["ts"] + 1.0, action["ts"] + 3.0)
+
+    # Measure the stop only while the stop is in force. R2 releases the hold
+    # once the anomaly has been clear for its quiet window, after which
+    # /nav/cmd_vel legitimately drives the robot again: measured resumption to
+    # 0.22 m/s within a second of the accepted RESUME. A fixed three second
+    # window straddles that release whenever detection ran slightly long,
+    # because detection latency shifts the accepted stop relative to the
+    # injector's fixed schedule. The check then reported a moving robot as a
+    # failure to stop, which is the opposite of what happened.
+    #
+    # The claim under test is "while HELIX holds the robot, the robot is at
+    # rest", so end the window at the release. The rest threshold is unchanged.
+    release = _first(
+        records["actions"],
+        lambda item: item["action"] == "RESUME" and item["status"] == "ACCEPTED",
+        after=action["ts"],
+    )
+    post_end = action["ts"] + 3.0
+    if release is not None:
+        post_end = min(post_end, release["ts"])
+    post_odom = _window(records["odom"], action["ts"] + 1.0, post_end)
     pre_speed = statistics.median(item["speed_m_s"] for item in pre_odom) if pre_odom else None
     post_speed = statistics.median(item["speed_m_s"] for item in post_odom) if post_odom else None
     checks.append(_check(
@@ -131,10 +151,22 @@ def evaluate(records: dict, max_detection_s: float = 10.0) -> dict:
         pre_speed is not None and pre_speed >= 0.08,
         {"samples": len(pre_odom), "median_speed_m_s": pre_speed, "minimum_m_s": 0.08},
     ))
+    # Ending the window at the release must not become a way to pass on a
+    # sliver of data: a hold too short to observe is not a demonstrated stop.
+    # Expressed as a duration rather than a sample count so it does not encode
+    # an assumption about the odometry publish rate.
+    post_span = max(0.0, post_end - (action["ts"] + 1.0))
     checks.append(_check(
         "odometry proves the robot stopped",
-        post_speed is not None and post_speed <= 0.03,
-        {"samples": len(post_odom), "median_speed_m_s": post_speed, "maximum_m_s": 0.03},
+        post_speed is not None and post_speed <= 0.03 and post_span >= 0.5,
+        {
+            "samples": len(post_odom),
+            "median_speed_m_s": post_speed,
+            "maximum_m_s": 0.03,
+            "observed_span_s": round(post_span, 3),
+            "minimum_span_s": 0.5,
+            "ended_at_release": release is not None and post_end < action["ts"] + 3.0,
+        },
     ))
 
     latencies = {
