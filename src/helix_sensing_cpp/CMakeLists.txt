@@ -75,6 +75,22 @@ if(BUILD_TESTING)
     ${CMAKE_CURRENT_SOURCE_DIR}/include
   )
 
+  # Heartbeat emitter (CRASH-detection contract with HeartbeatMonitor)
+  ament_add_gtest(test_heartbeat test/test_heartbeat.cpp)
+  target_include_directories(test_heartbeat PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+  )
+  target_link_libraries(test_heartbeat anomaly_detector_component)
+  ament_target_dependencies(test_heartbeat
+    rclcpp
+    rclcpp_lifecycle
+    rclcpp_components
+    std_msgs
+    diagnostic_msgs
+    lifecycle_msgs
+    helix_msgs
+  )
+
   # Node integration
   ament_add_gtest(test_anomaly_detector_node test/test_anomaly_detector_node.cpp)
   target_include_directories(test_anomaly_detector_node PRIVATE

@@ -9,6 +9,10 @@
 //   * subs:       /diagnostics (diagnostic_msgs/DiagnosticArray, depth 10)
 //                 /helix/metrics (std_msgs/Float64MultiArray, depth 100)
 //   * pub:        /helix/faults (helix_msgs/FaultEvent, depth 10)
+//   * pub:        /helix/heartbeat (std_msgs/String, depth 10, 10 Hz
+//                 while active). HeartbeatMonitor cannot report CRASH
+//                 for a node that never registers itself; see
+//                 heartbeat.hpp for the contract and its limits.
 //   * params:     zscore_threshold (double, default 3.0)
 //                 consecutive_trigger (int, default 3)
 //                 window_size (int, default 60)
@@ -32,6 +36,7 @@
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "std_msgs/msg/float64_multi_array.hpp"
 
+#include "helix_sensing_cpp/heartbeat.hpp"
 #include "helix_sensing_cpp/rolling_stats.hpp"
 
 namespace helix_sensing_cpp
@@ -106,6 +111,10 @@ private:
   rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr metrics_sub_;
   std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<helix_msgs::msg::FaultEvent>>
   fault_pub_;
+
+  // Constructed in the constructor (mirrors the Python node, which builds
+  // its Heartbeat in __init__), started/stopped by the activate transitions.
+  std::unique_ptr<Heartbeat> heartbeat_;
 
   rclcpp::Clock system_clock_{RCL_SYSTEM_TIME};
 };

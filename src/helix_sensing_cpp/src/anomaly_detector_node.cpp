@@ -68,6 +68,8 @@ AnomalyDetectorNode::AnomalyDetectorNode(const rclcpp::NodeOptions & options)
   declare_parameter<int>("window_size", 60);
   declare_parameter<double>("emit_cooldown_s", 1.0);
   declare_parameter<double>("min_anomaly_duration_s", 2.0);
+
+  heartbeat_ = std::make_unique<Heartbeat>(this);
 }
 
 AnomalyDetectorNode::CallbackReturn
@@ -111,15 +113,20 @@ AnomalyDetectorNode::CallbackReturn
 AnomalyDetectorNode::on_activate(const rclcpp_lifecycle::State & state)
 {
   LifecycleNode::on_activate(state);
-  RCLCPP_INFO(get_logger(), "AnomalyDetectorNode activated.");
+  heartbeat_->start();
+  RCLCPP_INFO(
+    get_logger(),
+    "AnomalyDetectorNode activated (heartbeat publishing on %s at %.1f Hz).",
+    kHeartbeatTopic, 1.0 / kHeartbeatPeriodSec);
   return CallbackReturn::SUCCESS;
 }
 
 AnomalyDetectorNode::CallbackReturn
 AnomalyDetectorNode::on_deactivate(const rclcpp_lifecycle::State & state)
 {
+  heartbeat_->stop();
   LifecycleNode::on_deactivate(state);
-  RCLCPP_INFO(get_logger(), "AnomalyDetectorNode deactivated.");
+  RCLCPP_INFO(get_logger(), "AnomalyDetectorNode deactivated (heartbeat stopped).");
   return CallbackReturn::SUCCESS;
 }
 
