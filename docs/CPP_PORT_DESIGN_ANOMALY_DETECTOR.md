@@ -15,7 +15,7 @@ Python (`rclpy`) is the current RAM and CPU liability on the onboard Jetson Orin
 
 - Session 7 1-hour plateau: **257 → 282 MB RSS** across 6 lifecycle nodes (~47 MB per process).
 - Adapter CPU: **~48 % of one core** with `/utlidar/imu` in the topic list (Session 7 §17).
-- `helix_anomaly_detector` specifically burns 1.80 %-2.21 % CPU and contributes ~45 MB RSS (rclpy runtime, interpreter, bound msg types).
+- `helix_anomaly_detector` specifically burns 1.80 %-2.21 % CPU and holds 37.52 MB RSS at start rising to 42.51 MB at the 1-hr plateau (rclpy runtime, interpreter, bound msg types). Per-node source: `docs/GO2_HARDWARE_EVIDENCE.md` §15. The "~47 MB per process" figure above is the 6-node mean, not this node.
 
 The Python Z-score maths is already fast (0.049 ms mean per sample, Session 7 §16). The cost is **executor dispatch, Python msg deserialization, and the interpreter's baseline RSS**: none of which the algorithm owns. A 1:1 C++ rewrite eliminates that overhead without touching behavior.
 
@@ -349,7 +349,7 @@ Python uses IEEE 754 double precision; C++ `double` is the same type on the Jets
 
 | Metric | Python (Session 7) | Target | Expected C++ |
 |---|---:|---:|---:|
-| Per-node RSS | ~47 MB | < 14 MB | ~8-10 MB |
+| Per-node RSS | 37.52-42.51 MB (§15, this node) | < 30 % of baseline = 11.26-12.75 MB | ~8-10 MB |
 | CPU on one Jetson core | 1.80-2.21 % | < 10 % | < 0.3 % |
 | Per-sample Z-score latency (mean) | 0.0488 ms | < 0.02 ms | < 0.005 ms |
 | Per-sample Z-score latency (p95) | 0.0506 ms | < 0.02 ms | < 0.010 ms |
