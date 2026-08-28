@@ -33,6 +33,8 @@ using namespace std::chrono_literals;
 namespace
 {
 
+constexpr const char * kNodeUnderTest = "helix_anomaly_detector";
+
 class HeartbeatFixture : public ::testing::Test
 {
 protected:
@@ -45,6 +47,13 @@ protected:
     sub_ = listener_->create_subscription<std_msgs::msg::String>(
       kHeartbeatTopic, rclcpp::QoS(10).reliable(),
       [this](const std_msgs::msg::String::SharedPtr msg) {
+        // /helix/heartbeat is a shared bus: every HELIX node publishes its
+        // own name on it, and colcon runs test binaries concurrently. Count
+        // only the node under test, or a sibling suite's beats leak in and
+        // the silence assertions below become meaningless.
+        if (msg->data != kNodeUnderTest) {
+          return;
+        }
         std::lock_guard<std::mutex> lock(mutex_);
         beats_.push_back(msg->data);
       });
@@ -154,7 +163,7 @@ TEST_F(HeartbeatFixture, HeartbeatPayloadIsNodeName)
 
   ASSERT_TRUE(spin_until(node, [this]() {return beat_count() >= 1;}, 3000ms));
   for (const auto & data : beats_copy()) {
-    EXPECT_EQ(data, "helix_anomaly_detector");
+    EXPECT_EQ(data, kNodeUnderTest);
   }
 }
 

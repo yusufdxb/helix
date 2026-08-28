@@ -81,6 +81,12 @@ if(BUILD_TESTING)
     ${CMAKE_CURRENT_SOURCE_DIR}/include
   )
   target_link_libraries(test_heartbeat anomaly_detector_component)
+  # Own DDS domain: test_anomaly_detector_node activates nodes with the
+  # same name, and ctest runs the binaries concurrently, so its beats
+  # would otherwise be counted here.
+  set_tests_properties(test_heartbeat PROPERTIES
+    ENVIRONMENT "ROS_DOMAIN_ID=87"
+  )
   ament_target_dependencies(test_heartbeat
     rclcpp
     rclcpp_lifecycle
@@ -105,6 +111,10 @@ if(BUILD_TESTING)
     diagnostic_msgs
     lifecycle_msgs
     helix_msgs
+  )
+  # Own DDS domain, see the note on test_heartbeat above.
+  set_tests_properties(test_anomaly_detector_node PROPERTIES
+    ENVIRONMENT "ROS_DOMAIN_ID=86"
   )
 endif()
 
