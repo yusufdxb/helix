@@ -25,6 +25,7 @@ DEFAULT_ZSCORE_THRESHOLD: float = 3.0
 DEFAULT_CONSECUTIVE_TRIGGER: int = 3
 DEFAULT_WINDOW_SIZE: int = 60
 DEFAULT_MIN_ANOMALY_DURATION_S: float = 2.0
+DEFAULT_EMIT_COOLDOWN_S: float = 1.0
 FLAT_SIGNAL_EPSILON: float = 1e-6
 
 
@@ -39,6 +40,7 @@ class AnomalyDetector(LifecycleNode):
         self.declare_parameter("zscore_threshold", DEFAULT_ZSCORE_THRESHOLD)
         self.declare_parameter("consecutive_trigger", DEFAULT_CONSECUTIVE_TRIGGER)
         self.declare_parameter("window_size", DEFAULT_WINDOW_SIZE)
+        self.declare_parameter("emit_cooldown_s", DEFAULT_EMIT_COOLDOWN_S)
         self.declare_parameter(
             "min_anomaly_duration_s", DEFAULT_MIN_ANOMALY_DURATION_S
         )
@@ -49,6 +51,8 @@ class AnomalyDetector(LifecycleNode):
         self._consecutive: Dict[str, int] = {}
         # metric_name -> monotonic time when anomaly streak started (None = not active)
         self._anomaly_start: Dict[str, float] = {}
+        # metric_name -> wall-clock time of the last emitted FaultEvent
+        self._last_emit: Dict[str, float] = {}
         self._data_lock: threading.Lock = threading.Lock()
 
         self._fault_pub = None
@@ -62,9 +66,20 @@ class AnomalyDetector(LifecycleNode):
         self._zscore_threshold = self.get_parameter("zscore_threshold").value
         self._consecutive_trigger = self.get_parameter("consecutive_trigger").value
         self._window_size = self.get_parameter("window_size").value
+        self._emit_cooldown_s = self.get_parameter("emit_cooldown_s").value
         self._min_anomaly_duration_s = self.get_parameter(
             "min_anomaly_duration_s"
         ).value
+
+        # deque(maxlen=0) silently never fills, so a non-positive window_size
+        # would leave the detector permanently blind instead of failing. The
+        # C++ port already refused to configure here; both sides now do.
+        if self._window_size <= 0:
+            self.get_logger().error(
+                f"window_size must be > 0 (got {self._window_size}); "
+                "refusing to configure"
+            )
+            return TransitionCallbackReturn.FAILURE
 
         self._fault_pub = self.create_publisher(FaultEvent, "/helix/faults", 10)
         self._diagnostics_sub = self.create_subscription(
@@ -77,6 +92,7 @@ class AnomalyDetector(LifecycleNode):
             f"AnomalyDetector configured, zscore_threshold={self._zscore_threshold} "
             f"consecutive_trigger={self._consecutive_trigger} "
             f"window_size={self._window_size} "
+            f"emit_cooldown_s={self._emit_cooldown_s} "
             f"min_anomaly_duration_s={self._min_anomaly_duration_s}"
         )
         return TransitionCallbackReturn.SUCCESS
@@ -105,6 +121,7 @@ class AnomalyDetector(LifecycleNode):
             self._windows.clear()
             self._consecutive.clear()
             self._anomaly_start.clear()
+            self._last_emit.clear()
         return TransitionCallbackReturn.SUCCESS
 
     # ── Callbacks ────────────────────────────────────────────────────────────
@@ -176,7 +193,14 @@ class AnomalyDetector(LifecycleNode):
                         self._min_anomaly_duration_s <= 0.0
                         or elapsed >= self._min_anomaly_duration_s
                     ):
-                        self._emit_stale_fault(metric_name, consecutive)
+                        if self._cooldown_expired(metric_name):
+                            self._last_emit[metric_name] = time.time()
+                            self._emit_stale_fault(metric_name, consecutive)
+                        else:
+                            self.get_logger().debug(
+                                f"Metric '{metric_name}' stale ANOMALY suppressed "
+                                f"by emit_cooldown_s={self._emit_cooldown_s}"
+                            )
                     else:
                         self.get_logger().debug(
                             f"Metric '{metric_name}' stale ANOMALY suppressed by "
@@ -218,10 +242,18 @@ class AnomalyDetector(LifecycleNode):
                                 self._min_anomaly_duration_s <= 0.0
                                 or elapsed >= self._min_anomaly_duration_s
                             ):
-                                self._emit_anomaly_fault(
-                                    metric_name, value, mean, std, zscore,
-                                    consecutive,
-                                )
+                                if self._cooldown_expired(metric_name):
+                                    self._last_emit[metric_name] = time.time()
+                                    self._emit_anomaly_fault(
+                                        metric_name, value, mean, std, zscore,
+                                        consecutive,
+                                    )
+                                else:
+                                    self.get_logger().debug(
+                                        f"Metric '{metric_name}' ANOMALY suppressed "
+                                        f"by emit_cooldown_s="
+                                        f"{self._emit_cooldown_s}"
+                                    )
                             else:
                                 self.get_logger().debug(
                                     f"Metric '{metric_name}' ANOMALY suppressed by "
@@ -241,6 +273,23 @@ class AnomalyDetector(LifecycleNode):
 
             # Always append after evaluating, keeps baseline from being poisoned
             window.append(value)
+
+    def _cooldown_expired(self, metric_name: str) -> bool:
+        """True when this metric may emit again.
+
+        emit_cooldown_s <= 0.0 means legacy flood behavior: emit on every
+        sample once the trigger streak is reached. Otherwise a metric emits
+        at most once per emit_cooldown_s. Wall clock (time.time()), matching
+        the C++ port's system_time_now() so the two gates agree.
+
+        Caller must hold self._data_lock.
+        """
+        if self._emit_cooldown_s <= 0.0:
+            return True
+        last = self._last_emit.get(metric_name)
+        if last is None:
+            return True
+        return (time.time() - last) >= self._emit_cooldown_s
 
     def _emit_anomaly_fault(
         self,

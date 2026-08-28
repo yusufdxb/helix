@@ -19,8 +19,11 @@ def generate_launch_description():
     use_cpp = LaunchConfiguration("use_cpp_anomaly")
     params_file = LaunchConfiguration("params_file")
 
+    # Single source of truth: helix_bringup ships the only tracked
+    # helix_params.yaml. helix_sensing_cpp deliberately does not carry a
+    # copy, because the two copies drifted.
     default_params = PathJoinSubstitution(
-        [FindPackageShare("helix_sensing_cpp"), "config", "helix_params.yaml"]
+        [FindPackageShare("helix_bringup"), "config", "helix_params.yaml"]
     )
 
     return LaunchDescription([

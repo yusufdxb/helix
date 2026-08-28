@@ -25,6 +25,9 @@
   <depend>lifecycle_msgs</depend>
   <depend>helix_msgs</depend>
 
+  <!-- The launch file resolves the shared helix_params.yaml out of
+       helix_bringup's share dir; this package ships no config copy. -->
+  <exec_depend>helix_bringup</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
 

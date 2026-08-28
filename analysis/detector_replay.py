@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import ast
 import math
+import types
 import statistics
 from collections import deque
 from dataclasses import dataclass, field
@@ -43,27 +44,49 @@ STOP_METRIC_PREFIX = "rate_hz/utlidar"
 # ── shipped-code loader (for the equivalence proof) ──────────────────────────
 
 
-def load_shipped_process_sample() -> Callable:
-    """Return the real ``AnomalyDetector._process_sample`` as a bare function.
+# Methods lifted verbatim out of the shipped detector. Anything the replay
+# harness needs to reproduce must be lifted rather than reimplemented here,
+# otherwise the harness drifts from the node it claims to mirror. The
+# emit-cooldown gate is lifted for exactly that reason.
+SHIPPED_METHODS = ("_process_sample", "_cooldown_expired")
 
-    Parses the shipped source, extracts the module-level constants plus that
-    single method, and compiles them in a namespace holding only stdlib names.
-    No rclpy, no helix_msgs, no node instantiation.
+
+def load_shipped_methods() -> Dict[str, Callable]:
+    """Return the real ``AnomalyDetector`` methods in SHIPPED_METHODS.
+
+    Parses the shipped source, extracts the module-level constants plus those
+    methods, and compiles them in a namespace holding only stdlib names.
+    No rclpy, no helix_msgs, no node instantiation. All returned functions
+    share one globals dict, so rebinding ``time`` on any of them rebinds it
+    for all.
     """
     tree = ast.parse(SHIPPED_DETECTOR.read_text())
     body: List[ast.stmt] = []
+    found = set()
     for node in tree.body:
         if isinstance(node, ast.AnnAssign) or isinstance(node, ast.Assign):
             body.append(node)
         if isinstance(node, ast.ClassDef) and node.name == "AnomalyDetector":
             for item in node.body:
-                if isinstance(item, ast.FunctionDef) and item.name == "_process_sample":
+                if isinstance(item, ast.FunctionDef) and item.name in SHIPPED_METHODS:
                     body.append(item)
+                    found.add(item.name)
+    missing = set(SHIPPED_METHODS) - found
+    if missing:
+        raise RuntimeError(
+            f"shipped AnomalyDetector no longer defines {sorted(missing)}; "
+            "the replay harness must be updated to match it"
+        )
     module = ast.Module(body=body, type_ignores=[])
     ast.fix_missing_locations(module)
     namespace: Dict[str, object] = {"math": math, "deque": deque}
     exec(compile(module, "<shipped_anomaly_detector>", "exec"), namespace)
-    return namespace["_process_sample"]  # type: ignore[return-value]
+    return {name: namespace[name] for name in SHIPPED_METHODS}  # type: ignore[misc]
+
+
+def load_shipped_process_sample() -> Callable:
+    """Return the real ``AnomalyDetector._process_sample`` as a bare function."""
+    return load_shipped_methods()["_process_sample"]
 
 
 class _NullLogger:
@@ -99,12 +122,17 @@ class ShippedShim:
         consecutive_trigger: int = 3,
         window_size: int = 60,
         min_anomaly_duration_s: float = 2.0,
+        emit_cooldown_s: float = 0.0,
     ) -> None:
         self._clock = clock
         self._zscore_threshold = zscore_threshold
         self._consecutive_trigger = consecutive_trigger
         self._window_size = window_size
         self._min_anomaly_duration_s = min_anomaly_duration_s
+        # Default 0.0 (legacy flood) so the sweep keeps measuring the
+        # detection parameters rather than the emission rate limiter.
+        self._emit_cooldown_s = emit_cooldown_s
+        self._last_emit: Dict[str, float] = {}
         self._windows: Dict[str, Deque[float]] = {}
         self._consecutive: Dict[str, int] = {}
         self._anomaly_start: Dict[str, float] = {}
@@ -112,7 +140,17 @@ class ShippedShim:
         self.emitted: List[dict] = []
         # The shipped source calls ``time.monotonic()``; give it a module-like
         # object whose monotonic() is our replay clock.
-        self._time_stub = type("_T", (), {"monotonic": staticmethod(lambda: self._clock())})()
+        # Both monotonic() and time() resolve to the replay clock: the shipped
+        # code uses monotonic for the duration gate and wall time for the
+        # cooldown gate, and a replay needs both to be deterministic.
+        self._time_stub = type(
+            "_T",
+            (),
+            {
+                "monotonic": staticmethod(lambda: self._clock()),
+                "time": staticmethod(lambda: self._clock()),
+            },
+        )()
 
     def get_logger(self) -> _NullLogger:
         return _NullLogger()
@@ -148,11 +186,16 @@ class ShippedShim:
 
 def run_shipped(samples: Iterable[tuple], **params) -> List[dict]:
     """Replay ``(t, metric, value)`` samples through the SHIPPED method body."""
-    process = load_shipped_process_sample()
+    methods = load_shipped_methods()
+    process = methods["_process_sample"]
     clock_box = {"t": 0.0}
     shim = ShippedShim(clock=lambda: clock_box["t"], **params)
-    # Rebind the global ``time`` the shipped code closes over.
+    # Rebind the global ``time`` the shipped code closes over (shared globals,
+    # so this covers every lifted method).
     process.__globals__["time"] = shim._time_stub
+    # Bind the lifted cooldown gate as a real method of the shim, so the gate
+    # under test is the shipped one and not a copy.
+    shim._cooldown_expired = types.MethodType(methods["_cooldown_expired"], shim)
     for t, metric, value in samples:
         clock_box["t"] = float(t)
         process(shim, metric, float("nan") if value is None else float(value))
@@ -210,12 +253,18 @@ class DetectorConfig:
     consecutive_trigger: int = 3
     window_size: int = 60
     min_anomaly_duration_s: float = 2.0
+    # 0.0 = legacy flood, the historical sweep behavior. Kept out of label()
+    # unless set, so existing sweep labels and cached results stay comparable.
+    emit_cooldown_s: float = 0.0
 
     def label(self) -> str:
-        return (
+        base = (
             f"{self.statistic}/thr={self.threshold:g}/k={self.consecutive_trigger}"
             f"/W={self.window_size}/dur={self.min_anomaly_duration_s:g}"
         )
+        if self.emit_cooldown_s:
+            base += f"/cool={self.emit_cooldown_s:g}"
+        return base
 
 
 @dataclass

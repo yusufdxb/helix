@@ -56,11 +56,6 @@ install(DIRECTORY launch
   OPTIONAL
 )
 
-install(DIRECTORY config
-  DESTINATION share/${PROJECT_NAME}
-  OPTIONAL
-)
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # Disable copyright check (no LICENSE in package): other linters still run.

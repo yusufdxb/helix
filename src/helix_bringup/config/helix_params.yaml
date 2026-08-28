@@ -1,3 +1,16 @@
+# HELIX runtime parameters, single source of truth.
+#
+# This file is the ONLY tracked helix_params.yaml in the workspace. Both
+# AnomalyDetector implementations load it:
+#   * Python: helix_core.anomaly_detector
+#   * C++:    helix_sensing_cpp::AnomalyDetectorNode
+# helix_sensing_cpp used to ship its own copy, and the two drifted (the C++
+# copy carried emit_cooldown_s and a different Session 8 comment, and had
+# dropped the heartbeat_monitor and log_parser blocks entirely). Launch files
+# in both packages now resolve this path via
+# FindPackageShare("helix_bringup"). tests/test_param_parity.py fails if a
+# second copy reappears or if the two node implementations drift apart.
+
 helix_heartbeat_monitor:
   ros__parameters:
     heartbeat_timeout_sec: 0.3
@@ -12,8 +25,15 @@ helix_anomaly_detector:
     # Session 8 observed real anomalies land well above 4.0 (z=6.7 IMU,
     # z=5.2 cloud, z=21 startup), so the headroom is real.
     zscore_threshold: 4.0
+    # Consecutive violations required before a FaultEvent is considered.
     consecutive_trigger: 3
+    # Rolling window length in samples. Must be > 0: both nodes refuse to
+    # configure otherwise.
     window_size: 60
+    # Seconds between FaultEvent emissions per metric. 0.0 restores the
+    # legacy flood behavior (emit on every sample once the trigger streak
+    # is reached).
+    emit_cooldown_s: 1.0
     # Minimum seconds an anomaly must persist before emitting a fault.
     # Filters transient idle-jitter spikes while still catching sustained
     # faults. Set to 0.0 to disable (immediate emission, legacy behavior).
