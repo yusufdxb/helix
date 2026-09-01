@@ -216,6 +216,26 @@ TEST_F(HeartbeatFixture, DeactivateStopsHeartbeat)
     << "node kept publishing heartbeats after deactivation";
 }
 
+// Python Heartbeat.start() creates a fresh timer after stop() destroys the
+// previous one. The C++ lifecycle path must support the same reactivation.
+TEST_F(HeartbeatFixture, ReactivationRestartsHeartbeat)
+{
+  auto node = make_node();
+  node->configure();
+  node->activate();
+  ASSERT_TRUE(spin_until(node, [this]() {return beat_count() >= 2;}, 3000ms));
+
+  node->deactivate();
+  // Drain any beat already queued in DDS before measuring the second active
+  // period, then discard the first period's observations.
+  spin_for(node, 300ms);
+  clear_beats();
+
+  node->activate();
+  EXPECT_TRUE(spin_until(node, [this]() {return beat_count() >= 2;}, 3000ms))
+    << "node did not resume heartbeats after reactivation";
+}
+
 int main(int argc, char ** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);

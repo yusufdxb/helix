@@ -208,7 +208,7 @@ void AnomalyDetectorNode::process_sample(const std::string & metric_name, double
   // threshold comparison, so without this branch a silent topic produces
   // zero anomalies. Treat NaN as a violation of the same shape as a
   // z-score breach (same counter, same consecutive_trigger gate, same
-  // cooldown); do NOT push NaN to RollingStats — it would poison every
+  // cooldown); do NOT push NaN to RollingStats, it would poison every
   // future mean/std for this metric.
   //
   // Mirrors helix_core.anomaly_detector._process_sample's isnan branch
@@ -259,7 +259,7 @@ void AnomalyDetectorNode::process_sample(const std::string & metric_name, double
   }
 
   // Evaluate Z-score against the CURRENT window (before push), so a streak
-  // of anomalies doesn't poison its own baseline — matches Python.
+  // of anomalies doesn't poison its own baseline, matches Python.
   const ZScoreResult r = state.stats.evaluate(value);
 
   const double mono_now = steady_time_now();

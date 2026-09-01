@@ -1,7 +1,7 @@
 """
-Launch anomaly detector — C++ port gated behind use_cpp_anomaly arg.
+Launch anomaly detector: C++ port gated behind use_cpp_anomaly arg.
 
-Default is `use_cpp_anomaly:=false` — Python stays the default until
+Default is `use_cpp_anomaly:=false`, Python stays the default until
 hardware parity is re-confirmed on the Jetson with a real rosbag. Set
 the arg true to launch the C++ lifecycle component instead. Both paths
 honor the same config file (same param names).
@@ -54,7 +54,7 @@ def generate_launch_description():
             output="screen",
         ),
 
-        # Python default path — delegates to helix_core's console script.
+        # Python default path, delegates to helix_core's console script.
         Node(
             package="helix_core",
             executable="helix_anomaly_detector",

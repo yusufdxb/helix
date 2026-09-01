@@ -2,7 +2,7 @@
 //
 // Use of this source code is governed by an MIT-style license.
 //
-// AnomalyDetectorNode — rclcpp_lifecycle C++ port of the HELIX Phase 1
+// AnomalyDetectorNode: rclcpp_lifecycle C++ port of the HELIX Phase 1
 // Python anomaly detector (helix_core.anomaly_detector). Drop-in
 // behavioral replacement:
 //   * node name:  helix_anomaly_detector
@@ -86,11 +86,11 @@ private:
   // z-score path so R1 in helix_diagnosis catches both without a new rule.
   void emit_stale_fault(const std::string & metric_name, int consecutive);
 
-  // Wall-clock in seconds since epoch — RCL_SYSTEM_TIME matches
+  // Wall-clock in seconds since epoch. RCL_SYSTEM_TIME matches
   // Python time.time() for the FaultEvent.timestamp field.
   double system_time_now();
 
-  // Steady (monotonic) clock in seconds — used for duration gating so
+  // Steady (monotonic) clock in seconds, used for duration gating so
   // that system-clock adjustments don't affect anomaly timing.
   double steady_time_now();
 
