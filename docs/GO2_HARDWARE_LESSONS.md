@@ -1,5 +1,16 @@
 # GO2 Hardware Lessons
 
+> **SUPERSEDED IN PART, 2026-09-02.** This document was written before HELIX had any
+> access to the robot, so its claims are inferences from documentation and from the topic
+> landscape, not measurements. `docs/GO2_FIELD_NOTES.md` records what was actually
+> measured on a live Go2 EDU with a Jetson Orin NX payload on 2026-09-01 and 2026-09-02.
+> **Where the two disagree, the field notes win.** Known corrections: the topic surface is
+> 109 topics, not "over 122"; the DDS question in section 4 is answered
+> (`rmw_cyclonedds_cpp` with the interface pinned to the payload's robot-facing NIC, which
+> fails silently if the name is wrong); and section 6's "no SDK integration" is no longer
+> a blocker, because the raw `unitree_api/msg/Request` path needs no SDK to observe or to
+> command. Sections 1, 2, 3, 5 and 7 still stand as written.
+
 Concrete reasons the current HELIX design does not transfer cleanly to the Unitree GO2 with a Jetson Orin companion computer, based on direct inspection of the GO2's ROS 2 topic landscape and development experience on the Jetson.
 
 ## 1. Custom Message Types
