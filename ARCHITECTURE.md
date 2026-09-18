@@ -11,7 +11,8 @@ three HELIX topics:
 |---|---|---|---|
 | Sense | `helix_core`, `helix_sensing_cpp`, `helix_adapter` | live ROS 2 graph, `/helix/metrics` | `/helix/faults` (FaultEvent) |
 | Diagnose | `helix_diagnosis` | `/helix/faults` | `/helix/recovery_hints` (RecoveryHint) |
-| Recover | `helix_recovery` | `/helix/recovery_hints` | `/helix/cmd_vel` (Twist), `/helix/recovery_actions` (audit) |
+| Recover | `helix_recovery` | `/helix/recovery_hints` | `/helix/hold` (HelixHold state), `/helix/recovery_actions` (audit) |
+| Arbitrate | `helix_arbiter` | `/helix/hold`, `/teleop/cmd_vel`, `/nav/cmd_vel` | `/cmd_vel` (Twist, sole publisher), `/helix/arbiter/status` |
 | Explain | `helix_explanation` | `/helix/faults` | operator-facing summaries (advisory, off the safety path) |
 
 The overview diagram lives in the project README (`## Architecture`); this
@@ -71,12 +72,14 @@ commands. It consumes `RecoveryHint` messages, applies the `SafetyEnvelope`
 on every decision (`ACCEPTED`, `SUPPRESSED_DISABLED`,
 `SUPPRESSED_ALLOWLIST`, `SUPPRESSED_COOLDOWN`).
 
-When holding a STOP, the node publishes a literal zero `Twist` to
-`/helix/cmd_vel` at 20 Hz. The intended downstream is `twist_mux`, which
-arbitrates HELIX (priority 100) against an operator joystick
-(`/teleop/cmd_vel`, priority 200, which always wins) and the autonomy stack
-(`/nav/cmd_vel`, priority 50). RESUME is exempt from cooldown so a safety
-stop can never suppress its own release.
+The node publishes its hold state on `/helix/hold` at 20 Hz for as long as it
+is active, holding or not. `helix_arbiter`, the single publisher of
+`/cmd_vel`, forces its output to zero while that state is asserted, stale, or
+missing. RESUME clears the hold and never produces velocity. RESUME is exempt
+from cooldown, and a STOP that arrives while not holding is never cooled down.
+The old zero-twist on `/helix/cmd_vel` for `twist_mux` is opt-in legacy
+(`enable_twist_mux:=true`); see [`docs/MOTION_ARBITRATION.md`](docs/MOTION_ARBITRATION.md)
+for why `twist_mux` cannot stop the robot.
 
 `auto_activate_recovery` is `false` by default in the bringup; recovery is
 intentionally opt-in.
@@ -106,8 +109,9 @@ provides:
 - `helix_adapter.launch.py` does the same for the three `helix_adapter`
   nodes.
 - `helix_closedloop.launch.py` brings up the full Sense + Adapter +
-  Diagnose + Recover stack, plus an optional `twist_mux` with the canonical
-  config at `src/helix_bringup/config/twist_mux.yaml`.
+  Diagnose + Recover stack plus `helix_arbiter` (auto-activated; it holds
+  zero until recovery is live). `enable_twist_mux:=true` swaps in the legacy
+  `twist_mux` path instead.
 - `fault_injector` publishes synthetic anomalies for local testing.
 
 ## Design Choices
@@ -126,14 +130,16 @@ unit tests without an `rclpy` spin (allowlist, cooldown, RESUME exemption,
 disabled rejection). This is what makes the recovery tier auditable from
 the test suite alone.
 
-### Recovery is the only `cmd_vel` publisher
+### HELIX holds; it never commands velocity
 
-By design, only `helix_recovery` writes to `/helix/cmd_vel`. The intended
-downstream is `twist_mux` arbitrating HELIX against teleop and the autonomy
-stack, so a node crash here results in `twist_mux` timing the input out and
-emitting zero rather than an indeterminate command. The fail-safe behaviour
-is asserted in `test_twist_mux_model.py`; hardware verification against the
-real `twist_mux` under total input dropout is still owed.
+`helix_arbiter` is the only `/cmd_vel` publisher, and HELIX enters it as a
+hold state, not as a competing velocity source. An earlier version of this
+section claimed that a recovery crash would make `twist_mux` time out and
+emit zero. That is false: measured against the real twist_mux 4.3.0, it
+publishes nothing when every input is stale, so the consumer keeps its last
+command. The arbiter instead publishes on a timer and treats a missing or
+stale HELIX state as a hold (recovery SIGKILL to zero output: 475 ms median,
+off-robot).
 
 ### RESUME is exempt from cooldown
 
@@ -152,8 +158,9 @@ audited actions, 3,064 zero-twist commands in a 7m19s bag).
 
 What is *not* validated: continuous field deployment, multi-day stability,
 and physical actuation closure. `/helix/cmd_vel` had zero downstream
-subscribers in Session 8; wiring it through `twist_mux` on the robot is the
-next milestone.
+subscribers in Session 8. The motion path is now closed in software and
+verified off-robot; the bounded hardware procedure is
+[`docs/HW_MOTION_TEST.md`](docs/HW_MOTION_TEST.md).
 
 Full evidence: [`docs/GO2_HARDWARE_EVIDENCE.md`](GO2_HARDWARE_EVIDENCE.md).
 Honest limits: [`docs/LIMITATIONS.md`](LIMITATIONS.md).

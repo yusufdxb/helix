@@ -25,9 +25,10 @@ Diagnostics get reported, watchdogs catch dead nodes, navigation has its own
 recovery behaviors, and a mux arbitrates whose `/cmd_vel` wins, but nothing
 closes the loop from detection through a policy decision to a gated actuation
 as one system with one safety envelope. HELIX is that loop: four ROS 2
-lifecycle tiers, SENSE to CONTEXT to DIAGNOSE to RECOVER, where RECOVER is the
-only publisher of `/helix/cmd_vel` and is gated by an enable flag, a 5 s
-per-fault cooldown, and an action allowlist. It has been run end to end on a
+lifecycle tiers, SENSE to CONTEXT to DIAGNOSE to RECOVER, where RECOVER is
+gated by an enable flag, a 5 s per-fault cooldown, and an action allowlist,
+and asserts a hold on a single motion arbiter rather than publishing
+velocity itself. It has been run end to end on a
 live GO2 across eight lab sessions, most recently a 439 s idle run that
 produced 30 detected faults, 14 recovery hints, 14 audited recovery actions,
 and 3,064 zero-twist commands. [`docs/comparison.md`](docs/comparison.md) is
@@ -42,10 +43,16 @@ the honest version of this paragraph: it compares HELIX against
   RECOVER emits an audited, allowlisted, cooldown-gated action. Session 8
   reproduced this 14 times with no allowlist or cooldown violation.
 - **Not proven**: physical stopping. `/helix/cmd_vel` had zero downstream
-  subscribers during Session 8, so STOP_AND_HOLD is a real, audited decision
-  that lands on a topic nothing is listening to. It has not yet been wired
-  through a `twist_mux` fallback to the motors. "The robot holds" is proven
-  through the software path only.
+  subscribers during Session 8, and the planned `twist_mux` fallback turned out
+  to be unsafe (it goes silent on idle and lock, and forwards NaN). The path
+  is now closed **in software**: `helix_arbiter` is the single authoritative
+  velocity output, HELIX forces it to zero through a hold state, and
+  `helix_go2_sport_sink` turns it into GO2 StopMove/Move requests. This is
+  verified off-robot (20 harness scenarios, and a replay of Session 8's
+  real faults with every accepted STOP reaching a zero output, median 1.0 ms).
+  Stage E of [`docs/HW_MOTION_TEST.md`](docs/HW_MOTION_TEST.md) is the one
+  step left to prove the robot physically stops. See
+  [`docs/MOTION_ARBITRATION.md`](docs/MOTION_ARBITRATION.md).
 - **Found and fixed, not assumed away**: the CONTEXT tier's `ContextBuffer`
   crashed roughly one second after activation in every prior session,
   including hardware, on an `rclpy` detail (`DiagnosticStatus.level` arrives
@@ -202,7 +209,8 @@ duplicates cannot be trusted about what it does not.
 | **Sense, C++ port** (`helix_sensing_cpp`) | work in progress | 30-min hardware parity run: -56% RSS, -60% CPU vs Python, though 44% RSS missed the 30% design-doc target. Launch-gated (`use_cpp_anomaly=false`). |
 | **Context** (`helix_diagnosis.context_buffer`) | fixed, re-verify on hardware | Crashed roughly 1 s after activation in every prior session on an `rclpy` bytes/int detail. Fixed and unit-tested; not yet re-confirmed on a live GO2. |
 | **Diagnose** (`helix_diagnosis`) | work in progress | Closed-loop validated on a live GO2 in Session 8, 14/14 hints correctly ruled. |
-| **Recover** (`helix_recovery`) | work in progress | Validated end to end in Session 8: 14 hints consumed, allowlist and cooldown audited, 3,064 zero-twist commands published. Caveat: `/helix/cmd_vel` has 0 downstream subscribers, so STOP_AND_HOLD is currently a void publish, not yet wired to a `twist_mux` fallback. |
+| **Recover** (`helix_recovery`) | work in progress | Validated end to end in Session 8: 14 hints consumed, allowlist and cooldown audited. Session 8's `/helix/cmd_vel` had 0 subscribers. Recovery now asserts `/helix/hold` on `helix_arbiter`; verified off-robot, hardware stage E pending. |
+| **Arbitrate** (`helix_arbiter`) | software-verified | Single authoritative velocity output plus GO2 sport sink. 20 real-process scenarios, Session 8 replay, A-F rehearsal against a fake GO2. Not yet run on the robot. |
 | **Explain** (`helix_explanation`) | work in progress | 26 unit tests green. Ships `llm_enabled=false`; Jetson `llama-server` deployment pending. |
 
 Last stable release without the closed-loop stack:
@@ -214,12 +222,13 @@ self-healing work is tagged
 
 | Package | Language | Tier | Contents |
 |---|---|---|---|
-| `helix_msgs` | msg | shared | `FaultEvent`, `RecoveryHint`, `RecoveryAction`, `GetContext` srv |
+| `helix_msgs` | msg | shared | `FaultEvent`, `RecoveryHint`, `RecoveryAction`, `HelixHold`, `ArbiterStatus`, `GetContext` srv |
 | `helix_core` | Python | Sense | `anomaly_detector`, `heartbeat_monitor`, `log_parser` (reference implementation) |
 | `helix_sensing_cpp` | C++ | Sense | C++ port of `anomaly_detector` (RollingStats kernel + LifecycleNode component). Launch-gated; Python stays default until hardware parity is re-confirmed. |
 | `helix_adapter` | Python | Sense | Lifecycle nodes bridging robot-specific telemetry (topic-rate monitor, JSON state parser, pose drift) to `/helix/metrics` |
 | `helix_diagnosis` | Python | Context, Diagnose | `context_buffer` (rosout ring + metric/health snapshot), `diagnosis_node` (IDLE / STOP_AND_HOLD state machine), pure-function `rules` |
-| `helix_recovery` | Python | Recover | `recovery_node` with `SafetyEnvelope` (enable, cooldown, allowlist). Only publisher of `cmd_vel`. |
+| `helix_recovery` | Python | Recover | `recovery_node` with `SafetyEnvelope` (enable, cooldown, allowlist). Publishes the `/helix/hold` state, never a velocity. |
+| `helix_arbiter` | Python | Arbitrate | `helix_arbiter` (sole `/cmd_vel` publisher), `helix_go2_sport_sink`, `helix_preflight` (GO/NO-GO), `helix_hw_stage` (gated A-F runner), `helix_trace`, `helix_fake_go2` (rehearsal only). |
 | `helix_explanation` | Python | Explain | `llm_explainer` and `llm_client`: llama-server sidecar client, `response_format: json_schema`, ThreadPoolExecutor, deterministic fallback. Advisory only. |
 | `helix_bringup` | Python | Ops | Launch files, YAML config, `fault_injector` |
 
@@ -282,9 +291,10 @@ Full evidence, scope, and limitations: [`docs/GO2_HARDWARE_EVIDENCE.md`](docs/GO
 HELIX ships as a public repo and demo video: a working self-healing system
 that other roboticists can install and adapt. Forward pillars:
 
-1. **Close the recovery loop physically.** Wire `/helix/cmd_vel` through a
-   `twist_mux` fallback so STOP_AND_HOLD reaches the robot, not a void
-   publish. This is the single biggest gap between "proven" and "true" above.
+1. **Close the recovery loop physically.** Done in software
+   ([`docs/MOTION_ARBITRATION.md`](docs/MOTION_ARBITRATION.md)); run stage E
+   of [`docs/HW_MOTION_TEST.md`](docs/HW_MOTION_TEST.md) on the GO2. This is
+   the single biggest gap between "proven" and "true" above.
 2. **Ship the measured detector operating point.** The shipped
    `zscore_threshold: 4.0, window_size: 60` is measurably blind to a
    sustained fault (1/62 detection on a 10-sigma step); `analysis/`'s
