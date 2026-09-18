@@ -134,16 +134,26 @@ def analyze(events: List[dict]) -> Dict[str, object]:
             summary[key] = {'n': len(vals), 'median': statistics.median(vals),
                             'max': max(vals), 'min': min(vals)}
     nonzero_after_hold = []
+    forced = ('HELIX_HOLD', 'HELIX_STATE_STALE', 'HELIX_STATE_MISSING', 'SHUTDOWN')
     for c in chains:
         th = c['times']['status']
         if th is None:
             continue
-        # every arbiter output between hold assertion and the next release
-        rel = _first(ev, lambda e: e['kind'] == 'status' and e['reason'] != 'HELIX_HOLD'
-                     and e['reason'] != 'SHUTDOWN', th)
-        tend = rel['t'] if rel else float('inf')
+        # The hold episode runs from the first HELIX_HOLD status to the LAST
+        # forced status before the first unforced one. The window must end at
+        # that last forced status, not at the next unforced status: the
+        # arbiter publishes each tick's output BEFORE that tick's status, so
+        # the first post-release output (one tick, ~20 ms, after the last
+        # forced tick) reaches an observer just before its own SOURCE status.
+        tend = th
+        for e in ev:
+            if e['t'] < th or e['kind'] != 'status':
+                continue
+            if e['reason'] not in forced:
+                break
+            tend = e['t']
         nonzero_after_hold += [e for e in ev if e['kind'] == 'output'
-                               and th <= e['t'] < tend and not e['zero']]
+                               and th <= e['t'] <= tend and not e['zero']]
     return {'chains': chains, 'summary': summary,
             'nonzero_outputs_during_hold': len(nonzero_after_hold)}
 

@@ -150,6 +150,9 @@ def main() -> int:
     }
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(result, indent=1))
+    with open(Path(args.out).with_suffix('.trace.jsonl'), 'w') as fp:
+        for e in h.events:
+            fp.write(json.dumps(e) + '\n')
     r = result['replay']
     print(json.dumps({k: result[k] for k in ('faults_replayed', 'latency_summary_ms',
                                              'nonzero_outputs_during_hold')}, indent=1))
