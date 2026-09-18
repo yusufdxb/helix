@@ -147,16 +147,25 @@ def test_node_cleanup_releases_publishers():
     node = RecoveryNode()
     try:
         node.trigger_configure()
-        assert node._pub_cmd is not None
+        assert node._pub_hold is not None
+        assert node._pub_cmd is None          # legacy /helix/cmd_vel off by default
         node.trigger_cleanup()
-        assert node._pub_cmd is None
+        assert node._pub_hold is None
         assert node._pub_audit is None
     finally:
         node.destroy_node()
 
 
 def test_node_publish_tick_emits_zero_twist_only_during_stop():
-    node = _active_node()
+    """Legacy twist_mux path, opt-in only."""
+    node = RecoveryNode()
+    node.set_parameters([
+        Parameter('enabled', Parameter.Type.BOOL, True),
+        Parameter('publish_legacy_cmd_vel', Parameter.Type.BOOL, True),
+    ])
+    node.trigger_configure()
+    node.trigger_activate()
+    node._pub_hold.publish = lambda msg: None
     published = []
     node._pub_cmd.publish = lambda msg: published.append(msg)
     try:
@@ -164,8 +173,124 @@ def test_node_publish_tick_emits_zero_twist_only_during_stop():
         assert published == []
         node._on_hint(_hint(ACTION_STOP, 'R1'))
         node._on_publish_tick()                       # holding: zero-twist
-        assert len(published) == 1
-        assert published[0].linear.x == 0.0
-        assert published[0].angular.z == 0.0
+        # one immediate publish on STOP acceptance, one from the tick
+        assert len(published) == 2
+        assert all(m.linear.x == 0.0 and m.angular.z == 0.0 for m in published)
+    finally:
+        node.destroy_node()
+
+
+# --- hold channel (arbiter contract) -----------------------------------------
+
+def _capture_holds(node):
+    holds = []
+    node._pub_hold.publish = lambda msg: holds.append(msg)
+    return holds
+
+
+def test_hold_state_published_every_tick_even_when_idle():
+    node = _active_node()
+    holds = _capture_holds(node)
+    try:
+        for _ in range(3):
+            node._on_publish_tick()
+        assert [h.hold for h in holds] == [False, False, False]
+        seqs = [h.seq for h in holds]
+        assert seqs == sorted(seqs) and len(set(seqs)) == 3
+        assert len({h.epoch for h in holds}) == 1
+    finally:
+        node.destroy_node()
+
+
+def test_stop_publishes_hold_immediately_with_fault_id():
+    node = _active_node()
+    holds = _capture_holds(node)
+    try:
+        node._on_hint(_hint(ACTION_STOP, 'R1'))
+        assert holds and holds[-1].hold is True
+        assert holds[-1].fault_id == 'test-fault'
+        assert holds[-1].asserted_stamp > 0.0
+    finally:
+        node.destroy_node()
+
+
+def test_resume_releases_hold_and_never_emits_velocity():
+    node = RecoveryNode()
+    node.set_parameters([
+        Parameter('enabled', Parameter.Type.BOOL, True),
+        Parameter('publish_legacy_cmd_vel', Parameter.Type.BOOL, True),
+    ])
+    node.trigger_configure()
+    node.trigger_activate()
+    holds = _capture_holds(node)
+    twists = []
+    node._pub_cmd.publish = lambda m: twists.append(m)
+    try:
+        node._on_hint(_hint(ACTION_STOP, 'R1'))
+        n_twist = len(twists)
+        node._on_hint(_hint(ACTION_RESUME, 'R2'))
+        assert holds[-1].hold is False and holds[-1].fault_id == ''
+        node._on_publish_tick()
+        assert len(twists) == n_twist          # RESUME produced no Twist at all
+    finally:
+        node.destroy_node()
+
+
+def test_stop_after_resume_inside_cooldown_is_accepted():
+    """Regression (safety defect found 2026-09-17): diagnosis releases after
+    3 s but cooldown is 5 s, so a fault recurring between those instants was
+    SUPPRESSED_COOLDOWN and the robot kept moving with a live fault."""
+    node = _active_node(cooldown=5.0)
+    holds = _capture_holds(node)
+    audits = []
+    node._pub_audit.publish = lambda m: audits.append(m)
+    try:
+        node._on_hint(_hint(ACTION_STOP, 'R1'))
+        node._on_hint(_hint(ACTION_RESUME, 'R2'))
+        node._on_hint(_hint(ACTION_STOP, 'R1'))      # well inside 5 s
+        assert audits[-1].status == 'ACCEPTED'
+        assert node._current_action == ACTION_STOP and holds[-1].hold is True
+    finally:
+        node.destroy_node()
+
+
+def test_repeated_stop_while_holding_still_cooled_down():
+    node = _active_node(cooldown=5.0)
+    audits = []
+    node._pub_audit.publish = lambda m: audits.append(m)
+    try:
+        node._on_hint(_hint(ACTION_STOP, 'R1'))
+        node._on_hint(_hint(ACTION_STOP, 'R1'))
+        assert audits[-1].status == 'SUPPRESSED_COOLDOWN'
+        assert node._current_action == ACTION_STOP     # hold unaffected
+    finally:
+        node.destroy_node()
+
+
+def test_envelope_stop_not_holding_bypasses_cooldown():
+    env = SafetyEnvelope(enabled=True, cooldown_seconds=5.0)
+    env.evaluate(ACTION_STOP, 'ANOMALY', 1.0, holding=False)
+    assert env.evaluate(ACTION_STOP, 'ANOMALY', 2.0, holding=False).status == 'ACCEPTED'
+    assert env.evaluate(ACTION_STOP, 'ANOMALY', 2.5, holding=True).status == 'SUPPRESSED_COOLDOWN'
+
+
+def test_disabled_recovery_never_asserts_hold():
+    node = _active_node(enabled=False)
+    holds = _capture_holds(node)
+    try:
+        node._on_hint(_hint(ACTION_STOP, 'R1'))
+        node._on_publish_tick()
+        assert all(h.hold is False for h in holds)
+    finally:
+        node.destroy_node()
+
+
+def test_deactivate_asserts_hold_before_going_silent():
+    node = _active_node()
+    holds = _capture_holds(node)
+    try:
+        node.trigger_deactivate()
+        assert holds and holds[-1].hold is True
+        assert holds[-1].reason == 'RECOVERY_DEACTIVATING'
     finally:
         node.destroy_node()

@@ -1,20 +1,23 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>helix_bringup</name>
+  <name>helix_arbiter</name>
   <version>0.1.0</version>
-  <description>HELIX launch files, configuration, and demo fault injector</description>
+  <description>HELIX motion arbitration: single authoritative velocity output with a HELIX hold channel, GO2 sport sink, trace and hardware preflight</description>
   <maintainer email="yusuf.a.guenena@gmail.com">yusufdxb</maintainer>
   <license>MIT</license>
 
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
   <depend>rcl_interfaces</depend>
+  <depend>lifecycle_msgs</depend>
   <depend>helix_msgs</depend>
-  <depend>helix_core</depend>
-  <depend>ros2launch</depend>
-  <exec_depend>helix_arbiter</exec_depend>
-  <exec_depend>twist_mux</exec_depend>
+  <!-- unitree_api is only needed by go2_sport_sink in stop_only/armed mode,
+       on the robot payload; it is imported lazily. -->
+
+  <test_depend>pytest</test_depend>
 
   <buildtool_depend>ament_python</buildtool_depend>
 

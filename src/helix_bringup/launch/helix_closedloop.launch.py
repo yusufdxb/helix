@@ -25,6 +25,18 @@ Typical operator sequence on live hardware:
 This launcher auto-activates diagnosis by default, but recovery comes up in
 ``unconfigured`` so the operator can gate the actuation path on body-height
 verification. Sense and adapter auto-activate as they always have.
+
+Motion path (docs/MOTION_ARBITRATION.md): by default ``helix_arbiter`` is the
+single authoritative publisher of ``cmd_vel_out``. HELIX recovery enters it
+through the /helix/hold state, never as a velocity source. The arbiter is
+auto-activated: with no live HELIX state it publishes zero, so it is safe.
+The GO2 sport sink is NOT started here; the operator starts it per hardware
+stage with an explicit mode (dry_run / stop_only / armed).
+
+``enable_twist_mux:=true`` selects the legacy twist_mux path instead (used by
+the Isaac Sim closure scenario). It is mutually exclusive with the arbiter.
+twist_mux goes silent (does not publish zero) on idle and on lock, and passes
+NaN through; it is not a safety layer.
 """
 import os
 
@@ -37,7 +49,7 @@ from launch.actions import (
     LogInfo,
     RegisterEventHandler,
 )
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import LifecycleNode, Node
@@ -105,9 +117,9 @@ def generate_launch_description() -> LaunchDescription:
         default_value="false",
         description=(
             "Auto-configure/activate the recovery node. SAFETY-RELEVANT: "
-            "recovery is the only node that publishes cmd_vel. Default false "
-            "so the operator can gate on body_height verification at the robot "
-            "before enabling the actuation path."
+            "recovery owns the /helix/hold state; while it is not active the "
+            "arbiter holds the output at zero. Default false so the operator "
+            "can gate on body_height verification at the robot first."
         ),
     )
     recovery_enabled_arg = DeclareLaunchArgument(
@@ -134,20 +146,25 @@ def generate_launch_description() -> LaunchDescription:
     )
     enable_twist_mux_arg = DeclareLaunchArgument(
         "enable_twist_mux",
-        default_value="true",
+        default_value="false",
         description=(
-            "Start the twist_mux arbiter that fans /helix/cmd_vel, "
-            "/teleop/cmd_vel, and /nav/cmd_vel onto the muxed cmd_vel "
-            "output. Set false if an external mux is already running."
+            "LEGACY. Use twist_mux (fed by /helix/cmd_vel zero-twist) instead "
+            "of helix_arbiter. Mutually exclusive with the arbiter."
         ),
+    )
+    arbiter_config_arg = DeclareLaunchArgument(
+        "arbiter_config",
+        default_value=os.path.join(
+            get_package_share_directory("helix_arbiter"), "config", "arbiter.yaml"),
+        description="helix_arbiter parameter file.",
     )
     cmd_vel_out_arg = DeclareLaunchArgument(
         "cmd_vel_out",
         default_value="/cmd_vel",
         description=(
-            "Topic that twist_mux publishes the muxed velocity onto. "
-            "Default /cmd_vel matches the GO2 sport-mode bridge and the "
-            "Isaac Sim go2_ros2_bridge subscriber."
+            "Authoritative velocity output (arbiter, or legacy twist_mux). "
+            "Consumed by helix_go2_sport_sink on the robot (a stock GO2 has "
+            "no /cmd_vel consumer) and by the Isaac Sim bridge."
         ),
     )
     twist_mux_config_arg = DeclareLaunchArgument(
@@ -197,6 +214,7 @@ def generate_launch_description() -> LaunchDescription:
         parameters=[{
             "enabled": LaunchConfiguration("recovery_enabled"),
             "cooldown_seconds": LaunchConfiguration("recovery_cooldown_seconds"),
+            "publish_legacy_cmd_vel": LaunchConfiguration("enable_twist_mux"),
         }],
         output="screen",
     )
@@ -228,6 +246,18 @@ def generate_launch_description() -> LaunchDescription:
         output="screen",
     )
 
+    # --- helix_arbiter: the single authoritative motion output ---------------
+    arbiter_node = LifecycleNode(
+        package="helix_arbiter",
+        executable="helix_arbiter",
+        name="helix_arbiter",
+        namespace="",
+        parameters=[LaunchConfiguration("arbiter_config"),
+                    {"output_topic": LaunchConfiguration("cmd_vel_out")}],
+        condition=UnlessCondition(LaunchConfiguration("enable_twist_mux")),
+        output="screen",
+    )
+
     # --- lifecycle auto-activation -------------------------------------------
     diag_cond = IfCondition(LaunchConfiguration("auto_activate_diagnosis"))
     recov_cond = IfCondition(LaunchConfiguration("auto_activate_recovery"))
@@ -243,6 +273,7 @@ def generate_launch_description() -> LaunchDescription:
         enable_twist_mux_arg,
         cmd_vel_out_arg,
         twist_mux_config_arg,
+        arbiter_config_arg,
         sense_include,
         adapter_include,
         context_buffer,
@@ -250,8 +281,11 @@ def generate_launch_description() -> LaunchDescription:
         recovery_node,
         llm_explainer,
         twist_mux_node,
+        arbiter_node,
     ]
     actions.extend(_auto_activate(context_buffer, diag_cond))
     actions.extend(_auto_activate(diagnosis_node, diag_cond))
     actions.extend(_auto_activate(recovery_node, recov_cond))
+    actions.extend(_auto_activate(
+        arbiter_node, UnlessCondition(LaunchConfiguration("enable_twist_mux"))))
     return LaunchDescription(actions)

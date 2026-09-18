@@ -22,10 +22,11 @@ following the same semantics that the upstream twist_mux package documents:
      most recently published message (last-writer-wins within a priority
      class). This mirrors upstream twist_mux behavior at the time of
      writing (see twist_mux::TwistMux::onTwistReceived).
-  5. If no input is live, no twist is emitted. The real twist_mux node
-     publishes zero in that case, which we model by returning the
-     ``zero_twist`` sentinel from ``arbitrate_with_zero_on_idle`` if the
-     caller asks for that explicit behavior.
+  5. If no input is live, no twist is emitted. CORRECTION (2026-09-17): the
+     real twist_mux 4.3.0 node ALSO emits nothing in that case (it only
+     publishes from an input callback). ``arbitrate_with_zero_on_idle`` is
+     therefore NOT a model of twist_mux; it models what a safe arbiter must
+     do, which is what helix_arbiter implements.
 
 Locks are intentionally NOT modeled here. The HELIX twist_mux config
 declares a single dummy lock with priority 0 and timeout 0 to satisfy
@@ -141,8 +142,9 @@ class PriorityMux:
         """Return the current winner, or None if every input is stale.
 
         The "no live input" branch returns ``winner=None, twist=None``.
-        If the caller wants the real twist_mux behavior of publishing zero
-        on idle, see ``arbitrate_with_zero_on_idle``.
+        This branch is what the real twist_mux does too: it publishes
+        nothing. For the zero-on-idle behaviour a safe arbiter needs, see
+        ``arbitrate_with_zero_on_idle``.
         """
         now = self._clock()
         live = self._live_inputs(now)
@@ -158,10 +160,11 @@ class PriorityMux:
     def arbitrate_with_zero_on_idle(self) -> ArbitrationResult:
         """Same as ``arbitrate`` but emits ZERO twist when no input is live.
 
-        This mirrors the upstream twist_mux behavior: when all topics go
-        stale simultaneously, twist_mux publishes a zero twist rather
-        than going silent. HELIX relies on this for the "robot holds when
-        recovery and operator both fall silent" safety invariant.
+        This does NOT mirror upstream twist_mux, which goes silent when all
+        inputs are stale (measured 2026-09-17 against twist_mux 4.3.0). The
+        "robot holds when every source falls silent" invariant is provided by
+        helix_arbiter, which publishes on a timer; see
+        docs/MOTION_ARBITRATION.md.
         """
         result = self.arbitrate()
         if result.winner is None:

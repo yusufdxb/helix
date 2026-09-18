@@ -62,7 +62,7 @@ jobs:
           colcon build --symlink-install --packages-select \
             helix_msgs helix_core helix_adapter helix_bringup \
             helix_sensing_cpp \
-            helix_diagnosis helix_recovery helix_explanation
+            helix_diagnosis helix_recovery helix_explanation helix_arbiter
 
       - name: Run unit tests (Python packages, one invocation per package for rclpy isolation)
         run: |
@@ -73,7 +73,7 @@ jobs:
           # cross-talk with anything running on the host.
           export ROS_DOMAIN_ID=77
           set -e
-          for pkg in helix_core helix_adapter helix_diagnosis helix_recovery helix_explanation; do
+          for pkg in helix_core helix_adapter helix_diagnosis helix_recovery helix_explanation helix_arbiter; do
             echo "::group::pytest $pkg"
             python3 -m pytest "src/$pkg/test/" -v --timeout=30
             echo "::endgroup::"
