@@ -136,6 +136,68 @@ ros2 run helix_arbiter helix_hw_stage --stage F --session-dir $SESSION --repo <H
 #   confirm phrase: OPERATOR REARM
 ```
 
+## Dry variants of A and C (remapped topics)
+
+Stages A and C run the sink in `dry_run`, so they can also run with every
+motion topic moved onto sink topics that nothing on the robot consumes. Use
+this to check the graph, the fault chain and the STOP decisions on the robot
+without the arbiter ever publishing `/cmd_vel` or the runner publishing
+`/nav/cmd_vel`. The defaults are unchanged: without the options below the
+runner uses the real topics exactly as in the stages above.
+
+| Topic | Real (default) | Dry (`--topic-prefix`) |
+|---|---|---|
+| arbiter output | `/cmd_vel` | `/helix_dry/cmd_vel` |
+| nav source (the runner publishes here) | `/nav/cmd_vel` | `/helix_dry/nav/cmd_vel` |
+| teleop source | `/teleop/cmd_vel` | `/helix_dry/teleop/cmd_vel` |
+
+```bash
+DRY=~/helix_hw/$(date +%Y%m%d)_dry        # its own session dir, never $SESSION
+SHARE=$(ros2 pkg prefix helix_arbiter)/share/helix_arbiter
+
+# T1: arbiter on the dry topics
+ros2 launch helix_bringup helix_closedloop.launch.py \
+    auto_activate_recovery:=true recovery_enabled:=true enable_twist_mux:=false \
+    arbiter_config:=$SHARE/config/arbiter_dry.yaml cmd_vel_out:=/helix_dry/cmd_vel
+
+# T2: sink, dry_run only, reading the dry output
+ros2 run helix_arbiter helix_go2_sport_sink --ros-args -p mode:=dry_run \
+    -p input_topic:=/helix_dry/cmd_vel
+
+# T4
+ros2 run helix_arbiter helix_hw_stage --stage A --session-dir $DRY --repo <HELIX> --topic-prefix
+ros2 run helix_arbiter helix_hw_stage --stage C --session-dir $DRY --repo <HELIX> --topic-prefix
+```
+
+`--topic-prefix` alone means `/helix_dry`; `--topic-prefix /other` or
+`--cmd-topic`, `--nav-topic` and `--teleop-topic` (all three) choose other
+names. The standalone `helix_preflight` takes the same options.
+
+What keeps a dry PASS from standing in for a real one:
+
+- Only stages A and C accept remapped topics; B, D, E and F refuse them.
+- A remap must move cmd, nav and teleop all off the real path. A partial remap,
+  or a remapped name that is itself a robot command topic (`/cmd_vel`,
+  `/nav/cmd_vel`, `/teleop/cmd_vel`, `/helix/cmd_vel`, `/api/sport/request`,
+  `/lowcmd`, `/wirelesscontroller`), is rejected before anything starts.
+- Evidence records the topic set as `"topics": {"mode": "remapped", ...}`
+  (real runs record `"mode": "real"`), and the summary line reads
+  `STAGE A: PASS [TOPICS REMAPPED: NOT REAL COMMAND-PATH EVIDENCE]`.
+- The session dir gets a `TOPICS_REMAPPED` marker. Real stages refuse to run
+  in it, and dry stages refuse a dir that already holds real evidence.
+- Dry stages chain A then C. Every real stage requires real-topic evidence
+  from its predecessor, so remapped evidence never unlocks stage B or later,
+  even if copied into a hardware session.
+- Preflight adds C14: no HELIX node publishes or subscribes any of the real
+  command topics listed above.
+- The live arbiter parameters differ (`output_topic`, sources), so the config
+  hash differs from a real run as well.
+
+A dry stage A or C PASS says the HELIX chain works on the robot's compute with
+the real sensors and clocks. It says nothing about the real `/cmd_vel` edge,
+the sink's `/api/sport/request` path or the robot's response; only the real
+stages cover those.
+
 Stand-alone preflight at any time (publishes nothing):
 
 ```bash
@@ -164,6 +226,7 @@ Any FAIL is NO-GO and the stage does not run.
 | C11b | HELIX **not holding** at stage start | WARN only in A |
 | C12 | arbiter output zero at preflight | |
 | C13 | `/helix/hold` published only by recovery and `/helix/recovery_hints` only by diagnosis | a second publisher could release a hold |
+| C14 | dry (remapped) runs only: no HELIX node on any real command topic | see Dry variants |
 
 ## Abort
 

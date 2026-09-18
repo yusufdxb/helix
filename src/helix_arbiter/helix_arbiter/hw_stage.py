@@ -15,6 +15,12 @@ and, in C/E/F, one benign synthetic FaultEvent on /helix/faults (it does not
 touch any sensor). The GO2 sport sink's mode (dry_run / stop_only / armed) is
 set by the operator when launching it, and preflight check C7 verifies it.
 
+Dry variants: the dry_run stages (A, C) can also run with the motion topics
+remapped onto sink topics (--topic-prefix, or --cmd-topic / --nav-topic /
+--teleop-topic), with the arbiter and sink launched on the same topics. Such
+evidence is marked `topics: remapped`, lives in its own session dir (marker
+file TOPICS_REMAPPED), chains A -> C, and never unlocks a real-topic stage.
+
   A  graph + topic verification, motors off           sink dry_run
   B  live arbitration, zero velocity only             sink stop_only
   C  low-speed command visible through the arbiter,   sink dry_run
@@ -43,7 +49,11 @@ import time
 from pathlib import Path
 from typing import Callable, Dict, List, Optional
 
+from helix_arbiter import preflight
+from helix_arbiter.preflight import DEFAULT_TOPICS, REMAP_STAGES
+
 STAGES = 'ABCDEF'
+REMAPPED_MARKER = 'TOPICS_REMAPPED'
 # Matches diagnosis rule R1 (prefix rate_hz/utlidar) but can never be a real
 # metric name, so evidence cannot confuse the injected fault with a real one.
 INJECTED_FAULT_ID = 'rate_hz/utlidar_helix_injected'
@@ -85,18 +95,53 @@ CHECKLIST = {
 # pure helpers (unit-tested)
 # --------------------------------------------------------------------------
 
-def gate(stage: str, session: Path, sha: str, cfg_hash: str) -> Optional[str]:
-    """Return a refusal reason, or None if the stage may run."""
-    i = STAGES.index(stage)
+def topics_mode(ev: dict) -> str:
+    """Topic mode of stage evidence. Evidence written before the remap option
+    existed carries no 'topics' key and was always on the real topics."""
+    return (ev.get('topics') or {}).get('mode', 'real')
+
+
+def remap_refusal(stage: str, topics: dict) -> Optional[str]:
+    """Remapped topics are allowed only for the dry_run stages."""
+    if topics['mode'] == 'remapped' and stage not in REMAP_STAGES:
+        return (f'stage {stage} cannot run on remapped topics: only the dry_run '
+                f'stages {"/".join(REMAP_STAGES)} have a dry variant')
+    return None
+
+
+def session_refusal(session: Path, remapped: bool) -> Optional[str]:
+    """Keep real and remapped evidence in separate session dirs."""
+    marked = (session / REMAPPED_MARKER).exists()
+    if marked and not remapped:
+        return ('session dir is a TOPICS REMAPPED (dry) session; use a fresh dir '
+                'for real-topic stages')
+    if remapped and not marked and any(session.glob('stage_*/evidence.json')):
+        return 'session dir holds real-topic evidence; use a fresh dir for dry stages'
+    return None
+
+
+def gate(stage: str, session: Path, sha: str, cfg_hash: str,
+         mode: str = 'real') -> Optional[str]:
+    """Return a refusal reason, or None if the stage may run.
+
+    ``mode`` is the topic mode of the stage about to run. Remapped (dry)
+    stages chain over the dry_run stages only (A -> C); a real stage accepts
+    only real-topic evidence, so a sink-topic PASS can never unlock it.
+    """
+    order = ''.join(REMAP_STAGES) if mode == 'remapped' else STAGES
+    i = order.index(stage)
     if i == 0:
         return None
-    prev = STAGES[i - 1]
+    prev = order[i - 1]
     p = session / f'stage_{prev}' / 'evidence.json'
     if not p.exists():
         return f'stage {prev} evidence missing ({p}); run stages in order'
     ev = json.loads(p.read_text())
     if ev.get('verdict') != PASS:
         return f'stage {prev} verdict is {ev.get("verdict")}, not PASS'
+    if topics_mode(ev) != mode:
+        return (f'stage {prev} evidence has topics: {topics_mode(ev)}, this run is {mode}; '
+                'remapped (sink-topic) evidence never unlocks a real-topic stage')
     if ev.get('git_sha') != sha:
         return f'git SHA changed since stage {prev}: {ev.get("git_sha")} -> {sha}'
     if ev.get('config_hash') != cfg_hash:
@@ -155,9 +200,13 @@ def config_hash(files: Dict[str, str], params: Dict[str, dict]) -> str:
 # --------------------------------------------------------------------------
 
 class StageIO:
-    """Recorder + the runner's only two publishers (/nav/cmd_vel, /helix/faults)."""
+    """Recorder + the runner's only two publishers (nav source, /helix/faults).
 
-    def __init__(self, rehearsal: bool):
+    ``topics`` is a preflight.resolve_topics() result; the arbiter output
+    ('cmd') and nav source ('nav') come from it, defaulting to the real path.
+    """
+
+    def __init__(self, rehearsal: bool, topics: Optional[dict] = None):
         import rclpy
         from geometry_msgs.msg import Twist
         from nav_msgs.msg import Odometry
@@ -172,13 +221,15 @@ class StageIO:
             RecoveryHint,
         )
         self.rclpy = rclpy
+        self.topics = topics or {'mode': 'real', **DEFAULT_TOPICS}
+        cmd_t, nav_t = self.topics['cmd'], self.topics['nav']
         self.Twist, self.FaultEvent = Twist, FaultEvent
         self.node = rclpy.create_node('helix_hw_stage')
         n = self.node
         q = QoSProfile(depth=500, reliability=ReliabilityPolicy.RELIABLE)
         self.events: List[dict] = []
         self.odom: List[dict] = []
-        self.nav = n.create_publisher(Twist, '/nav/cmd_vel', 10)
+        self.nav = n.create_publisher(Twist, nav_t, 10)
         self.faults = n.create_publisher(FaultEvent, '/helix/faults', 10)
         ev = self._ev
         n.create_subscription(FaultEvent, '/helix/faults', lambda m: ev(
@@ -198,10 +249,10 @@ class StageIO:
             hold_fault_id=m.hold_fault_id, vx=m.out_linear_x, vy=m.out_linear_y,
             wz=m.out_angular_z, rejected=int(m.rejected_total),
             sink_subscribers=int(m.sink_subscribers), src_stamp=m.stamp), q)
-        n.create_subscription(Twist, '/cmd_vel', lambda m: ev(
+        n.create_subscription(Twist, cmd_t, lambda m: ev(
             'output', vx=m.linear.x, vy=m.linear.y, wz=m.angular.z,
             zero=(m.linear.x == 0.0 and m.linear.y == 0.0 and m.angular.z == 0.0)), q)
-        n.create_subscription(Twist, '/nav/cmd_vel', lambda m: ev(
+        n.create_subscription(Twist, nav_t, lambda m: ev(
             'input', vx=m.linear.x, wz=m.angular.z), q)
 
         def on_sink(m):
@@ -559,12 +610,19 @@ def main(argv=None) -> int:
     ap.add_argument('--rehearsal', action='store_true',
                     help='off-robot run against helix_fake_go2; evidence labelled REHEARSAL')
     ap.add_argument('--confirm', help='confirmation phrase (rehearsal scripting only)')
+    preflight.add_topic_args(ap)
     a = ap.parse_args(argv)
+    try:
+        topics = preflight.topics_from_args(a)
+    except ValueError as e:
+        ap.error(str(e))
+    why = remap_refusal(a.stage, topics)
+    if why:
+        ap.error(why)
+    remapped = topics['mode'] == 'remapped'
 
     import rclpy
     from ament_index_python.packages import get_package_share_directory
-
-    from helix_arbiter import preflight
 
     session = Path(a.session_dir)
     session.mkdir(parents=True, exist_ok=True)
@@ -573,6 +631,12 @@ def main(argv=None) -> int:
     elif (session / 'REHEARSAL').exists():
         print('session dir is a REHEARSAL session; use a fresh dir for hardware')
         return 3
+    why = session_refusal(session, remapped)
+    if why:
+        print(why)
+        return 3
+    if remapped:
+        (session / REMAPPED_MARKER).touch()
     out = session / f'stage_{a.stage}'
     prior = out / 'evidence.json'
     if prior.exists():
@@ -584,8 +648,9 @@ def main(argv=None) -> int:
     ran = False
 
     rclpy.init()
-    io = StageIO(a.rehearsal)
+    io = StageIO(a.rehearsal, topics)
     ev: Dict[str, object] = {'stage': a.stage, 'rehearsal': a.rehearsal,
+                             'topics': topics,
                              'host': socket.gethostname(),
                              'ros_domain_id': os.environ.get('ROS_DOMAIN_ID'),
                              'rmw': os.environ.get('RMW_IMPLEMENTATION'),
@@ -609,7 +674,7 @@ def main(argv=None) -> int:
         if gi['dirty'] and not a.rehearsal:
             ev['refused'] = 'git tree dirty: hardware evidence must map to a commit'
             return 3
-        why = gate(a.stage, session, gi['sha'], ev['config_hash'])
+        why = gate(a.stage, session, gi['sha'], ev['config_hash'], topics['mode'])
         if why:
             ev['refused'] = why
             return 3
@@ -621,7 +686,7 @@ def main(argv=None) -> int:
             ev['sport_baseline'] = pubs
         rep = preflight.run(a.stage, str(out / 'preflight.json'),
                             str(baseline) if baseline.exists() else None,
-                            a.rehearsal, node=io.node, repo=a.repo)
+                            a.rehearsal, node=io.node, repo=a.repo, topics=topics)
         preflight.print_report(rep)
         ev['preflight'] = {'verdict': rep['verdict'], 'checks': rep['checks']}
         ev['ros_graph'] = {'nodes': rep['snapshot']['nodes'],
@@ -632,7 +697,10 @@ def main(argv=None) -> int:
         if rep['verdict'] != 'GO':
             ev['refused'] = 'preflight NO-GO'
             return 1
-        print(f'\n=== STAGE {a.stage} ===')
+        print(f'\n=== STAGE {a.stage}{" (DRY: TOPICS REMAPPED)" if remapped else ""} ===')
+        if remapped:
+            print(f"  motion topics remapped: cmd={topics['cmd']} nav={topics['nav']} "
+                  f"teleop={topics['teleop']}")
         for item in CHECKLIST[a.stage]:
             print(f'  [ ] {item}')
         phrase = a.confirm if a.confirm is not None else input(
@@ -692,6 +760,8 @@ def main(argv=None) -> int:
         io.node.destroy_node()
         rclpy.shutdown()
         tag = ' [REHEARSAL: NOT HARDWARE EVIDENCE]' if a.rehearsal else ''
+        if remapped:
+            tag += ' [TOPICS REMAPPED: NOT REAL COMMAND-PATH EVIDENCE]'
         for c in stage.checks:
             print(f"[{c['result']}] {c['id']}: {c['name']}  {c['detail'][:140]}")
         print(f'\nSTAGE {a.stage}: {verdict}{tag}\nevidence: {out / "evidence.json"}')

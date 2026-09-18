@@ -40,6 +40,50 @@ T_ODOM = 'nav_msgs/msg/Odometry'
 STAGE_SINK_MODE = {'A': 'dry_run', 'B': 'stop_only', 'C': 'dry_run',
                    'D': 'armed', 'E': 'armed', 'F': 'armed'}
 
+# Motion-path topics of the real robot command path. The default topic set is
+# the real one. A remapped (dry) set moves the arbiter output and its sources
+# onto sink topics that nothing on the robot consumes; see docs/HW_MOTION_TEST.md.
+DEFAULT_TOPICS = {'cmd': '/cmd_vel', 'nav': '/nav/cmd_vel', 'teleop': '/teleop/cmd_vel'}
+DRY_PREFIX = '/helix_dry'
+# A remapped topic may never be one of these: they reach (or are) robot command paths.
+REAL_MOTION_TOPICS = ('/cmd_vel', '/nav/cmd_vel', '/teleop/cmd_vel', '/helix/cmd_vel',
+                      '/api/sport/request', '/lowcmd', '/wirelesscontroller')
+# Stages whose sink mode is dry_run: the only ones allowed on remapped topics.
+REMAP_STAGES = tuple(s for s, m in STAGE_SINK_MODE.items() if m == 'dry_run')
+
+
+def resolve_topics(cmd: Optional[str] = None, nav: Optional[str] = None,
+                   teleop: Optional[str] = None, prefix: Optional[str] = None) -> dict:
+    """Topic set for a run: defaults (real), per-topic overrides, or a prefix.
+
+    Returns {'mode': 'real'|'remapped', 'cmd', 'nav', 'teleop'}. Raises
+    ValueError on an unsafe or ambiguous remap: a prefix combined with
+    per-topic overrides, a partial remap, or a remapped topic that is a real
+    robot command topic.
+    """
+    overrides = {k: v for k, v in (('cmd', cmd), ('nav', nav), ('teleop', teleop))
+                 if v is not None}
+    if prefix is not None:
+        if overrides:
+            raise ValueError('use --topic-prefix OR per-topic overrides, not both')
+        prefix = '/' + prefix.strip('/')
+        if prefix == '/':
+            raise ValueError('topic prefix must not be empty')
+        overrides = {k: prefix + v for k, v in DEFAULT_TOPICS.items()}
+    topics = {**DEFAULT_TOPICS, **overrides}
+    if topics == DEFAULT_TOPICS:
+        return {'mode': 'real', **topics}
+    for k, v in topics.items():
+        if not v.startswith('/'):
+            raise ValueError(f'{k} topic must be absolute: {v!r}')
+        if v in REAL_MOTION_TOPICS:
+            raise ValueError(
+                f'partial or unsafe remap: {k} topic {v} is a real robot command topic; '
+                'a remapped run must move cmd, nav and teleop all off the real path')
+    if len(set(topics.values())) != len(topics):
+        raise ValueError(f'remapped topics must be distinct: {topics}')
+    return {'mode': 'remapped', **topics}
+
 
 @dataclass
 class Check:
@@ -64,6 +108,15 @@ class Config:
     max_robot_clock_skew_s: float = 5.0
     sport_baseline: Optional[List[str]] = None
     rehearsal: bool = False      # off-robot rehearsal against fake_go2: waives C8b only
+    remapped: bool = False       # dry run on sink topics: adds C14
+
+
+def config_for(stage: str, topics: Optional[dict] = None, **kw) -> Config:
+    """Config whose motion topics come from a resolve_topics() result."""
+    t = topics or {'mode': 'real', **DEFAULT_TOPICS}
+    return Config(stage=stage, output_topic=t['cmd'],
+                  source_topics=(t['teleop'], t['nav']),
+                  remapped=t['mode'] == 'remapped', **kw)
 
 
 def _names(endpoints) -> List[str]:
@@ -173,6 +226,19 @@ def evaluate(snap: dict, cfg: Config) -> List[Check]:
     add('C13', 'hold/hint topics have exactly one HELIX publisher',
         hp == [RECOVERY] and hint_p == [DIAGNOSIS],
         f'{cfg.hold_topic} pubs={hp}; /helix/recovery_hints pubs={hint_p}')
+
+    # C14 remapped (dry) run: HELIX must not touch the real command path at all,
+    # so a sink-topic PASS cannot hide a live path to the robot.
+    if cfg.remapped:
+        touching = []
+        for t in REAL_MOTION_TOPICS:
+            tp = topic(t)
+            helix_pubs = [n for n in _names(tp['publishers']) if n.startswith('/helix')]
+            helix_subs = [n for n in _names(tp['subscribers']) if n.startswith('/helix')]
+            if helix_pubs or helix_subs:
+                touching.append(f'{t} pubs={helix_pubs} subs={helix_subs}')
+        add('C14', 'remapped run: no HELIX node on any real motion topic', not touching,
+            '; '.join(touching) or f'untouched: {list(REAL_MOTION_TOPICS)}')
 
     # C9 GO2 state fresh
     st = snap.get('state', {})
@@ -344,22 +410,24 @@ def _sink_mode_param(node) -> Optional[str]:
 
 
 def run(stage: str, out: Optional[str], baseline: Optional[str], rehearsal: bool,
-        node=None, repo: Optional[str] = None) -> dict:
+        node=None, repo: Optional[str] = None, topics: Optional[dict] = None) -> dict:
     import rclpy
     own = node is None
     if own:
         rclpy.init()
         node = rclpy.create_node('helix_preflight')
     try:
-        cfg = Config(stage=stage, rehearsal=rehearsal,
-                     sport_baseline=(json.load(open(baseline)) if baseline else None))
+        cfg = config_for(stage, topics, rehearsal=rehearsal,
+                         sport_baseline=(json.load(open(baseline)) if baseline else None))
         snap = collect(node, cfg, repo=repo)
         checks = evaluate(snap, cfg)
     finally:
         if own:
             node.destroy_node()
             rclpy.shutdown()
-    report = {'stage': stage, 'rehearsal': rehearsal, 'verdict': verdict(checks),
+    report = {'stage': stage, 'rehearsal': rehearsal,
+              'topics': topics or {'mode': 'real', **DEFAULT_TOPICS},
+              'verdict': verdict(checks),
               'checks': [asdict(k) for k in checks], 'snapshot': snap}
     if out:
         with open(out, 'w') as fp:
@@ -371,7 +439,26 @@ def print_report(rep: dict) -> None:
     for k in rep['checks']:
         print(f"[{k['result']:4}] {k['id']:4} {k['name']}: {k['detail']}")
     tag = ' (REHEARSAL, not hardware)' if rep['rehearsal'] else ''
+    if rep.get('topics', {}).get('mode') == 'remapped':
+        tag += ' (TOPICS REMAPPED, not the real command path)'
     print(f"\nSTAGE {rep['stage']} PREFLIGHT: {rep['verdict']}{tag}")
+
+
+def add_topic_args(ap) -> None:
+    """CLI for the motion topic set. Defaults are the real robot path."""
+    g = ap.add_argument_group(
+        'topic remap (dry stages only; evidence is marked topics: remapped)')
+    g.add_argument('--cmd-topic', help=f"arbiter output (default {DEFAULT_TOPICS['cmd']})")
+    g.add_argument('--nav-topic', help=f"nav source (default {DEFAULT_TOPICS['nav']})")
+    g.add_argument('--teleop-topic',
+                   help=f"teleop source (default {DEFAULT_TOPICS['teleop']})")
+    g.add_argument('--topic-prefix', nargs='?', const=DRY_PREFIX, default=None,
+                   help=f'put cmd, nav and teleop under PREFIX (bare flag: {DRY_PREFIX}), '
+                        'matching config/arbiter_dry.yaml')
+
+
+def topics_from_args(a) -> dict:
+    return resolve_topics(a.cmd_topic, a.nav_topic, a.teleop_topic, a.topic_prefix)
 
 
 def main(argv=None) -> int:
@@ -383,7 +470,14 @@ def main(argv=None) -> int:
     ap.add_argument('--capture-sport-baseline', metavar='FILE',
                     help='write the current /api/sport/request publisher list and exit')
     ap.add_argument('--rehearsal', action='store_true')
+    add_topic_args(ap)
     a = ap.parse_args(argv)
+    try:
+        topics = topics_from_args(a)
+    except ValueError as e:
+        ap.error(str(e))
+    if topics['mode'] == 'remapped' and a.stage not in REMAP_STAGES:
+        ap.error(f'remapped topics are only for dry_run stages {REMAP_STAGES}')
     if a.capture_sport_baseline:
         import rclpy
         rclpy.init()
@@ -398,7 +492,7 @@ def main(argv=None) -> int:
         n.destroy_node()
         rclpy.shutdown()
         return 0
-    rep = run(a.stage, a.out, a.sport_baseline, a.rehearsal)
+    rep = run(a.stage, a.out, a.sport_baseline, a.rehearsal, topics=topics)
     print_report(rep)
     return 0 if rep['verdict'] == 'GO' else 1
 
