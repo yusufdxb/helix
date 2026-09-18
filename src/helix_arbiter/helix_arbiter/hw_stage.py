@@ -612,7 +612,6 @@ def main(argv=None) -> int:
         why = gate(a.stage, session, gi['sha'], ev['config_hash'])
         if why:
             ev['refused'] = why
-            print(f'REFUSED: {why}')
             return 3
         baseline = session / 'sport_baseline.json'
         if a.stage == 'A':
@@ -677,6 +676,7 @@ def main(argv=None) -> int:
                   selected=[s for s in io.of('status')][::10],
                   sink=io.of('sink'))
         if not ran:
+            print(f"REFUSED / NOT RUN: {ev.get('refused', 'interrupted before confirmation')}")
             # Refused before any command: keep the record, do not lock the stage.
             att = session / 'attempts'
             att.mkdir(exist_ok=True)
