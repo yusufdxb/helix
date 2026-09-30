@@ -62,7 +62,7 @@ non-utlidar ANOMALYs (gnss, multiplestate) were correctly ignored.
 
 ## Follow-up
 
-1. **Don't flip `use_cpp_anomaly` default yet.** The 44% RSS is a real
+1. **Don't flip `use_cpp_anomaly` default yet.** The 46.6% RSS ratio is a real
    win but the design doc gated promotion on the 30% target. Options:
    - Accept the current ratio as pragmatic-good-enough and retune the
      design doc target.

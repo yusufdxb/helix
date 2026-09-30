@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://youtu.be/PbKXB91-NSY">
-    <img src="https://img.youtube.com/vi/PbKXB91-NSY/maxresdefault.jpg" width="760" alt="HELIX demo: self-healing closed loop on a live GO2">
+    <img src="https://img.youtube.com/vi/PbKXB91-NSY/maxresdefault.jpg" width="760" alt="HELIX demo: detect, decide, and publish a recovery command on a live GO2">
   </a>
 </p>
 
@@ -27,25 +27,29 @@ closes the loop from detection through a policy decision to a gated actuation
 as one system with one safety envelope. HELIX is that loop: four ROS 2
 lifecycle tiers, SENSE to CONTEXT to DIAGNOSE to RECOVER, where RECOVER is the
 only publisher of `/helix/cmd_vel` and is gated by an enable flag, a 5 s
-per-fault cooldown, and an action allowlist. It has been run end to end on a
-live GO2 across eight lab sessions, most recently a 439 s idle run that
-produced 30 detected faults, 14 recovery hints, 14 audited recovery actions,
-and 3,064 zero-twist commands. [`docs/comparison.md`](docs/comparison.md) is
+per-fault cooldown, and an action allowlist. It has been run on a live GO2
+across eight lab sessions, and end to end in software in the most recent, a
+439 s idle run that produced 30 detected faults, 14 recovery hints, 14 audited
+recovery actions, and 3,064 zero-twist commands published on a topic with no
+downstream subscriber. [`docs/comparison.md`](docs/comparison.md) is
 the honest version of this paragraph: it compares HELIX against
 `diagnostic_updater`, `software_watchdogs`, `system_modes`, Nav2 recovery, and
 `twist_mux`, and says plainly where HELIX duplicates each one.
 
 ## Proven, and not yet proven
 
-- **Proven**: the closed loop runs end to end on a live GO2. A fault enters at
+- **Proven, in software**: the closed loop runs end to end on a live GO2, up to
+  the published recovery command. A fault enters at
   SENSE, a rule in DIAGNOSE (R1 to R4) turns it into a `RecoveryHint`, and
   RECOVER emits an audited, allowlisted, cooldown-gated action. Session 8
   reproduced this 14 times with no allowlist or cooldown violation.
 - **Not proven**: physical stopping. `/helix/cmd_vel` had zero downstream
   subscribers during Session 8, so STOP_AND_HOLD is a real, audited decision
-  that lands on a topic nothing is listening to. It has not yet been wired
-  through a `twist_mux` fallback to the motors. "The robot holds" is proven
-  through the software path only.
+  that lands on a topic nothing is listening to. The source now routes it
+  through a `twist_mux` fallback (`helix_closedloop.launch.py`), and that path
+  stops a moving robot in simulation
+  ([`docs/sim_launch_recipe.md`](docs/sim_launch_recipe.md)), but it has not
+  been run on the GO2. Physical recovery on the robot is not demonstrated.
 - **Found and fixed, not assumed away**: the CONTEXT tier's `ContextBuffer`
   crashed roughly one second after activation in every prior session,
   including hardware, on an `rclpy` detail (`DiagnosticStatus.level` arrives
@@ -199,15 +203,15 @@ duplicates cannot be trusted about what it does not.
 | Tier | State | Validation |
 |---|---|---|
 | **Sense** (`helix_core`, `helix_adapter`) | stable | Hardware-validated across 8 GO2 and Jetson lab sessions (2026-04-03 to 2026-04-23). Detector operating point measured post hoc, see above; shipped config unchanged. |
-| **Sense, C++ port** (`helix_sensing_cpp`) | work in progress | 30-min hardware parity run: -56% RSS, -60% CPU vs Python, though 44% RSS missed the 30% design-doc target. Launch-gated (`use_cpp_anomaly=false`). |
+| **Sense, C++ port** (`helix_sensing_cpp`) | work in progress | 30-min hardware parity run vs the Python Session 7 plateau: RSS 42.51 MB to 19.81 MB (-53.4%), CPU 2.21% to 0.80% (-63.8%); the 46.6% RSS ratio missed the 30% design-doc target. Cross-session, not a controlled A/B ([`docs/cpp_parity_summary.md`](docs/cpp_parity_summary.md)). Launch-gated (`use_cpp_anomaly=false`). |
 | **Context** (`helix_diagnosis.context_buffer`) | fixed, re-verify on hardware | Crashed roughly 1 s after activation in every prior session on an `rclpy` bytes/int detail. Fixed and unit-tested; not yet re-confirmed on a live GO2. |
-| **Diagnose** (`helix_diagnosis`) | work in progress | Closed-loop validated on a live GO2 in Session 8, 14/14 hints correctly ruled. |
-| **Recover** (`helix_recovery`) | work in progress | Validated end to end in Session 8: 14 hints consumed, allowlist and cooldown audited, 3,064 zero-twist commands published. Caveat: `/helix/cmd_vel` has 0 downstream subscribers, so STOP_AND_HOLD is currently a void publish, not yet wired to a `twist_mux` fallback. |
+| **Diagnose** (`helix_diagnosis`) | work in progress | Closed loop validated in software on a live GO2 in Session 8, 14/14 hints correctly ruled. |
+| **Recover** (`helix_recovery`) | work in progress | Validated end to end in software in Session 8: 14 hints consumed, allowlist and cooldown audited, 3,064 zero-twist commands published. Caveat: `/helix/cmd_vel` had 0 downstream subscribers in that session, so STOP_AND_HOLD was a void publish. The `twist_mux` fallback now in source is validated in unit tests and simulation only, not on the robot. |
 | **Explain** (`helix_explanation`) | work in progress | 26 unit tests green. Ships `llm_enabled=false`; Jetson `llama-server` deployment pending. |
 
 Last stable release without the closed-loop stack:
 [`v0.2.1`](https://github.com/yusufdxb/helix/releases/tag/v0.2.1). Current
-self-healing work is tagged
+closed-loop work is tagged
 [`v0.3.0-wip-self-healing`](https://github.com/yusufdxb/helix/releases/tag/v0.3.0-wip-self-healing).
 
 ## Packages
@@ -225,13 +229,13 @@ self-healing work is tagged
 
 ## Evaluation
 
-Five benchmark suites evaluate the sensing components.
+Six benchmarks evaluate the sensing components.
 
 | Benchmark | Key Result | ROS 2? |
 |-----------|-----------|--------|
 | Algorithmic throughput | ~81K samples/sec (PC i7-7700), ~64K (Jetson Orin NX) | No |
 | End-to-end ROS 2 latency | 1.16 ms mean (p95: 1.24 ms) | Yes |
-| Realistic anomaly detection | 96.5% TPR at Z=3.0 with marginal anomalies; 0% TPR for 3-sigma in Laplace noise | No |
+| Realistic anomaly detection | 96.5% TPR at 0% FPR with marginal anomalies at the benchmark Z=3.0 (the shipped Z=4.0 gives 8.0% TPR on the same scenario); 0% TPR for 3-sigma in Laplace noise at Z=3.0 | No |
 | Log parser accuracy | 22/22 correct; ~777K msg/sec (PC), ~156K (Jetson Orin NX) | No |
 | GO2 attachability | 1/4 HELIX inputs natively available; 54 topics adaptable | No |
 | Adapter-based detection | 4 real FaultEvents from a live GO2 LiDAR rate anomaly | Yes |
@@ -268,23 +272,26 @@ Eight lab sessions (2026-04-03 to 2026-04-23) demonstrated:
 - Real `FaultEvent` detection from LiDAR rate anomalies on the GO2 via the adapter
 - Ground-truth fault injection with ~1.8 s end-to-end detection latency
 - Algorithmic benchmarks on the Jetson Orin NX (62-64K samples/sec)
-- Session 8: end-to-end closed loop on a live GO2, 30 faults leading to 14
+- Session 8: end-to-end closed loop in software on a live GO2, 30 faults leading to 14
   recovery hints (R1 STOP_AND_HOLD and R2 RESUME) leading to 14 audited
-  actions (allowlist and cooldown), 3,064 zero-twist commands, and 9
-  STOP_AND_HOLD events in 7m19s on an idle robot; a 30-min C++
-  anomaly-detector parity run at -56% RSS and -60% CPU vs Python (RSS missed
-  the 30% design target at 44%)
+  actions (allowlist and cooldown), 3,064 zero-twist commands with no
+  downstream subscriber, and 9 STOP_AND_HOLD events in 7m19s on an idle robot;
+  a 30-min C++ anomaly-detector parity run at RSS 42.51 MB to 19.81 MB (-53.4%)
+  and CPU 2.21% to 0.80% (-63.8%) vs the Python Session 7 plateau (RSS missed
+  the 30% design target at 46.6%)
 
 Full evidence, scope, and limitations: [`docs/GO2_HARDWARE_EVIDENCE.md`](docs/GO2_HARDWARE_EVIDENCE.md).
 
 ## Roadmap
 
-HELIX ships as a public repo and demo video: a working self-healing system
-that other roboticists can install and adapt. Forward pillars:
+HELIX ships as a public repo and demo video: a working detect, decide, and
+command-recovery system that other roboticists can install and adapt; physical
+recovery on the robot is not yet demonstrated. Forward pillars:
 
-1. **Close the recovery loop physically.** Wire `/helix/cmd_vel` through a
-   `twist_mux` fallback so STOP_AND_HOLD reaches the robot, not a void
-   publish. This is the single biggest gap between "proven" and "true" above.
+1. **Close the recovery loop physically.** `/helix/cmd_vel` is now wired
+   through a `twist_mux` fallback in source and proven in simulation; the
+   remaining step is a GO2 run showing STOP_AND_HOLD reaches the robot, not a
+   void publish. This is the single biggest gap between "proven" and "true" above.
 2. **Ship the measured detector operating point.** The shipped
    `zscore_threshold: 4.0, window_size: 60` is measurably blind to a
    sustained fault (1/62 detection on a 10-sigma step); `analysis/`'s
