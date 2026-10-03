@@ -27,7 +27,6 @@ rclpy = pytest.importorskip('rclpy')
 yaml = pytest.importorskip('yaml')
 
 from geometry_msgs.msg import Twist  # noqa: E402
-from helix_msgs.msg import ArbiterStatus, HelixHold  # noqa: E402
 from lifecycle_msgs.msg import State, Transition  # noqa: E402
 from lifecycle_msgs.srv import ChangeState, GetState  # noqa: E402
 from rcl_interfaces.msg import Parameter, ParameterType, ParameterValue  # noqa: E402
@@ -37,6 +36,8 @@ from rclpy.qos import (  # noqa: E402
     QoSProfile,
     ReliabilityPolicy,
 )
+
+from helix_msgs.msg import ArbiterStatus, HelixHold  # noqa: E402
 
 PREFIX = '/helix_ptest'
 OUT, STATUS, HOLD = PREFIX + '/cmd_vel', PREFIX + '/status', PREFIX + '/hold'
