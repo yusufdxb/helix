@@ -294,3 +294,61 @@ def test_deactivate_asserts_hold_before_going_silent():
         assert holds[-1].reason == 'RECOVERY_DEACTIVATING'
     finally:
         node.destroy_node()
+
+
+def test_accepted_stop_publishes_hold_before_audit():
+    """The hold reaches the arbiter before the audit record and its log line."""
+    node = _active_node()
+    order = []
+    node._pub_hold.publish = lambda m: order.append(('hold', m.hold))
+    node._pub_audit.publish = lambda m: order.append(('audit', m.status))
+    try:
+        node._on_hint(_hint(ACTION_STOP, 'R1'))
+        assert order[:2] == [('hold', True), ('audit', 'ACCEPTED')]
+    finally:
+        node.destroy_node()
+
+
+def test_audit_keeps_the_decision_stamp():
+    node = _active_node()
+    holds = _capture_holds(node)
+    audits = []
+    node._pub_audit.publish = lambda m: audits.append(m)
+    try:
+        node._on_hint(_hint(ACTION_STOP, 'R1'))
+        assert audits[-1].timestamp <= holds[-1].stamp
+        assert audits[-1].timestamp <= holds[-1].asserted_stamp
+    finally:
+        node.destroy_node()
+
+
+def test_suppressed_decision_is_still_audited():
+    node = _active_node(enabled=False)
+    holds = _capture_holds(node)
+    audits = []
+    node._pub_audit.publish = lambda m: audits.append(m)
+    try:
+        node._on_hint(_hint(ACTION_STOP, 'R1'))
+        assert [a.status for a in audits] == ['SUPPRESSED_DISABLED']
+        assert not holds
+    finally:
+        node.destroy_node()
+
+
+def test_audit_survives_a_failure_while_applying():
+    node = _active_node()
+    audits = []
+    node._pub_audit.publish = lambda m: audits.append(m)
+
+    def broken(*_):
+        raise RuntimeError('publish failed')
+
+    node._pub_hold.publish = broken
+    try:
+        try:
+            node._on_hint(_hint(ACTION_STOP, 'R1'))
+        except RuntimeError:
+            pass
+        assert [a.status for a in audits] == ['ACCEPTED']
+    finally:
+        node.destroy_node()

@@ -193,9 +193,18 @@ class RecoveryNode(LifecycleNode):
         # cooldown, so its key is never consulted.
         fault_type = _rule_to_fault_type(msg.rule_matched)
         holding = self._current_action == ACTION_STOP
+        decided_at = self._now()
         result = self._envelope.evaluate(
-            msg.suggested_action, fault_type, self._now(), holding=holding)
-        self._audit(msg, result)
+            msg.suggested_action, fault_type, decided_at, holding=holding)
+        # The accepted action is applied and the hold published before the
+        # audit record and its log line, so they are not on the STOP path; the
+        # finally keeps every decision audited even if applying it raises.
+        try:
+            self._apply(msg, result, holding)
+        finally:
+            self._audit(msg, result, decided_at)
+
+    def _apply(self, msg: RecoveryHint, result: EnvelopeResult, holding: bool) -> None:
         if not result.publish:
             return
         if msg.suggested_action == ACTION_STOP:
@@ -240,12 +249,14 @@ class RecoveryNode(LifecycleNode):
         if holding and self._legacy_cmd_vel and self._pub_cmd is not None:
             self._pub_cmd.publish(Twist())   # zero velocity, legacy mux path
 
-    def _audit(self, hint: RecoveryHint, result: EnvelopeResult) -> None:
+    def _audit(self, hint: RecoveryHint, result: EnvelopeResult, decided_at: float) -> None:
         msg = RecoveryAction()
         msg.fault_id = hint.fault_id
         msg.action = hint.suggested_action
         msg.status = result.status
-        msg.timestamp = self._now()
+        # The envelope decision time, as before; the record is now emitted
+        # just after the hold, so it is stamped with when it was decided.
+        msg.timestamp = decided_at
         msg.reason = result.reason
         self._pub_audit.publish(msg)
         self.get_logger().info(f'audit: {msg.action} {msg.status} {msg.reason}')
