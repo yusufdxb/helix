@@ -75,12 +75,27 @@ the live graph.
 | P9 | axes | only linear.x, linear.y, angular.z pass; the other three must be finite and are zeroed |
 | P10 | clocks | freshness uses the arbiter's monotonic receipt clock only; publisher stamps are for tracing (robot and payload clocks are skewed) |
 
-Output is published on a 50 Hz timer, so silence is never ambiguous. On
+Output is published on a 50 Hz timer, so silence is never ambiguous. A
+source command that changes the decision is also published at once from
+its callback rather than on the next tick; steady input adds no publishes.
+Velocity sources keep only their newest command (depth 1), so a backlog of
+superseded commands is never replayed; the hold topic keeps depth 10. On
 SIGINT, SIGTERM or lifecycle deactivate, the arbiter publishes 10 zero
 commands and then goes silent. rclpy's default handlers shut the context
 down before user code runs, so the arbiter and sink install their own.
 SIGKILL or power loss cannot be handled by any process; the sink's deadman
 covers that case (StopMove after 0.25 s without an arbiter message).
+
+**Backends.** `helix_arbiter_cpp` implements the same policy (same node
+name, parameters, topics and QoS) and is selected with
+`arbiter_backend:=cpp` in `helix_closedloop.launch.py`; Python is the
+default. One known difference, left open on purpose: the C++ output timer
+runs on the steady clock, while the Python timer follows the node's ROS
+clock. They behave the same on the robot (`use_sim_time` false); under a
+paused or stepped `/clock` in simulation, the Python arbiter's periodic
+output pauses with it while the C++ one keeps publishing (freshness is
+monotonic in both). Both refuse an invalid lifecycle request (for example a
+second activate) with `success=false` and keep running.
 
 **RESUME never creates motion.** It clears the hold state. Under P7 the arbiter
 then outputs zero until an upstream source publishes a new command.
@@ -96,7 +111,9 @@ Its only input is the arbiter output. Its mode is fixed at startup:
 `dry_run` makes the armed decisions but sends nothing, `stop_only` can only
 send StopMove, and `armed` may send Move within its own limits (0.25 m/s,
 0.20 m/s, 0.50 rad/s). Over-limit or non-finite input produces StopMove, never
-a clamped Move. Api id 1001 on this topic is Damp, which drops the robot; the
+a clamped Move. The 0.25 s input deadman is checked by a timer that each
+input restarts, so it trips about 2 ms past the deadline instead of up to
+50 ms late on the old polling tick. Api id 1001 on this topic is Damp, which drops the robot; the
 sink refuses every id except 1003 and 1008. While the command is zero it
 repeats StopMove at 2 Hz, which fights the handheld remote's locomotion.
 
