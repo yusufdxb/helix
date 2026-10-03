@@ -27,6 +27,9 @@ DEFAULT_WINDOW_SIZE: int = 60
 DEFAULT_MIN_ANOMALY_DURATION_S: float = 2.0
 DEFAULT_EMIT_COOLDOWN_S: float = 1.0
 FLAT_SIGNAL_EPSILON: float = 1e-6
+# A violation streak logs its first sample, then at most one WARN per metric
+# per period; the FaultEvent itself is never throttled.
+VIOLATION_LOG_PERIOD_S: float = 1.0
 
 
 class AnomalyDetector(LifecycleNode):
@@ -53,6 +56,7 @@ class AnomalyDetector(LifecycleNode):
         self._anomaly_start: Dict[str, float] = {}
         # metric_name -> wall-clock time of the last emitted FaultEvent
         self._last_emit: Dict[str, float] = {}
+        self._last_violation_log: Dict[str, float] = {}
         self._data_lock: threading.Lock = threading.Lock()
 
         self._fault_pub = None
@@ -183,10 +187,6 @@ class AnomalyDetector(LifecycleNode):
                 if metric_name not in self._anomaly_start:
                     self._anomaly_start[metric_name] = now
 
-                self.get_logger().warn(
-                    f"Metric '{metric_name}' stale (NaN), "
-                    f"consecutive violation #{consecutive}"
-                )
                 if consecutive >= self._consecutive_trigger:
                     elapsed = now - self._anomaly_start[metric_name]
                     if (
@@ -207,6 +207,13 @@ class AnomalyDetector(LifecycleNode):
                             f"min_anomaly_duration_s={self._min_anomaly_duration_s} "
                             f"(elapsed={elapsed:.3f}s)"
                         )
+                # Logged after the fault is published, so the log write is
+                # not on the emission path.
+                if self._should_log_violation(metric_name, consecutive, now):
+                    self.get_logger().warn(
+                        f"Metric '{metric_name}' stale (NaN), "
+                        f"consecutive violation #{consecutive}"
+                    )
                 return
 
             if len(window) >= 2:
@@ -230,11 +237,6 @@ class AnomalyDetector(LifecycleNode):
                         # Track duration: record when the anomaly streak started.
                         if metric_name not in self._anomaly_start:
                             self._anomaly_start[metric_name] = now
-
-                        self.get_logger().warn(
-                            f"Metric '{metric_name}' Z-score={zscore:.2f} "
-                            f"(consecutive violation #{consecutive})"
-                        )
 
                         if consecutive >= self._consecutive_trigger:
                             elapsed = now - self._anomaly_start[metric_name]
@@ -261,6 +263,11 @@ class AnomalyDetector(LifecycleNode):
                                     f"{self._min_anomaly_duration_s} "
                                     f"(elapsed={elapsed:.3f}s)"
                                 )
+                        if self._should_log_violation(metric_name, consecutive, now):
+                            self.get_logger().warn(
+                                f"Metric '{metric_name}' Z-score={zscore:.2f} "
+                                f"(consecutive violation #{consecutive})"
+                            )
                     else:
                         if self._consecutive[metric_name] > 0:
                             self.get_logger().debug(
@@ -290,6 +297,14 @@ class AnomalyDetector(LifecycleNode):
         if last is None:
             return True
         return (time.time() - last) >= self._emit_cooldown_s
+
+    def _should_log_violation(self, metric_name: str, consecutive: int, now: float) -> bool:
+        """First violation of a streak, then at most once per period per metric."""
+        last = self._last_violation_log.get(metric_name)
+        if consecutive == 1 or last is None or now - last >= VIOLATION_LOG_PERIOD_S:
+            self._last_violation_log[metric_name] = now
+            return True
+        return False
 
     def _emit_anomaly_fault(
         self,

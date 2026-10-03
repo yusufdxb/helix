@@ -110,6 +110,7 @@ class Reference:
     _cooldown_expired = reference.AnomalyDetector._cooldown_expired
     _emit_anomaly_fault = reference.AnomalyDetector._emit_anomaly_fault
     _emit_stale_fault = reference.AnomalyDetector._emit_stale_fault
+    _should_log_violation = reference.AnomalyDetector._should_log_violation
 
     def __init__(self, zscore: float, trigger: int, window: int, cooldown: float,
                  min_duration: float) -> None:
@@ -122,6 +123,7 @@ class Reference:
         self._consecutive: dict = {}
         self._anomaly_start: dict = {}
         self._last_emit: dict = {}
+        self._last_violation_log: dict = {}
         self._data_lock = threading.Lock()
         self._fault_pub = self
         self.published: list = []

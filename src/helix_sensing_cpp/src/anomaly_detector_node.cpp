@@ -178,24 +178,14 @@ void AnomalyDetectorNode::process_sample(const std::string & metric_name, double
   if (!core_ || !active_) {
     return;
   }
-  const SampleResult r = core_->process(
-    metric_name, value, steady_time_now(),
-    system_time_now());
+  const double now = steady_time_now();
+  const SampleResult r = core_->process(metric_name, value, now, system_time_now());
   const char * m = metric_name.c_str();
   const std::int64_t streak = r.consecutive;
   const bool violation = r.outcome == SampleOutcome::kViolation ||
     r.outcome == SampleOutcome::kStaleViolation ||
     r.outcome == SampleOutcome::kSuppressedDuration ||
     r.outcome == SampleOutcome::kSuppressedCooldown || r.outcome == SampleOutcome::kEmitted;
-  if (violation && r.stale) {
-    RCLCPP_WARN(
-      get_logger(), "Metric '%s' stale (NaN), consecutive violation #%" PRId64, m,
-      streak);
-  } else if (violation) {
-    RCLCPP_WARN(
-      get_logger(), "Metric '%s' Z-score=%.2f (consecutive violation #%" PRId64 ")", m, r.zscore,
-      streak);
-  }
   switch (r.outcome) {
     case SampleOutcome::kFlat:
       RCLCPP_DEBUG(get_logger(), "Metric '%s' is flat (std=%.2e), skipping Z-score", m, r.std);
@@ -235,6 +225,33 @@ void AnomalyDetectorNode::process_sample(const std::string & metric_name, double
     default:
       break;  // insufficient history or a plain violation: nothing more to say
   }
+  // The violation WARN comes after the fault is published, so the log write
+  // is not on the emission path. A streak logs its first violation, then at
+  // most once per kViolationLogPeriodS per metric; faults are never throttled.
+  if (violation && should_log_violation(metric_name, streak, now)) {
+    if (r.stale) {
+      RCLCPP_WARN(
+        get_logger(), "Metric '%s' stale (NaN), consecutive violation #%" PRId64, m,
+        streak);
+    } else {
+      RCLCPP_WARN(
+        get_logger(), "Metric '%s' Z-score=%.2f (consecutive violation #%" PRId64 ")", m,
+        r.zscore, streak);
+    }
+  }
+}
+
+bool AnomalyDetectorNode::should_log_violation(
+  const std::string & metric_name, std::int64_t streak, double now)
+{
+  auto it = last_violation_log_.find(metric_name);
+  if (streak == 1 || it == last_violation_log_.end() ||
+    now - it->second >= kViolationLogPeriodS)
+  {
+    last_violation_log_[metric_name] = now;
+    return true;
+  }
+  return false;
 }
 
 void AnomalyDetectorNode::publish_fault(const FaultRecord & f)

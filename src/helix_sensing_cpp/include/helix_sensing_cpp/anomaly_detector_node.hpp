@@ -39,6 +39,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "helix_msgs/msg/fault_event.hpp"
@@ -89,6 +90,8 @@ private:
   // Steady (monotonic) clock in seconds, used for duration gating so
   // that system-clock adjustments don't affect anomaly timing.
   double steady_time_now();
+  bool should_log_violation(const std::string & metric_name, std::int64_t streak, double now);
+  static constexpr double kViolationLogPeriodS = 1.0;
 
   mutable std::mutex data_mutex_;
   std::unique_ptr<AnomalyCore> core_;  // built at configure from the latched parameters
@@ -96,6 +99,8 @@ private:
 
   // Test-visible monotonic emit count.
   std::size_t fault_count_ = 0;
+  // Steady time of the last violation WARN per metric (see process_sample).
+  std::unordered_map<std::string, double> last_violation_log_;
 
   rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diagnostics_sub_;
   rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr metrics_sub_;
