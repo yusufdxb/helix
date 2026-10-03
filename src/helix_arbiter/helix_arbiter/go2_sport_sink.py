@@ -20,6 +20,7 @@ import time
 import rclpy
 from geometry_msgs.msg import Twist
 from rcl_interfaces.msg import ParameterDescriptor
+from rclpy.clock import Clock, ClockType
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
@@ -38,6 +39,9 @@ from helix_arbiter.sport_sink_core import (
 IN_QOS = QoSProfile(history=HistoryPolicy.KEEP_LAST, depth=10,
                     reliability=ReliabilityPolicy.RELIABLE,
                     durability=DurabilityPolicy.VOLATILE)
+# The core trips the deadman strictly after input_timeout_sec, so the
+# deadline timer fires just past it.
+DEADLINE_MARGIN_SEC = 0.002
 TRACE_QOS = QoSProfile(history=HistoryPolicy.KEEP_LAST, depth=100,
                        reliability=ReliabilityPolicy.RELIABLE,
                        durability=DurabilityPolicy.VOLATILE)
@@ -78,10 +82,18 @@ class Go2SportSink(Node):
         self._req_id = int(time.time() * 1000) % 1_000_000_000
         self.create_subscription(
             Twist, self.get_parameter('input_topic').value, self._on_cmd, IN_QOS)
+        # The 50 ms tick catches silence at startup and repeats StopMove, but
+        # on its own it finds an input timeout up to 50 ms late. This timer is
+        # restarted by every input and fires just past the timeout, so the
+        # deadman trips at the deadline itself. Steady clock, like the logic.
         self.create_timer(0.05, self._on_tick)
+        self._deadline = self.create_timer(
+            self.logic.input_timeout_sec + DEADLINE_MARGIN_SEC, self._on_tick,
+            clock=Clock(clock_type=ClockType.STEADY_TIME))
         self.get_logger().warning(f'GO2 sport sink up in mode={mode}')
 
     def _on_cmd(self, msg: Twist) -> None:
+        self._deadline.reset()
         self._send(self.logic.on_command(
             msg.linear.x, msg.linear.y, msg.angular.z, time.monotonic()),
             (msg.linear.x, msg.linear.y, msg.angular.z))
