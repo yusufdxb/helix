@@ -51,10 +51,11 @@ namespace helix_arbiter_cpp
 /// Value of the read-only arbiter_backend parameter.
 inline constexpr const char * kBackendName = "cpp";
 
-/// QoS profiles, identical to INPUT_QOS / OUTPUT_QOS / STATUS_QOS in the
+/// QoS profiles, identical to INPUT_QOS / SOURCE_QOS / OUTPUT_QOS / STATUS_QOS in the
 /// Python node. BEST_EFFORT input matches reliable and best-effort
 /// publishers; RELIABLE output matches reliable and best-effort subscribers.
 rclcpp::QoS input_qos();
+rclcpp::QoS source_qos();
 rclcpp::QoS output_qos();
 rclcpp::QoS status_qos();
 
@@ -103,6 +104,8 @@ private:
   std::vector<rclcpp::SubscriptionBase::SharedPtr> subs_;
   rclcpp::TimerBase::SharedPtr timer_;
   std::uint64_t seq_{0};
+  // Last decision published, so a source callback publishes only on change.
+  std::optional<Decision> last_decision_;
   bool active_{false};
   std::optional<std::pair<Reason, std::string>> last_logged_;
   rclcpp::Clock::SharedPtr throttle_clock_;

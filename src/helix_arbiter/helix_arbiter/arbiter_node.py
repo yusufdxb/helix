@@ -56,6 +56,12 @@ UINT32_MAX = 2 ** 32 - 1
 INPUT_QOS = QoSProfile(history=HistoryPolicy.KEEP_LAST, depth=10,
                        reliability=ReliabilityPolicy.BEST_EFFORT,
                        durability=DurabilityPolicy.VOLATILE)
+# Velocity sources keep only their newest command: a backlog of superseded
+# commands would be applied in turn, each stamped fresh on receipt. The hold
+# topic keeps INPUT_QOS, because its transitions must not be dropped.
+SOURCE_QOS = QoSProfile(history=HistoryPolicy.KEEP_LAST, depth=1,
+                        reliability=ReliabilityPolicy.BEST_EFFORT,
+                        durability=DurabilityPolicy.VOLATILE)
 # RELIABLE/VOLATILE output matches reliable and best-effort subscribers.
 OUTPUT_QOS = QoSProfile(history=HistoryPolicy.KEEP_LAST, depth=1,
                         reliability=ReliabilityPolicy.RELIABLE,
@@ -98,9 +104,25 @@ class ArbiterNode(LifecycleNode):
         self._seq = 0
         self._last_reason: Optional[str] = None
         self._last_source: Optional[str] = None
+        self._last_decision: Optional[Decision] = None
         self._active = False
 
     # -- lifecycle ------------------------------------------------------------
+
+    def _LifecycleNodeMixin__change_state(self, transition_id: int) -> TransitionCallbackReturn:
+        # Humble's rclpy triggers a requested transition without checking it,
+        # so an invalid one (a second activate from a launch file or operator,
+        # say) raises inside the change_state service callback. That ends the
+        # executor, and with it the only motion publisher. Refuse it instead,
+        # as the C++ backend does: the caller gets success=false and the node
+        # keeps running in its current state.
+        valid = {t[0] for t in self._state_machine.available_transitions}
+        if transition_id not in valid:
+            self.get_logger().warning(
+                f'refusing lifecycle transition {transition_id}: not valid from '
+                f'{self._state_machine.current_state[1]}')
+            return TransitionCallbackReturn.FAILURE
+        return super()._LifecycleNodeMixin__change_state(transition_id)
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
         params = {n: p.value for n, p in self.get_parameters_by_prefix('').items()}
@@ -136,10 +158,11 @@ class ArbiterNode(LifecycleNode):
         for name in self._arb.source_names:
             self._subs.append(self.create_subscription(
                 Twist, self._arb.spec(name).topic,
-                lambda m, n=name: self._on_source(n, m), INPUT_QOS))
+                lambda m, n=name: self._on_source(n, m), SOURCE_QOS))
         self._subs.append(self.create_subscription(
             HelixHold, self._cfg.hold_topic, self._on_hold, INPUT_QOS))
         ret = super().on_activate(state)
+        self._last_decision = None
         self._active = True
         self._timer = self.create_timer(1.0 / self._cfg.rate_hz, self._on_tick)
         return ret
@@ -188,6 +211,14 @@ class ArbiterNode(LifecycleNode):
         if not ok:
             self.get_logger().warning(
                 f'rejected malformed command from {name}', throttle_duration_sec=1.0)
+        # Publish at once when this input changes what the arbiter outputs
+        # (including a rejected command invalidating its source), instead of
+        # waiting up to one timer period. The full decision runs as on a tick;
+        # the timer still refreshes the output at rate_hz.
+        if self._active and self._arb is not None:
+            d = self._arb.decide(self._now())
+            if d != self._last_decision:
+                self._emit(d)
 
     def _on_hold(self, msg: HelixHold) -> None:
         self._arb.on_hold(msg.hold, msg.fault_id, msg.epoch, msg.seq, self._now())
@@ -202,6 +233,7 @@ class ArbiterNode(LifecycleNode):
 
     def _emit(self, d: Decision) -> None:
         self._pub_out.publish(to_twist(d.command))
+        self._last_decision = d
         self._seq += 1
         st = ArbiterStatus()
         st.selected_source = d.source

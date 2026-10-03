@@ -59,11 +59,25 @@ double seconds_since_epoch(std::chrono::system_clock::time_point t)
   return std::chrono::duration<double>(t.time_since_epoch()).count();
 }
 
+bool same_decision(const Decision & a, const Decision & b)
+{
+  return a.command == b.command && a.reason == b.reason && a.source == b.source &&
+         a.hold_fault_id == b.hold_fault_id;
+}
+
 }  // namespace
 
 rclcpp::QoS input_qos()
 {
   return rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().durability_volatile();
+}
+
+// Velocity sources keep only their newest command: a backlog of superseded
+// commands would be applied in turn, each stamped fresh on receipt. The hold
+// topic keeps input_qos(), because its transitions must not be dropped.
+rclcpp::QoS source_qos()
+{
+  return rclcpp::QoS(rclcpp::KeepLast(1)).best_effort().durability_volatile();
 }
 
 rclcpp::QoS output_qos()
@@ -192,7 +206,7 @@ ArbiterNode::CallbackReturn ArbiterNode::on_activate(const rclcpp_lifecycle::Sta
   for (std::size_t i = 0; i < arb_->source_count(); ++i) {
     subs_.push_back(
       create_subscription<geometry_msgs::msg::Twist>(
-        arb_->spec(i).topic, input_qos(),
+        arb_->spec(i).topic, source_qos(),
         [this, i](geometry_msgs::msg::Twist::ConstSharedPtr m) {on_source(i, *m);}));
   }
   subs_.push_back(
@@ -218,6 +232,7 @@ ArbiterNode::CallbackReturn ArbiterNode::on_activate(const rclcpp_lifecycle::Sta
       others, pub_out_->get_topic_name());
   }
 
+  last_decision_.reset();
   active_ = true;
   const auto period = std::chrono::duration_cast<std::chrono::nanoseconds>(
     std::chrono::duration<double>(1.0 / cfg_->rate_hz));
@@ -298,6 +313,16 @@ void ArbiterNode::on_source(std::size_t index, const geometry_msgs::msg::Twist &
       get_logger(), *throttle_clock_, 1000, "rejected malformed command from %s (%s)",
       arb_->spec(index).name.c_str(), rejection_name(why));
   }
+  // Publish at once when this input changes what the arbiter outputs
+  // (including a rejected command invalidating its source), instead of
+  // waiting up to one timer period. The full decision runs as on a tick; the
+  // timer still refreshes the output at rate_hz.
+  if (active_) {
+    const Decision d = arb_->decide(now());
+    if (!last_decision_ || !same_decision(d, *last_decision_)) {
+      emit(d);
+    }
+  }
 }
 
 void ArbiterNode::on_hold(const helix_msgs::msg::HelixHold & msg)
@@ -327,6 +352,7 @@ void ArbiterNode::emit(const Decision & d)
   out.linear.y = d.command.vy;
   out.angular.z = d.command.wz;
   pub_out_->publish(out);
+  last_decision_ = d;
   ++seq_;
 
   helix_msgs::msg::ArbiterStatus st;

@@ -449,3 +449,44 @@ def test_identity_qos_and_backend_label(rig_factory, backend):
     assert r.get_param('arbiter_backend') == backend
     assert r.last_status().sink_subscribers >= 1
     assert r.last_status().seq > 0
+
+
+def test_changed_command_is_published_without_waiting_for_the_timer(rig_factory):
+    """A source update that changes the decision is published from its callback.
+
+    The timer runs at 2 Hz here, so a timer-only arbiter would take up to
+    500 ms to show a change; both backends must show it well inside that,
+    and a steady stream must not add publishes beyond the timer.
+    """
+    r = rig_factory(_params(rate_hz=2.0, hold_timeout_sec=5.0))
+    _started(r)
+    r.pump(1.2, NAV_03, hold=False)
+    assert r.last_status().reason == 'SOURCE'
+
+    latencies = []
+    for i, lx in enumerate((0.11, 0.22, 0.33, 0.44, 0.55)):
+        t = r.mark()
+        r.send('nav', lx=lx, az=0.1)
+        assert r.wait_for(lambda lx=lx: any(m.linear.x == lx for _, m in r.outputs(t)), 2.0), \
+            'changed command never published:\n' + r.log()
+        latencies.append(next(tt for tt, m in r.outputs(t) if m.linear.x == lx) - t)
+        r.wait_for(lambda: False, 0.05 + 0.07 * i)   # vary the phase against the timer
+    assert max(latencies) < 0.2, latencies
+
+    t = r.mark()
+    r.pump(1.0, {'nav': {'lx': 0.55, 'az': 0.1}}, hold=False)
+    assert len(r.outputs(t)) <= 4, len(r.outputs(t))   # about 2 timer ticks, no echo
+
+
+def test_redundant_lifecycle_request_is_refused_not_fatal(rig_factory):
+    """A second activate (from a launch file or an operator) must not kill the node."""
+    r = rig_factory()
+    _started(r)
+    assert r.state() == State.PRIMARY_STATE_ACTIVE
+    assert r.transition(Transition.TRANSITION_ACTIVATE) is False
+    assert r.transition(Transition.TRANSITION_CONFIGURE) is False
+    t = r.mark()
+    r.pump(0.6, NAV_03, hold=False)
+    assert r.proc.poll() is None, 'arbiter exited:\n' + r.log()
+    assert r.state() == State.PRIMARY_STATE_ACTIVE
+    assert r.outputs(t) and r.last_status().reason == 'SOURCE'
