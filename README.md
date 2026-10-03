@@ -171,6 +171,12 @@ source install/setup.bash
 # launch the sensing stack
 ros2 launch helix_bringup helix_sensing.launch.py
 
+# same stack with the C++ anomaly detector (Python is the default)
+ros2 launch helix_bringup helix_sensing.launch.py anomaly_backend:=cpp
+
+# closed loop with both C++ backends; exactly one arbiter runs
+ros2 launch helix_bringup helix_closedloop.launch.py arbiter_backend:=cpp anomaly_backend:=cpp
+
 # inject faults (separate terminal)
 ros2 run helix_bringup fault_injector
 
@@ -206,7 +212,7 @@ duplicates cannot be trusted about what it does not.
 | Tier | State | Validation |
 |---|---|---|
 | **Sense** (`helix_core`, `helix_adapter`) | stable | Hardware-validated across 8 GO2 and Jetson lab sessions (2026-04-03 to 2026-04-23). Detector operating point measured post hoc, see above; shipped config unchanged. |
-| **Sense, C++ port** (`helix_sensing_cpp`) | work in progress | 30-min hardware parity run: -56% RSS, -60% CPU vs Python, though 44% RSS missed the 30% design-doc target. Launch-gated (`use_cpp_anomaly=false`). |
+| **Sense, C++ port** (`helix_sensing_cpp`) | work in progress | 30-min hardware parity run: -56% RSS, -60% CPU vs Python, though 44% RSS missed the 30% design-doc target. Selected with `anomaly_backend:=cpp` (the older `use_cpp_anomaly:=true` still works); Python stays the default. |
 | **Context** (`helix_diagnosis.context_buffer`) | fixed, re-verify on hardware | Crashed roughly 1 s after activation in every prior session on an `rclpy` bytes/int detail. Fixed and unit-tested; not yet re-confirmed on a live GO2. |
 | **Diagnose** (`helix_diagnosis`) | work in progress | Closed-loop validated on a live GO2 in Session 8, 14/14 hints correctly ruled. |
 | **Recover** (`helix_recovery`) | work in progress | Validated end to end in Session 8: 14 hints consumed, allowlist and cooldown audited. Session 8's `/helix/cmd_vel` had 0 subscribers. Recovery now asserts `/helix/hold` on `helix_arbiter`; verified off-robot, hardware stage E pending. |
@@ -224,7 +230,8 @@ self-healing work is tagged
 |---|---|---|---|
 | `helix_msgs` | msg | shared | `FaultEvent`, `RecoveryHint`, `RecoveryAction`, `HelixHold`, `ArbiterStatus`, `GetContext` srv |
 | `helix_core` | Python | Sense | `anomaly_detector`, `heartbeat_monitor`, `log_parser` (reference implementation) |
-| `helix_sensing_cpp` | C++ | Sense | C++ port of `anomaly_detector` (RollingStats kernel + LifecycleNode component). Launch-gated; Python stays default until hardware parity is re-confirmed. |
+| `helix_sensing_cpp` | C++ | Sense | C++ port of `anomaly_detector`: ROS-free core plus a lifecycle component, byte-identical fault strings (134 Python parity cases). Selected with `anomaly_backend:=cpp`; Python stays the default until hardware parity is re-confirmed. |
+| `helix_arbiter_cpp` | C++ | Arbitrate | C++ port of `helix_arbiter`: same node name, parameters, topics and QoS (233 Python parity cases, 26 process tests). Selected with `arbiter_backend:=cpp`; verified off robot only, Python stays the default. |
 | `helix_adapter` | Python | Sense | Lifecycle nodes bridging robot-specific telemetry (topic-rate monitor, JSON state parser, pose drift) to `/helix/metrics` |
 | `helix_diagnosis` | Python | Context, Diagnose | `context_buffer` (rosout ring + metric/health snapshot), `diagnosis_node` (IDLE / STOP_AND_HOLD state machine), pure-function `rules` |
 | `helix_recovery` | Python | Recover | `recovery_node` with `SafetyEnvelope` (enable, cooldown, allowlist). Publishes the `/helix/hold` state, never a velocity. |

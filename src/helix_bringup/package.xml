@@ -14,6 +14,10 @@
   <depend>helix_core</depend>
   <depend>ros2launch</depend>
   <exec_depend>helix_arbiter</exec_depend>
+  <!-- Optional native backends, selected with arbiter_backend:=cpp and
+       anomaly_backend:=cpp. Python stays the default. -->
+  <exec_depend>helix_arbiter_cpp</exec_depend>
+  <exec_depend>helix_sensing_cpp</exec_depend>
   <exec_depend>twist_mux</exec_depend>
 
   <buildtool_depend>ament_python</buildtool_depend>

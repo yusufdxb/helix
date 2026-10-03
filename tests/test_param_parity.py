@@ -146,19 +146,22 @@ class TestSingleParamsFile(unittest.TestCase):
         )
 
     def test_launch_files_reference_the_canonical_package(self):
-        launch = os.path.join(
-            SRC,
-            "helix_sensing_cpp",
-            "launch",
-            "anomaly_detector.launch.py",
-        )
+        # helix_bringup's sensing launch starts both anomaly backends, so it
+        # alone must resolve the shared config; the C++ package ships no
+        # launch file or config of its own that could drift.
+        launch = os.path.join(SRC, "helix_bringup", "launch", "helix_sensing.launch.py")
         with open(launch, encoding="utf-8") as fh:
             text = fh.read()
         self.assertIn(
-            'FindPackageShare("helix_bringup"), "config", "helix_params.yaml"',
+            'get_package_share_directory("helix_bringup"), "config", "helix_params.yaml"',
             text,
-            "helix_sensing_cpp's launch file must resolve the shared config "
-            "out of helix_bringup, not a package-local copy.",
+            "helix_sensing.launch.py must resolve the shared config out of "
+            "helix_bringup, not a package-local copy.",
+        )
+        self.assertFalse(
+            os.path.isdir(os.path.join(SRC, "helix_sensing_cpp", "launch")),
+            "helix_sensing_cpp must not carry its own launch files; select it "
+            "with helix_bringup's anomaly_backend:=cpp.",
         )
 
 

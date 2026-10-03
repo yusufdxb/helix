@@ -1,9 +1,15 @@
 """HELIX Phase 1 sensing-stack bringup.
 
-Starts the three lifecycle sensor nodes from ``helix_core`` and (by default)
-auto-transitions them through configure -> activate so the documented quick
-start produces an actually-running stack — not three nodes parked in the
-``unconfigured`` state.
+Starts the three lifecycle sensor nodes and (by default) auto-transitions them
+through configure -> activate so the documented quick start produces an
+actually-running stack, not three nodes parked in the ``unconfigured`` state.
+
+The anomaly detector has two interchangeable backends with the same node
+name, parameters and topics. Python (``helix_core``) is the default; the C++
+port (``helix_sensing_cpp``) is selected with ``anomaly_backend:=cpp``. The
+older ``use_cpp_anomaly:=true`` flag still selects C++; combining it with
+``anomaly_backend:=python`` stops the launch instead of guessing:
+    ros2 launch helix_bringup helix_sensing.launch.py anomaly_backend:=cpp
 
 Pass ``auto_activate:=false`` if you want to drive the lifecycle by hand:
     ros2 launch helix_bringup helix_sensing.launch.py auto_activate:=false
@@ -15,10 +21,12 @@ import os
 
 import launch.events
 from ament_index_python.packages import get_package_share_directory
+from helix_bringup.backends import executable, resolve_anomaly_backend
 from launch.actions import (
     DeclareLaunchArgument,
     EmitEvent,
     LogInfo,
+    OpaqueFunction,
     RegisterEventHandler,
 )
 from launch.conditions import IfCondition
@@ -32,14 +40,11 @@ from launch import LaunchDescription
 
 
 def _auto_activate(node: LifecycleNode, condition):
-    """Emit configure on launch, then activate when the node reaches 'inactive'."""
-    configure = EmitEvent(
-        event=ChangeState(
-            lifecycle_node_matcher=launch.events.matches_action(node),
-            transition_id=Transition.TRANSITION_CONFIGURE,
-        ),
-        condition=condition,
-    )
+    """Activate when the node reaches 'inactive', then emit configure.
+
+    The handler is registered before configure is emitted, so a configure
+    transition that completes quickly cannot be missed.
+    """
     activate_on_inactive = RegisterEventHandler(
         OnStateTransition(
             target_lifecycle_node=node,
@@ -55,12 +60,46 @@ def _auto_activate(node: LifecycleNode, condition):
         ),
         condition=condition,
     )
-    return [configure, activate_on_inactive]
+    configure = EmitEvent(
+        event=ChangeState(
+            lifecycle_node_matcher=launch.events.matches_action(node),
+            transition_id=Transition.TRANSITION_CONFIGURE,
+        ),
+        condition=condition,
+    )
+    return [activate_on_inactive, configure]
+
+
+def _params_file():
+    return os.path.join(
+        get_package_share_directory("helix_bringup"), "config", "helix_params.yaml")
+
+
+def anomaly_detector_actions(context, *args, **kwargs):
+    """Start exactly one anomaly detector, on the selected backend."""
+    backend = resolve_anomaly_backend(
+        LaunchConfiguration("anomaly_backend").perform(context),
+        LaunchConfiguration("use_cpp_anomaly").perform(context),
+    )
+    package, exe = executable("anomaly_detector", backend)
+    node = LifecycleNode(
+        package=package,
+        executable=exe,
+        name="helix_anomaly_detector",
+        namespace="",
+        parameters=[_params_file()],
+        output="screen",
+    )
+    return [
+        LogInfo(msg=f"[helix_bringup] anomaly detector backend: {backend} ({package})"),
+        node,
+        *_auto_activate(node, IfCondition(LaunchConfiguration("auto_activate"))),
+    ]
 
 
 def generate_launch_description() -> LaunchDescription:
     bringup_share = get_package_share_directory("helix_bringup")
-    params_file = os.path.join(bringup_share, "config", "helix_params.yaml")
+    params_file = _params_file()
     rules_file = os.path.join(bringup_share, "config", "log_rules.yaml")
 
     auto_activate_arg = DeclareLaunchArgument(
@@ -72,21 +111,26 @@ def generate_launch_description() -> LaunchDescription:
             "manually via 'ros2 lifecycle set ...'."
         ),
     )
+    anomaly_backend_arg = DeclareLaunchArgument(
+        "anomaly_backend",
+        default_value="",
+        description=(
+            "Anomaly detector backend: 'python' (helix_core) or 'cpp' "
+            "(helix_sensing_cpp). Empty (default) defers to use_cpp_anomaly, "
+            "which defaults to python."
+        ),
+    )
+    use_cpp_anomaly_arg = DeclareLaunchArgument(
+        "use_cpp_anomaly",
+        default_value="false",
+        description="Legacy alias: true selects anomaly_backend cpp.",
+    )
     auto_activate_cond = IfCondition(LaunchConfiguration("auto_activate"))
 
     heartbeat_monitor = LifecycleNode(
         package="helix_core",
         executable="helix_heartbeat_monitor",
         name="helix_heartbeat_monitor",
-        namespace="",
-        parameters=[params_file],
-        output="screen",
-    )
-
-    anomaly_detector = LifecycleNode(
-        package="helix_core",
-        executable="helix_anomaly_detector",
-        name="helix_anomaly_detector",
         namespace="",
         parameters=[params_file],
         output="screen",
@@ -104,7 +148,14 @@ def generate_launch_description() -> LaunchDescription:
         output="screen",
     )
 
-    actions = [auto_activate_arg, heartbeat_monitor, anomaly_detector, log_parser]
-    for node in (heartbeat_monitor, anomaly_detector, log_parser):
+    actions = [
+        auto_activate_arg,
+        anomaly_backend_arg,
+        use_cpp_anomaly_arg,
+        heartbeat_monitor,
+        OpaqueFunction(function=anomaly_detector_actions),
+        log_parser,
+    ]
+    for node in (heartbeat_monitor, log_parser):
         actions.extend(_auto_activate(node, auto_activate_cond))
     return LaunchDescription(actions)

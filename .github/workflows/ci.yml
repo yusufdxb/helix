@@ -61,7 +61,7 @@ jobs:
           . /opt/ros/humble/setup.sh
           colcon build --symlink-install --packages-select \
             helix_msgs helix_core helix_adapter helix_bringup \
-            helix_sensing_cpp \
+            helix_sensing_cpp helix_arbiter_cpp \
             helix_diagnosis helix_recovery helix_explanation helix_arbiter
 
       - name: Run unit tests (Python packages, one invocation per package for rclpy isolation)
@@ -85,11 +85,12 @@ jobs:
           python3 -m pytest src/helix_bringup/test/ -v --timeout=60
           echo "::endgroup::"
 
-      - name: Run C++ tests (helix_sensing_cpp)
+      - name: Run C++ tests (helix_sensing_cpp, helix_arbiter_cpp)
         run: |
           . /opt/ros/humble/setup.sh
           . install/setup.sh
-          colcon test --packages-select helix_sensing_cpp
+          export ROS_DOMAIN_ID=78 ROS_LOCALHOST_ONLY=1
+          colcon test --packages-select helix_sensing_cpp helix_arbiter_cpp
           colcon test-result --verbose
 
       - name: Verify launch files import cleanly
@@ -102,7 +103,8 @@ jobs:
           from launch.launch_description_sources import PythonLaunchDescriptionSource
 
           share = get_package_share_directory("helix_bringup")
-          for name in ("helix_sensing.launch.py", "helix_adapter.launch.py"):
+          for name in ("helix_sensing.launch.py", "helix_adapter.launch.py",
+                       "helix_closedloop.launch.py"):
               src = PythonLaunchDescriptionSource(os.path.join(share, "launch", name))
               ld = src.try_get_launch_description_without_context()
               assert ld is not None, name
