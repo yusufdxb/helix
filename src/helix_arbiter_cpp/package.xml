@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>helix_arbiter_cpp</name>
+  <version>0.1.0</version>
+  <description>
+    C++ rclcpp_lifecycle port of the HELIX motion arbiter (helix_arbiter).
+    Same node name (helix_arbiter), parameters, topics, QoS, hold policy and
+    shutdown zero burst; the Python node stays the reference and the default
+    launch backend. A ROS-free core library carries every arbitration policy
+    and the parameter contract.
+  </description>
+  <maintainer email="yusuf.a.guenena@gmail.com">yusufdxb</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>lifecycle_msgs</depend>
+  <depend>rcl_interfaces</depend>
+  <depend>geometry_msgs</depend>
+  <depend>helix_msgs</depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <!-- The Python reference implementation: the parity and process tests
+       run it side by side with the native core and node. -->
+  <test_depend>helix_arbiter</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
