@@ -220,14 +220,31 @@ def _launch_sensing(env, *args):
         start_new_session=True)
 
 
+def _group_alive(pgid):
+    try:
+        os.killpg(pgid, 0)
+    except ProcessLookupError:
+        return False
+    return True
+
+
 def _stop(proc):
+    """Stop the launch and every node it started (they share its process group)."""
+    pgid = proc.pid
     if proc.poll() is None:
-        os.killpg(proc.pid, signal.SIGINT)
+        os.killpg(pgid, signal.SIGINT)
         try:
             proc.wait(timeout=20)
         except subprocess.TimeoutExpired:
-            os.killpg(proc.pid, signal.SIGKILL)
+            os.killpg(pgid, signal.SIGKILL)
             proc.wait(timeout=5)
+    # ros2 launch can exit before a child that ignored SIGINT; reap stragglers.
+    deadline = time.monotonic() + 5.0
+    while _group_alive(pgid) and time.monotonic() < deadline:
+        os.killpg(pgid, signal.SIGTERM)
+        time.sleep(0.2)
+    if _group_alive(pgid):
+        os.killpg(pgid, signal.SIGKILL)
 
 
 @pytest.mark.parametrize('args, package', [
