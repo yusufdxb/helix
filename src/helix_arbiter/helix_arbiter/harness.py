@@ -8,6 +8,10 @@ direct hint/hold source, and the final robot consumer on the arbiter output.
 Every message the test node sees is appended to ``events`` in the trace
 format used by helix_arbiter.trace.analyze, stamped on this process's
 monotonic clock.
+
+The arbiter backend is the Python reference by default. Set
+HELIX_ARBITER_BACKEND=cpp to run the same scenarios against the native node
+(package helix_arbiter_cpp, which must be built and sourced).
 """
 from __future__ import annotations
 
@@ -36,6 +40,15 @@ from helix_msgs.msg import (
 )
 
 QOS = QoSProfile(depth=200, reliability=ReliabilityPolicy.RELIABLE)
+ARBITER_PACKAGES = {'python': 'helix_arbiter', 'cpp': 'helix_arbiter_cpp'}
+
+
+def arbiter_backend() -> str:
+    backend = os.environ.get('HELIX_ARBITER_BACKEND', 'python')
+    if backend not in ARBITER_PACKAGES:
+        raise ValueError(f'HELIX_ARBITER_BACKEND must be one of {sorted(ARBITER_PACKAGES)}, '
+                         f'got {backend!r}')
+    return backend
 
 
 def share_config() -> str:
@@ -158,7 +171,7 @@ class Harness:
 
     def start_arbiter(self, autostart: bool = True, extra: Optional[List[str]] = None,
                       config: Optional[str] = None) -> Proc:
-        argv = ['ros2', 'run', 'helix_arbiter', 'helix_arbiter', '--ros-args',
+        argv = ['ros2', 'run', ARBITER_PACKAGES[arbiter_backend()], 'helix_arbiter', '--ros-args',
                 '--params-file', config or share_config(),
                 '-p', f'autostart:={"true" if autostart else "false"}']
         return self.start('arbiter', argv + (extra or []))

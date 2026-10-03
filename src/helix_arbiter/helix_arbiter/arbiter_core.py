@@ -29,12 +29,16 @@ P10 Freshness uses the arbiter's receipt clock only. Publisher stamps are
     for tracing (robot and payload clocks are known to be skewed).
 
 Priority ties are broken by most recent receipt, like twist_mux.
+
+The C++ port (helix_arbiter_cpp) implements the same policies and the same
+parameter contract (parse_config, check_topic_layout); its parity test runs
+both implementations on identical inputs and compares every decision.
 """
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 REASON_SOURCE = 'SOURCE'
 REASON_HOLD = 'HELIX_HOLD'
@@ -137,15 +141,23 @@ class Arbiter:
         if not sources:
             raise ValueError('arbiter needs at least one source')
         names = [s.name for s in sources]
+        if not all(names):
+            raise ValueError('source names must be non-empty')
         if len(set(names)) != len(names):
             raise ValueError(f'duplicate source names: {names}')
         for s in sources:
-            if s.timeout_sec <= 0.0:
+            if not math.isfinite(s.timeout_sec) or s.timeout_sec <= 0.0:
                 # twist_mux treats timeout 0 as "never expires"; that would let a
                 # dead source keep authority forever, so it is refused here.
-                raise ValueError(f'source {s.name!r} needs a timeout > 0')
-        if hold_timeout_sec <= 0.0:
-            raise ValueError('hold_timeout_sec must be > 0')
+                # NaN and +inf are refused for the same reason.
+                raise ValueError(f'source {s.name!r} needs a finite timeout > 0')
+        if not math.isfinite(hold_timeout_sec) or hold_timeout_sec <= 0.0:
+            raise ValueError('hold_timeout_sec must be finite and > 0')
+        # A NaN limit would disable the bound (every comparison is False) and an
+        # infinite one is no bound at all.
+        for lim in (limits.max_abs_linear, limits.max_abs_angular):
+            if not math.isfinite(lim) or lim < 0.0:
+                raise ValueError('velocity limits must be finite and >= 0')
         self._slots: Dict[str, _Slot] = {s.name: _Slot(s) for s in sources}
         self.hold_timeout_sec = hold_timeout_sec
         self.limits = limits
@@ -245,3 +257,178 @@ def load_sources(params: dict) -> List[SourceSpec]:
         out.append(SourceSpec(str(name), str(cfg['topic']), int(cfg['priority']),
                               float(cfg['timeout'])))
     return out
+
+
+# -- node parameter contract (shared with helix_arbiter_cpp) -------------------
+#
+# Both nodes run with automatically_declare_parameters_from_overrides, so a YAML
+# value keeps its YAML type. The node flattens its parameters into one
+# {name: value} map ('sources.teleop.topic' -> '/teleop/cmd_vel') and hands it to
+# parse_config. Typing is strict: a priority of 200.5, a timeout given as the
+# string '0.5' or a boolean where a number is expected is refused, not coerced.
+# Real-valued parameters accept YAML integers (rate_hz: 50).
+
+MAX_RATE_HZ = 1000.0
+MAX_SHUTDOWN_ZERO_COUNT = 1000
+_SOURCES_PREFIX = 'sources.'
+_SOURCE_FIELDS = ('topic', 'priority', 'timeout')
+_KNOWN_TOP_LEVEL = frozenset((
+    'output_topic', 'status_topic', 'hold_topic', 'rate_hz', 'hold_timeout_sec',
+    'max_abs_linear', 'max_abs_angular', 'shutdown_zero_count', 'autostart',
+    'use_sim_time', 'arbiter_backend'))
+
+# Declared by the node when the parameter file does not set them.
+DEFAULT_PARAMETERS: Tuple[Tuple[str, object], ...] = (
+    ('output_topic', '/cmd_vel'),
+    ('status_topic', '/helix/arbiter/status'),
+    ('hold_topic', '/helix/hold'),
+    ('rate_hz', 50.0),
+    ('hold_timeout_sec', 0.5),
+    ('max_abs_linear', 1.0),
+    ('max_abs_angular', 1.5),
+    ('shutdown_zero_count', 10),
+    ('autostart', False),
+)
+
+
+class ConfigError(ValueError):
+    """A parameter set the arbiter refuses to configure with."""
+
+
+@dataclass(frozen=True)
+class ArbiterConfig:
+    output_topic: str
+    status_topic: str
+    hold_topic: str
+    rate_hz: float
+    hold_timeout_sec: float
+    limits: Limits
+    shutdown_zero_count: int
+    autostart: bool
+    sources: Tuple[SourceSpec, ...]
+
+
+def _require(params: Mapping[str, object], name: str) -> object:
+    if name not in params:
+        raise ConfigError(f'missing parameter {name!r}')
+    return params[name]
+
+
+def _as_string(v: object, name: str) -> str:
+    if not isinstance(v, str):
+        raise ConfigError(f'{name!r} must be a string')
+    if not v:
+        raise ConfigError(f'{name!r} must be a non-empty string')
+    return v
+
+
+def _as_integer(v: object, name: str) -> int:
+    if isinstance(v, bool) or not isinstance(v, int):
+        raise ConfigError(f'{name!r} must be an integer')
+    return v
+
+
+def _as_number(v: object, name: str) -> float:
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        raise ConfigError(f'{name!r} must be a number')
+    return float(v)
+
+
+def _as_bool(v: object, name: str) -> bool:
+    if not isinstance(v, bool):
+        raise ConfigError(f'{name!r} must be a boolean')
+    return v
+
+
+def parse_sources(params: Mapping[str, object]) -> List[SourceSpec]:
+    """SourceSpecs from the 'sources.<name>.<field>' entries, sorted by name.
+
+    Every source needs exactly topic (non-empty string), priority (integer) and
+    timeout (finite number > 0). Any other field is an error, so a misspelt or
+    unsupported key (e.g. 'enabled: false') cannot be silently ignored.
+    """
+    raw: Dict[str, Dict[str, object]] = {}
+    for key, value in params.items():
+        if not key.startswith(_SOURCES_PREFIX):
+            continue
+        name, _, fld = key[len(_SOURCES_PREFIX):].partition('.')
+        if not name:
+            raise ConfigError(f'source parameter {key!r} has an empty source name')
+        raw.setdefault(name, {})[fld] = value
+    if not raw:
+        raise ConfigError('no sources configured (expected sources.<name>.topic/priority/timeout)')
+    specs = []
+    for name in sorted(raw):
+        fields = raw[name]
+        extra = sorted(set(fields) - set(_SOURCE_FIELDS))
+        if extra:
+            raise ConfigError(f'source {name!r} has unsupported field {extra[0]!r} '
+                              '(allowed: topic, priority, timeout)')
+        for f in _SOURCE_FIELDS:
+            if f not in fields:
+                raise ConfigError(f'source {name!r} is missing {f!r}')
+        base = f'{_SOURCES_PREFIX}{name}.'
+        timeout = _as_number(fields['timeout'], base + 'timeout')
+        topic = _as_string(fields['topic'], base + 'topic')
+        priority = _as_integer(fields['priority'], base + 'priority')
+        if not math.isfinite(timeout) or timeout <= 0.0:
+            raise ConfigError(f'{base}timeout must be finite and > 0')
+        specs.append(SourceSpec(name, topic, priority, timeout))
+    return specs
+
+
+def parse_config(params: Mapping[str, object]) -> ArbiterConfig:
+    """Parse and validate the node's full parameter map. Raises ConfigError.
+
+    Topic names are not resolved here; see check_topic_layout.
+    """
+    output = _as_string(_require(params, 'output_topic'), 'output_topic')
+    status = _as_string(_require(params, 'status_topic'), 'status_topic')
+    hold = _as_string(_require(params, 'hold_topic'), 'hold_topic')
+    rate = _as_number(_require(params, 'rate_hz'), 'rate_hz')
+    if not math.isfinite(rate) or rate <= 0.0 or rate > MAX_RATE_HZ:
+        raise ConfigError("'rate_hz' must be finite, > 0 and <= 1000")
+    hold_timeout = _as_number(_require(params, 'hold_timeout_sec'), 'hold_timeout_sec')
+    if not math.isfinite(hold_timeout) or hold_timeout <= 0.0:
+        raise ConfigError("'hold_timeout_sec' must be finite and > 0")
+    lin = _as_number(_require(params, 'max_abs_linear'), 'max_abs_linear')
+    ang = _as_number(_require(params, 'max_abs_angular'), 'max_abs_angular')
+    for name, v in (('max_abs_linear', lin), ('max_abs_angular', ang)):
+        if not math.isfinite(v) or v < 0.0:
+            raise ConfigError(f'{name!r} must be finite and >= 0')
+    count = _as_integer(_require(params, 'shutdown_zero_count'), 'shutdown_zero_count')
+    if not 1 <= count <= MAX_SHUTDOWN_ZERO_COUNT:
+        raise ConfigError("'shutdown_zero_count' must be between 1 and 1000")
+    autostart = _as_bool(_require(params, 'autostart'), 'autostart')
+    return ArbiterConfig(output, status, hold, rate, hold_timeout, Limits(lin, ang),
+                         count, autostart, tuple(parse_sources(params)))
+
+
+def unknown_parameters(params: Mapping[str, object]) -> List[str]:
+    """Top-level parameter names the arbiter does not use (typo guard)."""
+    return sorted(k for k in params
+                  if k not in _KNOWN_TOP_LEVEL and not k.startswith(_SOURCES_PREFIX)
+                  and not k.startswith('qos_overrides.'))
+
+
+def check_topic_layout(output: str, status: str, hold: str,
+                       source_topics: Sequence[Tuple[str, str]]) -> None:
+    """Collision checks on RESOLVED topic names. Raises ConfigError.
+
+    output, status and hold are pairwise distinct, and every source topic is
+    distinct from those three and from every other source, so neither a
+    relative alias ('cmd_vel' in the root namespace) nor a remapping can feed
+    the arbiter its own output.
+    """
+    if len({output, status, hold}) != 3:
+        raise ConfigError('output_topic, status_topic and hold_topic must be distinct '
+                          f'(resolved: {output}, {status}, {hold})')
+    seen: Dict[str, str] = {}
+    for name, topic in source_topics:
+        if topic == output:
+            raise ConfigError(f'source {name} subscribes to the output topic {output}')
+        if topic in (status, hold):
+            raise ConfigError(f"source {name} uses the arbiter's own topic {topic}")
+        if topic in seen:
+            raise ConfigError(f'sources {seen[topic]} and {name} share the topic {topic}')
+        seen[topic] = name

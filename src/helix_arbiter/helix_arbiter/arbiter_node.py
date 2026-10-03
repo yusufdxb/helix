@@ -11,30 +11,46 @@ therefore installs its own handlers, and on SIGINT, SIGTERM or lifecycle
 deactivate the node publishes ``shutdown_zero_count`` zero commands before
 going silent. A downstream sink must still carry its own deadman for the
 SIGKILL / power-loss case, which no process can handle for itself.
+
+Every parameter is read and validated at configure (arbiter_core.parse_config,
+the contract shared with the C++ port helix_arbiter_cpp); a change takes
+effect on the next cleanup + configure.
 """
 from __future__ import annotations
 
 import signal
 import time
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 import rclpy
 from geometry_msgs.msg import Twist
+from rcl_interfaces.msg import ParameterDescriptor
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.lifecycle import LifecycleNode, State, TransitionCallbackReturn
 from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
 from rclpy.signals import SignalHandlerOptions
 
 from helix_arbiter.arbiter_core import (
+    DEFAULT_PARAMETERS,
     REASON_SHUTDOWN,
     ZERO,
     Arbiter,
+    ArbiterConfig,
     Command,
+    ConfigError,
     Decision,
-    Limits,
-    SourceSpec,
+    check_topic_layout,
+    parse_config,
+    unknown_parameters,
 )
 from helix_msgs.msg import ArbiterStatus, HelixHold
+
+# Read-only parameter naming the implementation behind /helix_arbiter. The
+# hardware stage tool hashes the arbiter's parameters into its evidence, so
+# this binds that evidence to the backend that actually ran.
+BACKEND_PARAM = 'arbiter_backend'
+BACKEND = 'python'
+UINT32_MAX = 2 ** 32 - 1
 
 # BEST_EFFORT subscriptions match both reliable and best-effort publishers.
 INPUT_QOS = QoSProfile(history=HistoryPolicy.KEEP_LAST, depth=10,
@@ -63,18 +79,17 @@ class ArbiterNode(LifecycleNode):
             allow_undeclared_parameters=True,
             automatically_declare_parameters_from_overrides=True,
             **kwargs)
-        for name, default in (
-                ('output_topic', '/cmd_vel'),
-                ('status_topic', '/helix/arbiter/status'),
-                ('hold_topic', '/helix/hold'),
-                ('rate_hz', 50.0),
-                ('hold_timeout_sec', 0.5),
-                ('max_abs_linear', 1.0),
-                ('max_abs_angular', 1.5),
-                ('shutdown_zero_count', 10),
-                ('autostart', False)):
+        for name, default in DEFAULT_PARAMETERS:
             if not self.has_parameter(name):
                 self.declare_parameter(name, default)
+        if self.has_parameter(BACKEND_PARAM):
+            # A parameter file cannot relabel the implementation.
+            self.undeclare_parameter(BACKEND_PARAM)
+        self.declare_parameter(
+            BACKEND_PARAM, BACKEND,
+            ParameterDescriptor(read_only=True, description='implementation of this node'),
+            ignore_override=True)
+        self._cfg: Optional[ArbiterConfig] = None
         self._arb: Optional[Arbiter] = None
         self._pub_out = None
         self._pub_status = None
@@ -87,39 +102,32 @@ class ArbiterNode(LifecycleNode):
 
     # -- lifecycle ------------------------------------------------------------
 
-    def _source_specs(self) -> List[SourceSpec]:
-        raw: Dict[str, Dict[str, object]] = {}
-        for key, param in self.get_parameters_by_prefix('sources').items():
-            name, _, field = key.partition('.')
-            raw.setdefault(name, {})[field] = param.value
-        specs = []
-        for name, cfg in sorted(raw.items()):
-            specs.append(SourceSpec(name, str(cfg['topic']), int(cfg['priority']),
-                                    float(cfg['timeout'])))
-        return specs
-
     def on_configure(self, state: State) -> TransitionCallbackReturn:
+        params = {n: p.value for n, p in self.get_parameters_by_prefix('').items()}
         try:
-            specs = self._source_specs()
-            self._arb = Arbiter(
-                specs,
-                hold_timeout_sec=float(self.get_parameter('hold_timeout_sec').value),
-                limits=Limits(float(self.get_parameter('max_abs_linear').value),
-                              float(self.get_parameter('max_abs_angular').value)))
-        except (KeyError, ValueError, TypeError) as exc:
-            self.get_logger().error(f'bad arbiter configuration: {exc!r}')
+            cfg = parse_config(params)
+            arb = Arbiter(list(cfg.sources), cfg.hold_timeout_sec, cfg.limits)
+            try:
+                resolve = self.resolve_topic_name
+                check_topic_layout(
+                    resolve(cfg.output_topic), resolve(cfg.status_topic),
+                    resolve(cfg.hold_topic), [(s.name, resolve(s.topic)) for s in cfg.sources])
+            except RuntimeError as exc:   # rclpy RCLError: invalid topic name
+                raise ConfigError(f'invalid topic name: {exc}') from exc
+        except (ValueError, TypeError) as exc:   # ConfigError is a ValueError
+            self.get_logger().error(f'bad arbiter configuration: {exc}')
             return TransitionCallbackReturn.FAILURE
-        out = self.get_parameter('output_topic').value
-        for s in specs:
-            if s.topic == out:
-                self.get_logger().error(f'source {s.name} subscribes to the output topic {out}')
-                return TransitionCallbackReturn.FAILURE
-        self._pub_out = self.create_lifecycle_publisher(Twist, out, OUTPUT_QOS)
+        unknown = unknown_parameters(params)
+        if unknown:
+            self.get_logger().warning(f'ignoring unknown parameters {unknown}')
+        self._cfg, self._arb = cfg, arb
+        self._pub_out = self.create_lifecycle_publisher(Twist, cfg.output_topic, OUTPUT_QOS)
         self._pub_status = self.create_lifecycle_publisher(
-            ArbiterStatus, self.get_parameter('status_topic').value, STATUS_QOS)
+            ArbiterStatus, cfg.status_topic, STATUS_QOS)
         self.get_logger().info(
             'configured: output=%s sources=%s hold_timeout=%.2fs' % (
-                out, [(s.name, s.topic, s.priority, s.timeout_sec) for s in specs],
+                cfg.output_topic,
+                [(s.name, s.topic, s.priority, s.timeout_sec) for s in cfg.sources],
                 self._arb.hold_timeout_sec))
         return TransitionCallbackReturn.SUCCESS
 
@@ -130,11 +138,10 @@ class ArbiterNode(LifecycleNode):
                 Twist, self._arb.spec(name).topic,
                 lambda m, n=name: self._on_source(n, m), INPUT_QOS))
         self._subs.append(self.create_subscription(
-            HelixHold, self.get_parameter('hold_topic').value, self._on_hold, INPUT_QOS))
+            HelixHold, self._cfg.hold_topic, self._on_hold, INPUT_QOS))
         ret = super().on_activate(state)
         self._active = True
-        self._timer = self.create_timer(
-            1.0 / float(self.get_parameter('rate_hz').value), self._on_tick)
+        self._timer = self.create_timer(1.0 / self._cfg.rate_hz, self._on_tick)
         return ret
 
     def on_deactivate(self, state: State) -> TransitionCallbackReturn:
@@ -149,6 +156,7 @@ class ArbiterNode(LifecycleNode):
                 self.destroy_publisher(pub)
         self._pub_out = self._pub_status = None
         self._arb = None
+        self._cfg = None
         return TransitionCallbackReturn.SUCCESS
 
     def on_shutdown(self, state: State) -> TransitionCallbackReturn:
@@ -204,7 +212,8 @@ class ArbiterNode(LifecycleNode):
             d.command.vx, d.command.vy, d.command.wz)
         st.stamp = time.time()
         st.seq = self._seq
-        st.rejected_total = self._arb.counters.rejected if self._arb else 0
+        # uint32 field: saturate instead of failing the publish.
+        st.rejected_total = min(self._arb.counters.rejected, UINT32_MAX) if self._arb else 0
         st.sink_subscribers = self._pub_out.get_subscription_count()
         self._pub_status.publish(st)
         if (d.reason, d.source) != (self._last_reason, self._last_source):
@@ -216,10 +225,9 @@ class ArbiterNode(LifecycleNode):
 
     def publish_shutdown_zero(self) -> None:
         """Publish a burst of zero commands while the publisher is still enabled."""
-        if not self._active or self._pub_out is None:
+        if not self._active or self._pub_out is None or self._cfg is None:
             return
-        n = int(self.get_parameter('shutdown_zero_count').value)
-        for _ in range(max(1, n)):
+        for _ in range(self._cfg.shutdown_zero_count):
             self._emit(Decision(ZERO, REASON_SHUTDOWN))
         self._active = False
 
@@ -236,9 +244,15 @@ def main(args=None) -> None:
     signal.signal(signal.SIGTERM, _handler)
     executor = SingleThreadedExecutor()
     executor.add_node(node)
-    if node.get_parameter('autostart').value:
-        node.trigger_configure()
-        node.trigger_activate()
+    # Strictly boolean, as parse_config requires: the string 'false' is truthy.
+    if node.get_parameter('autostart').value is True:
+        # A refused configuration leaves the node unconfigured and silent (the
+        # lifecycle services stay up so it can be fixed and configured); it
+        # must not crash on an activate that is invalid from 'unconfigured'.
+        if node.trigger_configure() == TransitionCallbackReturn.SUCCESS:
+            node.trigger_activate()
+        else:
+            node.get_logger().error('autostart: configure failed; staying unconfigured')
     try:
         while stop['sig'] is None and rclpy.ok():
             executor.spin_once(timeout_sec=0.05)
