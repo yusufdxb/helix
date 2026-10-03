@@ -8,9 +8,9 @@
     replacement for the Python helix_core.anomaly_detector node:
     same node name (helix_anomaly_detector), same parameters, same
     topics (/diagnostics, /helix/metrics -> /helix/faults), same
-    FaultEvent rounding behavior. Adds a cooldown-based suppression
-    parameter (emit_cooldown_s) to replace the Python flood behavior
-    while keeping legacy behavior available (emit_cooldown_s = 0.0).
+    FaultEvent strings (detail and rounded context values, byte for byte),
+    same emit_cooldown_s / min_anomaly_duration_s gates. Selected with
+    helix_bringup's anomaly_backend:=cpp; the Python node stays the default.
   </description>
   <maintainer email="yusuf.a.guenena@gmail.com">yusufdxb</maintainer>
   <license>MIT</license>
@@ -25,15 +25,18 @@
   <depend>lifecycle_msgs</depend>
   <depend>helix_msgs</depend>
 
-  <!-- The launch file resolves the shared helix_params.yaml out of
-       helix_bringup's share dir; this package ships no config copy. -->
-  <exec_depend>helix_bringup</exec_depend>
-  <exec_depend>launch</exec_depend>
-  <exec_depend>launch_ros</exec_depend>
+  <!-- Launched by helix_bringup (helix_sensing.launch.py anomaly_backend:=cpp),
+       which also owns the shared helix_params.yaml; this package ships no
+       launch file or config copy, so it does not depend on helix_bringup. -->
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
   <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <!-- The Python reference implementation, run side by side with the core
+       by test/test_python_parity.py. -->
+  <test_depend>helix_core</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -7,58 +7,19 @@
 #include "helix_sensing_cpp/anomaly_detector_node.hpp"
 
 #include <chrono>
+#include <cinttypes>
 #include <cmath>
-#include <cstdlib>
 #include <memory>
-#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "rclcpp_components/register_node_macro.hpp"
 
+#include "helix_sensing_cpp/pyfmt.hpp"
+
 namespace helix_sensing_cpp
 {
-
-namespace
-{
-
-// Match Python's round(x, n) (banker's rounding in Python3) closely enough
-// for human-readable FaultEvent context. We use the standard "round half
-// away from zero" which matches Python for the precision we care about
-// here (3+ dp on deterministic test inputs). The Python emitter also
-// calls str(round(...)), so trailing zeros are stripped by Python's repr.
-// We emit fixed-precision decimal that matches reasonable parity for logs.
-std::string round_to_string(double value, int digits)
-{
-  if (std::isnan(value)) {
-    return "nan";
-  }
-  if (std::isinf(value)) {
-    return value > 0 ? "inf" : "-inf";
-  }
-  const double scale = std::pow(10.0, digits);
-  const double rounded = std::round(value * scale) / scale;
-  std::ostringstream os;
-  os.precision(digits);
-  os << std::fixed << rounded;
-  // Match Python: strip trailing zeros and trailing '.'
-  std::string s = os.str();
-  if (s.find('.') != std::string::npos) {
-    while (!s.empty() && s.back() == '0') {
-      s.pop_back();
-    }
-    if (!s.empty() && s.back() == '.') {
-      s.pop_back();
-    }
-  }
-  if (s == "-0") {
-    s = "0";
-  }
-  return s;
-}
-
-}  // namespace
 
 AnomalyDetectorNode::AnomalyDetectorNode(const rclcpp::NodeOptions & options)
 : LifecycleNode("helix_anomaly_detector", options)
@@ -75,18 +36,22 @@ AnomalyDetectorNode::AnomalyDetectorNode(const rclcpp::NodeOptions & options)
 AnomalyDetectorNode::CallbackReturn
 AnomalyDetectorNode::on_configure(const rclcpp_lifecycle::State &)
 {
-  zscore_threshold_ = get_parameter("zscore_threshold").as_double();
-  consecutive_trigger_ = static_cast<int>(get_parameter("consecutive_trigger").as_int());
-  window_size_ = static_cast<int>(get_parameter("window_size").as_int());
-  emit_cooldown_s_ = get_parameter("emit_cooldown_s").as_double();
-  min_anomaly_duration_s_ = get_parameter("min_anomaly_duration_s").as_double();
+  AnomalyParams p;
+  p.zscore_threshold = get_parameter("zscore_threshold").as_double();
+  p.consecutive_trigger = get_parameter("consecutive_trigger").as_int();
+  p.window_size = get_parameter("window_size").as_int();
+  p.emit_cooldown_s = get_parameter("emit_cooldown_s").as_double();
+  p.min_anomaly_duration_s = get_parameter("min_anomaly_duration_s").as_double();
 
-  if (window_size_ <= 0) {
+  if (p.window_size <= 0) {
     RCLCPP_ERROR(
-      get_logger(),
-      "window_size must be > 0 (got %d); refusing to configure",
-      window_size_);
+      get_logger(), "window_size must be > 0 (got %" PRId64 "); refusing to configure",
+      p.window_size);
     return CallbackReturn::FAILURE;
+  }
+  {
+    std::lock_guard<std::mutex> lock(data_mutex_);
+    core_ = std::make_unique<AnomalyCore>(p);
   }
 
   fault_pub_ = create_publisher<helix_msgs::msg::FaultEvent>(
@@ -102,10 +67,10 @@ AnomalyDetectorNode::on_configure(const rclcpp_lifecycle::State &)
 
   RCLCPP_INFO(
     get_logger(),
-    "AnomalyDetectorNode configured - zscore_threshold=%.3f consecutive_trigger=%d "
-    "window_size=%d emit_cooldown_s=%.3f min_anomaly_duration_s=%.3f",
-    zscore_threshold_, consecutive_trigger_, window_size_, emit_cooldown_s_,
-    min_anomaly_duration_s_);
+    "AnomalyDetectorNode configured - zscore_threshold=%.3f consecutive_trigger=%" PRId64
+    " window_size=%" PRId64 " emit_cooldown_s=%.3f min_anomaly_duration_s=%.3f",
+    p.zscore_threshold, p.consecutive_trigger, p.window_size, p.emit_cooldown_s,
+    p.min_anomaly_duration_s);
   return CallbackReturn::SUCCESS;
 }
 
@@ -113,6 +78,10 @@ AnomalyDetectorNode::CallbackReturn
 AnomalyDetectorNode::on_activate(const rclcpp_lifecycle::State & state)
 {
   LifecycleNode::on_activate(state);
+  {
+    std::lock_guard<std::mutex> lock(data_mutex_);
+    active_ = true;
+  }
   heartbeat_->start();
   RCLCPP_INFO(
     get_logger(),
@@ -124,29 +93,51 @@ AnomalyDetectorNode::on_activate(const rclcpp_lifecycle::State & state)
 AnomalyDetectorNode::CallbackReturn
 AnomalyDetectorNode::on_deactivate(const rclcpp_lifecycle::State & state)
 {
+  {
+    std::lock_guard<std::mutex> lock(data_mutex_);
+    active_ = false;
+  }
   heartbeat_->stop();
   LifecycleNode::on_deactivate(state);
   RCLCPP_INFO(get_logger(), "AnomalyDetectorNode deactivated (heartbeat stopped).");
   return CallbackReturn::SUCCESS;
 }
 
-AnomalyDetectorNode::CallbackReturn
-AnomalyDetectorNode::on_cleanup(const rclcpp_lifecycle::State &)
+void AnomalyDetectorNode::stop_and_clear()
 {
+  heartbeat_->stop();
   fault_pub_.reset();
   diagnostics_sub_.reset();
   metrics_sub_.reset();
-  {
-    std::lock_guard<std::mutex> lock(data_mutex_);
-    metrics_.clear();
-  }
+  std::lock_guard<std::mutex> lock(data_mutex_);
+  active_ = false;
+  core_.reset();
+}
+
+AnomalyDetectorNode::CallbackReturn
+AnomalyDetectorNode::on_cleanup(const rclcpp_lifecycle::State &)
+{
+  stop_and_clear();
   return CallbackReturn::SUCCESS;
 }
 
 AnomalyDetectorNode::CallbackReturn
-AnomalyDetectorNode::on_shutdown(const rclcpp_lifecycle::State & s)
+AnomalyDetectorNode::on_shutdown(const rclcpp_lifecycle::State &)
 {
-  return on_cleanup(s);
+  // Shutdown is reachable from ACTIVE: the heartbeat must stop too, or a
+  // finalized node would keep reporting itself alive.
+  stop_and_clear();
+  return CallbackReturn::SUCCESS;
+}
+
+AnomalyDetectorNode::CallbackReturn
+AnomalyDetectorNode::on_error(const rclcpp_lifecycle::State & state)
+{
+  RCLCPP_ERROR(
+    get_logger(), "lifecycle error from state '%s': stopping and unconfiguring",
+    state.label().c_str());
+  stop_and_clear();
+  return CallbackReturn::SUCCESS;
 }
 
 void AnomalyDetectorNode::on_diagnostics(
@@ -154,20 +145,10 @@ void AnomalyDetectorNode::on_diagnostics(
 {
   for (const auto & status : msg->status) {
     for (const auto & kv : status.values) {
-      // Mirror Python's float(kv.value); skip on parse failure.
-      try {
-        std::size_t pos = 0;
-        double v = std::stod(kv.value, &pos);
-        // Require the entire string be consumed (stod is permissive).
-        if (pos != kv.value.size()) {
-          continue;
-        }
-        std::string metric_name = status.name + "/" + kv.key;
-        process_sample(metric_name, v);
-      } catch (const std::invalid_argument &) {
-        continue;
-      } catch (const std::out_of_range &) {
-        continue;
+      // float(kv.value) in the reference; a ValueError skips the entry.
+      const auto v = parse_python_float(kv.value);
+      if (v) {
+        process_sample(status.name + "/" + kv.key, *v);
       }
     }
   }
@@ -179,7 +160,7 @@ void AnomalyDetectorNode::on_metric(
   if (msg->layout.dim.empty()) {
     RCLCPP_WARN(
       get_logger(),
-      "Received Float64MultiArray with no dim labels - skipping");
+      "Received Float64MultiArray with no dim labels, skipping");
     return;
   }
   const std::string & metric_name = msg->layout.dim[0].label;
@@ -194,218 +175,82 @@ void AnomalyDetectorNode::on_metric(
 void AnomalyDetectorNode::process_sample(const std::string & metric_name, double value)
 {
   std::lock_guard<std::mutex> lock(data_mutex_);
-
-  auto it = metrics_.find(metric_name);
-  if (it == metrics_.end()) {
-    it = metrics_.emplace(
-      metric_name,
-      MetricState(static_cast<std::size_t>(window_size_))).first;
-  }
-  MetricState & state = it->second;
-
-  // Stale path: topic_rate_monitor emits NaN when the watched topic has no
-  // samples in its rolling window. Z-score of NaN is NaN and fails every
-  // threshold comparison, so without this branch a silent topic produces
-  // zero anomalies. Treat NaN as a violation of the same shape as a
-  // z-score breach (same counter, same consecutive_trigger gate, same
-  // cooldown); do NOT push NaN to RollingStats, it would poison every
-  // future mean/std for this metric.
-  //
-  // Mirrors helix_core.anomaly_detector._process_sample's isnan branch
-  // (PR #7); keep the two in sync so the C++ port remains drop-in.
-  if (std::isnan(value)) {
-    state.consecutive += 1;
-    const int consecutive = state.consecutive;
-
-    // Track duration: record when the anomaly streak started.
-    const double mono_now = steady_time_now();
-    if (state.anomaly_start_time == 0.0) {
-      state.anomaly_start_time = mono_now;
-    }
-
-    RCLCPP_WARN(
-      get_logger(),
-      "Metric '%s' stale (NaN) - consecutive violation #%d",
-      metric_name.c_str(), consecutive);
-    if (consecutive >= consecutive_trigger_) {
-      const double elapsed = mono_now - state.anomaly_start_time;
-      const bool duration_ok =
-        min_anomaly_duration_s_ <= 0.0 || elapsed >= min_anomaly_duration_s_;
-      if (!duration_ok) {
-        RCLCPP_DEBUG(
-          get_logger(),
-          "Metric '%s' stale ANOMALY suppressed by min_anomaly_duration_s=%.3f "
-          "(elapsed=%.3fs)",
-          metric_name.c_str(), min_anomaly_duration_s_, elapsed);
-        return;
-      }
-      const double now = system_time_now();
-      const bool cooldown_expired =
-        emit_cooldown_s_ <= 0.0 ||
-        state.last_emit_time == 0.0 ||
-        (now - state.last_emit_time) >= emit_cooldown_s_;
-      if (cooldown_expired) {
-        state.last_emit_time = now;
-        emit_stale_fault(metric_name, consecutive);
-      } else {
-        RCLCPP_DEBUG(
-          get_logger(),
-          "Metric '%s' stale ANOMALY suppressed by emit_cooldown_s=%.3f "
-          "(since last: %.3fs)",
-          metric_name.c_str(), emit_cooldown_s_, now - state.last_emit_time);
-      }
-    }
+  if (!core_ || !active_) {
     return;
   }
-
-  // Evaluate Z-score against the CURRENT window (before push), so a streak
-  // of anomalies doesn't poison its own baseline, matches Python.
-  const ZScoreResult r = state.stats.evaluate(value);
-
-  const double mono_now = steady_time_now();
-
-  if (r.status == ZScoreStatus::kOk) {
-    if (r.zscore > zscore_threshold_) {
-      state.consecutive += 1;
-      const int consecutive = state.consecutive;
-
-      // Track duration: record when the anomaly streak started.
-      if (state.anomaly_start_time == 0.0) {
-        state.anomaly_start_time = mono_now;
-      }
-
-      RCLCPP_WARN(
-        get_logger(),
-        "Metric '%s' Z-score=%.2f (consecutive violation #%d)",
-        metric_name.c_str(), r.zscore, consecutive);
-
-      if (consecutive >= consecutive_trigger_) {
-        const double elapsed = mono_now - state.anomaly_start_time;
-        const bool duration_ok =
-          min_anomaly_duration_s_ <= 0.0 || elapsed >= min_anomaly_duration_s_;
-
-        if (!duration_ok) {
-          RCLCPP_DEBUG(
-            get_logger(),
-            "Metric '%s' ANOMALY suppressed by min_anomaly_duration_s=%.3f "
-            "(elapsed=%.3fs)",
-            metric_name.c_str(), min_anomaly_duration_s_, elapsed);
-        } else {
-          // Cooldown gate: emit_cooldown_s_ <= 0 means legacy flood (emit
-          // every sample). Otherwise only emit when now - last_emit >= cooldown.
-          const double now = system_time_now();
-          const bool cooldown_expired =
-            emit_cooldown_s_ <= 0.0 ||
-            state.last_emit_time == 0.0 ||
-            (now - state.last_emit_time) >= emit_cooldown_s_;
-
-          if (cooldown_expired) {
-            state.last_emit_time = now;
-            emit_anomaly_fault(
-              metric_name, value, r.mean, r.std, r.zscore, consecutive, state);
-          } else {
-            RCLCPP_DEBUG(
-              get_logger(),
-              "Metric '%s' ANOMALY suppressed by emit_cooldown_s=%.3f "
-              "(since last: %.3fs)",
-              metric_name.c_str(), emit_cooldown_s_, now - state.last_emit_time);
-          }
-        }
-      }
-    } else {
-      if (state.consecutive > 0) {
+  const SampleResult r = core_->process(
+    metric_name, value, steady_time_now(),
+    system_time_now());
+  const char * m = metric_name.c_str();
+  const std::int64_t streak = r.consecutive;
+  const bool violation = r.outcome == SampleOutcome::kViolation ||
+    r.outcome == SampleOutcome::kStaleViolation ||
+    r.outcome == SampleOutcome::kSuppressedDuration ||
+    r.outcome == SampleOutcome::kSuppressedCooldown || r.outcome == SampleOutcome::kEmitted;
+  if (violation && r.stale) {
+    RCLCPP_WARN(
+      get_logger(), "Metric '%s' stale (NaN), consecutive violation #%" PRId64, m,
+      streak);
+  } else if (violation) {
+    RCLCPP_WARN(
+      get_logger(), "Metric '%s' Z-score=%.2f (consecutive violation #%" PRId64 ")", m, r.zscore,
+      streak);
+  }
+  switch (r.outcome) {
+    case SampleOutcome::kFlat:
+      RCLCPP_DEBUG(get_logger(), "Metric '%s' is flat (std=%.2e), skipping Z-score", m, r.std);
+      break;
+    case SampleOutcome::kNormal:
+      if (r.streak_was_active) {
         RCLCPP_DEBUG(
-          get_logger(),
-          "Metric '%s' Z-score dropped to %.2f - resetting consecutive counter",
-          metric_name.c_str(), r.zscore);
+          get_logger(), "Metric '%s' Z-score dropped to %.2f, resetting consecutive counter",
+          m, r.zscore);
       }
-      state.consecutive = 0;
-      // Reset duration tracker when metric returns to normal.
-      state.anomaly_start_time = 0.0;
-    }
-  } else if (r.status == ZScoreStatus::kFlat) {
-    RCLCPP_DEBUG(
-      get_logger(),
-      "Metric '%s' is flat (std=%.2e) - skipping Z-score",
-      metric_name.c_str(), r.std);
+      break;
+    case SampleOutcome::kSuppressedDuration:
+      RCLCPP_DEBUG(
+        get_logger(), "Metric '%s'%s ANOMALY suppressed by min_anomaly_duration_s=%.3f "
+        "(elapsed=%.3fs)", m, r.stale ? " stale" : "",
+        core_->params().min_anomaly_duration_s, r.elapsed);
+      break;
+    case SampleOutcome::kSuppressedCooldown:
+      RCLCPP_DEBUG(
+        get_logger(), "Metric '%s'%s ANOMALY suppressed by emit_cooldown_s=%.3f "
+        "(since last: %.3fs)", m, r.stale ? " stale" : "", core_->params().emit_cooldown_s,
+        r.since_last_emit);
+      break;
+    case SampleOutcome::kEmitted:
+      publish_fault(*r.fault);
+      if (r.stale) {
+        RCLCPP_INFO(
+          get_logger(), "FaultEvent emitted: ANOMALY (stale) for '%s' consecutive=%" PRId64, m,
+          streak);
+      } else {
+        RCLCPP_INFO(
+          get_logger(),
+          "FaultEvent emitted: ANOMALY for '%s' (zscore=%.2f, consecutive=%" PRId64 ")", m,
+          r.zscore, streak);
+      }
+      break;
+    default:
+      break;  // insufficient history or a plain violation: nothing more to say
   }
-  // kInsufficient: silently wait for more samples (matches Python).
-
-  // Always push after evaluation.
-  state.stats.push(value);
 }
 
-void AnomalyDetectorNode::emit_anomaly_fault(
-  const std::string & metric_name,
-  double value, double mean, double std_, double zscore, int consecutive,
-  MetricState & /*state*/)
+void AnomalyDetectorNode::publish_fault(const FaultRecord & f)
 {
   helix_msgs::msg::FaultEvent msg;
-  msg.node_name = metric_name;
-  msg.fault_type = "ANOMALY";
-  msg.severity = 2;
-
-  std::ostringstream detail;
-  detail.precision(2);
-  detail << std::fixed;
-  detail << "Metric '" << metric_name << "' Z-score " << zscore
-         << " exceeded threshold on " << consecutive_trigger_
-         << " consecutive samples";
-  msg.detail = detail.str();
-
-  msg.timestamp = system_time_now();
-
-  msg.context_keys = {
-    "metric_name", "current_value", "window_mean",
-    "window_std", "zscore", "consecutive_count",
-  };
-  msg.context_values = {
-    metric_name,
-    round_to_string(value, 4),   // 4 dp
-    round_to_string(mean, 4),    // 4 dp
-    round_to_string(std_, 6),    // 6 dp
-    round_to_string(zscore, 2),  // 2 dp
-    std::to_string(consecutive),
-  };
-
+  msg.node_name = f.node_name;
+  msg.fault_type = f.fault_type;
+  msg.severity = f.severity;
+  msg.detail = f.detail;
+  msg.timestamp = f.timestamp;
+  msg.context_keys = f.context_keys;
+  msg.context_values = f.context_values;
   if (fault_pub_ && fault_pub_->is_activated()) {
     fault_pub_->publish(msg);
   }
   ++fault_count_;
-
-  RCLCPP_INFO(
-    get_logger(),
-    "FaultEvent emitted: ANOMALY for '%s' (zscore=%.2f, consecutive=%d)",
-    metric_name.c_str(), zscore, consecutive);
-}
-
-void AnomalyDetectorNode::emit_stale_fault(
-  const std::string & metric_name, int consecutive)
-{
-  helix_msgs::msg::FaultEvent msg;
-  msg.node_name = metric_name;
-  msg.fault_type = "ANOMALY";
-  msg.severity = 2;
-
-  std::ostringstream detail;
-  detail << "Metric '" << metric_name << "' stale - no samples in window on "
-         << consecutive << " consecutive checks";
-  msg.detail = detail.str();
-
-  msg.timestamp = system_time_now();
-
-  msg.context_keys = {"metric_name", "violation_type", "consecutive_count"};
-  msg.context_values = {metric_name, "stale", std::to_string(consecutive)};
-
-  if (fault_pub_ && fault_pub_->is_activated()) {
-    fault_pub_->publish(msg);
-  }
-  ++fault_count_;
-
-  RCLCPP_INFO(
-    get_logger(),
-    "FaultEvent emitted: ANOMALY (stale) for '%s' consecutive=%d",
-    metric_name.c_str(), consecutive);
 }
 
 double AnomalyDetectorNode::system_time_now()

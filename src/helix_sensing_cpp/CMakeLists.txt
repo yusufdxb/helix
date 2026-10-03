@@ -19,6 +19,17 @@ find_package(diagnostic_msgs REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(helix_msgs REQUIRED)
 
+# ROS-free detection core and Python-compatible number formatting/parsing.
+add_library(helix_sensing_core STATIC
+  src/anomaly_core.cpp
+  src/pyfmt.cpp
+)
+target_include_directories(helix_sensing_core PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+set_target_properties(helix_sensing_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 # Component library: AnomalyDetectorNode
 add_library(anomaly_detector_component SHARED
   src/anomaly_detector_node.cpp
@@ -27,6 +38,7 @@ target_include_directories(anomaly_detector_component PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
+target_link_libraries(anomaly_detector_component helix_sensing_core)
 ament_target_dependencies(anomaly_detector_component
   rclcpp
   rclcpp_lifecycle
@@ -41,19 +53,22 @@ rclcpp_components_register_node(anomaly_detector_component
   EXECUTABLE helix_anomaly_detector
 )
 
+# Replay / benchmark tool for the core (no ROS): parity tests and benchmarks.
+add_executable(helix_anomaly_replay tools/anomaly_replay.cpp)
+target_link_libraries(helix_anomaly_replay helix_sensing_core)
+
 install(DIRECTORY include/
   DESTINATION include
+)
+
+install(TARGETS helix_anomaly_replay
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 install(TARGETS anomaly_detector_component
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
-)
-
-install(DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}
-  OPTIONAL
 )
 
 if(BUILD_TESTING)
@@ -63,11 +78,22 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_cmake_pytest REQUIRED)
 
   # Pure math kernel
   ament_add_gtest(test_rolling_stats test/test_rolling_stats.cpp)
   target_include_directories(test_rolling_stats PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+  )
+
+  # Python-compatible formatting and float() parsing
+  ament_add_gtest(test_pyfmt test/test_pyfmt.cpp)
+  target_link_libraries(test_pyfmt helix_sensing_core)
+
+  # Native core vs the Python reference node's own methods, sample by sample.
+  ament_add_pytest_test(test_python_parity test/test_python_parity.py
+    ENV HELIX_ANOMALY_REPLAY=$<TARGET_FILE:helix_anomaly_replay>
+    TIMEOUT 300
   )
 
   # Heartbeat emitter (CRASH-detection contract with HeartbeatMonitor)

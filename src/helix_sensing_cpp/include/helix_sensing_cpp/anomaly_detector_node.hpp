@@ -21,13 +21,24 @@
 //
 // QoS: reliable depth 10 for all I/O (matches the Python node's default
 // QoS). Q2 from the design doc resolved to "reliable, depth 10".
+//
+// Detection logic lives in AnomalyCore (anomaly_core.hpp, no ROS), which is
+// compared with the Python reference sample by sample. FaultEvent strings
+// (detail, rounded context values) match the reference byte for byte, and
+// DiagnosticArray values are parsed with Python float() semantics
+// (pyfmt.hpp).
+//
+// Lifecycle: inputs are processed only while ACTIVE. The Python node keeps
+// processing (and publishing) while inactive; here an inactive node neither
+// publishes nor advances any streak or cooldown, so activation never starts
+// with a cooldown consumed by a fault nobody received. Shutdown and error
+// transitions stop the heartbeat as well as clearing state.
 #ifndef HELIX_SENSING_CPP__ANOMALY_DETECTOR_NODE_HPP_
 #define HELIX_SENSING_CPP__ANOMALY_DETECTOR_NODE_HPP_
 
 #include <memory>
 #include <mutex>
 #include <string>
-#include <unordered_map>
 
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "helix_msgs/msg/fault_event.hpp"
@@ -36,8 +47,8 @@
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "std_msgs/msg/float64_multi_array.hpp"
 
+#include "helix_sensing_cpp/anomaly_core.hpp"
 #include "helix_sensing_cpp/heartbeat.hpp"
-#include "helix_sensing_cpp/rolling_stats.hpp"
 
 namespace helix_sensing_cpp
 {
@@ -55,36 +66,21 @@ public:
   CallbackReturn on_deactivate(const rclcpp_lifecycle::State & state) override;
   CallbackReturn on_cleanup(const rclcpp_lifecycle::State &) override;
   CallbackReturn on_shutdown(const rclcpp_lifecycle::State & s) override;
+  CallbackReturn on_error(const rclcpp_lifecycle::State & s) override;
 
   // Exposed for tests so they don't need a live /diagnostics publisher.
   void process_sample_for_test(const std::string & metric_name, double value);
   std::size_t fault_count_for_test() const;
 
 private:
-  struct MetricState
-  {
-    RollingStats stats;
-    int consecutive = 0;
-    double last_emit_time = 0.0;  // seconds since epoch, 0.0 == never
-    double anomaly_start_time = 0.0;  // monotonic seconds, 0.0 == not active
-    explicit MetricState(std::size_t win)
-    : stats(win) {}
-  };
-
   void on_diagnostics(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr msg);
   void on_metric(const std_msgs::msg::Float64MultiArray::SharedPtr msg);
 
+  // Runs one sample through the core, logs like the reference and publishes
+  // an emitted fault. Takes data_mutex_.
   void process_sample(const std::string & metric_name, double value);
-
-  void emit_anomaly_fault(
-    const std::string & metric_name,
-    double value, double mean, double std_, double zscore, int consecutive,
-    MetricState & state);
-
-  // Stale path emission: used when a metric arrives as NaN, which
-  // topic_rate_monitor emits for a silent topic. Same fault_type as the
-  // z-score path so R1 in helix_diagnosis catches both without a new rule.
-  void emit_stale_fault(const std::string & metric_name, int consecutive);
+  void publish_fault(const FaultRecord & fault);
+  void stop_and_clear();
 
   // Wall-clock in seconds since epoch. RCL_SYSTEM_TIME matches
   // Python time.time() for the FaultEvent.timestamp field.
@@ -94,15 +90,9 @@ private:
   // that system-clock adjustments don't affect anomaly timing.
   double steady_time_now();
 
-  // Parameters (latched at configure).
-  double zscore_threshold_ = 3.0;
-  int consecutive_trigger_ = 3;
-  int window_size_ = 60;
-  double emit_cooldown_s_ = 1.0;
-  double min_anomaly_duration_s_ = 2.0;
-
   mutable std::mutex data_mutex_;
-  std::unordered_map<std::string, MetricState> metrics_;
+  std::unique_ptr<AnomalyCore> core_;  // built at configure from the latched parameters
+  bool active_ = false;
 
   // Test-visible monotonic emit count.
   std::size_t fault_count_ = 0;

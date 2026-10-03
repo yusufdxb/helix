@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 
+#include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/executors/single_threaded_executor.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -234,6 +235,23 @@ TEST_F(HeartbeatFixture, ReactivationRestartsHeartbeat)
   node->activate();
   EXPECT_TRUE(spin_until(node, [this]() {return beat_count() >= 2;}, 3000ms))
     << "node did not resume heartbeats after reactivation";
+}
+
+// Shutdown is reachable straight from ACTIVE. A finalized node must not keep
+// reporting itself alive; before the fix its heartbeat timer kept running.
+TEST_F(HeartbeatFixture, ShutdownFromActiveStopsHeartbeat)
+{
+  auto node = make_node();
+  node->configure();
+  node->activate();
+  ASSERT_TRUE(spin_until(node, [this]() {return beat_count() >= 2;}, 3000ms));
+
+  node->shutdown();
+  EXPECT_EQ(node->get_current_state().id(), lifecycle_msgs::msg::State::PRIMARY_STATE_FINALIZED);
+  spin_for(node, 300ms);
+  clear_beats();
+  spin_for(node, 500ms);
+  EXPECT_EQ(beat_count(), 0u) << "finalized node kept publishing heartbeats";
 }
 
 int main(int argc, char ** argv)

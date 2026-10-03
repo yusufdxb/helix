@@ -35,6 +35,18 @@ namespace helix_sensing_cpp
 
 inline constexpr double kFlatSignalEpsilon = 1e-6;
 
+/// (d) ** 2 exactly as CPython evaluates it: through libm pow(), which is
+/// not always correctly rounded and differs from d * d in the last bit for
+/// roughly 0.07% of inputs (measured). That bit can move a rounded
+/// FaultEvent context value or a threshold comparison, so the kernel
+/// reproduces the reference instead of computing the "better" product. The
+/// volatile exponent stops the compiler from folding pow(d, 2.0) into d * d.
+inline double python_square(double d)
+{
+  static volatile double two = 2.0;
+  return std::pow(d, two);
+}
+
 enum class ZScoreStatus
 {
   kOk,            // z-score is meaningful
@@ -73,6 +85,9 @@ public:
       return r;
     }
 
+    // Plain left-to-right accumulation, as Python 3.10's sum() does for
+    // floats (3.12+ switched to compensated summation; ROS 2 Humble ships
+    // 3.10, the reference this kernel is compared against).
     double sum = 0.0;
     for (double s : samples_) {
       sum += s;
@@ -81,8 +96,7 @@ public:
 
     double sq = 0.0;
     for (double s : samples_) {
-      const double d = s - mean;
-      sq += d * d;
+      sq += python_square(s - mean);
     }
     // POPULATION variance — divide by N, not N-1, matching Python.
     const double variance = sq / static_cast<double>(n);
