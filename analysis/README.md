@@ -288,6 +288,7 @@ gap in section 5, 3.5 is the defensible choice.
 | `plot.py` | the two figures |
 | `recommended_helix_params.yaml` | the proposed config, not loaded by anything |
 | `score_capture.py` | scores a bag against shipped and proposed settings and compares with live faults (section 7) |
+| `gate_edge.py` | shows the live-vs-replay disagreement on the 2026-10-06 capture is the duration gate sitting on the 0.5 s sample grid (section 7) |
 | `results/helix_operating_point.png` / `.svg` | main figure: tradeoff, per-fault-model detection, idle margin |
 | `results/helix_selfmasking.png` / `.svg` | why the shipped config is blind |
 | `../tests/test_detector_sweep.py` | shipped-vs-mirror equivalence, Session 8 escalation reproduction, and pins for every number quoted above |
@@ -330,15 +331,34 @@ All 4 proposed-config faults are `rate_hz/gnss`. A STOP-producing fault is any
 shipped config also has no margin on gnss: its longest run is 5, exactly the
 5 needed to emit.
 
-### Open finding: live detector disagrees with replay
+### Resolved: live vs replay disagreement is a duration gate on the sample grid
 
 The live shipped detector emitted 1 fault (`rate_hz/gnss`, z 4.26, t = 760.2 s
-into the bag). Replay of the same recorded metrics at the shipped parameters
-emits 0. This is a MISMATCH and its cause is unverified. Hypothesis, untested:
-the gnss run sits exactly at the emit minimum (5 of 5), and the live node uses
-its own clock for the duration gate while replay uses bag stamps. Until it is
-resolved, replay results from this harness should not be read as a prediction of
-live behaviour at the margin.
+into the bag); replay of the same recorded metrics at the shipped parameters
+emitted 0. `analysis/gate_edge.py` shows why:
+
+- Both paths saw identical inputs. The live fault payload (value 0.9982, window
+  mean 0.9993, window std 0.000248, z 4.26, 5 consecutive violations) matches
+  the replayed sample at t = 760.198 s exactly.
+- `min_anomaly_duration_s` is 2.0 s and the metric is published every 0.5 s, so
+  the gate sits exactly on the sample grid: the fifth violating sample arrives
+  4 x 0.5 = 2.0 s after the first. In the bag's receive stamps that interval is
+  1.999984 s (16 us short), so replay's `elapsed >= 2.0` fails. The live node
+  measures the same interval with its own `time.monotonic()` at callback time,
+  where it came out at or above 2.0 s, so it emitted. Arrival jitter is
+  0.39 ms (sd) over the capture, two orders of magnitude larger than that gap.
+- Moving the gate off the grid by 1 ms (`min_anomaly_duration_s` 1.999) makes
+  the shipped body emit the same fault at t = 760.2 s in replay.
+
+Consequence: with the shipped parameters, emission needs 5 OR 6 consecutive
+violations, decided by sub-millisecond timing. "5 required" in section 1 and
+in `recommended_helix_params.yaml` is the lower of the two, so it is the
+conservative figure for false-alarm margin, but neither live nor replay is
+deterministic at that boundary, and the same applies to every replay result in
+this directory whose streak ends exactly at the gate. Fix options, none
+applied (each changes detection latency or behaviour): set the gate off the
+grid (e.g. 1.75 s for 5 samples, 2.25 s for 6), gate on a sample count instead
+of elapsed time, or compare with a half-period tolerance.
 
 ### Limits
 
