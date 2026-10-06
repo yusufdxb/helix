@@ -287,6 +287,7 @@ gap in section 5, 3.5 is the defensible choice.
 | `idle_margin.py` | idle score distribution and longest above-threshold run, writes `results/idle_margin.json` |
 | `plot.py` | the two figures |
 | `recommended_helix_params.yaml` | the proposed config, not loaded by anything |
+| `score_capture.py` | scores a bag against shipped and proposed settings and compares with live faults (section 7) |
 | `results/helix_operating_point.png` / `.svg` | main figure: tradeoff, per-fault-model detection, idle margin |
 | `results/helix_selfmasking.png` / `.svg` | why the shipped config is blind |
 | `../tests/test_detector_sweep.py` | shipped-vs-mirror equivalence, Session 8 escalation reproduction, and pins for every number quoted above |
@@ -300,3 +301,52 @@ python3 analysis/idle_margin.py
 python3 analysis/plot.py
 python3 -m pytest tests/test_detector_sweep.py -q
 ```
+
+---
+
+## 7. Loaded standing capture, 2026-10-06 (18.4 min)
+
+A real HELIX Tier-1 capture on a GO2 payload computer, robot standing still,
+with a voice-interaction stack running on the same computer and a low-priority
+compile from about 00:34Z (not separated here). Conditions, layout and side
+evidence: [`../hardware_eval_20261006/README.md`](../hardware_eval_20261006/README.md).
+Reproduce: `python3 analysis/score_capture.py` (writes
+`results/loaded_standing_20261006.json` and `data/metrics_loaded_standing_20261006.json`).
+
+The recorded `/helix/metrics` stream (1103.2 s, 13 metrics, 28691 samples, 0 NaN)
+was replayed through the shipped detector code at both operating points.
+`rate_hz/utlidar_robot_odom` is present in this capture, unlike the idle baselines.
+
+| Operating point | False faults | Per hour | Without 1 s cooldown | STOP-producing faults | Longest above-threshold run, per rate metric (need 5) |
+| --- | --- | --- | --- | --- | --- |
+| Shipped (4.0 / 60) | 0 | 0.00 | 0 | 0 | gnss 5, multiplestate 3, utlidar_robot_pose 3, utlidar_cloud 1, utlidar_robot_odom 1 |
+| Proposed (3.5 / 120) | 4 | 13.05 | 7 | 0 | gnss 8, utlidar_robot_pose 3, multiplestate 2, utlidar_robot_odom 2, utlidar_cloud 1 |
+
+All 4 proposed-config faults are `rate_hz/gnss`. A STOP-producing fault is any
+`rate_hz/utlidar*` fault; there were none under either config.
+
+**The proposed operating point is NOT confirmed on this capture.** It raised
+`rate_hz/gnss` false faults that the idle baselines (section 1) did not. The
+shipped config also has no margin on gnss: its longest run is 5, exactly the
+5 needed to emit.
+
+### Open finding: live detector disagrees with replay
+
+The live shipped detector emitted 1 fault (`rate_hz/gnss`, z 4.26, t = 760.2 s
+into the bag). Replay of the same recorded metrics at the shipped parameters
+emits 0. This is a MISMATCH and its cause is unverified. Hypothesis, untested:
+the gnss run sits exactly at the emit minimum (5 of 5), and the live node uses
+its own clock for the duration gate while replay uses bag stamps. Until it is
+resolved, replay results from this harness should not be read as a prediction of
+live behaviour at the margin.
+
+### Limits
+
+- One 18.4 min capture. Zero events in that time still allows roughly 12 per hour
+  at 95 % confidence, so "0 false faults" is not a rate of zero.
+- Standing, not walking. Gait-induced rate and pose changes are not exercised.
+- No injected faults, so detection was not measured here.
+- A compile load window and a voice-interaction stack share the computer; the
+  compile window is not separated.
+- `/utlidar/imu` was excluded from topic_rate_monitor.
+- The build was commit b31a9ce; Tier-1 equivalence to main is assumed.

@@ -99,7 +99,9 @@ injections onto real idle GO2 telemetry:
 | 50 percent rate collapse | 0 / 62 | 62 / 62 |
 
 Both operating points measure 0.0 false alarms per hour on 901.5 s of real
-idle telemetry, and both hold the same 2.5 s median detection latency. The
+idle telemetry (a later loaded standing capture did not confirm this for the
+proposed point: 4 `rate_hz/gnss` false faults, see
+[`analysis/README.md`](analysis/README.md) section 7), and both hold the same 2.5 s median detection latency. The
 mechanism is self-masking: the z-score is scored against a rolling window that
 the sustained fault itself is filling, so the score decays back below
 threshold at roughly the same instant `min_anomaly_duration_s` first permits

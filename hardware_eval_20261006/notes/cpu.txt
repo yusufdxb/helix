@@ -1,0 +1,448 @@
+== 00:19:52 load 0.44
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.1  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  3.5 48388 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  3.4 46976 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  5.2 40896 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 13.7 58788 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  4.1 38656 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  3.1 38096 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  4.7 53952 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  3.6 36904 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:20:22 load 0.26
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  2.0 48912 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  2.0 46568 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.7 40420 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 15.2 59048 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  3.4 38916 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  2.5 38356 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.9 54212 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  2.5 37164 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:20:52 load 0.27
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  1.5 49176 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  1.5 46832 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.4 40680 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 15.7 59312 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  3.1 39180 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  2.2 38620 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.6 54476 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  2.1 37428 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:21:22 load 0.22
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  1.3 49440 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  1.2 47096 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.3 40944 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 15.9 59576 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  3.0 39444 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  2.1 38884 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.4 54740 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.9 37692 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:21:52 load 0.26
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  1.1 48652 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  1.1 46308 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.3 41208 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.1 59840 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.9 38656 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  2.0 38096 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.3 53952 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.8 36904 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:22:22 load 1.56
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  1.0 48912 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  1.0 46568 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.2 40420 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.2 60104 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.9 38916 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  2.0 38356 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.3 54212 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.7 37164 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:22:52 load 1.70
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.9 49176 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.9 46832 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.2 40680 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.3 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.8 39180 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  2.0 38620 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.2 54476 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.7 37428 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:23:22 load 1.49
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.8 49704 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.8 47096 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.2 41208 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.4 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.8 39444 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.9 38884 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.2 54740 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.6 37692 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:23:52 load 1.49
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.8 49968 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.8 47360 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.2 41472 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.4 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.8 39972 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.9 39148 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.2 55004 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.6 37956 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:24:22 load 1.85
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.8 50232 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.7 47624 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.2 41736 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.5 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.8 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.9 39412 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.2 55268 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.6 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:24:52 load 2.12
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.7 50232 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.7 47888 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.2 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.8 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.9 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.2 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.6 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:25:22 load 1.92
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.7 50232 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.7 47888 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.2 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.9 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.2 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.5 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:25:52 load 2.14
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.7 50232 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.7 47888 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.9 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.5 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:26:22 load 1.75
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.7 50232 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.7 47888 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.9 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.5 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:26:52 load 1.77
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 50232 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.6 47888 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.9 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.5 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:27:22 load 1.64
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 50232 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.6 47888 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.5 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:27:52 load 3.13
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 50232 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.6 47888 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.5 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:28:22 load 1.90
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 50340 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.6 47888 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.5 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:28:52 load 1.36
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.6 47888 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.5 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:29:22 load 0.96
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.6 48000 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.7 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.5 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:29:52 load 0.72
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.6 50168 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 60368 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.5 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:30:22 load 1.20
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.6 50168 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 60600 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:30:52 load 1.02
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.6 50168 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42000 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.7 60912 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40236 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39676 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 38484 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:31:22 load 0.75
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.6 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42264 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.7 61176 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40500 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39940 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 38748 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:31:52 load 1.73
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.6 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42264 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.7 61176 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40500 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39940 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39012 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:32:22 load 1.27
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.6 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42264 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 61176 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40500 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39940 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.0 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39276 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:32:52 load 0.98
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.5 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42264 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 61176 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40500 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39940 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.0 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39540 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:33:22 load 1.01
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.5 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42452 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.7 61440 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40500 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39940 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.0 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39540 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:33:52 load 0.69
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.5 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42452 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.7 61440 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 40500 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39940 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.0 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39540 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:34:22 load 0.74
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.5 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42480 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 61440 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 42640 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 39940 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.0 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39540 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:34:52 load 1.15
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.5 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42480 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.6 61440 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 42664 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 40120 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.0 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39540 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:35:22 load 2.49
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.5 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42480 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.7 61440 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 42664 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 40528 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55532 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39540 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:35:52 load 2.93
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.5 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.1 42480 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 16.9 61440 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 42664 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 40528 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55672 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39540 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:36:22 load 3.28
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.5 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.2 42480 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 17.0 61440 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 42664 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 40528 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55800 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39540 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:36:52 load 3.26
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.5 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.2 42480 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 17.1 61440 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 42664 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 40528 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55800 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39540 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:37:23 load 3.37
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.5 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.2 42480 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 17.2 61440 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 42664 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 40528 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55800 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39540 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+== 00:37:53 load 3.39
+  21100  0.0  1584 bash -c mkdir -p ~/piggyback_20261006 && chmod +x ~/helix_observe.sh && nohup setsid bash -c 'set -m; ~/helix_observe.sh 
+  21103  0.0  3512 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  21165  0.5 52384 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_sensing.launch.py
+  21166  0.5 50432 /usr/bin/python3 /opt/ros/humble/bin/ros2 launch helix_bringup helix_adapter.launch.py auto_activate:=false
+  21188  4.2 42480 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-a
+  21189 17.3 61440 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor 
+  21192  2.7 42664 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-ar
+  21193  1.8 40528 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_json_state_parser -
+  21196  3.1 55800 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor 
+  21197  1.4 39540 /usr/bin/python3 /home/unitree/hw_verify_20260918/helix/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r 
+  21513  0.0  2252 bash /home/unitree/helix_observe.sh /home/unitree/piggyback_20261006/helix_observe 1800
+  23521  0.0  2284 /usr/bin/gmake -s -f tests/CMakeFiles/test_helix_parity.dir/build.make tests/CMakeFiles/test_helix_parity.dir/build
+  23524  0.0   844 /bin/sh -c cd /home/unitree/bbrs_cpp/build/blackboxrs_core/tests && /usr/bin/c++ -DBLACKBOXRS_REPO_ROOT=\"/home/unitree/b
+  23525  0.0   844 /usr/bin/c++ -DBLACKBOXRS_REPO_ROOT="/home/unitree/bbrs_cpp/cpp/tests/../.." -DJSON_DIAGNOSTICS=0 -DJSON_USE_IMPLICIT_CON
+  23526 94.3 434004 /usr/lib/gcc/aarch64-linux-gnu/11/cc1plus -quiet -I /home/unitree/bbrs_cpp/cpp/include -I /home/unitree/bbrs_cpp/build/b

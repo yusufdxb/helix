@@ -1,0 +1,128 @@
+{
+ "duration_s": 1103.247,
+ "n_samples": 28691,
+ "metrics": [
+  "gnss/hdop",
+  "gnss/satellite_inuse",
+  "gnss/satellite_total",
+  "go2_state/brightness",
+  "go2_state/obstaclesAvoidSwitch",
+  "go2_state/uwbSwitch",
+  "go2_state/volume",
+  "pose/displacement_rate_m_s",
+  "rate_hz/gnss",
+  "rate_hz/multiplestate",
+  "rate_hz/utlidar_cloud",
+  "rate_hz/utlidar_robot_odom",
+  "rate_hz/utlidar_robot_pose"
+ ],
+ "samples_per_metric": {
+  "gnss/satellite_total": 2207,
+  "gnss/satellite_inuse": 2207,
+  "gnss/hdop": 2207,
+  "go2_state/volume": 2207,
+  "go2_state/brightness": 2207,
+  "go2_state/obstaclesAvoidSwitch": 2207,
+  "go2_state/uwbSwitch": 2207,
+  "rate_hz/utlidar_robot_odom": 2207,
+  "rate_hz/utlidar_robot_pose": 2207,
+  "rate_hz/utlidar_cloud": 2207,
+  "rate_hz/gnss": 2207,
+  "rate_hz/multiplestate": 2207,
+  "pose/displacement_rate_m_s": 2207
+ },
+ "nan_samples_per_metric": {
+  "gnss/satellite_total": 0,
+  "gnss/satellite_inuse": 0,
+  "gnss/hdop": 0,
+  "go2_state/volume": 0,
+  "go2_state/brightness": 0,
+  "go2_state/obstaclesAvoidSwitch": 0,
+  "go2_state/uwbSwitch": 0,
+  "rate_hz/utlidar_robot_odom": 0,
+  "rate_hz/utlidar_robot_pose": 0,
+  "rate_hz/utlidar_cloud": 0,
+  "rate_hz/gnss": 0,
+  "rate_hz/multiplestate": 0,
+  "pose/displacement_rate_m_s": 0
+ },
+ "utlidar_robot_odom_present": true,
+ "live_faults": [
+  {
+   "t_rel": 760.200552576,
+   "node": "rate_hz/gnss",
+   "type": "ANOMALY",
+   "detail": "Metric 'rate_hz/gnss' Z-score 4.26 exceeded threshold on 3 consecutive samples"
+  }
+ ],
+ "configs": {
+  "shipped": {
+   "params": {
+    "zscore_threshold": 4.0,
+    "window_size": 60,
+    "consecutive_trigger": 3,
+    "min_anomaly_duration_s": 2.0,
+    "emit_cooldown_s": 1.0
+   },
+   "false_faults": 0,
+   "false_faults_per_hour": 0.0,
+   "false_faults_no_cooldown": 0,
+   "faults_by_metric": {},
+   "stop_producing_faults": 0,
+   "stop_producing_per_hour": 0.0,
+   "stop_episodes": 0,
+   "stop_episodes_per_hour": 0.0,
+   "longest_above_threshold_run_per_metric": {
+    "rate_hz/utlidar_robot_odom": 1,
+    "rate_hz/utlidar_robot_pose": 3,
+    "rate_hz/utlidar_cloud": 1,
+    "rate_hz/gnss": 5,
+    "rate_hz/multiplestate": 3
+   },
+   "longest_run_overall": 5,
+   "needed_to_emit": 5,
+   "max_score_per_metric": {
+    "rate_hz/utlidar_robot_odom": 4.462160610204971,
+    "rate_hz/utlidar_robot_pose": 5.075293456729761,
+    "rate_hz/utlidar_cloud": 38.674290262660016,
+    "rate_hz/gnss": 11.535568612529577,
+    "rate_hz/multiplestate": 11.503202809263179
+   }
+  },
+  "proposed": {
+   "params": {
+    "zscore_threshold": 3.5,
+    "window_size": 120,
+    "consecutive_trigger": 3,
+    "min_anomaly_duration_s": 2.0,
+    "emit_cooldown_s": 1.0
+   },
+   "false_faults": 4,
+   "false_faults_per_hour": 13.052380835841836,
+   "false_faults_no_cooldown": 7,
+   "faults_by_metric": {
+    "rate_hz/gnss": 4
+   },
+   "stop_producing_faults": 0,
+   "stop_producing_per_hour": 0.0,
+   "stop_episodes": 0,
+   "stop_episodes_per_hour": 0.0,
+   "longest_above_threshold_run_per_metric": {
+    "rate_hz/utlidar_robot_odom": 2,
+    "rate_hz/utlidar_robot_pose": 3,
+    "rate_hz/utlidar_cloud": 1,
+    "rate_hz/gnss": 8,
+    "rate_hz/multiplestate": 2
+   },
+   "longest_run_overall": 8,
+   "needed_to_emit": 5,
+   "max_score_per_metric": {
+    "rate_hz/utlidar_robot_odom": 4.462160610204971,
+    "rate_hz/utlidar_robot_pose": 5.075293456729761,
+    "rate_hz/utlidar_cloud": 38.674290262660016,
+    "rate_hz/gnss": 12.160424593777492,
+    "rate_hz/multiplestate": 11.503202809263179
+   }
+  }
+ }
+}
