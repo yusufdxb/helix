@@ -44,3 +44,25 @@ def test_chain_complete_and_source_latency():
     assert c['complete_to_output']
     assert abs(c['fault_to_output_src_ms'] - 4.0) < 1e-6
     assert abs(c['src_deltas_ms']['fault->action_ms'] - 2.0) < 1e-6
+
+
+def test_hint_received_after_action_still_completes_chain():
+    # 2026-10-09 GO2 dry stage C: hint receipt 3.9 ms after the action
+    E = _chain_events(True)
+    for e in E:
+        if e['kind'] == 'hint':
+            e['t'] = 0.0059
+    c = analyze(E)['chains'][0]
+    assert c['complete_to_output']
+    assert c['times']['fault'] == 0.000
+    assert c['times']['hint'] == 0.0059
+
+
+def test_hint_far_after_action_is_not_matched():
+    E = _chain_events(True)
+    for e in E:
+        if e['kind'] == 'hint':
+            e['t'] = 0.5
+    c = analyze(E)['chains'][0]
+    assert c['times']['hint'] is None
+    assert not c['complete_to_output']

@@ -41,6 +41,11 @@ from typing import Dict, List, Optional
 
 STAGES = ('fault', 'hint', 'action', 'hold', 'status', 'output', 'sink')
 
+# Receipt order across topics is not causal order: one recorder node receives
+# the hint and the action on different subscriptions, and on the GO2 payload
+# the hint arrived 3.9 ms after the action it caused (2026-10-09 dry stage C).
+REORDER_TOL_S = 0.05
+
 
 def _first(events, pred, after: float) -> Optional[dict]:
     for e in events:
@@ -60,7 +65,7 @@ def analyze(events: List[dict]) -> Dict[str, object]:
         fid = act['fault_id']
         hint = None
         for e in ev:
-            if e['t'] > act['t']:
+            if e['t'] > act['t'] + REORDER_TOL_S:
                 break
             if (e['kind'] == 'hint' and e['fault_id'] == fid
                     and e['suggested_action'] == 'STOP_AND_HOLD'):
@@ -68,11 +73,11 @@ def analyze(events: List[dict]) -> Dict[str, object]:
         fault = None
         if hint is not None:
             for e in ev:
-                if e['t'] > hint['t']:
+                if e['t'] > hint['t'] + REORDER_TOL_S:
                     break
                 if e['kind'] == 'fault' and e['node_name'] == fid:
                     fault = e
-        t0 = hint['t'] if hint else act['t']
+        t0 = min(hint['t'], act['t']) if hint else act['t']
         hold = _first(ev, lambda e: e['kind'] == 'hold' and e['hold']
                       and e['fault_id'] == fid, t0)
         th = hold['t'] if hold else act['t']
