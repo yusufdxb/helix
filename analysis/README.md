@@ -287,6 +287,8 @@ gap in section 5, 3.5 is the defensible choice.
 | `idle_margin.py` | idle score distribution and longest above-threshold run, writes `results/idle_margin.json` |
 | `plot.py` | the two figures |
 | `recommended_helix_params.yaml` | the proposed config, not loaded by anything |
+| `score_capture.py` | scores a bag against shipped and proposed settings and compares with live faults (section 7) |
+| `gate_edge.py` | shows the live-vs-replay disagreement on the 2026-10-06 capture is the duration gate sitting on the 0.5 s sample grid (section 7) |
 | `results/helix_operating_point.png` / `.svg` | main figure: tradeoff, per-fault-model detection, idle margin |
 | `results/helix_selfmasking.png` / `.svg` | why the shipped config is blind |
 | `../tests/test_detector_sweep.py` | shipped-vs-mirror equivalence, Session 8 escalation reproduction, and pins for every number quoted above |
@@ -300,3 +302,71 @@ python3 analysis/idle_margin.py
 python3 analysis/plot.py
 python3 -m pytest tests/test_detector_sweep.py -q
 ```
+
+---
+
+## 7. Loaded standing capture, 2026-10-06 (18.4 min)
+
+A real HELIX Tier-1 capture on a GO2 payload computer, robot standing still,
+with a voice-interaction stack running on the same computer and a low-priority
+compile from about 00:34Z (not separated here). Conditions, layout and side
+evidence: [`../hardware_eval_20261006/README.md`](../hardware_eval_20261006/README.md).
+Reproduce: `python3 analysis/score_capture.py` (writes
+`results/loaded_standing_20261006.json` and `data/metrics_loaded_standing_20261006.json`).
+
+The recorded `/helix/metrics` stream (1103.2 s, 13 metrics, 28691 samples, 0 NaN)
+was replayed through the shipped detector code at both operating points.
+`rate_hz/utlidar_robot_odom` is present in this capture, unlike the idle baselines.
+
+| Operating point | False faults | Per hour | Without 1 s cooldown | STOP-producing faults | Longest above-threshold run, per rate metric (need 5) |
+| --- | --- | --- | --- | --- | --- |
+| Shipped (4.0 / 60) | 0 | 0.00 | 0 | 0 | gnss 5, multiplestate 3, utlidar_robot_pose 3, utlidar_cloud 1, utlidar_robot_odom 1 |
+| Proposed (3.5 / 120) | 4 | 13.05 | 7 | 0 | gnss 8, utlidar_robot_pose 3, multiplestate 2, utlidar_robot_odom 2, utlidar_cloud 1 |
+
+All 4 proposed-config faults are `rate_hz/gnss`. A STOP-producing fault is any
+`rate_hz/utlidar*` fault; there were none under either config.
+
+**The proposed operating point is NOT confirmed on this capture.** It raised
+`rate_hz/gnss` false faults that the idle baselines (section 1) did not. The
+shipped config also has no margin on gnss: its longest run is 5, exactly the
+5 needed to emit.
+
+### Resolved: live vs replay disagreement is a duration gate on the sample grid
+
+The live shipped detector emitted 1 fault (`rate_hz/gnss`, z 4.26, t = 760.2 s
+into the bag); replay of the same recorded metrics at the shipped parameters
+emitted 0. `analysis/gate_edge.py` shows why:
+
+- Both paths saw identical inputs. The live fault payload (value 0.9982, window
+  mean 0.9993, window std 0.000248, z 4.26, 5 consecutive violations) matches
+  the replayed sample at t = 760.198 s exactly.
+- `min_anomaly_duration_s` is 2.0 s and the metric is published every 0.5 s, so
+  the gate sits exactly on the sample grid: the fifth violating sample arrives
+  4 x 0.5 = 2.0 s after the first. In the bag's receive stamps that interval is
+  1.999984 s (16 us short), so replay's `elapsed >= 2.0` fails. The live node
+  measures the same interval with its own `time.monotonic()` at callback time,
+  where it came out at or above 2.0 s, so it emitted. Arrival jitter is
+  0.39 ms (sd) over the capture, two orders of magnitude larger than that gap.
+- Moving the gate off the grid by 1 ms (`min_anomaly_duration_s` 1.999) makes
+  the shipped body emit the same fault at t = 760.2 s in replay.
+
+Consequence: with the shipped parameters, emission needs 5 OR 6 consecutive
+violations, decided by sub-millisecond timing. "5 required" in section 1 and
+in `recommended_helix_params.yaml` is the lower of the two, so it is the
+conservative figure for false-alarm margin, but neither live nor replay is
+deterministic at that boundary, and the same applies to every replay result in
+this directory whose streak ends exactly at the gate. Fix options, none
+applied (each changes detection latency or behaviour): set the gate off the
+grid (e.g. 1.75 s for 5 samples, 2.25 s for 6), gate on a sample count instead
+of elapsed time, or compare with a half-period tolerance.
+
+### Limits
+
+- One 18.4 min capture. Zero events in that time still allows roughly 12 per hour
+  at 95 % confidence, so "0 false faults" is not a rate of zero.
+- Standing, not walking. Gait-induced rate and pose changes are not exercised.
+- No injected faults, so detection was not measured here.
+- A compile load window and a voice-interaction stack share the computer; the
+  compile window is not separated.
+- `/utlidar/imu` was excluded from topic_rate_monitor.
+- The build was commit b31a9ce; Tier-1 equivalence to main is assumed.

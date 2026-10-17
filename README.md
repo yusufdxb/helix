@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://youtu.be/PbKXB91-NSY">
-    <img src="https://img.youtube.com/vi/PbKXB91-NSY/maxresdefault.jpg" width="760" alt="HELIX demo: self-healing closed loop on a live GO2">
+    <img src="https://img.youtube.com/vi/PbKXB91-NSY/maxresdefault.jpg" width="760" alt="HELIX demo: detect, decide, and publish a recovery command on a live GO2">
   </a>
 </p>
 
@@ -38,7 +38,8 @@ the honest version of this paragraph: it compares HELIX against
 
 ## Proven, and not yet proven
 
-- **Proven**: the closed loop runs end to end on a live GO2. A fault enters at
+- **Proven, in software**: the closed loop runs end to end on a live GO2, up to
+  the published recovery command. A fault enters at
   SENSE, a rule in DIAGNOSE (R1 to R4) turns it into a `RecoveryHint`, and
   RECOVER emits an audited, allowlisted, cooldown-gated action. Session 8
   reproduced this 14 times with no allowlist or cooldown violation.
@@ -102,7 +103,9 @@ injections onto real idle GO2 telemetry:
 | 50 percent rate collapse | 0 / 62 | 62 / 62 |
 
 Both operating points measure 0.0 false alarms per hour on 901.5 s of real
-idle telemetry, and both hold the same 2.5 s median detection latency. The
+idle telemetry (a later loaded standing capture did not confirm this for the
+proposed point: 4 `rate_hz/gnss` false faults, see
+[`analysis/README.md`](analysis/README.md) section 7), and both hold the same 2.5 s median detection latency. The
 mechanism is self-masking: the z-score is scored against a rolling window that
 the sustained fault itself is filling, so the score decays back below
 threshold at roughly the same instant `min_anomaly_duration_s` first permits
@@ -221,7 +224,7 @@ duplicates cannot be trusted about what it does not.
 
 Last stable release without the closed-loop stack:
 [`v0.2.1`](https://github.com/yusufdxb/helix/releases/tag/v0.2.1). Current
-self-healing work is tagged
+closed-loop work is tagged
 [`v0.3.0-wip-self-healing`](https://github.com/yusufdxb/helix/releases/tag/v0.3.0-wip-self-healing).
 
 ## Packages
@@ -241,13 +244,13 @@ self-healing work is tagged
 
 ## Evaluation
 
-Five benchmark suites evaluate the sensing components.
+Six benchmarks evaluate the sensing components.
 
 | Benchmark | Key Result | ROS 2? |
 |-----------|-----------|--------|
 | Algorithmic throughput | ~81K samples/sec (PC i7-7700), ~64K (Jetson Orin NX) | No |
 | End-to-end ROS 2 latency | 1.16 ms mean (p95: 1.24 ms) | Yes |
-| Realistic anomaly detection | 96.5% TPR at Z=3.0 with marginal anomalies; 0% TPR for 3-sigma in Laplace noise | No |
+| Realistic anomaly detection | 96.5% TPR at 0% FPR with marginal anomalies at the benchmark Z=3.0 (the shipped Z=4.0 gives 8.0% TPR on the same scenario); 0% TPR for 3-sigma in Laplace noise at Z=3.0 | No |
 | Log parser accuracy | 22/22 correct; ~777K msg/sec (PC), ~156K (Jetson Orin NX) | No |
 | GO2 attachability | 1/4 HELIX inputs natively available; 54 topics adaptable | No |
 | Adapter-based detection | 4 real FaultEvents from a live GO2 LiDAR rate anomaly | Yes |
@@ -284,19 +287,21 @@ Eight lab sessions (2026-04-03 to 2026-04-23) demonstrated:
 - Real `FaultEvent` detection from LiDAR rate anomalies on the GO2 via the adapter
 - Ground-truth fault injection with ~1.8 s end-to-end detection latency
 - Algorithmic benchmarks on the Jetson Orin NX (62-64K samples/sec)
-- Session 8: end-to-end closed loop on a live GO2, 30 faults leading to 14
+- Session 8: end-to-end closed loop in software on a live GO2, 30 faults leading to 14
   recovery hints (R1 STOP_AND_HOLD and R2 RESUME) leading to 14 audited
-  actions (allowlist and cooldown), 3,064 zero-twist commands, and 9
-  STOP_AND_HOLD events in 7m19s on an idle robot; a 30-min C++
-  anomaly-detector parity run at -56% RSS and -60% CPU vs Python (RSS missed
-  the 30% design target at 44%)
+  actions (allowlist and cooldown), 3,064 zero-twist commands with no
+  downstream subscriber, and 9 STOP_AND_HOLD events in 7m19s on an idle robot;
+  a 30-min C++ anomaly-detector parity run at RSS 42.51 MB to 19.81 MB (-53.4%)
+  and CPU 2.21% to 0.80% (-63.8%) vs the Python Session 7 plateau (RSS missed
+  the 30% design target at 46.6%)
 
 Full evidence, scope, and limitations: [`docs/GO2_HARDWARE_EVIDENCE.md`](docs/GO2_HARDWARE_EVIDENCE.md).
 
 ## Roadmap
 
-HELIX ships as a public repo and demo video: a working self-healing system
-that other roboticists can install and adapt. Forward pillars:
+HELIX ships as a public repo and demo video: a working detect, decide, and
+command-recovery system that other roboticists can install and adapt; physical
+recovery on the robot is not yet demonstrated. Forward pillars:
 
 1. **Close the recovery loop physically.** Done in software
    ([`docs/MOTION_ARBITRATION.md`](docs/MOTION_ARBITRATION.md)); run stage E

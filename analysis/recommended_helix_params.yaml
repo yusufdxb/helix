@@ -1,4 +1,6 @@
 # PROPOSAL ONLY. This file is not loaded by anything.
+# NOT CONFIRMED: this proposal raised 4 rate_hz/gnss false faults on the 2026-10-06
+# loaded standing capture; see analysis/README.md section 7.
 # Measured replacement for the guessed operating point in
 # src/helix_bringup/config/helix_params.yaml. See analysis/README.md for the
 # numbers and analysis/results/ for the raw sweep output.

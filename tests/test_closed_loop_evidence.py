@@ -1,5 +1,8 @@
 """Pure regression tests for the physical-closure evidence gate."""
 
+import sys
+from types import ModuleType
+
 from scripts.validate_closed_loop_bag import evaluate
 
 
@@ -69,24 +72,34 @@ def test_unmarked_bag_fails_closed():
 # schemas, which is what an audit artifact needs: readable years later, by any
 # reader, without the source tree that produced it.
 
+def _install_fake_ament_index(monkeypatch, installed_packages):
+    """Provide the one ament API used by the scenario without requiring ROS."""
+    ament = ModuleType("ament_index_python")
+    packages = ModuleType("ament_index_python.packages")
+    packages.get_packages_with_prefixes = lambda: installed_packages
+    ament.packages = packages
+    monkeypatch.setitem(sys.modules, "ament_index_python", ament)
+    monkeypatch.setitem(sys.modules, "ament_index_python.packages", packages)
+
+
 def test_scenario_records_a_self_describing_bag_when_possible(monkeypatch):
-    import ament_index_python.packages as packages
+    _install_fake_ament_index(
+        monkeypatch, {"rosbag2_storage_mcap": "/opt/ros/humble"}
+    )
 
     from scripts.sim_faults.run_closed_loop_scenario import default_storage
 
-    monkeypatch.setattr(packages, 'get_packages_with_prefixes',
-                        lambda: {'rosbag2_storage_mcap': '/opt/ros/humble'})
-    assert default_storage() == 'mcap'
+    assert default_storage() == "mcap"
 
 
 def test_scenario_falls_back_when_the_mcap_plugin_is_absent(monkeypatch):
-    import ament_index_python.packages as packages
+    _install_fake_ament_index(
+        monkeypatch, {"rosbag2_storage_default_plugins": "/opt/ros/humble"}
+    )
 
     from scripts.sim_faults.run_closed_loop_scenario import default_storage
 
-    monkeypatch.setattr(packages, 'get_packages_with_prefixes',
-                        lambda: {'rosbag2_storage_default_plugins': '/opt/ros/humble'})
-    assert default_storage() == 'sqlite3'
+    assert default_storage() == "sqlite3"
 
 
 def test_record_command_passes_the_storage_plugin_through():
