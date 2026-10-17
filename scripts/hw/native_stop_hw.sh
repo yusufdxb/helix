@@ -1,8 +1,10 @@
 #!/bin/bash
 # HELIX native stop test on the GO2, ARMED: helix_native.launch.py with the C++
 # sink armed, supervisor actuation enabled, arbiter on /helix_hw/*, then one
-# native_stop_test.py stage. Records the sport request/response, robot state,
-# LiDAR odometry and HELIX topics. Produced hardware_eval_20261017/native_stop.
+# native_stop_test.py stage. Records the sport request/response, robot state
+# (/sportmodestate, /lowstate with foot forces), odometry, /wirelesscontroller
+# and the HELIX topics. The 2026-10-17 runs in hardware_eval_20261017/native_stop
+# predate the last two (/lowstate, /wirelesscontroller).
 # Usage: native_stop_hw.sh <build dir> <ack|motion> [native_stop_test.py args]
 # motion: robot standing, area clear, operator on the remote.
 REPO=$1; STAGE=$2; shift 2
@@ -23,7 +25,7 @@ SHARE=$(ros2 pkg prefix helix_arbiter)/share/helix_arbiter
 setsid ros2 bag record -s sqlite3 -o bag /api/sport/request /api/sport/response /sportmodestate \
   /lf/sportmodestate /utlidar/robot_odom /helix/faults /helix/fault_clear /helix/hold \
   /helix/supervisor/status /helix/sink/status /helix/arbiter/status /helix_hw/cmd_vel \
-  /helix_hw/nav/cmd_vel > bag.log 2>&1 &
+  /helix_hw/nav/cmd_vel /wirelesscontroller /lowstate > bag.log 2>&1 &
 TB=$!
 setsid ros2 launch helix_bringup helix_native.launch.py sink_mode:=armed actuation_enabled:=true \
   arbiter_config:="$SHARE/config/arbiter_hw.yaml" cmd_vel_out:=/helix_hw/cmd_vel > stack.log 2>&1 &

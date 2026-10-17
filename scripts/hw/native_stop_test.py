@@ -47,7 +47,7 @@ from nav_msgs.msg import Odometry
 from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
 from std_msgs.msg import String
 from std_srvs.srv import Trigger
-from unitree_go.msg import SportModeState
+from unitree_go.msg import SportModeState, WirelessController
 
 from stop_guard import OverspeedGuard
 
@@ -89,6 +89,10 @@ class Io:
         n.create_subscription(FaultEvent, '/helix/faults', self._fault, RELIABLE)
         n.create_subscription(SportModeState, '/sportmodestate', self._state, BEST_EFFORT)
         n.create_subscription(Odometry, '/utlidar/robot_odom', self._odom, BEST_EFFORT)
+        # The handheld remote drives the robot without /api/sport/request; it publishes here
+        # only while a stick or key is in use (silence is not "remote off").
+        n.create_subscription(WirelessController, '/wirelesscontroller', self._remote,
+                              BEST_EFFORT)
         self.release_cli = n.create_client(Trigger, '/helix/supervisor/release')
 
     def ev(self, kind, **kw):
@@ -142,6 +146,10 @@ class Io:
         self.mode = m.mode
         self.ev('state', v=round(self.speed, 4), yaw=round(m.yaw_speed, 4),
                 h=round(m.body_height, 4), mode=m.mode)
+
+    def _remote(self, m):
+        self.ev('remote', lx=round(m.lx, 3), ly=round(m.ly, 3), rx=round(m.rx, 3),
+                ry=round(m.ry, 3), keys=m.keys)
 
     def _odom(self, m):
         v = m.twist.twist.linear
@@ -324,6 +332,9 @@ class Stage:
                 and e['node'].startswith('rate_hz/utlidar')]
         self.check('unconfounded', 'no real stop-worthy fault during the stage', not real,
                    real=real[:5])
+        remote = [e for e in self.io.events if e['kind'] == 'remote' and e['t'] >= t0]
+        self.check('no_remote_input', 'no remote stick or key input during the stage',
+                   not remote, n=len(remote), first=remote[:3])
 
 
 def run_ack(stage: Stage) -> None:
