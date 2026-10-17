@@ -90,8 +90,12 @@ about 20:31Z) was lost when the Orin dropped off the network.
 `native_stop/` holds every armed run of `scripts/hw/native_stop_hw.sh`
 (ack, then motion), passes and failures alike. Each run has:
 - `evidence/evidence.json`: every check and the full event log.
-- `bag/`: sport request/response, SportModeState, LiDAR odometry and the
+- `bag/`: sport request/response, SportModeState, `/utlidar/robot_odom`
+  (the same state estimate as SportModeState, not a second sensor) and the
   HELIX topics.
+- The `odom_still` check in these evidence files is labelled "independent
+  sensor". That label is wrong and is kept as recorded; the runner's label
+  was corrected after these runs.
 - the stack, run and bag logs.
 
 Run 221913 failed before the stack came up, so its bag was dropped.

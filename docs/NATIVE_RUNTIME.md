@@ -233,9 +233,9 @@ including the failures:
 | 222336 | motion, vx 0.3 | refused | the runner rejects vx above the sink's 0.25 m/s limit. No Move was sent; the armed sink sent only its periodic StopMove (32, all code 0) |
 | 222412 | motion, vx 0.25, settle 0.3 s, abort 0.40 | **PASS** (24/24) | robot moving at 0.130 m/s at injection |
 | 223203 | same as 222412 | **PASS** (24/24) | robot moving at 0.316 m/s at injection |
-| 223245 | same as 222412 | FAIL (9/10), overspeed abort | SportModeState reported 0.43 m/s 25 ms after the first Move, while odometry read 0.015 m/s. The runner stopped sourcing, the sink sent StopMove 1 ms later, and the robot stayed standing. No fault was injected |
+| 223245 | same as 222412 | FAIL (9/10), overspeed abort | one estimator spike at Move onset: 0.431 m/s on one SportModeState sample 26 ms after the first Move and on the odometry sample 0.2 ms later (the two topics carry the same estimate, see below). The runner stopped sourcing, the sink sent StopMove 1 ms later, and the robot stayed standing (0.6 cm peak displacement). No fault was injected |
 
-Between 222412 and 223203 the robot was found lying (body height 0.072 m). The native stack was in dry_run then, with no `/api/sport/request` publisher, and no other ROS process was running. It was presumably laid down from the remote or app. The operator stood it with the remote before 223203. Trials stopped after 223245: the abort rule is unchanged, and changing it is not a run-time decision.
+Between 222412 and 223203 the robot was found lying (body height 0.072 m). The 10-minute dry_run bag that covers that window (`native_partial/`, 22:26:16 to 22:29:13Z) shows the HELIX sink sent nothing (`last_api_id` 0 throughout). The robot read still (median 0.007 m/s) until 22:28:14Z, moved for 19 s (up to 1.42 m/s and 2.78 rad/s yaw), and read 0 m/s (median) from 22:28:33Z. That bag did not record `/api/sport/request` or `/wirelesscontroller`, so the source of that motion is not established: the remote, the app or another process on the robot network are all possible. The stop test now records both topics and fails a stage on any remote input or foreign sport request (commit ac28a5b). The operator stood the robot with the remote before 223203. Trials stopped after 223245: changing the abort rule is not a run-time decision. It was changed afterwards, offline (below).
 
 Supervisor-reported latencies, measured from the injected fault:
 
@@ -246,6 +246,8 @@ Supervisor-reported latencies, measured from the injected fault:
 | 223203 motion | 0.17 ms | 0.64 ms | 1.7 ms | 575 ms |
 
 The runner's own motion measurements:
+
+Speed and travel below come from the robot's own state estimate. `/sportmodestate` and `/utlidar/robot_odom` carry the same estimate (median velocity difference exactly 0, identical positions; odometry is every other SportModeState sample), so the odometry column is not a second sensor.
 
 | Run | Speed at fault | SportModeState still after | Odometry max after the 1.5 s deadline | Peak speed | Travel, first Move to fault | Travel, fault to +3 s (odometry) |
 |---|---|---|---|---|---|---|
@@ -267,25 +269,59 @@ robot. After the explicit clear and operator release, the robot stayed still
 for 3 s and no Move was sent (every passing stage).
 
 What these runs do not show:
-- **A start transient, not steady walking.** The fault landed about 0.35 s
-  into the motion. At 0.25 m/s or below, the stock gait does not keep a
-  steady walk: run 222205 stalled. So the stop times (265 and 636 ms) come
-  from a decelerating start, not from cruise speed. Run 222205 is the
-  closest thing to a counterfactual: Move kept arriving there and the robot
-  crept at 0.03 to 0.05 m/s. No run has measured how far the robot would
-  have travelled without the hold.
+- **That the robot was walking.** The estimate reports a 6 to 8 cm body
+  displacement in every motion run, and in two of the three runs it
+  returns toward the start after StopMove: 222205 peaks at 7.6 cm and ends
+  at 1.4 cm, 222412 peaks at 6.2 cm and ends at 0.6 cm (4 s after the first
+  Move). 223203 peaks at 8.4 cm and keeps 8.0 cm. A body shift or lean in
+  stance fits the first two better than steps. The bags cannot settle it:
+  `foot_force` and `foot_position_body` are zero in `mcf`, `mode` stays 0
+  even while the robot is driven at 1.4 m/s, and `/lowstate` was not
+  recorded (it is now). So the stop times (265 and 636 ms) are the time for
+  the estimate to settle after StopMove, not a stopping distance from a
+  walk.
+- **Why the gait did not engage.** Untested hypotheses: commands too short
+  (0.35 to 1.0 s of Move before the fault), vx at or below 0.25 m/s under
+  the `mcf` engagement threshold (earlier lab notes: a clean trot needs vx of
+  0.5 or more), or the absence of a BalanceStand before the first Move.
+  Each needs motion on the robot and an operator decision; the 0.25 m/s
+  limit was not raised.
+- **A counterfactual.** No run measured how far the robot travels under the
+  same Move stream without the hold. Run 222205 is the nearest thing: Move
+  kept arriving and the robot crept at 0.03 to 0.05 m/s.
 - **Few trials.** 2 passing motion trials out of 4 motion attempts at the
   shipped limits, plus 1 ack pass. No repeat statistics.
-- **The overspeed abort trips on one SportModeState sample.** Run 223245
-  aborted on a 0.43 m/s reading that odometry did not confirm. The abort
-  failed safe: it stopped commanding. But at vx 0.25 the abort interrupts
-  1 trial in 3 before the fault is injected.
+- **Onset spikes in the estimate.** In 2 of the 4 motion runs the peak
+  speed is a sample within 26 ms of the first Move (0.36 m/s at 12 ms in
+  222412, 0.43 m/s at 26 ms in 223245): faster than the robot can
+  physically accelerate. Run 223245 aborted on one. The odometry reading
+  that seemed to contradict it was the previous odometry sample; the same
+  0.431 m/s is on both topics 0.2 ms apart. The first abort rule
+  tripped on any single sample above the limit. It is replaced by
+  `scripts/hw/stop_guard.py` (commit d0029bb): a sample above 0.60 m/s
+  aborts at once, a speed above the abort limit must persist for 30 ms, and
+  travel above 0.60 m, a silent state topic for 0.2 s or a non-finite value
+  also abort. The guard is tested against all four recorded motion runs
+  (`tests/test_stop_guard.py`, 19 tests): it ignores the 223245 spike, stays
+  quiet on the passing runs and trips on injected sustained overspeed. It
+  only governs the test runner's own motion source. The HELIX stop path is
+  independent of it: the sink and supervisor judge "still" on
+  `/lf/sportmodestate` (20 Hz, where the spike is absent) over a 0.3 s
+  window, and a spike can only reset that window, never shorten it.
 - **Idle-robot ack waits for the repeat.** When the robot is already still,
   the hold does not trigger an immediate StopMove. The sink's next 2 Hz
   repeat carries it, so the controller ack took 159 ms. From motion it was
   immediate (0.73 ms).
-- **The fault was injected.** The fault was one synthetic `FaultEvent` on
+- **A real fault.** The fault was one synthetic `FaultEvent` on
   `rate_hz/utlidar_helix_injected`. No real sensor degraded.
+
+Controller ownership: in all 6 recorded armed bags the request ids on
+`/api/sport/request` form one consecutive sequence (the sink's) and every
+response answers one of those ids, so no other process sent sport requests
+during the trials. Publisher counts cannot show this on the GO2 graph: it is
+full of unnamed DDS entities. Remote input was not recorded in those bags.
+The full classification of every result by evidence class is in
+[`EVIDENCE_AUDIT.md`](EVIDENCE_AUDIT.md).
 
 ## Proven, partial, unverified
 
@@ -297,13 +333,19 @@ What these runs do not show:
 | Python stack cost: 79.1 % of one core, 587 MB | **Proven (hardware)** | `hardware_eval_20261017/pybaseline/procs.jsonl` |
 | Native stack cost: 7.35 % of one core and 91.5 MB, against Python's 79.08 % and 587.4 MB (-90.7 % CPU, -84.4 % RSS) | **Proven (hardware, 10 min)** | `native/procs.jsonl`; robot lying, as in the baseline. The profiles do different work (see above) |
 | Fault-state machine: R4, explicit clearance, a single state, enable sync, startup visibility | **Proven (software)** | 49 supervisor tests; rehearsal |
-| Hold to arbiter zero to StopMove to ack to measured stop, end to end | **Proven (hardware, small n)** | `native_stop/`: ack run 222125; motion runs 222412 and 223203 |
+| Hold to arbiter zero to StopMove to ack to a still state estimate, end to end, on the real controller | **Proven (hardware, small n, synthetic trigger)** | `native_stop/`: ack run 222125; motion runs 222412 and 223203 |
 | The GO2 acks a repeated StopMove from this sink with code 0 | **Proven (hardware)** | 277 StopMove answered with code 0 across all 6 armed bags; 2 without a recorded response, both the first request at sink startup (cause not established: possibly sent before the recorder matched `/api/sport/response`) |
-| The GO2 physically stops on a HELIX fault | **Partial (hardware)** | 2 of 2 faults injected while the robot moved above 0.05 m/s stopped it from a start transient (0.13 and 0.32 m/s at the fault; SportModeState still at 636 and 265 ms; odometry confirms). Not from steady walking |
+| HELIX stops a walking GO2 | **Unverified** | In 2 of 2 valid motion trials the estimate read 0.13 and 0.32 m/s at the fault and still 636 and 265 ms later, but the robot never sustained a walk (6 to 8 cm body displacement, mostly returned). No stop from steady walking, no counterfactual, no independent motion sensor |
 | No Move reaches the robot while held, with upstream streaming | **Proven (hardware)** | bag check: 0 Move after the fault in all 3 motion runs that injected one |
+| No other process sent sport requests during the trials | **Proven (hardware, request path only)** | bag check: one consecutive id sequence and 0 responses to unknown ids in all 6 armed bags. Remote input not recorded then; recorded and checked since ac28a5b |
 | Native detector config: 0 stop false alarms, 0 false clears, all 6 models detected | **Proven on held-out (short)** | [`DETECTOR_EVAL.md`](DETECTOR_EVAL.md): DEV of 1.057 h, plus a held-out pass on 0.216 h (95 % bound about 13.9 false alarms per hour); synthetic onsets on real streams |
 | Live fault injection (topic loss, rate collapse, drift) on the robot | **Unverified** | not run |
-| Crash detection by SIGKILL of a live node on the Orin | **Unverified** | supervisor tests only |
+| SIGKILL of the detector holds and stops; restart then needs operator release | **Proven (simulation)** | `results/native_crash_recovery_sim.json`: StopMove 265 ms after the kill, 0 Move after it, AWAIT_RELEASE after restart, NOMINAL only on release ([`EVIDENCE_AUDIT.md`](EVIDENCE_AUDIT.md)) |
+| SIGKILL of the supervisor or arbiter fails closed | **Proven (simulation)** | StopMove 495 ms (supervisor, arbiter hold timeout) and 237 ms (arbiter, sink deadman) after the kill |
+| A hold survives a supervisor restart | **Refuted (simulation)** | the restarted supervisor released within 0.1 s and Move resumed with no operator release; open decision |
+| A sink crash stops the robot | **Unverified, no mechanism** | nothing sends StopMove once the sink is gone; the GO2's own Move timeout is not measured |
+| Crash detection by SIGKILL of a live node on the Orin | **Unverified** | simulation only |
+| C++ components cost about a tenth of their Python counterparts under the same load | **Proven (bench, x86 host)** | `results/native_vs_python_bench.json`: five components 14.42 % to 1.54 % CPU (-89.3 %), 254.1 to 75.8 MB (-70.2 %), identical outputs |
 | DDS liveliness compared with the heartbeat | **Unverified** | not evaluated |
 | Long-run stability and timer jitter of the native stack | **Unverified** | not run |
 
@@ -317,8 +359,10 @@ scripts/hw/native_run.sh <build dir> 600 native     # 10 min, CPU/RSS + bag
 
 Hardware stop test. It needs the robot standing, an operator holding the
 remote, a clear area and a verified e-stop. Stage `ack` sends StopMove only.
-Stage `motion` defaults to vx 0.15 m/s and aborts above 0.35 m/s. On the
-GO2 that speed stalls the gait, so the passing run used the arguments below.
+Stage `motion` defaults to vx 0.15 m/s. It aborts when the estimate stays
+above 0.35 m/s for 30 ms, exceeds 0.60 m/s once, travels 0.6 m or goes
+silent. On the GO2 that speed stalls the gait, so the passing run used the
+arguments below.
 The runner refuses vx above the sink's 0.25 m/s limit.
 
 ```bash

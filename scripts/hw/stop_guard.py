@@ -9,9 +9,9 @@ this rule:
 * The two topics carry the same estimate. Their velocities differ by a
   median of exactly 0 and their positions match; odometry is every other
   SportModeState sample. A second topic is not a second sensor.
-* Run 223245 aborted on one 3 ms estimator transient at Move onset
-  (0.43 m/s on one SportModeState sample, then on one odometry sample),
-  before any fault was injected.
+* Run 223245 aborted on a one-sample estimator transient at Move onset
+  (0.431 m/s on one SportModeState sample and on the odometry sample
+  0.2 ms later), before any fault was injected.
 
 The guard therefore trips on any of:
 

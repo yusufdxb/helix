@@ -14,8 +14,9 @@ Stages (one per invocation, nothing chains):
   motion  robot standing, area clear, operator with the remote. Stream
           vx on the arbiter's nav source until the robot is measured moving,
           inject the fault while the source KEEPS streaming, and require the
-          robot to be measured stopped (SportModeState and LiDAR odometry
-          independently) with no Move sent while held. Then stop streaming,
+          robot to be measured stopped (SportModeState, and the odometry
+          topic, which carries the same estimate) with no Move sent while
+          held. Then stop streaming,
           clear, release, and require the robot to stay still. Sink armed.
 
 The injected fault is one ANOMALY FaultEvent (severity 2) named
@@ -396,7 +397,7 @@ def run_motion(stage: Stage) -> None:
     stop_ms = (first_still - t_inject) * 1e3 if first_still else None
     stage.check('stopped_measured', f'SportModeState still within {a.stop_deadline_s} s of fault',
                 stop_ms is not None and stop_ms <= a.stop_deadline_s * 1e3, stop_ms=stop_ms)
-    stage.check('odom_still', 'LiDAR odometry still after the deadline (independent sensor)',
+    stage.check('odom_still', 'odometry topic still after the deadline (same estimate as SportModeState)',
                 bool(odom_after) and max(odom_after) <= 2 * STILL,
                 odom_max=max(odom_after, default=None))
     stage.check('no_move_held', 'no Move sent while held (upstream kept streaming)',

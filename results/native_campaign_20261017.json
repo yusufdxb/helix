@@ -137,7 +137,7 @@
   "note": "stop_confirmed includes the 0.3 s still dwell; measured_stop is the first still SportModeState sample"
  },
  "stop_chain_hw": {
-  "kind": "PARTIAL",
+  "kind": "PROVEN_COMMAND_PATH; WALKING_STOP_UNVERIFIED",
   "build": "1254bbe + ddf816c",
   "sink": "helix_go2_sink_cpp armed",
   "robot": "standing, mcf, operator on remote",
@@ -165,7 +165,9 @@
     "args": "vx 0.15 settle 1.0",
     "verdict": "FAIL",
     "checks": "23/24",
-    "why": "speed at fault 0.032 m/s: gait stalled"
+    "why": "speed at fault 0.032 m/s: gait stalled",
+    "estimate_peak_disp_m": 0.076,
+    "estimate_disp_at_4s_m": 0.014
    },
    {
     "run": "222336",
@@ -188,7 +190,9 @@
     "sportmodestate_still_ms": 635.9,
     "odom_max_after_deadline": 0.0243,
     "travel_before_fault_m": 0.057,
-    "travel_after_fault_3s_m": 0.051
+    "travel_after_fault_3s_m": 0.051,
+    "estimate_peak_disp_m": 0.062,
+    "estimate_disp_at_4s_m": 0.006
    },
    {
     "run": "223203",
@@ -204,7 +208,9 @@
     "sportmodestate_still_ms": 265.1,
     "odom_max_after_deadline": 0.0217,
     "travel_before_fault_m": 0.06,
-    "travel_after_fault_3s_m": 0.021
+    "travel_after_fault_3s_m": 0.021,
+    "estimate_peak_disp_m": 0.084,
+    "estimate_disp_at_4s_m": 0.08
    },
    {
     "run": "223245",
@@ -212,22 +218,39 @@
     "args": "vx 0.25 settle 0.3 abort 0.40",
     "verdict": "FAIL",
     "checks": "9/10",
-    "why": "overspeed abort on one SportModeState sample 0.43 m/s (odom 0.015); no fault injected; StopMove 1 ms after abort"
+    "why": "runner overspeed abort on a one-sample estimator spike at Move onset: 0.431 m/s on one SportModeState sample 26 ms after the first Move, then on one odometry sample (same estimate); no fault injected; StopMove 1 ms after abort; 0.006 m peak displacement",
+    "estimate_peak_disp_m": 0.006,
+    "estimate_disp_at_4s_m": 0.004
    }
   ],
   "bag_check": {
    "stopmove_code0": 277,
    "move_code0": 31,
    "stopmove_no_recorded_response": 2,
-   "move_after_fault": 0
+   "move_after_fault": 0,
+   "foreign_request_id_breaks": 0,
+   "responses_to_unknown_ids": 0,
+   "remote_input": "not recorded in these runs; recorded and checked since ac28a5b"
   },
   "not_shown": [
-   "stop from steady walking (gait does not sustain at <= 0.25 m/s)",
-   "counterfactual travel without hold",
+   "that the robot was walking: 6-8 cm body displacement, returned toward start in 222205 and 222412; foot fields zero in mcf, /lowstate not recorded, so shift vs steps unresolved",
+   "stop from steady walking (gait does not sustain at <= 0.25 m/s; limit not raised)",
+   "no-HELIX counterfactual: travel under the same Move stream without the hold",
+   "independent motion sensor",
    "repeat statistics",
    "real sensor fault"
   ],
-  "evidence": "hardware_eval_20261017/native_stop/"
+  "evidence": "hardware_eval_20261017/native_stop/",
+  "trigger": "synthetic FaultEvent (rate_hz/utlidar_helix_injected) in every stop; no real sensor fault",
+  "estimator": "/sportmodestate and /utlidar/robot_odom carry the same estimate (median velocity difference 0); odom_* fields are not an independent sensor",
+  "posture_event": {
+   "window": "2026-10-17T22:28:14Z to 22:28:33Z, between runs 222412 and 223203",
+   "evidence": "hardware_eval_20261017/native_partial/bag /helix/sink/status",
+   "helix_sent": "nothing (sink dry_run, last_api_id 0 throughout)",
+   "peak_speed_m_s": 1.419,
+   "peak_yaw_rad_s": 2.784,
+   "cause": "not established; /api/sport/request and /wirelesscontroller not recorded in that window"
+  }
  },
  "detector_round2": {
   "kind": "DEV + HELD-OUT PASS (short)",
