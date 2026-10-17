@@ -25,8 +25,10 @@ stop-worthy fault during the stage marks it confounded.
 
 Safety: the runner never sends to /api/sport/request itself; the sink does,
 and the sink refuses anything but StopMove 1003 and Move 1008 within its
-limits. Above --abort-speed the runner stops sourcing at once (the arbiter
-then outputs zero and the sink sends StopMove). Exit code 0 only on PASS.
+limits. The runner stops sourcing (the arbiter then outputs zero and the
+sink sends StopMove) when stop_guard.OverspeedGuard trips: speed above
+--abort-speed for 30 ms, any sample above 0.60 m/s, 0.6 m of travel, or a
+silent state topic. Exit code 0 only on PASS.
 """
 from __future__ import annotations
 
@@ -46,6 +48,8 @@ from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPo
 from std_msgs.msg import String
 from std_srvs.srv import Trigger
 from unitree_go.msg import SportModeState
+
+from stop_guard import OverspeedGuard
 
 INJECTED = 'rate_hz/utlidar_helix_injected'
 RELIABLE = QoSProfile(history=HistoryPolicy.KEEP_LAST, depth=100,
@@ -74,6 +78,7 @@ class Io:
         self.body_height = math.nan
         self.mode = None
         self.odom_speed = math.nan
+        self.guard = None
         self.nav = n.create_publisher(Twist, nav_topic, 10)
         self.faults = n.create_publisher(FaultEvent, '/helix/faults', RELIABLE)
         self.clears = n.create_publisher(FaultEvent, '/helix/fault_clear', RELIABLE)
@@ -128,6 +133,10 @@ class Io:
 
     def _state(self, m):
         self.speed = math.hypot(m.velocity[0], m.velocity[1])
+        if self.guard is not None:
+            t = time.monotonic()
+            self.guard.speed(t, self.speed, 'state')
+            self.guard.position(t, m.position[0], m.position[1])
         self.yaw = m.yaw_speed
         self.body_height = m.body_height
         self.mode = m.mode
@@ -137,6 +146,8 @@ class Io:
     def _odom(self, m):
         v = m.twist.twist.linear
         self.odom_speed = math.hypot(v.x, v.y)
+        if self.guard is not None:
+            self.guard.speed(time.monotonic(), self.odom_speed, 'odom')
         self.ev('odom', v=round(self.odom_speed, 4))
 
     def spin(self, secs, vx=None, abort_speed=0.35, each=None):
@@ -145,8 +156,12 @@ class Io:
         next_pub = 0.0
         while time.monotonic() < end:
             if vx is not None:
-                if self.speed > abort_speed or self.odom_speed > abort_speed:
-                    self.ev('abort', why='overspeed', v=self.speed, odom=self.odom_speed)
+                if self.guard is None:
+                    self.guard = OverspeedGuard(abort_speed)
+                    self.guard.arm(time.monotonic())
+                if self.guard.check_stale(time.monotonic()):
+                    self.ev('abort', why=self.guard.reason, v=self.speed, odom=self.odom_speed,
+                            guard=dict(self.guard.detail))
                     self.zero()
                     return True
                 if time.monotonic() >= next_pub:
@@ -352,7 +367,8 @@ def run_motion(stage: Stage) -> None:
     # keep streaming upstream for the rest of the hold window
     rest = max(0.0, a.hold_stream_s - (time.monotonic() - t_inject))
     aborted = io.spin(rest, vx=a.vx, abort_speed=a.abort_speed)
-    stage.check('no_overspeed', f'never above {a.abort_speed} m/s', not aborted)
+    stage.check('no_overspeed', f'overspeed guard never tripped (abort {a.abort_speed} m/s)',
+                not aborted)
     held = [e for e in io.events if e['t'] > t_inject]
     first_still = None
     for e in held:
