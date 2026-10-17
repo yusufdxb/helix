@@ -74,11 +74,12 @@ the honest version of this paragraph: it compares HELIX against
   release, and every stop records arbiter-ack, controller-ack and
   measured-stop timestamps. Re-selected on five real captures, the detector
   keeps sustained faults active (0 false clears, against 1488 for the shipped
-  point) with 0 stop false alarms. That is a DEV score; it has no held-out
-  score yet. On hardware: the stop test above, and native cost of 7.06 % of
-  one core and 83.5 MB for 6 processes, against 79.08 % and 587.4 MB for the
-  13-process Python stack. The native figure comes from a 175 s run with the
-  robot standing, so it is partial. Details:
+  point) with 0 stop false alarms. It then passed a short held-out test on
+  two fresh GO2 captures (0.216 h): 0 false alarms, 644/644 synthetic onsets
+  detected and 0 false clears. On hardware: the stop test above, and a 10-minute cost run.
+  The 6 native processes use 7.35 % of one core and 91.5 MB, against
+  79.08 % and 587.4 MB for the 13-process Python stack (-90.7 % CPU,
+  -84.4 % RSS). Details:
   [`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md),
   [`docs/DETECTOR_EVAL.md`](docs/DETECTOR_EVAL.md).
 - **Found and fixed, not assumed away**: the CONTEXT tier's `ContextBuffer`
@@ -344,12 +345,15 @@ walking. Forward pillars:
    sustained fault (1/62 detection on a 10-sigma step) and self-clears
    during one. The proposed `3.5 / 120` failed on the October captures
    (stop false alarms). The native profile ships a frozen-baseline
-   configuration chosen on DEV ([`docs/DETECTOR_EVAL.md`](docs/DETECTOR_EVAL.md)),
-   and its first held-out GO2 capture is still owed.
+   configuration chosen on DEV, which passed a short held-out test
+   ([`docs/DETECTOR_EVAL.md`](docs/DETECTOR_EVAL.md)). Next: longer
+   held-out time, captures with the robot walking, and a physical sensor
+   fault.
 3. **C/C++ on the hot paths.** Done for the native profile: rate monitor,
-   detector, log parser, supervisor, arbiter and sink. Measured Python cost
-   on the Orin: 79.1 % of one core and 587 MB for the full stack. The
-   native figure on the same robot is owed.
+   detector, log parser, supervisor, arbiter and sink. On the Orin, the
+   native profile uses 7.35 % of one core and 91.5 MB, against 79.08 % and
+   587.4 MB for the Python stack (10 min against 30 min, robot lying).
+   CUDA was not used: the detector works on scalar metrics at 2 Hz.
 4. **Local LLM for heal, flag, and predict.** Qwen2.5-1.5B-Instruct Q4_K_M via
    a llama-server sidecar on the Jetson (~1.5 to 1.7 GB RSS),
    schema-constrained JSON output, advisory only. See

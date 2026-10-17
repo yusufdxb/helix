@@ -37,8 +37,8 @@ HELIX is not a substitute for the remote or the e-stop at any stage.
 
 ## Native Runtime Limits (2026-10-17)
 
-- Native CPU and RSS on the Orin: 7.06 % of one core and 83.5 MB, from 175 s of a planned 600 s run with the robot standing. The Python baseline is 79.08 % and 587.4 MB over 30 min with the robot lying. The profiles do different work: the native profile has no LLM explainer, context buffer, pose-drift monitor or JSON parser.
-- The native detector configuration was selected on five real captures (1.057 h) and has no held-out score. Round 1 of the same protocol failed held-out (2 stop false alarms from `rate_hz/utlidar_cloud` stalls); see `docs/DETECTOR_EVAL.md`.
+- Native CPU and RSS on the Orin: 7.35 % of one core and 91.5 MB over 10 min, with the robot lying. The Python baseline is 79.08 % and 587.4 MB over 30 min. The profiles do different work: the native profile has no LLM explainer, context buffer, pose-drift monitor or JSON parser. Ten minutes is not a soak.
+- The native detector configuration was selected on five real captures (1.057 h). It passed a short held-out test on 0.216 h: 0 stop false alarms (95 % bound about 13.9 per hour), all synthetic onsets detected, 0 false clears. Fault onsets are synthetic, injected into real streams; no physical sensor fault has been scored. Round 1 of the same protocol failed held-out (2 stop false alarms from `rate_hz/utlidar_cloud` stalls); see `docs/DETECTOR_EVAL.md`.
 - The chosen configuration still raises log-only faults on `pose/displacement_rate_m_s` (19 episodes in 30 min on a lying robot). They never hold, but they add audit noise.
 - No live fault injection (topic loss, rate collapse, drift), live SIGKILL crash test, DDS-liveliness comparison, long soak or jitter measurement has been run on the native stack.
 - `helix_supervisor_cpp` has no Python counterpart to check parity against. Its behavior rests on its own 49 tests and the rehearsal.

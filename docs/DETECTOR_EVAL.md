@@ -1,8 +1,8 @@
 # Detector evaluation (native AnomalyCore)
 
 This document records how the native detector configuration shipped in
-`helix_native.launch.py` (`DETECTOR_OVERRIDES`) was chosen. It also states the
-one thing the configuration still lacks: a held-out score.
+`helix_native.launch.py` (`DETECTOR_OVERRIDES`) was chosen, and how it scored
+on two GO2 captures that played no part in choosing it.
 
 Script: [`analysis/detector_eval.py`](../analysis/detector_eval.py). Every
 number it reports comes from `helix_detector_eval`, which runs the same
@@ -128,12 +128,66 @@ contains the metric):
 Drift is caught once the rate is about 10 % below the anchor: about 21 s
 into the 60 s ramp and about 101 s into the 300 s ramp.
 
+### Round 2 held-out (2026-10-17, passed)
+
+Held-out captures: the two native-profile runs recorded after the
+configuration was frozen at 1254bbe. Both were scored once, with no
+re-selection:
+
+| Capture | Duration | Robot |
+|---|---|---|
+| `hardware_eval_20261017/native_partial/bag` | 176.5 s | standing |
+| `hardware_eval_20261017/native/bag` | 600.0 s | lying |
+
+Together they cover 0.216 h. Reproduce with:
+
+```bash
+python3 analysis/detector_eval.py --eval-bin build/helix_sensing_cpp/helix_detector_eval \
+  --dev oct06_loaded_standing=hardware_eval_20261006/bags/loaded_standing_observe \
+  --dev oct17_lying_pybaseline=hardware_eval_20261017/pybaseline/bag \
+  --heldout oct17_standing_native_175s=hardware_eval_20261017/native_partial/bag \
+  --heldout oct17_lying_native_600s=hardware_eval_20261017/native/bag \
+  --out analysis/results/detector_eval_round2_heldout.json
+```
+
+The DEV section of that output is byte-identical to
+`detector_eval_round2_dev.json`.
+
+| Held-out result | shipped z4/w60 | proposed z3.5/w120 | **chosen** |
+|---|---|---|---|
+| Stop-metric false alarms | 0 | **1** (4.64 / h) | **0** |
+| Log-only false alarm episodes | 0 | 2 (`gnss`, `multiplestate`) | **0** |
+| 50 % collapse detected | 120/120 | 118/120 | **120/120** |
+| 75 % collapse detected | 120/120 | 118/120 | **120/120** |
+| Topic death detected (5 s window / 1 s stale) | 120/120, 120/120 | 118/120, 118/120 | **120/120, 120/120** |
+| 70 % drift / 60 s detected | 88/120 | 117/120 | **120/120** |
+| 70 % drift / 300 s detected | 8/44 | 31/44 | **44/44** |
+| False clears during a fault, all models | 336 | 384 | **0** |
+| Recovery: clears after the fault ends (collapse_50, death_s1) | 0/120, 120/120 | 0/120, 118/120 | **120/120, 120/120** |
+
+The chosen point's held-out latencies match DEV:
+
+| Model | Detection latency | Clear latency |
+|---|---|---|
+| Collapse 50 % | 2.0 s | 1.5 s |
+| Collapse 75 % | 3.0 s | |
+| Death, 5 s window | 5.5 to 6.0 s | |
+| Death, 1 s stale | 2.0 to 2.5 s | 1.5 s |
+| Drift over 60 s | 21.5 s | |
+| Drift over 300 s | 101.5 s | |
+
+The proposed point failed held-out again, as it did in round 1: one
+`rate_hz/utlidar_cloud` stop false alarm in the 10-minute lying capture.
+
 ### What round 2 does not show
 
-- **No held-out score yet.** All five captures were used for selection, so the
-  numbers above are DEV numbers. The next GO2 capture is the held-out test,
-  for example the native 10-min run (`scripts/hw/native_run.sh`). Pass it
-  with `--heldout`.
+- **A short held-out set.** 0.216 h with 0 stop false alarms gives a 95 %
+  Poisson upper bound of about 13.9 per hour. That is a pass on fresh data,
+  not a tight rate. Any later capture used to change the configuration
+  becomes DEV.
+- **The held-out captures have no pose metrics.** The native profile does
+  not run the pose-drift monitor. So the log-only noise on
+  `pose/displacement_rate_m_s` (next bullet) was not exercised held-out.
 - **Log-only noise is not zero.** The chosen point raises non-stop faults on
   `pose/displacement_rate_m_s`: 19 episodes (275 records) over the 30 min
   lying capture, plus 6 records on `rate_hz/multiplestate`. These faults

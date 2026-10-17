@@ -1,0 +1,8 @@
+start 2026-10-17T22:40:37Z sha=1254bbe09f086a2db383cb778ac2b84f13d05128 secs=600
+helix_topic_rate_monitor active [3]
+helix_anomaly_detector active [3]
+helix_log_parser active [3]
+helix_supervisor active [3]
+helix_arbiter active [3]
+{"summary": {"helix_anomaly_detector": {"n": 114, "cpu_mean": 0.584, "cpu_max": 1.998, "rss_mean_kb": 15537.1, "rss_max_kb": 16380}, "helix_arbiter": {"n": 114, "cpu_mean": 1.026, "cpu_max": 2.598, "rss_mean_kb": 15019.0, "rss_max_kb": 15988}, "helix_go2_sport_sink": {"n": 114, "cpu_mean": 1.113, "cpu_max": 2.798, "rss_mean_kb": 14572.2, "rss_max_kb": 15672}, "helix_log_parser": {"n": 114, "cpu_mean": 0.487, "cpu_max": 1.998, "rss_mean_kb": 13815.1, "rss_max_kb": 14728}, "helix_supervisor": {"n": 114, "cpu_mean": 1.439, "cpu_max": 3.197, "rss_mean_kb": 14716.0, "rss_max_kb": 15684}, "helix_topic_rate_monitor": {"n": 114, "cpu_mean": 2.687, "cpu_max": 4.596, "rss_mean_kb": 20353.6, "rss_max_kb": 22328}}}
+DONE 2026-10-17T22:51:17Z

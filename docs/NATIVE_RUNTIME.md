@@ -135,7 +135,36 @@ multiplestate 1.0. The robot was lying (mode 0, body height 0.073 m).
 The first 10-minute native measurement run (20:31Z) was lost when the Orin
 dropped off the network.
 
-### Native stack cost on the GO2 (hardware, 2026-10-17, 175 s, partial)
+### Native stack cost on the GO2 (hardware, 2026-10-17, 10 min)
+
+`hardware_eval_20261017/native/`: `scripts/hw/native_run.sh <build> 600 native`.
+Conditions:
+- Build 1254bbe, 22:40:37Z to 22:51:17Z, 595 s of samples (119 per process).
+- The robot was lying, as in the Python baseline.
+- `helix_native` defaults: sink in dry_run, actuation off.
+- Same sampler, and the same per-PID mean, as the Python table.
+
+| Process | CPU | RSS |
+|---|---|---|
+| helix_topic_rate_monitor | 2.69 % | 19.7 MB |
+| helix_supervisor | 1.44 % | 14.3 MB |
+| helix_go2_sport_sink | 1.12 % | 14.2 MB |
+| helix_arbiter | 1.03 % | 14.6 MB |
+| helix_anomaly_detector | 0.58 % | 15.1 MB |
+| helix_log_parser | 0.49 % | 13.5 MB |
+| **Total (6 processes)** | **7.35 %** | **91.5 MB** |
+
+Against the Python baseline (79.08 % and 587.4 MB, 13 processes), that is
+90.7 % less CPU and 84.4 % less RSS. Python's own first 600 s average
+79.12 % CPU and 578.1 MB. The bag has 0 messages on `/helix/faults`, and
+the supervisor reported NOMINAL in all 1200 status messages.
+
+The two profiles do not do the same work. The native profile has no LLM
+explainer, context buffer, pose-drift monitor or JSON state parser, and its
+supervisor replaces the heartbeat, diagnosis and recovery nodes. So this is
+the cost of the profile that ships, not a node-for-node port.
+
+### Native stack cost, first attempt (175 s, robot standing, partial)
 
 `hardware_eval_20261017/native_partial/`, recorded with
 `scripts/hw/native_run.sh`:
@@ -155,19 +184,7 @@ dropped off the network.
 | helix_log_parser | 0.46 % | 12.9 MB |
 | **Total (6 processes)** | **7.06 %** | **83.5 MB** |
 
-Python over its own first 175 s: 92.63 % and 570.2 MB (13 processes).
-Python over the full 30 min: 79.08 % and 587.4 MB. Against the full run,
-the native profile uses 91 % less CPU and 86 % less RSS.
-
-Limits of the comparison:
-- 175 s, not 600 s.
-- The robot was standing here and lying in the Python run.
-- The profiles do not do the same work: the native profile has no LLM
-  explainer, context buffer, pose-drift monitor or JSON state parser, and
-  the supervisor replaces heartbeat, diagnosis and recovery.
-
-So this is the cost of the profile that ships, not a like-for-like port of
-every node.
+This first attempt was stopped early, and it agrees with the 10-minute run.
 
 ### Stop chain against a simulated GO2 (rehearsal, not hardware)
 
@@ -278,13 +295,13 @@ What these runs do not show:
 | A native stack runs on the Orin against the live GO2 graph (non-actuating) | **Proven (hardware, short smoke)** | smoke result above |
 | The sink reads real GO2 feedback (`/lf/sportmodestate`) | **Proven (hardware)** | smoke: `feedback_available` true |
 | Python stack cost: 79.1 % of one core, 587 MB | **Proven (hardware)** | `hardware_eval_20261017/pybaseline/procs.jsonl` |
-| Native stack cost: 7.06 % of one core and 83.5 MB, against Python's 79.08 % and 587.4 MB | **Partial (hardware)** | 175 s instead of the planned 600 s; robot standing, not lying; the profiles do different work; `native_partial/procs.jsonl` |
+| Native stack cost: 7.35 % of one core and 91.5 MB, against Python's 79.08 % and 587.4 MB (-90.7 % CPU, -84.4 % RSS) | **Proven (hardware, 10 min)** | `native/procs.jsonl`; robot lying, as in the baseline. The profiles do different work (see above) |
 | Fault-state machine: R4, explicit clearance, a single state, enable sync, startup visibility | **Proven (software)** | 49 supervisor tests; rehearsal |
 | Hold to arbiter zero to StopMove to ack to measured stop, end to end | **Proven (hardware, small n)** | `native_stop/`: ack run 222125; motion runs 222412 and 223203 |
 | The GO2 acks a repeated StopMove from this sink with code 0 | **Proven (hardware)** | 277 StopMove answered with code 0 across all 6 armed bags; 2 without a recorded response, both the first request at sink startup (cause not established: possibly sent before the recorder matched `/api/sport/response`) |
 | The GO2 physically stops on a HELIX fault | **Partial (hardware)** | 2 of 2 faults injected while the robot moved above 0.05 m/s stopped it from a start transient (0.13 and 0.32 m/s at the fault; SportModeState still at 636 and 265 ms; odometry confirms). Not from steady walking |
 | No Move reaches the robot while held, with upstream streaming | **Proven (hardware)** | bag check: 0 Move after the fault in all 3 motion runs that injected one |
-| Native detector config: 0 stop false alarms, 0 false clears, all 6 models detected | **Partial: DEV only** | [`DETECTOR_EVAL.md`](DETECTOR_EVAL.md); no held-out score |
+| Native detector config: 0 stop false alarms, 0 false clears, all 6 models detected | **Proven on held-out (short)** | [`DETECTOR_EVAL.md`](DETECTOR_EVAL.md): DEV of 1.057 h, plus a held-out pass on 0.216 h (95 % bound about 13.9 false alarms per hour); synthetic onsets on real streams |
 | Live fault injection (topic loss, rate collapse, drift) on the robot | **Unverified** | not run |
 | Crash detection by SIGKILL of a live node on the Orin | **Unverified** | supervisor tests only |
 | DDS liveliness compared with the heartbeat | **Unverified** | not evaluated |

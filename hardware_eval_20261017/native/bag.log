@@ -1,0 +1,19 @@
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1792276866.482777440] [rosbag2_recorder]: Press SPACE for pausing/resuming
+[INFO] [1792276866.485466752] [rosbag2_storage]: Opened database 'bag/bag_0.db3' for READ_WRITE.
+[INFO] [1792276866.486672352] [rosbag2_recorder]: Listening for topics...
+[INFO] [1792276866.486704928] [rosbag2_recorder]: Event publisher thread: Starting
+[INFO] [1792276866.489924800] [rosbag2_recorder]: Subscribed to topic '/helix/recovery_hints'
+[INFO] [1792276866.491725536] [rosbag2_recorder]: Subscribed to topic '/helix/metrics'
+[INFO] [1792276866.493043360] [rosbag2_recorder]: Subscribed to topic '/helix/hold'
+[INFO] [1792276866.494140480] [rosbag2_recorder]: Subscribed to topic '/helix/supervisor/status'
+[INFO] [1792276866.495028672] [rosbag2_recorder]: Subscribed to topic '/helix/sink/status'
+[INFO] [1792276866.495761952] [rosbag2_recorder]: Subscribed to topic '/helix/recovery_actions'
+[INFO] [1792276866.496978784] [rosbag2_recorder]: Subscribed to topic '/helix/heartbeat'
+[INFO] [1792276866.497819392] [rosbag2_recorder]: Subscribed to topic '/helix/faults'
+[INFO] [1792276866.497960288] [rosbag2_recorder]: Recording...
+[INFO] [1792276866.501058368] [rosbag2_recorder]: Subscribed to topic '/helix/arbiter/status'
+[INFO] [1792276866.501821920] [rosbag2_recorder]: Subscribed to topic '/helix/fault_clear'
+[INFO] [1792276866.501879168] [rosbag2_recorder]: All requested topics are subscribed. Stopping discovery...
+[INFO] [1792277466.605749408] [rosbag2_cpp]: Writing remaining messages from cache to the bag. It may take a while
+[INFO] [1792277466.607770240] [rosbag2_recorder]: Event publisher thread: Exiting
+[INFO] [1792277466.607932128] [rosbag2_recorder]: Recording stopped

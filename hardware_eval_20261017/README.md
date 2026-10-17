@@ -72,7 +72,13 @@ the GO2 default (`~/unitree_ros2`); `env.txt` here omits it.
 The first 10-minute native run (`scripts/hw/native_run.sh`, build 6ace4d7,
 about 20:31Z) was lost when the Orin dropped off the network.
 
-`native_partial/` is the second native run:
+`native/` is the 10-minute native run:
+- Build 1254bbe, 22:40:37Z to 22:51:17Z, robot lying.
+- 6 processes, 7.35 % of one core, 91.5 MB (per-PID means, same sampler).
+- 0 messages on `/helix/faults`.
+- `bag/` is a held-out capture for detector round 2.
+
+`native_partial/` is an earlier native run:
 - Build 1254bbe, 22:25:48Z, robot standing.
 - Stopped after 175 s of samples to free the robot for the motion trials.
 - 6 processes, 7.06 % of one core, 83.5 MB (per-PID means, same sampler).
