@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>helix_supervisor_cpp</name>
+  <version>0.1.0</version>
+  <description>
+    HELIX supervisor: one C++ fault-state machine that replaces the Python
+    HeartbeatMonitor, DiagnosisNode and RecoveryNode. Tracks faults until
+    they are cleared by evidence, seeds expected heartbeats so a node that
+    never starts is a fault, and publishes the /helix/hold state the motion
+    arbiter consumes, with arbiter and robot-controller acknowledgments.
+  </description>
+  <maintainer email="yusuf.a.guenena@gmail.com">yusufdxb</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>rclcpp_components</depend>
+  <depend>lifecycle_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>helix_msgs</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

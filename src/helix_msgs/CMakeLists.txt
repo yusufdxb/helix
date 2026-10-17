@@ -15,6 +15,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/RecoveryAction.msg"
   "msg/HelixHold.msg"
   "msg/ArbiterStatus.msg"
+  "msg/SupervisorStatus.msg"
+  "msg/SinkStatus.msg"
   "srv/GetContext.srv"
   DEPENDENCIES std_msgs
 )
