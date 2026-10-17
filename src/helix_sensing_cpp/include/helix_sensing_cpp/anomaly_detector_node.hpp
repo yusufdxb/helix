@@ -81,6 +81,9 @@ private:
   // an emitted fault. Takes data_mutex_.
   void process_sample(const std::string & metric_name, double value);
   void publish_fault(const FaultRecord & fault);
+  void publish_record(
+    const std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<helix_msgs::msg::FaultEvent>> & pub,
+    const FaultRecord & record);
   void stop_and_clear();
 
   // Wall-clock in seconds since epoch. RCL_SYSTEM_TIME matches
@@ -106,6 +109,9 @@ private:
   rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr metrics_sub_;
   std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<helix_msgs::msg::FaultEvent>>
   fault_pub_;
+  // Clear records (clear_samples > 0) on /helix/fault_clear.
+  std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<helix_msgs::msg::FaultEvent>>
+  clear_pub_;
 
   // Constructed in the constructor (mirrors the Python node, which builds
   // its Heartbeat in __init__), started/stopped by the activate transitions.

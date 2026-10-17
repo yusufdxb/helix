@@ -29,6 +29,15 @@ AnomalyDetectorNode::AnomalyDetectorNode(const rclcpp::NodeOptions & options)
   declare_parameter<int>("window_size", 60);
   declare_parameter<double>("emit_cooldown_s", 1.0);
   declare_parameter<double>("min_anomaly_duration_s", 2.0);
+  // Native-only extensions (see anomaly_core.hpp); defaults keep the
+  // reference behavior, so the Python node needs no counterpart.
+  declare_parameter<bool>("freeze_baseline", false);
+  declare_parameter<double>("std_floor_rel", 0.0);
+  declare_parameter<double>("duration_tolerance_s", 0.0);
+  declare_parameter<int>("clear_samples", 0);
+  declare_parameter<double>("clear_zscore", 0.0);
+  declare_parameter<double>("anchor_tolerance_rel", 0.0);
+  declare_parameter<std::string>("anchor_metric_prefix", "rate_hz/");
 
   heartbeat_ = std::make_unique<Heartbeat>(this);
 }
@@ -42,6 +51,13 @@ AnomalyDetectorNode::on_configure(const rclcpp_lifecycle::State &)
   p.window_size = get_parameter("window_size").as_int();
   p.emit_cooldown_s = get_parameter("emit_cooldown_s").as_double();
   p.min_anomaly_duration_s = get_parameter("min_anomaly_duration_s").as_double();
+  p.freeze_baseline = get_parameter("freeze_baseline").as_bool();
+  p.std_floor_rel = get_parameter("std_floor_rel").as_double();
+  p.duration_tolerance_s = get_parameter("duration_tolerance_s").as_double();
+  p.clear_samples = get_parameter("clear_samples").as_int();
+  p.clear_zscore = get_parameter("clear_zscore").as_double();
+  p.anchor_tolerance_rel = get_parameter("anchor_tolerance_rel").as_double();
+  p.anchor_metric_prefix = get_parameter("anchor_metric_prefix").as_string();
 
   if (p.window_size <= 0) {
     RCLCPP_ERROR(
@@ -56,6 +72,8 @@ AnomalyDetectorNode::on_configure(const rclcpp_lifecycle::State &)
 
   fault_pub_ = create_publisher<helix_msgs::msg::FaultEvent>(
     "/helix/faults", rclcpp::QoS(10).reliable());
+  clear_pub_ = create_publisher<helix_msgs::msg::FaultEvent>(
+    "/helix/fault_clear", rclcpp::QoS(50).reliable());
 
   diagnostics_sub_ = create_subscription<diagnostic_msgs::msg::DiagnosticArray>(
     "/diagnostics", rclcpp::QoS(10).reliable(),
@@ -107,6 +125,7 @@ void AnomalyDetectorNode::stop_and_clear()
 {
   heartbeat_->stop();
   fault_pub_.reset();
+  clear_pub_.reset();
   diagnostics_sub_.reset();
   metrics_sub_.reset();
   std::lock_guard<std::mutex> lock(data_mutex_);
@@ -225,6 +244,10 @@ void AnomalyDetectorNode::process_sample(const std::string & metric_name, double
     default:
       break;  // insufficient history or a plain violation: nothing more to say
   }
+  if (r.clear) {
+    publish_record(clear_pub_, *r.clear);
+    RCLCPP_INFO(get_logger(), "FaultClear: %s", r.clear->detail.c_str());
+  }
   // The violation WARN comes after the fault is published, so the log write
   // is not on the emission path. A streak logs its first violation, then at
   // most once per kViolationLogPeriodS per metric; faults are never throttled.
@@ -256,6 +279,14 @@ bool AnomalyDetectorNode::should_log_violation(
 
 void AnomalyDetectorNode::publish_fault(const FaultRecord & f)
 {
+  publish_record(fault_pub_, f);
+  ++fault_count_;
+}
+
+void AnomalyDetectorNode::publish_record(
+  const std::shared_ptr<rclcpp_lifecycle::LifecyclePublisher<helix_msgs::msg::FaultEvent>> & pub,
+  const FaultRecord & f)
+{
   helix_msgs::msg::FaultEvent msg;
   msg.node_name = f.node_name;
   msg.fault_type = f.fault_type;
@@ -264,10 +295,9 @@ void AnomalyDetectorNode::publish_fault(const FaultRecord & f)
   msg.timestamp = f.timestamp;
   msg.context_keys = f.context_keys;
   msg.context_values = f.context_values;
-  if (fault_pub_ && fault_pub_->is_activated()) {
-    fault_pub_->publish(msg);
+  if (pub && pub->is_activated()) {
+    pub->publish(msg);
   }
-  ++fault_count_;
 }
 
 double AnomalyDetectorNode::system_time_now()

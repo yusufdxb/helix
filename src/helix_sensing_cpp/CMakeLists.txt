@@ -53,6 +53,26 @@ rclcpp_components_register_node(anomaly_detector_component
   EXECUTABLE helix_anomaly_detector
 )
 
+# Component library: TopicRateMonitorNode (generic subscriptions, no deserialization)
+add_library(topic_rate_monitor_component SHARED
+  src/topic_rate_monitor_node.cpp
+)
+target_include_directories(topic_rate_monitor_component PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+ament_target_dependencies(topic_rate_monitor_component
+  rclcpp
+  rclcpp_lifecycle
+  rclcpp_components
+  std_msgs
+  helix_msgs
+)
+rclcpp_components_register_node(topic_rate_monitor_component
+  PLUGIN "helix_sensing_cpp::TopicRateMonitorNode"
+  EXECUTABLE helix_topic_rate_monitor
+)
+
 # Replay / benchmark tool for the core (no ROS): parity tests and benchmarks.
 add_executable(helix_anomaly_replay tools/anomaly_replay.cpp)
 target_link_libraries(helix_anomaly_replay helix_sensing_core)
@@ -61,11 +81,15 @@ install(DIRECTORY include/
   DESTINATION include
 )
 
-install(TARGETS helix_anomaly_replay
+# Offline detector evaluation over recorded streams (analysis/detector_eval.py).
+add_executable(helix_detector_eval tools/detector_eval.cpp)
+target_link_libraries(helix_detector_eval helix_sensing_core)
+
+install(TARGETS helix_anomaly_replay helix_detector_eval
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(TARGETS anomaly_detector_component
+install(TARGETS anomaly_detector_component topic_rate_monitor_component
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -116,6 +140,16 @@ if(BUILD_TESTING)
     diagnostic_msgs
     lifecycle_msgs
     helix_msgs
+  )
+
+  # Detector extensions (freeze, std floor, clear records, anchored band)
+  ament_add_gtest(test_anomaly_core test/test_anomaly_core.cpp)
+  target_link_libraries(test_anomaly_core helix_sensing_core)
+
+  # Rate window contract (same as helix_adapter.rate_window)
+  ament_add_gtest(test_rate_window test/test_rate_window.cpp)
+  target_include_directories(test_rate_window PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
   )
 
   # Node integration

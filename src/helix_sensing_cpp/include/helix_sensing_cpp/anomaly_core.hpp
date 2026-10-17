@@ -20,6 +20,37 @@
 //     once per emit_cooldown_s per metric (wall clock, as time.time() in
 //     the reference; <= 0 restores the legacy flood).
 //   * Every non-NaN sample is appended after evaluation.
+//
+// Opt-in extensions (every default reproduces the reference exactly):
+//   * baseline_mode "freeze": a violating sample is NOT appended, and while a
+//     fault is active only samples inside the clear band are. The rolling
+//     reference lets a sustained fault fill its own window, so the z-score
+//     decays below threshold at about the time the duration gate opens
+//     (self-masking); freezing keeps the pre-fault baseline.
+//   * std_floor_rel > 0: z is computed against max(std, std_floor_rel*|mean|).
+//     A very steady rate (std ~0.3 % of mean) otherwise turns sub-percent
+//     jitter into a large z; the floor states the smallest relative change
+//     that can count as a fault. It also makes a flat window evaluable.
+//   * duration_tolerance_s: the duration gate passes at
+//     elapsed + tolerance >= min_anomaly_duration_s. With samples on a fixed
+//     0.5 s grid a 2.0 s gate sits exactly on a sample, and sub-ms jitter
+//     decides between 5 and 6 samples; a half-period tolerance makes it 5.
+//   * anchor_tolerance_rel > 0: the first time the window is full with no
+//     active streak, its mean becomes the metric's anchor. A sample further
+//     than anchor_tolerance_rel * |anchor| from it is a violation too (same
+//     streak and gates), and while that fault is active a clear needs the
+//     sample back inside half the band (hysteresis against edge flapping).
+//     A slow drift moves the rolling mean with it and inflates the window
+//     std, so z alone never sees it; the anchor does. This is the
+//     expected-rate band of diagnostic_updater's FrequencyStatus, with the
+//     expected rate learned instead of configured, so it applies only to
+//     metrics whose name starts with anchor_metric_prefix (rate_hz/ by
+//     default): a band around a near-zero or motion-dependent metric such
+//     as pose displacement rate is meaningless.
+//   * clear_samples > 0: after a fault, clear_samples consecutive samples
+//     with z <= clear_zscore (default zscore_threshold) produce a clear
+//     record: evidence that the metric is normal again. A metric that never
+//     faulted announces itself healthy once the same way.
 #ifndef HELIX_SENSING_CPP__ANOMALY_CORE_HPP_
 #define HELIX_SENSING_CPP__ANOMALY_CORE_HPP_
 
@@ -41,6 +72,13 @@ struct AnomalyParams
   std::int64_t window_size{60};
   double emit_cooldown_s{1.0};
   double min_anomaly_duration_s{2.0};
+  bool freeze_baseline{false};
+  double std_floor_rel{0.0};
+  double duration_tolerance_s{0.0};
+  std::int64_t clear_samples{0};
+  double clear_zscore{0.0};          // <= 0: use zscore_threshold
+  double anchor_tolerance_rel{0.0};
+  std::string anchor_metric_prefix{"rate_hz/"};  // metrics the anchor applies to
 };
 
 /// The fields of a helix_msgs/FaultEvent, as the reference fills them.
@@ -73,11 +111,14 @@ struct SampleResult
   bool stale{false};             // the sample was NaN
   std::int64_t consecutive{0};   // streak length after this sample
   double zscore{0.0};            // valid when a z-score was computed
+  bool anchor_violation{false};  // outside the anchored band (anchor_tolerance_rel)
   double std{0.0};
   double elapsed{0.0};           // streak duration, monotonic seconds
   double since_last_emit{0.0};   // wall seconds, when cooldown-suppressed
   bool streak_was_active{false};  // for the reference's "resetting" debug line
+  bool pushed{false};            // the sample entered the window
   std::optional<FaultRecord> fault;
+  std::optional<FaultRecord> clear;   // clear record (clear_samples > 0 only)
 };
 
 class AnomalyCore
@@ -100,12 +141,17 @@ public:
 private:
   struct MetricState
   {
-    explicit MetricState(std::size_t window)
-    : stats(window) {}
+    MetricState(std::size_t window, bool anchorable)
+    : stats(window), anchorable(anchorable) {}
     RollingStats stats;
     std::int64_t consecutive{0};
     std::optional<double> anomaly_start;  // monotonic; set while a streak is active
     std::optional<double> last_emit;      // wall clock of the last emitted fault
+    bool fault_active{false};             // a fault was emitted and not yet cleared
+    bool announced{false};                // a clear record was published at least once
+    std::int64_t normal_run{0};           // consecutive samples inside the clear band
+    std::optional<double> anchor;         // anchor_tolerance_rel reference
+    bool anchorable{false};               // name matches anchor_metric_prefix
   };
 
   bool cooldown_expired(const MetricState & m, double wall_now) const noexcept;
@@ -116,6 +162,9 @@ private:
     const std::string & metric, std::int64_t consecutive, double wall_now) const;
   void gate(
     MetricState & m, SampleResult & r, double mono_now, double wall_now);
+  void maybe_clear(
+    const std::string & metric, MetricState & m, SampleResult & r, double wall_now);
+  double clear_z() const noexcept;
 
   AnomalyParams params_;
   std::unordered_map<std::string, MetricState> metrics_;
