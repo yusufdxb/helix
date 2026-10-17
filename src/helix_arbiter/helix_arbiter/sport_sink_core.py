@@ -127,3 +127,108 @@ def fill_unitree_request(msg, req: SportRequest, request_id: int):
     msg.header.policy.noreply = False
     msg.parameter = req.parameter
     return msg
+
+
+@dataclass(frozen=True)
+class StillThresholds:
+    """Measured-stop thresholds on SportModeState (velocity is body frame)."""
+
+    max_speed_xy: float = 0.05   # m/s
+    max_yaw_speed: float = 0.10  # rad/s
+    still_s: float = 0.3         # must hold this long to count as stopped
+
+
+class SinkFeedback:
+    """Controller ack and measured motion for the requests this sink sent.
+
+    The robot answers every request on /api/sport/response, including the
+    ones from the other publishers on /api/sport/request, so only request ids
+    this sink sent are matched. stop_acked is true only while the newest sent
+    request is a StopMove and the robot answered that StopMove, or one sent
+    after the newest Move, with status code 0. A Move sent afterwards clears
+    it. Time is the caller's monotonic clock.
+    """
+
+    MAX_TRACKED = 256
+
+    def __init__(self, still: StillThresholds = StillThresholds(),
+                 feedback_timeout_s: float = 1.0) -> None:
+        self.still = still
+        self.feedback_timeout_s = feedback_timeout_s
+        self._sent: dict = {}          # request id -> (api_id, sent_at)
+        self.last_api_id = 0
+        self.last_request_id = 0
+        self.last_reason = ''
+        self.last_sent_at = 0.0
+        self._last_move_sent_at: Optional[float] = None
+        self.last_ack_request_id = 0
+        self.last_ack_code = 0
+        self.last_ack_at = 0.0
+        self.last_response_at: Optional[float] = None
+        self.stop_acked = False
+        self.stop_ack_sent_at = 0.0
+        self.stop_acked_at = 0.0
+        self.speed_xy = math.nan
+        self.yaw_speed = math.nan
+        self.state_at = 0.0
+        self.robot_mode = 0
+        self._still_since: Optional[float] = None
+        self.stopped = False
+        self.stopped_since = 0.0
+
+    def on_sent(self, request_id: int, api_id: int, reason: str, now: float) -> None:
+        self._sent[int(request_id)] = (int(api_id), now)
+        if len(self._sent) > self.MAX_TRACKED:
+            self._sent.pop(next(iter(self._sent)))
+        self.last_api_id = int(api_id)
+        self.last_request_id = int(request_id)
+        self.last_reason = reason
+        self.last_sent_at = now
+        if api_id == API_MOVE:
+            self._last_move_sent_at = now
+            self.stop_acked = False
+
+    def on_response(self, request_id: int, api_id: int, code: int, now: float) -> bool:
+        """Record a response; True if it answered one of this sink's requests."""
+        self.last_response_at = now
+        sent = self._sent.get(int(request_id))
+        if sent is None or sent[0] != int(api_id):
+            return False
+        sent_api, sent_at = sent
+        self.last_ack_request_id = int(request_id)
+        self.last_ack_code = int(code)
+        self.last_ack_at = now
+        newer_than_move = (self._last_move_sent_at is None
+                           or sent_at >= self._last_move_sent_at)
+        if (sent_api == API_STOP_MOVE and code == 0 and newer_than_move
+                and self.last_api_id == API_STOP_MOVE and not self.stop_acked):
+            self.stop_acked = True
+            self.stop_ack_sent_at = sent_at
+            self.stop_acked_at = now
+        return True
+
+    def on_state(self, vx: float, vy: float, yaw_speed: float, mode: int, now: float) -> None:
+        self.speed_xy = math.hypot(vx, vy)
+        self.yaw_speed = yaw_speed
+        self.robot_mode = int(mode)
+        self.state_at = now
+        still = (math.isfinite(self.speed_xy) and math.isfinite(yaw_speed)
+                 and self.speed_xy <= self.still.max_speed_xy
+                 and abs(yaw_speed) <= self.still.max_yaw_speed)
+        if not still:
+            self._still_since = None
+            self.stopped = False
+            return
+        if self._still_since is None:
+            self._still_since = now
+        if not self.stopped and now - self._still_since >= self.still.still_s:
+            self.stopped = True
+            self.stopped_since = now
+
+    def feedback_available(self, now: float) -> bool:
+        """Robot state is fresh. Responses only arrive after requests, so
+        their absence alone does not mean the feedback path is down."""
+        return self.state_at > 0.0 and now - self.state_at <= self.feedback_timeout_s
+
+    def stopped_now(self, now: float) -> bool:
+        return self.stopped and self.feedback_available(now)
