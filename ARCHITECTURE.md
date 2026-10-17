@@ -1,11 +1,17 @@
 # HELIX Architecture
 
-HELIX is a four-tier self-healing layer for ROS 2 robots. It monitors the live
-graph, classifies anomalies into recovery hints, applies a strict safety
-envelope before any actuation, and produces operator-readable explanations.
+HELIX is a fault-supervision layer for ROS 2 robots. It monitors the live
+graph, decides whether a fault is stop-worthy, holds the robot through a
+single motion arbiter, and produces operator-readable explanations. Its only
+recovery actions are hold and release: it does not restart, reconfigure or
+repair anything.
 
-The four tiers run as independent ROS 2 lifecycle nodes connected through
-three HELIX topics:
+There are two runtime profiles. The Python profile (below) is the reference.
+The native profile (`helix_native.launch.py`) runs the same path as C++
+processes and folds Diagnose and Recover into one supervisor; see
+[Native profile](#native-profile) and [`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md).
+
+In the Python profile the tiers run as independent ROS 2 lifecycle nodes:
 
 | Tier | Package | Subscribes | Publishes |
 |---|---|---|---|
@@ -53,7 +59,9 @@ and `pose_drift_monitor` (rolling displacement rate).
 - **R2.** A RESUME hint fires from a timer once the anomaly stream has been
   quiet for `anomaly_clear_seconds`.
 - **R3.** A LOG_PATTERN fault emits a STOP_AND_HOLD hint.
-- **R4.** A heartbeat-loss CRASH fault emits a STOP_AND_HOLD hint.
+- **R4.** A heartbeat-loss CRASH fault emits a `LOG_ONLY` hint, so in the
+  Python profile a dead sensing node never stops anything. The native
+  supervisor makes a CRASH of a critical node stop-worthy.
 
 The rules live in `helix_diagnosis.rules` as pure functions and are
 unit-testable without ROS 2. `RecoveryHint` messages are published to
@@ -83,6 +91,33 @@ for why `twist_mux` cannot stop the robot.
 
 `auto_activate_recovery` is `false` by default in the bringup; recovery is
 intentionally opt-in.
+
+## Native profile
+
+`helix_native.launch.py` runs six C++ processes: rate monitor, anomaly
+detector, log parser, `helix_supervisor`, `helix_arbiter` and the GO2 sport
+sink. `helix_supervisor` (`helix_supervisor_cpp`) replaces
+`heartbeat_monitor`, `diagnosis_node`, `context_buffer` and `recovery_node`
+with one ROS-free, deterministic state machine:
+
+```
+STARTING -> NOMINAL -> HOLD_REQUESTED -> HOLD_APPLIED -> STOP_ACKED -> STOP_CONFIRMED
+                          (arbiter ack)   (StopMove code 0)  (measured still)
+            any ack or measured stop late -> STOP_UNCONFIRMED (hold stays)
+all stop-worthy faults cleared -> CLEARING (clear_hold_s) -> release | AWAIT_RELEASE
+```
+
+- A fault stays active until evidence clears it: a detector clear record
+  (ANOMALY), continuous heartbeats (CRASH), or an operator release (latched
+  critical LOG_PATTERN). Silence never clears a fault.
+- Stop-worthy: R1 (`rate_hz/utlidar*` ANOMALY, severity >= 2), R3 (critical
+  log pattern), R4 (CRASH of a critical node, including one that never
+  started).
+- `hold = would_hold && actuation_enabled`. Turning actuation off never
+  hides what the machine would do.
+- `SupervisorStatus` publishes every stage timestamp on the host steady
+  clock. `SinkStatus` carries the StopMove ack and the measured-stop flag
+  from `/api/sport/response` and `/lf/sportmodestate`.
 
 ## Explain
 
@@ -161,6 +196,11 @@ and physical actuation closure. `/helix/cmd_vel` had zero downstream
 subscribers in Session 8. The motion path is now closed in software and
 verified off-robot; the bounded hardware procedure is
 [`docs/HW_MOTION_TEST.md`](docs/HW_MOTION_TEST.md).
+
+On 2026-10-17 the native profile ran on the Orin against the live GO2
+graph, non-actuating (smoke only). Its stop chain has passed against a
+simulated GO2 but not against the robot. The split is in
+[`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md).
 
 Full evidence: [`docs/GO2_HARDWARE_EVIDENCE.md`](GO2_HARDWARE_EVIDENCE.md).
 Honest limits: [`docs/LIMITATIONS.md`](LIMITATIONS.md).

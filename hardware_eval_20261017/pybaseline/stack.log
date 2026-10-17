@@ -1,0 +1,338 @@
+[INFO] [launch]: All log files can be found below /home/unitree/.ros/log/2026-10-17-19-27-00-170795-unitree-jetson-payload-61594
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [helix_heartbeat_monitor-1]: process started with pid [61626]
+[INFO] [helix_anomaly_detector-2]: process started with pid [61628]
+[INFO] [helix_log_parser-3]: process started with pid [61630]
+[INFO] [helix_topic_rate_monitor-4]: process started with pid [61632]
+[INFO] [helix_json_state_parser-5]: process started with pid [61634]
+[INFO] [helix_pose_drift_monitor-6]: process started with pid [61636]
+[INFO] [helix_context_buffer-7]: process started with pid [61638]
+[INFO] [helix_diagnosis_node-8]: process started with pid [61640]
+[INFO] [helix_recovery_node-9]: process started with pid [61642]
+[INFO] [helix_llm_explainer-10]: process started with pid [61644]
+[INFO] [helix_arbiter-11]: process started with pid [61646]
+[helix_json_state_parser-5] [INFO] [1792265221.146236736] [helix_json_state_parser]: JsonStateParser configured, 2 sources
+[INFO] [launch.user]: [helix_bringup] auto-activating lifecycle node
+[helix_json_state_parser-5] [INFO] [1792265221.167602656] [helix_json_state_parser]: JsonStateParser activated.
+[helix_log_parser-3] [INFO] [1792265221.179187936] [helix_log_parser]: Loaded 5 rules from '/home/unitree/helix_hw_b31a9ce/install/helix_bringup/share/helix_bringup/config/log_rules.yaml'
+[INFO] [launch.user]: [helix_bringup] auto-activating lifecycle node
+[helix_log_parser-3] [INFO] [1792265221.197157216] [helix_log_parser]: LogParser activated with 5 rules, dedup_window=5.0s
+[helix_heartbeat_monitor-1] [INFO] [1792265221.341746816] [helix_heartbeat_monitor]: HeartbeatMonitor configured — timeout=0.3s miss_threshold=3 check_interval=0.5s
+[INFO] [launch.user]: [helix_bringup] auto-activating lifecycle node
+[helix_heartbeat_monitor-1] [INFO] [1792265221.352108256] [helix_heartbeat_monitor]: HeartbeatMonitor activated.
+[helix_llm_explainer-10] [INFO] [1792265221.585937632] [helix_llm_explainer]: LLM advisory disabled (llm_enabled=false); deterministic template only
+[helix_anomaly_detector-2] [INFO] [1792265221.620498688] [helix_anomaly_detector]: AnomalyDetector configured, zscore_threshold=4.0 consecutive_trigger=3 window_size=60 emit_cooldown_s=1.0 min_anomaly_duration_s=2.0
+[INFO] [launch.user]: [helix_bringup] auto-activating lifecycle node
+[INFO] [launch.user]: [helix_closedloop] auto-activating lifecycle node
+[helix_anomaly_detector-2] [INFO] [1792265221.636414176] [helix_anomaly_detector]: AnomalyDetector activated.
+[helix_context_buffer-7] [INFO] [1792265221.683322912] [helix_context_buffer]: ContextBuffer configured
+[INFO] [launch.user]: [helix_closedloop] auto-activating lifecycle node
+[helix_context_buffer-7] [INFO] [1792265221.697986496] [helix_context_buffer]: ContextBuffer active
+[helix_topic_rate_monitor-4] [INFO] [1792265221.699802976] [helix_topic_rate_monitor]: TopicRateMonitor configured, 6 topics, window=5.0s
+[INFO] [launch.user]: [helix_bringup] auto-activating lifecycle node
+[INFO] [launch.user]: [helix_bringup] auto-activating lifecycle node
+[helix_pose_drift_monitor-6] [INFO] [1792265221.710265792] [helix_pose_drift_monitor]: PoseDriftMonitor configured, topic=/utlidar/robot_pose
+[helix_topic_rate_monitor-4] [INFO] [1792265221.711686944] [helix_topic_rate_monitor]: TopicRateMonitor activated.
+[helix_pose_drift_monitor-6] [INFO] [1792265221.722214496] [helix_pose_drift_monitor]: PoseDriftMonitor activated.
+[INFO] [launch.user]: [helix_closedloop] auto-activating lifecycle node
+[helix_arbiter-11] [INFO] [1792265221.929664384] [helix_arbiter]: configured: output=/helix_dry/cmd_vel sources=[('nav', '/helix_dry/nav/cmd_vel', 50, 0.5), ('teleop', '/helix_dry/teleop/cmd_vel', 200, 0.5)] hold_timeout=0.50s
+[INFO] [launch.user]: [helix_closedloop] auto-activating lifecycle node
+[helix_arbiter-11] [INFO] [1792265221.959628768] [helix_arbiter]: selected reason=NO_LIVE_INPUT source=- cmd=(+0.000,+0.000,+0.000) fault=-
+[helix_anomaly_detector-2] [WARN] [1792265283.214314048] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=85.26 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265283.216212512] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=300.03 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265283.715383136] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=7.76 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792265283.717163296] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=7.68 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792265284.214220608] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=5.20 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792265284.216117120] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=5.39 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792265284.714212672] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=4.34 (consecutive violation #4)
+[helix_anomaly_detector-2] [WARN] [1792265284.716326048] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=4.36 (consecutive violation #4)
+[helix_anomaly_detector-2] [WARN] [1792265302.222616768] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=685.65 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265302.722298592] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=7.60 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792265303.222182016] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=4.41 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792265303.722251392] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=4.85 (consecutive violation #4)
+[helix_anomaly_detector-2] [WARN] [1792265341.214535872] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=5.24 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265360.215933504] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=9.03 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265360.715037632] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=5.82 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792265361.215188864] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=4.44 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792265362.216271648] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=4.15 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265404.214333056] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=4.10 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265404.715305376] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=5.46 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265405.215495648] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=4.41 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792265433.715333792] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=8.20 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265434.218571872] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=5.57 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792265434.716251360] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=4.70 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792265489.216426464] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=115.81 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265489.714222720] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=7.62 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792265490.214180512] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=5.39 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792265490.714199680] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=4.36 (consecutive violation #4)
+[helix_anomaly_detector-2] [WARN] [1792265576.212686624] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_imu' Z-score=4.33 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265589.713994816] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=4.57 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265635.214091584] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=4.05 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265691.714837344] [helix_anomaly_detector]: Metric 'rate_hz/gnss' Z-score=6.68 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265692.214257504] [helix_anomaly_detector]: Metric 'rate_hz/gnss' Z-score=5.07 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792265700.212699136] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_imu' Z-score=4.95 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265700.712426784] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_imu' Z-score=4.31 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792265701.212630400] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_imu' Z-score=4.17 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792265727.213154336] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_robot_odom' Z-score=4.14 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265735.715190528] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=4.16 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265765.214247616] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=4.17 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265770.222036032] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=135.56 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265770.721906144] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=26.76 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792265771.222353728] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=7.50 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792265771.722029056] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=5.53 (consecutive violation #4)
+[helix_anomaly_detector-2] [WARN] [1792265806.712720800] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_imu' Z-score=4.12 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265841.714454496] [helix_anomaly_detector]: Metric 'rate_hz/gnss' Z-score=4.65 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265845.713870720] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_robot_pose' Z-score=4.34 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265872.721986816] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=5.42 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265894.213283296] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_robot_odom' Z-score=4.12 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265926.712685760] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_imu' Z-score=4.29 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265927.712530624] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_imu' Z-score=4.57 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792265938.214374304] [helix_anomaly_detector]: Metric 'rate_hz/gnss' Z-score=4.44 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266035.214268960] [helix_anomaly_detector]: Metric 'rate_hz/gnss' Z-score=5.47 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266035.714156064] [helix_anomaly_detector]: Metric 'rate_hz/gnss' Z-score=4.41 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792266036.214893440] [helix_anomaly_detector]: Metric 'rate_hz/gnss' Z-score=4.41 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792266053.213752768] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=7.06 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266078.214194304] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=4.36 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266115.213584096] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_robot_pose' Z-score=5.01 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266204.215032288] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=943.52 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266204.715058400] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=7.68 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792266205.215149472] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=5.39 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792266205.715170752] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=4.36 (consecutive violation #4)
+[helix_anomaly_detector-2] [WARN] [1792266288.714627840] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=1149.82 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266289.214799360] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=7.68 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792266289.714666336] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=5.39 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792266290.214651392] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=4.36 (consecutive violation #4)
+[helix_anomaly_detector-2] [WARN] [1792266310.213060512] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_imu' Z-score=4.21 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266311.212799616] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_imu' Z-score=4.20 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266423.214610528] [helix_anomaly_detector]: Metric 'rate_hz/gnss' Z-score=4.17 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266440.222018048] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=63.23 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266440.721997344] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=1570.76 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792266442.721969664] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=4.07 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266443.222100320] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=7.41 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792266443.713220768] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_robot_odom' Z-score=4.40 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266443.722362016] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=4.85 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792266444.213089216] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_robot_odom' Z-score=4.73 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792266444.221984832] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=4.35 (consecutive violation #4)
+[helix_anomaly_detector-2] [WARN] [1792266444.713174464] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_robot_odom' Z-score=4.99 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792266444.722062336] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=5.98 (consecutive violation #5)
+[helix_anomaly_detector-2] [INFO] [1792266444.723373056] [helix_anomaly_detector]: FaultEvent emitted: ANOMALY for 'pose/displacement_rate_m_s' (zscore=5.98, consecutive=5)
+[helix_anomaly_detector-2] [WARN] [1792266445.722094240] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=5.46 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266448.214082240] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=4.77 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266461.713618944] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_robot_odom' Z-score=4.02 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266479.215237376] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=24.07 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266479.715577440] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=7.31 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792266480.215307328] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=6.68 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792266481.214741824] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=4.56 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266492.714846976] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=7.29 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266540.714173920] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=4.02 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266545.714901536] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=5.07 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266546.215234784] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' Z-score=4.18 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792266547.714199040] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=4.57 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266552.722340576] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=4.10 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266561.215259744] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=5.28 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266619.712761344] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_imu' Z-score=4.99 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266622.713837824] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_robot_pose' Z-score=4.13 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266623.213796576] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_robot_pose' Z-score=4.13 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792266632.722610560] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=666.76 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266633.222670496] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=8.89 (consecutive violation #2)
+[helix_anomaly_detector-2] [WARN] [1792266633.722120672] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=8.77 (consecutive violation #3)
+[helix_anomaly_detector-2] [WARN] [1792266681.222403968] [helix_anomaly_detector]: Metric 'pose/displacement_rate_m_s' Z-score=4.12 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266704.714352832] [helix_anomaly_detector]: Metric 'rate_hz/utlidar_cloud' Z-score=4.07 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266791.714413248] [helix_anomaly_detector]: Metric 'rate_hz/gnss' Z-score=4.78 (consecutive violation #1)
+[helix_anomaly_detector-2] [WARN] [1792266792.214497824] [helix_anomaly_detector]: Metric 'rate_hz/gnss' Z-score=4.03 (consecutive violation #2)
+[helix_arbiter-11] [INFO] [1792267062.085578176] [helix_arbiter]: signal 2: publishing zero burst before exit
+[helix_arbiter-11] [INFO] [1792267062.087007904] [helix_arbiter]: selected reason=SHUTDOWN source=- cmd=(+0.000,+0.000,+0.000) fault=-
+[helix_topic_rate_monitor-4] Traceback (most recent call last):
+[helix_topic_rate_monitor-4]   File "/home/unitree/helix_hw_b31a9ce/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor", line 33, in <module>
+[helix_topic_rate_monitor-4]     sys.exit(load_entry_point('helix-adapter', 'console_scripts', 'helix_topic_rate_monitor')())
+[helix_topic_rate_monitor-4]   File "/home/unitree/helix_hw_b31a9ce/build/helix_adapter/helix_adapter/topic_rate_monitor.py", line 155, in main
+[helix_diagnosis_node-8] Traceback (most recent call last):
+[helix_diagnosis_node-8]   File "/home/unitree/helix_hw_b31a9ce/build/helix_diagnosis/helix_diagnosis/diagnosis_node.py", line 136, in main
+[helix_log_parser-3] Traceback (most recent call last):
+[helix_log_parser-3]   File "/home/unitree/helix_hw_b31a9ce/install/helix_core/lib/helix_core/helix_log_parser", line 33, in <module>
+[helix_log_parser-3]     sys.exit(load_entry_point('helix-core', 'console_scripts', 'helix_log_parser')())
+[helix_log_parser-3]   File "/home/unitree/helix_hw_b31a9ce/build/helix_core/helix_core/log_parser.py", line 186, in main
+[helix_diagnosis_node-8]     rclpy.spin(node)
+[helix_diagnosis_node-8]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 229, in spin
+[helix_diagnosis_node-8]     executor.spin_once()
+[helix_diagnosis_node-8]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 808, in spin_once
+[helix_diagnosis_node-8]     self._spin_once_impl(timeout_sec)
+[helix_diagnosis_node-8]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 797, in _spin_once_impl
+[helix_diagnosis_node-8]     handler, entity, node = self.wait_for_ready_callbacks(timeout_sec=timeout_sec)
+[helix_diagnosis_node-8]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 780, in wait_for_ready_callbacks
+[helix_log_parser-3]     rclpy.spin(node)
+[helix_log_parser-3]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 229, in spin
+[helix_log_parser-3]     executor.spin_once()
+[helix_log_parser-3]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 808, in spin_once
+[helix_log_parser-3]     self._spin_once_impl(timeout_sec)
+[helix_log_parser-3]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 797, in _spin_once_impl
+[helix_log_parser-3]     handler, entity, node = self.wait_for_ready_callbacks(timeout_sec=timeout_sec)
+[helix_log_parser-3]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 780, in wait_for_ready_callbacks
+[helix_log_parser-3]     return next(self._cb_iter)
+[helix_log_parser-3]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 681, in _wait_for_ready_callbacks
+[helix_diagnosis_node-8]     return next(self._cb_iter)
+[helix_diagnosis_node-8]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 681, in _wait_for_ready_callbacks
+[helix_diagnosis_node-8]     raise ExternalShutdownException()
+[helix_diagnosis_node-8] rclpy.executors.ExternalShutdownException
+[helix_diagnosis_node-8] 
+[helix_diagnosis_node-8] During handling of the above exception, another exception occurred:
+[helix_diagnosis_node-8] 
+[helix_diagnosis_node-8] Traceback (most recent call last):
+[helix_diagnosis_node-8]   File "/home/unitree/helix_hw_b31a9ce/install/helix_diagnosis/lib/helix_diagnosis/helix_diagnosis_node", line 33, in <module>
+[helix_diagnosis_node-8]     sys.exit(load_entry_point('helix-diagnosis', 'console_scripts', 'helix_diagnosis_node')())
+[helix_diagnosis_node-8]   File "/home/unitree/helix_hw_b31a9ce/build/helix_diagnosis/helix_diagnosis/diagnosis_node.py", line 139, in main
+[helix_diagnosis_node-8]     rclpy.shutdown()
+[helix_diagnosis_node-8]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 130, in shutdown
+[helix_log_parser-3]     raise ExternalShutdownException()
+[helix_log_parser-3] rclpy.executors.ExternalShutdownException
+[helix_diagnosis_node-8]     _shutdown(context=context)
+[helix_diagnosis_node-8]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/utilities.py", line 58, in shutdown
+[helix_diagnosis_node-8]     return context.shutdown()
+[helix_diagnosis_node-8]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/context.py", line 102, in shutdown
+[helix_diagnosis_node-8]     self.__context.shutdown()
+[helix_diagnosis_node-8] rclpy._rclpy_pybind11.RCLError: failed to shutdown: rcl_shutdown already called on the given context, at ./src/rcl/init.c:241
+[helix_pose_drift_monitor-6] Traceback (most recent call last):
+[helix_pose_drift_monitor-6]   File "/home/unitree/helix_hw_b31a9ce/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor", line 33, in <module>
+[helix_pose_drift_monitor-6]     sys.exit(load_entry_point('helix-adapter', 'console_scripts', 'helix_pose_drift_monitor')())
+[helix_pose_drift_monitor-6]   File "/home/unitree/helix_hw_b31a9ce/build/helix_adapter/helix_adapter/pose_drift_monitor.py", line 107, in main
+[helix_pose_drift_monitor-6]     rclpy.spin(node)
+[helix_pose_drift_monitor-6]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 229, in spin
+[helix_pose_drift_monitor-6]     executor.spin_once()
+[helix_pose_drift_monitor-6]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 808, in spin_once
+[helix_pose_drift_monitor-6]     self._spin_once_impl(timeout_sec)
+[helix_pose_drift_monitor-6]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 797, in _spin_once_impl
+[helix_pose_drift_monitor-6]     handler, entity, node = self.wait_for_ready_callbacks(timeout_sec=timeout_sec)
+[helix_pose_drift_monitor-6]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 780, in wait_for_ready_callbacks
+[helix_pose_drift_monitor-6]     return next(self._cb_iter)
+[helix_pose_drift_monitor-6]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 681, in _wait_for_ready_callbacks
+[helix_pose_drift_monitor-6]     raise ExternalShutdownException()
+[helix_pose_drift_monitor-6] rclpy.executors.ExternalShutdownException
+[helix_topic_rate_monitor-4]     rclpy.spin(node)
+[helix_topic_rate_monitor-4]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 229, in spin
+[helix_topic_rate_monitor-4]     executor.spin_once()
+[helix_topic_rate_monitor-4]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 808, in spin_once
+[helix_anomaly_detector-2] Traceback (most recent call last):
+[helix_anomaly_detector-2]   File "/home/unitree/helix_hw_b31a9ce/install/helix_core/lib/helix_core/helix_anomaly_detector", line 33, in <module>
+[helix_anomaly_detector-2]     sys.exit(load_entry_point('helix-core', 'console_scripts', 'helix_anomaly_detector')())
+[helix_anomaly_detector-2]   File "/home/unitree/helix_hw_b31a9ce/build/helix_core/helix_core/anomaly_detector.py", line 367, in main
+[helix_anomaly_detector-2]     rclpy.spin(node)
+[helix_anomaly_detector-2]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 229, in spin
+[helix_anomaly_detector-2]     executor.spin_once()
+[helix_anomaly_detector-2]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 808, in spin_once
+[helix_anomaly_detector-2]     self._spin_once_impl(timeout_sec)
+[helix_anomaly_detector-2]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 797, in _spin_once_impl
+[helix_topic_rate_monitor-4]     self._spin_once_impl(timeout_sec)
+[helix_topic_rate_monitor-4]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 797, in _spin_once_impl
+[helix_anomaly_detector-2]     handler, entity, node = self.wait_for_ready_callbacks(timeout_sec=timeout_sec)
+[helix_anomaly_detector-2]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 780, in wait_for_ready_callbacks
+[helix_anomaly_detector-2]     return next(self._cb_iter)
+[helix_anomaly_detector-2]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 681, in _wait_for_ready_callbacks
+[helix_anomaly_detector-2]     raise ExternalShutdownException()
+[helix_anomaly_detector-2] rclpy.executors.ExternalShutdownException
+[helix_topic_rate_monitor-4]     handler, entity, node = self.wait_for_ready_callbacks(timeout_sec=timeout_sec)
+[helix_topic_rate_monitor-4]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 780, in wait_for_ready_callbacks
+[helix_topic_rate_monitor-4]     return next(self._cb_iter)
+[helix_topic_rate_monitor-4]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 681, in _wait_for_ready_callbacks
+[helix_topic_rate_monitor-4]     raise ExternalShutdownException()
+[helix_topic_rate_monitor-4] rclpy.executors.ExternalShutdownException
+[helix_heartbeat_monitor-1] Traceback (most recent call last):
+[helix_heartbeat_monitor-1]   File "/home/unitree/helix_hw_b31a9ce/install/helix_core/lib/helix_core/helix_heartbeat_monitor", line 33, in <module>
+[helix_heartbeat_monitor-1]     sys.exit(load_entry_point('helix-core', 'console_scripts', 'helix_heartbeat_monitor')())
+[helix_heartbeat_monitor-1]   File "/home/unitree/helix_hw_b31a9ce/build/helix_core/helix_core/heartbeat_monitor.py", line 222, in main
+[helix_heartbeat_monitor-1]     rclpy.spin(node)
+[helix_heartbeat_monitor-1]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 229, in spin
+[helix_heartbeat_monitor-1]     executor.spin_once()
+[helix_heartbeat_monitor-1]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 808, in spin_once
+[helix_heartbeat_monitor-1]     self._spin_once_impl(timeout_sec)
+[helix_heartbeat_monitor-1]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 797, in _spin_once_impl
+[helix_heartbeat_monitor-1]     handler, entity, node = self.wait_for_ready_callbacks(timeout_sec=timeout_sec)
+[helix_heartbeat_monitor-1]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 780, in wait_for_ready_callbacks
+[helix_heartbeat_monitor-1]     return next(self._cb_iter)
+[helix_heartbeat_monitor-1]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 681, in _wait_for_ready_callbacks
+[helix_heartbeat_monitor-1]     raise ExternalShutdownException()
+[helix_heartbeat_monitor-1] rclpy.executors.ExternalShutdownException
+[helix_json_state_parser-5] Traceback (most recent call last):
+[helix_json_state_parser-5]   File "/home/unitree/helix_hw_b31a9ce/install/helix_adapter/lib/helix_adapter/helix_json_state_parser", line 33, in <module>
+[helix_json_state_parser-5]     sys.exit(load_entry_point('helix-adapter', 'console_scripts', 'helix_json_state_parser')())
+[helix_json_state_parser-5]   File "/home/unitree/helix_hw_b31a9ce/build/helix_adapter/helix_adapter/json_state_parser.py", line 144, in main
+[helix_json_state_parser-5]     rclpy.spin(node)
+[helix_json_state_parser-5]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 229, in spin
+[helix_json_state_parser-5]     executor.spin_once()
+[helix_json_state_parser-5]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 808, in spin_once
+[helix_json_state_parser-5]     self._spin_once_impl(timeout_sec)
+[helix_json_state_parser-5]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 797, in _spin_once_impl
+[helix_json_state_parser-5]     handler, entity, node = self.wait_for_ready_callbacks(timeout_sec=timeout_sec)
+[helix_json_state_parser-5]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 780, in wait_for_ready_callbacks
+[helix_json_state_parser-5]     return next(self._cb_iter)
+[helix_json_state_parser-5]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 681, in _wait_for_ready_callbacks
+[helix_json_state_parser-5]     raise ExternalShutdownException()
+[helix_json_state_parser-5] rclpy.executors.ExternalShutdownException
+[helix_context_buffer-7] Traceback (most recent call last):
+[helix_context_buffer-7]   File "/home/unitree/helix_hw_b31a9ce/build/helix_diagnosis/helix_diagnosis/context_buffer.py", line 113, in main
+[helix_context_buffer-7]     rclpy.spin(node)
+[helix_context_buffer-7]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 229, in spin
+[helix_context_buffer-7]     executor.spin_once()
+[helix_context_buffer-7]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 808, in spin_once
+[helix_context_buffer-7]     self._spin_once_impl(timeout_sec)
+[helix_context_buffer-7]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 797, in _spin_once_impl
+[helix_context_buffer-7]     handler, entity, node = self.wait_for_ready_callbacks(timeout_sec=timeout_sec)
+[helix_context_buffer-7]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 780, in wait_for_ready_callbacks
+[helix_context_buffer-7]     return next(self._cb_iter)
+[helix_context_buffer-7]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 681, in _wait_for_ready_callbacks
+[helix_context_buffer-7]     raise ExternalShutdownException()
+[helix_context_buffer-7] rclpy.executors.ExternalShutdownException
+[helix_context_buffer-7] 
+[helix_context_buffer-7] During handling of the above exception, another exception occurred:
+[helix_context_buffer-7] 
+[helix_context_buffer-7] Traceback (most recent call last):
+[helix_context_buffer-7]   File "/home/unitree/helix_hw_b31a9ce/install/helix_diagnosis/lib/helix_diagnosis/helix_context_buffer", line 33, in <module>
+[helix_context_buffer-7]     sys.exit(load_entry_point('helix-diagnosis', 'console_scripts', 'helix_context_buffer')())
+[helix_context_buffer-7]   File "/home/unitree/helix_hw_b31a9ce/build/helix_diagnosis/helix_diagnosis/context_buffer.py", line 116, in main
+[helix_context_buffer-7]     rclpy.shutdown()
+[helix_context_buffer-7]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 130, in shutdown
+[helix_context_buffer-7]     _shutdown(context=context)
+[helix_context_buffer-7]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/utilities.py", line 58, in shutdown
+[helix_context_buffer-7]     return context.shutdown()
+[helix_context_buffer-7]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/context.py", line 102, in shutdown
+[helix_context_buffer-7]     self.__context.shutdown()
+[helix_context_buffer-7] rclpy._rclpy_pybind11.RCLError: failed to shutdown: rcl_shutdown already called on the given context, at ./src/rcl/init.c:241
+[helix_llm_explainer-10] Traceback (most recent call last):
+[helix_llm_explainer-10]   File "/home/unitree/helix_hw_b31a9ce/build/helix_explanation/helix_explanation/llm_explainer.py", line 227, in main
+[helix_llm_explainer-10]     rclpy.spin(node)
+[helix_llm_explainer-10]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 229, in spin
+[helix_llm_explainer-10]     executor.spin_once()
+[helix_llm_explainer-10]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 808, in spin_once
+[helix_llm_explainer-10]     self._spin_once_impl(timeout_sec)
+[helix_llm_explainer-10]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 797, in _spin_once_impl
+[helix_llm_explainer-10]     handler, entity, node = self.wait_for_ready_callbacks(timeout_sec=timeout_sec)
+[helix_llm_explainer-10]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 780, in wait_for_ready_callbacks
+[helix_llm_explainer-10]     return next(self._cb_iter)
+[helix_llm_explainer-10]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/executors.py", line 681, in _wait_for_ready_callbacks
+[helix_llm_explainer-10]     raise ExternalShutdownException()
+[helix_llm_explainer-10] rclpy.executors.ExternalShutdownException
+[helix_llm_explainer-10] 
+[helix_llm_explainer-10] During handling of the above exception, another exception occurred:
+[helix_llm_explainer-10] 
+[helix_llm_explainer-10] Traceback (most recent call last):
+[helix_llm_explainer-10]   File "/home/unitree/helix_hw_b31a9ce/install/helix_explanation/lib/helix_explanation/helix_llm_explainer", line 33, in <module>
+[helix_llm_explainer-10]     sys.exit(load_entry_point('helix-explanation', 'console_scripts', 'helix_llm_explainer')())
+[helix_llm_explainer-10]   File "/home/unitree/helix_hw_b31a9ce/build/helix_explanation/helix_explanation/llm_explainer.py", line 230, in main
+[helix_llm_explainer-10]     rclpy.shutdown()
+[helix_llm_explainer-10]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 130, in shutdown
+[helix_llm_explainer-10]     _shutdown(context=context)
+[helix_llm_explainer-10]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/utilities.py", line 58, in shutdown
+[helix_llm_explainer-10]     return context.shutdown()
+[helix_llm_explainer-10]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/context.py", line 102, in shutdown
+[helix_llm_explainer-10]     self.__context.shutdown()
+[helix_llm_explainer-10] rclpy._rclpy_pybind11.RCLError: failed to shutdown: rcl_shutdown already called on the given context, at ./src/rcl/init.c:241
+[ERROR] [helix_log_parser-3]: process has died [pid 61630, exit code 1, cmd '/home/unitree/helix_hw_b31a9ce/install/helix_core/lib/helix_core/helix_log_parser --ros-args -r __node:=helix_log_parser -r __ns:=/ --params-file /home/unitree/helix_hw_b31a9ce/install/helix_bringup/share/helix_bringup/config/helix_params.yaml --params-file /tmp/launch_params_hxejroe3'].
+[ERROR] [helix_llm_explainer-10]: process has died [pid 61644, exit code 1, cmd '/home/unitree/helix_hw_b31a9ce/install/helix_explanation/lib/helix_explanation/helix_llm_explainer --ros-args -r __node:=helix_llm_explainer -r __ns:=/ --params-file /tmp/launch_params_6fp0e337'].
+[INFO] [helix_recovery_node-9]: process has finished cleanly [pid 61642]
+[ERROR] [helix_heartbeat_monitor-1]: process has died [pid 61626, exit code 1, cmd '/home/unitree/helix_hw_b31a9ce/install/helix_core/lib/helix_core/helix_heartbeat_monitor --ros-args -r __node:=helix_heartbeat_monitor -r __ns:=/ --params-file /home/unitree/helix_hw_b31a9ce/install/helix_bringup/share/helix_bringup/config/helix_params.yaml'].
+[ERROR] [helix_context_buffer-7]: process has died [pid 61638, exit code 1, cmd '/home/unitree/helix_hw_b31a9ce/install/helix_diagnosis/lib/helix_diagnosis/helix_context_buffer --ros-args -r __node:=helix_context_buffer -r __ns:=/'].
+[ERROR] [helix_anomaly_detector-2]: process has died [pid 61628, exit code 1, cmd '/home/unitree/helix_hw_b31a9ce/install/helix_core/lib/helix_core/helix_anomaly_detector --ros-args -r __node:=helix_anomaly_detector -r __ns:=/ --params-file /home/unitree/helix_hw_b31a9ce/install/helix_bringup/share/helix_bringup/config/helix_params.yaml'].
+[ERROR] [helix_diagnosis_node-8]: process has died [pid 61640, exit code 1, cmd '/home/unitree/helix_hw_b31a9ce/install/helix_diagnosis/lib/helix_diagnosis/helix_diagnosis_node --ros-args -r __node:=helix_diagnosis_node -r __ns:=/'].
+[ERROR] [helix_json_state_parser-5]: process has died [pid 61634, exit code 1, cmd '/home/unitree/helix_hw_b31a9ce/install/helix_adapter/lib/helix_adapter/helix_json_state_parser --ros-args -r __node:=helix_json_state_parser -r __ns:=/ --params-file /home/unitree/helix_hw_b31a9ce/install/helix_bringup/share/helix_bringup/config/helix_adapter_params.yaml'].
+[ERROR] [helix_pose_drift_monitor-6]: process has died [pid 61636, exit code 1, cmd '/home/unitree/helix_hw_b31a9ce/install/helix_adapter/lib/helix_adapter/helix_pose_drift_monitor --ros-args -r __node:=helix_pose_drift_monitor -r __ns:=/ --params-file /home/unitree/helix_hw_b31a9ce/install/helix_bringup/share/helix_bringup/config/helix_adapter_params.yaml'].
+[ERROR] [helix_topic_rate_monitor-4]: process has died [pid 61632, exit code 1, cmd '/home/unitree/helix_hw_b31a9ce/install/helix_adapter/lib/helix_adapter/helix_topic_rate_monitor --ros-args -r __node:=helix_topic_rate_monitor -r __ns:=/ --params-file /home/unitree/helix_hw_b31a9ce/install/helix_bringup/share/helix_bringup/config/helix_adapter_params.yaml --params-file /tmp/launch_params_am6rl6lb'].
+[INFO] [helix_arbiter-11]: process has finished cleanly [pid 61646]

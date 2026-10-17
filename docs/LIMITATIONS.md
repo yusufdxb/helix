@@ -26,7 +26,18 @@ The `helix_core` sensing nodes are not passive observers. The HeartbeatMonitor r
 
 As of Session 8 (2026-04-23), `helix_diagnosis` produces `RecoveryHint` messages and `helix_recovery` consumes them, applies the allowlist (`{STOP_AND_HOLD, RESUME, LOG_ONLY}`) and cooldown, and publishes audit events plus `/helix/cmd_vel`. The closed loop is observable end-to-end in the bag artifacts.
 
-What is **not** validated: the Session 8 GO2 graph had 0 downstream subscribers on `/helix/cmd_vel`, so STOP_AND_HOLD published zero-twist into a void and did not physically command the robot. The current source includes a `twist_mux` fallback, a canonical closed-loop launch path, and an offline bag validator that requires both muxed zero commands and odometry-confirmed stopping. Those paths have unit-level validation only. A new physical run must still prove the installed graph, the command handoff, and the robot's response before HELIX can be described as a physical safety intervention.
+What is **not** validated: the Session 8 GO2 graph had 0 downstream subscribers on `/helix/cmd_vel`, so STOP_AND_HOLD published zero-twist into a void and did not physically command the robot. The `twist_mux` fallback was found unsafe (silent on idle and lock, forwards NaN). The current path is `helix_arbiter` (sole velocity output) to the GO2 sport sink (StopMove 1003 / Move 1008 only).
+
+As of 2026-10-17 the native profile (`helix_native.launch.py`) tracks every stage of a stop: hold, arbiter ack, controller ack (`/api/sport/response` code 0), and the measured stop (`/lf/sportmodestate`). `scripts/hw/native_stop_test.py` checks all four against a second sensor (LiDAR odometry). That test has passed against `helix_fake_go2` only. The fake robot acks every StopMove and stops in one dynamics step, so the rehearsal says nothing about the real controller's ack behavior or stopping distance. No StopMove from a HELIX sink has reached the GO2. Until the `ack` and `motion` stages pass on the robot, HELIX must not be described as a physical safety intervention, and it is not a substitute for the remote or the e-stop at any stage.
+
+## Native Runtime Limits (2026-10-17)
+
+- Native CPU and RSS on the Orin are unmeasured. The 10-minute run was lost when the Orin dropped off the network. The Python baseline (79.1 % of one core, 587 MB) is measured.
+- The native detector configuration was selected on five real captures (1.057 h) and has no held-out score. Round 1 of the same protocol failed held-out (2 stop false alarms from `rate_hz/utlidar_cloud` stalls); see `docs/DETECTOR_EVAL.md`.
+- The chosen configuration still raises log-only faults on `pose/displacement_rate_m_s` (19 episodes in 30 min on a lying robot). They never hold, but they add audit noise.
+- No live fault injection (topic loss, rate collapse, drift), live SIGKILL crash test, DDS-liveliness comparison, long soak or jitter measurement has been run on the native stack.
+- `helix_supervisor_cpp` has no Python counterpart to check parity against. Its behavior rests on its own 49 tests and the rehearsal.
+- `json_state_parser` and `pose_drift_monitor` are not in the native profile.
 
 ## No End-to-End Field Deployment
 

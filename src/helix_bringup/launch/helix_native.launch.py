@@ -47,8 +47,8 @@ from launch import LaunchDescription
 
 SINK_MODES = ('dry_run', 'stop_only', 'armed')
 
-# Detector config chosen on DEV recordings and scored once on held-out ones
-# (analysis/detector_eval.py, docs/DETECTOR_EVAL.md).
+# Detector config chosen on DEV recordings (analysis/detector_eval.py round 2,
+# docs/DETECTOR_EVAL.md). It has no held-out score yet.
 DETECTOR_OVERRIDES = {
     'zscore_threshold': 4.0,
     'window_size': 60,
