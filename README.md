@@ -43,7 +43,7 @@ the honest version of this paragraph: it compares HELIX against
   SENSE, a rule in DIAGNOSE (R1 to R4) turns it into a `RecoveryHint`, and
   RECOVER emits an audited, allowlisted, cooldown-gated action. Session 8
   reproduced this 14 times with no allowlist or cooldown violation.
-- **Not proven**: physical stopping. `/helix/cmd_vel` had zero downstream
+- **Physical stopping, partly proven (2026-10-17)**: `/helix/cmd_vel` had zero downstream
   subscribers during Session 8, and the planned `twist_mux` fallback turned out
   to be unsafe (it goes silent on idle and lock, and forwards NaN). The path
   is now closed **in software**: `helix_arbiter` is the single authoritative
@@ -51,9 +51,20 @@ the honest version of this paragraph: it compares HELIX against
   `helix_go2_sport_sink` turns it into GO2 StopMove/Move requests. This is
   verified off-robot (20 harness scenarios, and a replay of Session 8's
   real faults with every accepted STOP reaching a zero output, median 1.0 ms).
-  The robot has never been shown to stop on a HELIX fault: the hardware
-  stop test (`scripts/hw/native_stop_test.py --stage ack`, then
-  `--stage motion`) has passed against a simulated GO2 only. See
+  On 2026-10-17 the armed native stack stopped the real GO2 on an injected
+  fault twice in two valid motion trials:
+  - The fault came 0.35 s into a 0.25 m/s start, with the robot at 0.13 and
+    0.32 m/s.
+  - StopMove went out within 1 ms, and the GO2 answered it with code 0 within
+    3 ms.
+  - The robot was measured still 636 and 265 ms after the fault, and LiDAR
+    odometry agreed.
+  - No Move reached the robot while held, even though the upstream source
+    kept streaming.
+
+  What this does not show: a stop from steady walking, because the stock
+  gait does not sustain a walk at 0.25 m/s or below. The run count is also
+  small, and a third trial aborted on overspeed before its fault. See
   [`docs/MOTION_ARBITRATION.md`](docs/MOTION_ARBITRATION.md) and
   [`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md).
 - **Native runtime, 2026-10-17**: the monitoring, supervision and actuation
@@ -64,9 +75,10 @@ the honest version of this paragraph: it compares HELIX against
   measured-stop timestamps. Re-selected on five real captures, the detector
   keeps sustained faults active (0 false clears, against 1488 for the shipped
   point) with 0 stop false alarms. That is a DEV score; it has no held-out
-  score yet. On hardware so far: a non-actuating smoke run on the Orin and a
-  Python cost baseline (79.1 % of one core, 587 MB). The native CPU figure
-  and the physical stop test are still owed. Details:
+  score yet. On hardware: the stop test above, and native cost of 7.06 % of
+  one core and 83.5 MB for 6 processes, against 79.08 % and 587.4 MB for the
+  13-process Python stack. The native figure comes from a 175 s run with the
+  robot standing, so it is partial. Details:
   [`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md),
   [`docs/DETECTOR_EVAL.md`](docs/DETECTOR_EVAL.md).
 - **Found and fixed, not assumed away**: the CONTEXT tier's `ContextBuffer`
@@ -231,7 +243,7 @@ duplicates cannot be trusted about what it does not.
 |---|---|---|
 | **Sense** (`helix_core`, `helix_adapter`) | stable | Hardware-validated across 8 GO2 and Jetson lab sessions (2026-04-03 to 2026-04-23). Detector operating point measured post hoc, see above; shipped config unchanged. |
 | **Sense, C++ port** (`helix_sensing_cpp`) | work in progress | Detector: 30-min hardware run, -53.4% RSS and -63.8% CPU vs the Python Session 7 plateau (cross-session; RSS missed the 30% target at 46.6%). Rate monitor and log parser ported 2026-10-17 (log parser: 16 Python parity cases). In `closedloop.launch.py`, `anomaly_backend:=cpp` selects the C++ detector and Python stays the default; `helix_native.launch.py` is all C++. |
-| **Supervise, native** (`helix_supervisor_cpp`) | software-verified | One fault-state machine replacing heartbeat, diagnosis, context and recovery. 49 tests; stop chain PASS against a simulated GO2; ran non-actuating on the Orin (smoke). Not yet shown to stop the robot. See [`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md). |
+| **Supervise, native** (`helix_supervisor_cpp`) | software-verified | One fault-state machine replacing heartbeat, diagnosis, context and recovery. 49 tests; stop chain PASS against a simulated GO2 and on the real GO2 (ack stage, plus 2 motion trials from a start transient). Not shown from steady walking. See [`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md). |
 | **Context** (`helix_diagnosis.context_buffer`) | fixed, re-verify on hardware | Crashed roughly 1 s after activation in every prior session on an `rclpy` bytes/int detail. Fixed and unit-tested; not yet re-confirmed on a live GO2. |
 | **Diagnose** (`helix_diagnosis`) | work in progress | Closed-loop validated on a live GO2 in Session 8, 14/14 hints correctly ruled. |
 | **Recover** (`helix_recovery`) | work in progress | Validated end to end in Session 8: 14 hints consumed, allowlist and cooldown audited. Session 8's `/helix/cmd_vel` had 0 subscribers. Recovery now asserts `/helix/hold` on `helix_arbiter`; verified off-robot, hardware stage E pending. |
@@ -316,14 +328,17 @@ Full evidence, scope, and limitations: [`docs/GO2_HARDWARE_EVIDENCE.md`](docs/GO
 ## Roadmap
 
 HELIX ships as a public repo and demo video: a working detect, decide, and
-command-recovery system that other roboticists can install and adapt; physical
-recovery on the robot is not yet demonstrated. Forward pillars:
+command-recovery system that other roboticists can install and adapt. A
+physical stop on the robot is shown from a low-speed start, not from
+walking. Forward pillars:
 
-1. **Close the recovery loop physically.** Done in software, and passing
-   against a simulated GO2 ([`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md)).
-   Next: `scripts/hw/native_stop_test.py --stage ack`, then `--stage motion`
-   (vx 0.15 m/s, operator on the remote), on the GO2. This is the single
-   biggest gap between "proven" and "true" above.
+1. **Close the recovery loop physically.** Ack stage and 2 motion trials
+   passed on the GO2 ([`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md)).
+   Next:
+   - a stop from steady walking. This needs a speed limit above the sink's
+     0.25 m/s, which is an operator decision.
+   - an overspeed abort that a second sensor must confirm.
+   - more trials, for repeat statistics.
 2. **Ship the measured detector operating point.** The shipped Python
    `zscore_threshold: 4.0, window_size: 60` is measurably blind to a
    sustained fault (1/62 detection on a 10-sigma step) and self-clears

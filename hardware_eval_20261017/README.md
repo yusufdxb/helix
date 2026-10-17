@@ -67,9 +67,27 @@ Recorded with `scripts/hw/py_baseline.sh <build dir> 1800`, which uses
 `scripts/hw/proc_sampler.py`. The DDS config path in the committed script is
 the GO2 default (`~/unitree_ros2`); `env.txt` here omits it.
 
-## Native run (same day): not recovered
+## Native run (same day)
 
-A 10-minute native run (`scripts/hw/native_run.sh`, build 6ace4d7) started
-at about 20:31Z. The Orin dropped off the network at about the same time
-(LabLink RED, TCP/22 timed out), and the run's output has not been
-retrieved.
+The first 10-minute native run (`scripts/hw/native_run.sh`, build 6ace4d7,
+about 20:31Z) was lost when the Orin dropped off the network.
+
+`native_partial/` is the second native run:
+- Build 1254bbe, 22:25:48Z, robot standing.
+- Stopped after 175 s of samples to free the robot for the motion trials.
+- 6 processes, 7.06 % of one core, 83.5 MB (per-PID means, same sampler).
+- `bag/` holds the HELIX topics. It is the held-out capture for detector
+  round 2 (`docs/DETECTOR_EVAL.md`).
+
+## Armed stop test
+
+`native_stop/` holds every armed run of `scripts/hw/native_stop_hw.sh`
+(ack, then motion), passes and failures alike. Each run has:
+- `evidence/evidence.json`: every check and the full event log.
+- `bag/`: sport request/response, SportModeState, LiDAR odometry and the
+  HELIX topics.
+- the stack, run and bag logs.
+
+Run 221913 failed before the stack came up, so its bag was dropped.
+`scripts/hw/stop_bag_check.py <run>/bag` re-checks a bag without the
+runner's recorder. Results: `docs/NATIVE_RUNTIME.md`.

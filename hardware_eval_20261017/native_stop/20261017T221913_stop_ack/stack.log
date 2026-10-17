@@ -1,0 +1,32 @@
+[INFO] [launch]: All log files can be found below /home/unitree/.ros/log/2026-10-17-22-19-14-760425-unitree-jetson-payload-62255
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [launch.user]: [helix_native] sink_mode=armed sink_backend=cpp actuation_enabled=True auto_resume=False arbiter_config=/home/unitree/helix_native_1254bbe/install/helix_arbiter/share/helix_arbiter/config/arbiter_hw.yaml cmd_vel_out=/helix_hw/cmd_vel
+[ERROR] [launch]: Caught exception in launch (see debug for traceback): "package 'helix_supervisor_cpp' not found, searching: ['/home/unitree/helix_native_1254bbe/install/helix_bringup', '/home/unitree/helix_native_1254bbe/install/helix_sensing_cpp', '/home/unitree/helix_native_1254bbe/install/helix_recovery', '/home/unitree/helix_native_1254bbe/install/helix_go2_sink_cpp', '/home/unitree/helix_native_1254bbe/install/helix_explanation', '/home/unitree/helix_native_1254bbe/install/helix_diagnosis', '/home/unitree/helix_native_1254bbe/install/helix_adapter', '/home/unitree/helix_native_1254bbe/install/helix_core', '/home/unitree/helix_native_1254bbe/install/helix_arbiter_cpp', '/home/unitree/helix_native_1254bbe/install/helix_arbiter', '/home/unitree/helix_native_1254bbe/install/helix_msgs', '/home/unitree/go2_ws/install/unitree_ros2_example', '/home/unitree/go2_ws/install/unitree_hg', '/home/unitree/go2_ws/install/unitree_go', '/home/unitree/go2_ws/install/unitree_api', '/home/unitree/go2_ws/install/speech_processor', '/home/unitree/go2_ws/install/lidar_processor_cpp', '/home/unitree/go2_ws/install/lidar_processor', '/home/unitree/go2_ws/install/go2_robot_sdk', '/home/unitree/go2_ws/install/go2_interfaces', '/home/unitree/go2_ws/install/coco_detector', '/opt/ros/humble']"
+[INFO] [helix_topic_rate_monitor-1]: process started with pid [62282]
+[INFO] [helix_anomaly_detector-2]: process started with pid [62284]
+[INFO] [helix_log_parser-3]: process started with pid [62286]
+Future exception was never retrieved
+future: <Future finished exception=InvalidHandle('cannot use Destroyable because destruction was requested')>
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/opt/ros/humble/lib/python3.10/site-packages/launch_ros/actions/lifecycle_node.py", line 91, in _call_change_state
+    while not self.__rclpy_change_state_client.wait_for_service(timeout_sec=1.0):
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/client.py", line 176, in wait_for_service
+    while self.context.ok() and not self.service_is_ready() and timeout_sec > 0.0:
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/client.py", line 159, in service_is_ready
+    with self.handle:
+rclpy._rclpy_pybind11.InvalidHandle: cannot use Destroyable because destruction was requested
+[INFO] [helix_log_parser-3]: sending signal 'SIGINT' to process[helix_log_parser-3]
+[INFO] [helix_anomaly_detector-2]: sending signal 'SIGINT' to process[helix_anomaly_detector-2]
+[INFO] [helix_topic_rate_monitor-1]: sending signal 'SIGINT' to process[helix_topic_rate_monitor-1]
+[helix_anomaly_detector-2] [INFO] [1792275555.198589632] [helix_anomaly_detector]: AnomalyDetectorNode configured - zscore_threshold=4.000 consecutive_trigger=3 window_size=60 emit_cooldown_s=1.000 min_anomaly_duration_s=1.000
+[helix_topic_rate_monitor-1] [INFO] [1792275555.199924544] [helix_topic_rate_monitor]: TopicRateMonitor configured, 6 topics, window=5.0s stale_after=1.00s
+[helix_log_parser-3] [INFO] [1792275555.407529600] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[helix_anomaly_detector-2] [INFO] [1792275555.408210656] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[helix_topic_rate_monitor-1] [INFO] [1792275555.408878080] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[INFO] [helix_topic_rate_monitor-1]: process has finished cleanly [pid 62282]
+[WARNING] [launch_ros.actions.lifecycle_node]: Abandoning wait for the '/helix_topic_rate_monitor/change_state' service response, due to shutdown.
+[WARNING] [launch_ros.actions.lifecycle_node]: Abandoning wait for the '/helix_anomaly_detector/change_state' service response, due to shutdown.
+[INFO] [helix_log_parser-3]: process has finished cleanly [pid 62286]
+[INFO] [helix_anomaly_detector-2]: process has finished cleanly [pid 62284]

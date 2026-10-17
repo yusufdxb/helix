@@ -1,7 +1,7 @@
 {
  "schema": "helix.native_campaign.v1",
  "date": "2026-10-17",
- "branch_head": "e4f3032",
+ "branch_head": "see git log; hardware runs at 1254bbe + ddf816c packaging fix",
  "python_baseline_hw": {
   "kind": "HARDWARE",
   "robot": "GO2 lying, sink dry_run",
@@ -110,8 +110,56 @@
   "source": "session log (not committed)"
  },
  "native_hw_cost": {
-  "kind": "UNVERIFIED",
-  "why": "10-min run started ~20:31Z; Orin went offline (LabLink RED), output not retrieved"
+  "kind": "PARTIAL",
+  "build": "1254bbe",
+  "utc_start": "2026-10-17T22:25:48Z",
+  "samples_s": 175.1,
+  "planned_s": 600,
+  "robot": "standing",
+  "method": "per-PID mean of proc_sampler cpu_pct and rss_kb, period 5 s",
+  "total_cpu_pct": 7.06,
+  "total_rss_mb": 83.5,
+  "processes": 6,
+  "per_process": {
+   "helix_topic_rate_monitor": [
+    2.63,
+    17.3
+   ],
+   "helix_supervisor": [
+    1.42,
+    15.8
+   ],
+   "helix_go2_sport_sink": [
+    1.07,
+    11.9
+   ],
+   "helix_arbiter": [
+    0.94,
+    12.5
+   ],
+   "helix_anomaly_detector": [
+    0.55,
+    13.0
+   ],
+   "helix_log_parser": [
+    0.46,
+    12.9
+   ]
+  },
+  "python_same_first_175s": {
+   "cpu_pct": 92.63,
+   "rss_mb": 570.2
+  },
+  "python_full": {
+   "cpu_pct": 79.08,
+   "rss_mb": 587.4
+  },
+  "caveats": [
+   "175 s not 600 s",
+   "robot standing vs lying in the Python run",
+   "profiles do different work (no LLM, context buffer, pose drift, json parser in native)"
+  ],
+  "evidence": "hardware_eval_20261017/native_partial/procs.jsonl"
  },
  "stop_chain_rehearsal": {
   "kind": "REHEARSAL (helix_fake_go2, not hardware)",
@@ -141,8 +189,97 @@
   "note": "stop_confirmed includes the 0.3 s still dwell; measured_stop is the first still SportModeState sample"
  },
  "stop_chain_hw": {
-  "kind": "UNVERIFIED",
-  "why": "not run on the robot"
+  "kind": "PARTIAL",
+  "build": "1254bbe + ddf816c",
+  "sink": "helix_go2_sink_cpp armed",
+  "robot": "standing, mcf, operator on remote",
+  "runs": [
+   {
+    "run": "221913",
+    "stage": "ack",
+    "verdict": "FAIL",
+    "checks": "1/3",
+    "why": "helix_supervisor_cpp not built (missing exec_depend), fixed ddf816c"
+   },
+   {
+    "run": "222125",
+    "stage": "ack",
+    "verdict": "PASS",
+    "checks": "18/18",
+    "hold_ms": 0.15,
+    "arbiter_ack_ms": 0.62,
+    "controller_ack_ms": 159.2,
+    "stop_confirmed_ms": 205.8
+   },
+   {
+    "run": "222205",
+    "stage": "motion",
+    "args": "vx 0.15 settle 1.0",
+    "verdict": "FAIL",
+    "checks": "23/24",
+    "why": "speed at fault 0.032 m/s: gait stalled"
+   },
+   {
+    "run": "222336",
+    "stage": "motion",
+    "args": "vx 0.3",
+    "verdict": "REFUSED",
+    "why": "runner rejects vx > 0.25 (sink limit); no Move sent"
+   },
+   {
+    "run": "222412",
+    "stage": "motion",
+    "args": "vx 0.25 settle 0.3 abort 0.40",
+    "verdict": "PASS",
+    "checks": "24/24",
+    "v_at_fault": 0.13,
+    "hold_ms": 0.18,
+    "arbiter_ack_ms": 0.65,
+    "controller_ack_ms": 2.62,
+    "stop_confirmed_ms": 925.5,
+    "sportmodestate_still_ms": 635.9,
+    "odom_max_after_deadline": 0.0243,
+    "travel_before_fault_m": 0.057,
+    "travel_after_fault_3s_m": 0.051
+   },
+   {
+    "run": "223203",
+    "stage": "motion",
+    "args": "vx 0.25 settle 0.3 abort 0.40",
+    "verdict": "PASS",
+    "checks": "24/24",
+    "v_at_fault": 0.316,
+    "hold_ms": 0.17,
+    "arbiter_ack_ms": 0.64,
+    "controller_ack_ms": 1.73,
+    "stop_confirmed_ms": 574.5,
+    "sportmodestate_still_ms": 265.1,
+    "odom_max_after_deadline": 0.0217,
+    "travel_before_fault_m": 0.06,
+    "travel_after_fault_3s_m": 0.021
+   },
+   {
+    "run": "223245",
+    "stage": "motion",
+    "args": "vx 0.25 settle 0.3 abort 0.40",
+    "verdict": "FAIL",
+    "checks": "9/10",
+    "why": "overspeed abort on one SportModeState sample 0.43 m/s (odom 0.015); no fault injected; StopMove 1 ms after abort"
+   }
+  ],
+  "bag_check": {
+   "stopmove_code0": 277,
+   "move_code0": 31,
+   "stopmove_no_recorded_response": 2,
+   "move_after_fault": 0
+  },
+  "not_shown": [
+   "stop from steady walking (gait does not sustain at <= 0.25 m/s)",
+   "counterfactual travel without hold",
+   "repeat statistics",
+   "real sensor fault"
+  ],
+  "evidence": "hardware_eval_20261017/native_stop/"
  },
  "detector_round2": {
   "kind": "DEV ONLY (no held-out score)",

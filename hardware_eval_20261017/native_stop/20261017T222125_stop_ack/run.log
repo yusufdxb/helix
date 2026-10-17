@@ -1,0 +1,25 @@
+start 2026-10-17T22:21:25Z sha=1254bbe09f086a2db383cb778ac2b84f13d05128 stage=ack args=
+=== native stop test, stage ack ===
+  [PASS] supervisor status received 
+  [PASS] sink status received 
+  [PASS] SportModeState received 
+  [PASS] supervisor NOMINAL {'state': 'NOMINAL', 'faults': []}
+  [PASS] supervisor actuation_enabled 
+  [PASS] sink mode in ('stop_only', 'armed') {'mode': 'armed'}
+  [PASS] sink feedback available 
+  [PASS] robot still before the stage {'v': 0.0034167446709229134, 'yaw': 0.010652642697095871}
+  [PASS] supervisor reached STOP_CONFIRMED for the injected fault {'state': 'STOP_CONFIRMED', 'hold': True, 'hold_id': 'rate_hz/utlidar_helix_injected', 'hold_requested_ms': 0.15334399995481363, 'arbiter_ack_ms': 0.6211839995557966, 'controller_ack_ms': 159.23542399968937, 'motion_stopped_ms': 205.80204799989588}
+  [PASS] arbiter acknowledged the hold (HELIX_HOLD) 
+  [PASS] robot acknowledged StopMove (code 0) {'last_ack_code': 0}
+  [PASS] robot still throughout 
+  [PASS] explicit clear -> AWAIT_RELEASE (no auto resume) {'state': 'AWAIT_RELEASE'}
+  [PASS] operator release accepted {'message': 'released'}
+  [PASS] supervisor NOMINAL, hold released {'state': 'NOMINAL'}
+  [PASS] robot still for 3 s after release (no upstream) {'max_v': 0.0}
+  [PASS] no Move sent after release {'n': 0}
+  [PASS] no real stop-worthy fault during the stage {'real': []}
+
+STAGE ack: PASS
+evidence: /home/unitree/helix_hw/20261017T222125_stop_ack/evidence/evidence.json
+stage rc=0
+DONE 2026-10-17T22:21:58Z rc=0 dir=/home/unitree/helix_hw/20261017T222125_stop_ack

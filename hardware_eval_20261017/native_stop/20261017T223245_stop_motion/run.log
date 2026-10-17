@@ -1,0 +1,17 @@
+start 2026-10-17T22:32:45Z sha=1254bbe09f086a2db383cb778ac2b84f13d05128 stage=motion args=--vx 0.25 --settle-s 0.3 --abort-speed 0.40
+=== native stop test, stage motion ===
+  [PASS] supervisor status received 
+  [PASS] sink status received 
+  [PASS] SportModeState received 
+  [PASS] supervisor NOMINAL {'state': 'NOMINAL', 'faults': []}
+  [PASS] supervisor actuation_enabled 
+  [PASS] sink mode in ('armed',) {'mode': 'armed'}
+  [PASS] sink feedback available 
+  [PASS] robot still before the stage {'v': 0.00967709834490927, 'yaw': -0.0021305286791175604}
+  [PASS] robot standing (body_height > 0.25 m) {'body_height': 0.3186787962913513}
+  [FAIL] robot measured moving (> 0.05 m/s) under vx=0.25 {'v': 0.43061933518082063}
+
+STAGE motion: FAIL
+evidence: /home/unitree/helix_hw/20261017T223245_stop_motion/evidence/evidence.json
+stage rc=1
+DONE 2026-10-17T22:33:13Z rc=1 dir=/home/unitree/helix_hw/20261017T223245_stop_motion

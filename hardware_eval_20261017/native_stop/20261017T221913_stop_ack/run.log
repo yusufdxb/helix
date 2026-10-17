@@ -1,0 +1,11 @@
+start 2026-10-17T22:19:13Z sha=1254bbe09f086a2db383cb778ac2b84f13d05128 stage=ack args=
+=== native stop test, stage ack ===
+  [FAIL] supervisor status received 
+  [FAIL] sink status received 
+  [PASS] SportModeState received 
+
+STAGE ack: FAIL
+evidence: /home/unitree/helix_hw/20261017T221913_stop_ack/evidence/evidence.json
+stage rc=1
+/home/unitree/helix_tools/stop_hw.sh: line 25: kill: (-62255) - No such process
+DONE 2026-10-17T22:19:40Z rc=1 dir=/home/unitree/helix_hw/20261017T221913_stop_ack

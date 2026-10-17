@@ -1,0 +1,242 @@
+[INFO] [launch]: All log files can be found below /home/unitree/.ros/log/2026-10-17-22-25-49-114639-unitree-jetson-payload-66525
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [launch.user]: [helix_native] sink_mode=dry_run sink_backend=cpp actuation_enabled=False auto_resume=False arbiter_config=/home/unitree/helix_native_1254bbe/install/helix_arbiter/share/helix_arbiter/config/arbiter_dry.yaml cmd_vel_out=/helix_dry/cmd_vel
+[INFO] [helix_topic_rate_monitor-1]: process started with pid [66538]
+[INFO] [helix_anomaly_detector-2]: process started with pid [66540]
+[INFO] [helix_log_parser-3]: process started with pid [66542]
+[INFO] [helix_supervisor-4]: process started with pid [66544]
+[INFO] [helix_arbiter-5]: process started with pid [66546]
+[INFO] [helix_go2_sport_sink-6]: process started with pid [66548]
+[helix_go2_sport_sink-6] [WARN] [1792275949.312429312] [helix_go2_sport_sink]: GO2 sport sink (C++) up in mode=dry_run
+[helix_go2_sport_sink-6] [INFO] [1792275949.360633472] [helix_go2_sport_sink]: StopMove (DEADMAN) sent_to_robot=false
+[helix_anomaly_detector-2] [INFO] [1792275949.551528864] [helix_anomaly_detector]: AnomalyDetectorNode configured - zscore_threshold=4.000 consecutive_trigger=3 window_size=60 emit_cooldown_s=1.000 min_anomaly_duration_s=1.000
+[helix_log_parser-3] [INFO] [1792275949.552412064] [helix_log_parser]: Loaded 5 rules from '/home/unitree/helix_native_1254bbe/install/helix_bringup/share/helix_bringup/config/log_rules.yaml'
+[helix_topic_rate_monitor-1] [INFO] [1792275949.553646048] [helix_topic_rate_monitor]: TopicRateMonitor configured, 6 topics, window=5.0s stale_after=1.00s
+[helix_supervisor-4] [INFO] [1792275949.554688288] [helix_supervisor]: configured: actuation_enabled=false auto_resume=false require_controller_ack=true expected=3 critical=1
+[helix_arbiter-5] [INFO] [1792275949.555857664] [helix_arbiter]: configured: output=/helix_dry/cmd_vel sources=[nav /helix_dry/nav/cmd_vel prio=50 timeout=0.500000, teleop /helix_dry/teleop/cmd_vel prio=200 timeout=0.500000] hold_timeout=0.50s rate=50.0Hz
+[helix_anomaly_detector-2] [INFO] [1792275949.558081984] [helix_anomaly_detector]: AnomalyDetectorNode activated (heartbeat publishing on /helix/heartbeat at 10.0 Hz).
+[helix_log_parser-3] [INFO] [1792275949.567162176] [helix_log_parser]: LogParser activated with 5 rules, dedup_window=5.0s
+[helix_arbiter-5] [WARN] [1792275949.568814176] [helix_arbiter]: 1 other publisher(s) on /helix_dry/cmd_vel: the arbiter must be its only publisher
+[helix_supervisor-4] [INFO] [1792275949.569679200] [helix_supervisor]: state STARTING: supervision started
+[helix_supervisor-4] [INFO] [1792275949.570009952] [helix_supervisor]: active: STARTING
+[helix_arbiter-5] [INFO] [1792275949.589112032] [helix_arbiter]: selected reason=NO_LIVE_INPUT source=- cmd=(+0.000,+0.000,+0.000) fault=-
+[helix_supervisor-4] [INFO] [1792275949.669705760] [helix_supervisor]: state NOMINAL: all critical expected nodes beating
+[helix_go2_sport_sink-6] [INFO] [1792275950.369105152] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_anomaly_detector-2] [WARN] [1792275951.067274240] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' stale (NaN), consecutive violation #1
+[helix_go2_sport_sink-6] [INFO] [1792275951.389075840] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275952.409065888] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_anomaly_detector-2] [INFO] [1792275952.567263840] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/utlidar_imu' healthy: 4 consecutive samples with z <= 4.00
+[helix_anomaly_detector-2] [INFO] [1792275952.567402304] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/utlidar_robot_odom' healthy: 4 consecutive samples with z <= 4.00
+[helix_anomaly_detector-2] [INFO] [1792275952.567488096] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/utlidar_robot_pose' healthy: 4 consecutive samples with z <= 4.00
+[helix_anomaly_detector-2] [INFO] [1792275952.567572064] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/utlidar_cloud' healthy: 4 consecutive samples with z <= 4.00
+[helix_anomaly_detector-2] [INFO] [1792275953.067265824] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/gnss' healthy: 4 consecutive samples with z <= 4.00
+[helix_go2_sport_sink-6] [INFO] [1792275953.449048928] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_anomaly_detector-2] [INFO] [1792275953.567257728] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/multiplestate' healthy: 4 consecutive samples with z <= 4.00
+[helix_go2_sport_sink-6] [INFO] [1792275954.489059232] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275955.509078080] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275956.529073184] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275957.549075136] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275958.569074816] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275959.589075424] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275960.609134432] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275961.649052768] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275962.669071648] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275963.669076288] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275964.709080448] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275965.729058368] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275966.769074176] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275967.789069728] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275968.809110560] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275969.829081184] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275970.849112192] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275971.869060352] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275972.889060320] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275973.909118176] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275974.929221440] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275975.969070816] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275976.989092800] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275978.009084384] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275979.029105824] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275980.069115104] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275981.109072224] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275982.109089792] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275983.129094400] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275984.149048480] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275985.149113312] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275986.169116416] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275987.209096544] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275988.249095968] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275989.289072544] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275990.329080192] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275991.349069088] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275992.349080192] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275993.369108640] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275994.389062816] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275995.389091168] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275996.429080928] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275997.449116192] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275998.489082368] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792275999.509078752] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276000.549085664] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276001.589066976] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276002.609106048] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276003.629084608] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276004.649101696] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276005.669117888] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276006.689063840] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276007.709072640] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276008.729069824] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276009.749096832] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276010.789071904] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276011.809066208] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276012.809116000] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276013.829060864] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276014.829085504] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276015.849082400] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276016.889053312] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276017.889079168] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276018.909099040] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276019.949064288] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276020.969077920] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276021.969112416] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276022.989086752] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276023.989130560] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276025.029095264] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276026.069094624] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276027.109078688] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276028.129081024] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276029.169093600] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276030.189080384] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276031.209103168] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276032.229102304] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276033.249077440] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276034.289057760] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276035.289090464] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276036.329073632] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276037.349086016] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276038.389060736] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276039.389087040] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276040.429111744] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276041.469105280] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276042.509069440] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276043.509088096] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276044.529098592] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276045.569097088] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276046.589077760] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276047.609080320] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276048.649056352] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276049.649086112] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276050.669184640] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276051.689065888] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276052.709083968] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276053.729071424] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276054.749074496] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276055.789066304] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276056.789079424] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276057.829075584] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276058.849069920] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276059.869092928] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276060.889095072] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276061.929079456] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276062.949092000] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276063.989093312] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276065.029101152] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276066.069208192] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276067.109090016] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276068.149098624] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276069.189099968] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276070.209101888] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276071.229100448] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276072.249085216] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276073.249089600] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276074.269086752] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276075.289078368] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276076.329085152] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276077.369096160] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276078.389114016] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276079.409086752] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276080.429099168] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276081.449149632] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276082.469085728] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276083.489080320] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276084.529069664] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276085.549085856] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276086.569129344] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276087.589121664] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276088.609101216] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276089.629091520] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_anomaly_detector-2] [WARN] [1792276090.567654592] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' stale (NaN), consecutive violation #1
+[helix_go2_sport_sink-6] [INFO] [1792276090.669097120] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276091.689124672] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276092.709106848] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276093.749072640] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276094.769174304] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276095.809089120] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276096.829076256] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276097.849082464] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276098.869099584] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276099.909102656] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276100.949089280] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276101.969083808] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276102.969098112] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276104.009085216] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276105.029084096] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276106.069100640] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276107.089082592] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276108.109082432] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276109.129118848] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276110.169097600] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276111.189063808] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276112.189084832] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276113.209069888] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276114.229058528] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276115.229100384] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276116.269095008] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276117.289103104] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276118.309080384] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276119.329085056] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276120.349077120] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276121.369081984] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276122.369085056] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276123.369093888] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276124.389096928] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276125.409079200] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276126.429089824] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276127.449083424] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276128.469084288] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276129.969095712] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276131.009056192] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276132.009190112] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276133.049072768] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276134.069083104] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276135.109073888] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276136.149081280] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276137.169115488] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276138.189069088] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276139.209080928] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276140.229066016] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276141.229069920] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276142.229369536] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276143.249079264] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276144.269092480] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276145.289068416] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276146.309087840] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276147.329091360] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276148.349079680] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276149.389068992] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276150.429097440] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276151.469094656] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276152.489163520] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_go2_sport_sink-6] [INFO] [1792276153.509126752] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=false
+[helix_log_parser-3] [INFO] [1792276153.709332832] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[helix_supervisor-4] [INFO] [1792276153.709322656] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[helix_topic_rate_monitor-1] [INFO] [1792276153.709335136] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[helix_anomaly_detector-2] [INFO] [1792276153.709337536] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[helix_arbiter-5] [INFO] [1792276153.729101088] [helix_arbiter]: signal 2: publishing zero burst before exit
+[helix_arbiter-5] [INFO] [1792276153.729204224] [helix_arbiter]: selected reason=SHUTDOWN source=- cmd=(+0.000,+0.000,+0.000) fault=-
+[ERROR] [helix_topic_rate_monitor-1]: process has died [pid 66538, exit code -11, cmd '/home/unitree/helix_native_1254bbe/install/helix_sensing_cpp/lib/helix_sensing_cpp/helix_topic_rate_monitor --ros-args -r __node:=helix_topic_rate_monitor -r __ns:=/ --params-file /home/unitree/helix_native_1254bbe/install/helix_bringup/share/helix_bringup/config/helix_adapter_params.yaml --params-file /tmp/launch_params_n8slrx0k'].
+[INFO] [helix_log_parser-3]: process has finished cleanly [pid 66542]
+[INFO] [helix_anomaly_detector-2]: process has finished cleanly [pid 66540]
+[INFO] [helix_supervisor-4]: process has finished cleanly [pid 66544]
+[INFO] [helix_go2_sport_sink-6]: process has finished cleanly [pid 66548]
+[INFO] [helix_arbiter-5]: process has finished cleanly [pid 66546]

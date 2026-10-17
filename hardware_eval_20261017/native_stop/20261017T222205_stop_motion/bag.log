@@ -1,0 +1,22 @@
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1792275726.918200960] [rosbag2_recorder]: Press SPACE for pausing/resuming
+[INFO] [1792275726.921768704] [rosbag2_storage]: Opened database 'bag/bag_0.db3' for READ_WRITE.
+[INFO] [1792275726.922547008] [rosbag2_recorder]: Listening for topics...
+[INFO] [1792275726.922557248] [rosbag2_recorder]: Event publisher thread: Starting
+[INFO] [1792275726.925128000] [rosbag2_recorder]: Subscribed to topic '/api/sport/request'
+[INFO] [1792275726.925498880] [rosbag2_recorder]: Recording...
+[INFO] [1792275727.029021760] [rosbag2_recorder]: Subscribed to topic '/api/sport/response'
+[INFO] [1792275727.030475552] [rosbag2_recorder]: Subscribed to topic '/utlidar/robot_odom'
+[INFO] [1792275727.031577664] [rosbag2_recorder]: Subscribed to topic '/lf/sportmodestate'
+[INFO] [1792275727.032267680] [rosbag2_recorder]: Subscribed to topic '/sportmodestate'
+[INFO] [1792275727.238360160] [rosbag2_recorder]: Subscribed to topic '/helix/sink/status'
+[INFO] [1792275727.445343264] [rosbag2_recorder]: Subscribed to topic '/helix/arbiter/status'
+[INFO] [1792275727.446275328] [rosbag2_recorder]: Subscribed to topic '/helix/hold'
+[INFO] [1792275727.447142304] [rosbag2_recorder]: Subscribed to topic '/helix/fault_clear'
+[INFO] [1792275727.448135648] [rosbag2_recorder]: Subscribed to topic '/helix/faults'
+[INFO] [1792275727.449008160] [rosbag2_recorder]: Subscribed to topic '/helix/supervisor/status'
+[INFO] [1792275727.450068704] [rosbag2_recorder]: Subscribed to topic '/helix_hw/cmd_vel'
+[INFO] [1792275742.021059040] [rosbag2_recorder]: Subscribed to topic '/helix_hw/nav/cmd_vel'
+[INFO] [1792275742.021196096] [rosbag2_recorder]: All requested topics are subscribed. Stopping discovery...
+[INFO] [1792275757.463377696] [rosbag2_cpp]: Writing remaining messages from cache to the bag. It may take a while
+[INFO] [1792275757.465352960] [rosbag2_recorder]: Event publisher thread: Exiting
+[INFO] [1792275757.465430304] [rosbag2_recorder]: Recording stopped

@@ -4,13 +4,14 @@
 # sink in dry_run (no /api/sport/request publisher). Produced
 # hardware_eval_20261017/pybaseline (build 3f648a8).
 # Usage: py_baseline.sh <build dir> <seconds>
-set -u
 REPO=$1
 SECS=${2:-1800}
 TOOLS=$(cd "$(dirname "$0")" && pwd)
 source /opt/ros/humble/setup.bash
 source ~/unitree_ros2/cyclonedds_ws/install/setup.bash
 source "$REPO/install/setup.bash"
+# after sourcing: the ROS setup scripts read unset variables
+set -u
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 export CYCLONEDDS_URI=file:///home/unitree/unitree_ros2/cyclonedds_ws/src/cyclonedds.xml
 export PYTHONUNBUFFERED=1

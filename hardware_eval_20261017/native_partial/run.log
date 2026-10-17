@@ -1,0 +1,6 @@
+start 2026-10-17T22:25:48Z sha=1254bbe09f086a2db383cb778ac2b84f13d05128 secs=600
+helix_topic_rate_monitor active [3]
+helix_anomaly_detector active [3]
+helix_log_parser active [3]
+helix_supervisor active [3]
+helix_arbiter active [3]

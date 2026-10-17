@@ -4,13 +4,14 @@
 # in dry_run so no /api/sport/request publisher exists). Records per-process
 # CPU/RSS and the HELIX topics for the same comparison as the Python baseline.
 # Usage: native_run.sh <build dir> <seconds> [label]
-set -u
 REPO=$1
 SECS=${2:-600}
 LABEL=${3:-native}
 source /opt/ros/humble/setup.bash
 source ~/unitree_ros2/cyclonedds_ws/install/setup.bash
 source "$REPO/install/setup.bash"
+# after sourcing: the ROS setup scripts read unset variables
+set -u
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 export CYCLONEDDS_URI=file:///home/unitree/unitree_ros2/cyclonedds_ws/src/cyclonedds.xml
 export PYTHONUNBUFFERED=1
