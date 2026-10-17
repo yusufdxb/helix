@@ -4,7 +4,7 @@ One process per node, all lifecycle nodes auto-activated:
 
   helix_topic_rate_monitor  (helix_sensing_cpp)  rate_hz/* on /helix/metrics
   helix_anomaly_detector    (helix_sensing_cpp)  FaultEvent + clear records
-  helix_log_parser          (helix_core, Python) LOG_PATTERN faults from /rosout
+  helix_log_parser          (helix_sensing_cpp)  LOG_PATTERN faults from /rosout
   helix_supervisor          (helix_supervisor_cpp) heartbeat registry, fault
                             state machine, hold, controller-ack tracking
   helix_arbiter             (helix_arbiter_cpp)  sole velocity publisher
@@ -13,8 +13,9 @@ One process per node, all lifecycle nodes auto-activated:
                             measured motion on /helix/sink/status
 
 The supervisor replaces helix_heartbeat_monitor, helix_diagnosis_node,
-helix_context_buffer and helix_recovery_node. The log parser is the only
-Python node left on the robot. Python stays for offline
+helix_context_buffer and helix_recovery_node. No Python runs on the robot
+in this profile except the launch process itself (and the reference sink
+with sink_backend:=python). Python stays for offline
 analysis, tests and the optional LLM explainer, none of which run here.
 
 Safe by default: sink_mode:=dry_run sends nothing to the robot, and the
@@ -120,7 +121,7 @@ def native_actions(context, *args, **kwargs):
                           [adapter_params, {'stale_after_s': stale_after}])
     actions += _lifecycle('helix_sensing_cpp', 'helix_anomaly_detector',
                           'helix_anomaly_detector', [params, DETECTOR_OVERRIDES])
-    actions += _lifecycle('helix_core', 'helix_log_parser', 'helix_log_parser',
+    actions += _lifecycle('helix_sensing_cpp', 'helix_log_parser', 'helix_log_parser',
                           [params, {'rules_file_path': rules}])
     actions += _lifecycle('helix_supervisor_cpp', 'helix_supervisor', 'helix_supervisor', [{
         'expected_nodes': EXPECTED_NODES,

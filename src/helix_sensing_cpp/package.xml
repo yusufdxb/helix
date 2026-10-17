@@ -24,6 +24,8 @@
   <depend>diagnostic_msgs</depend>
   <depend>lifecycle_msgs</depend>
   <depend>helix_msgs</depend>
+  <depend>rcl_interfaces</depend>
+  <depend>yaml_cpp_vendor</depend>
 
   <!-- Launched by helix_bringup (helix_sensing.launch.py anomaly_backend:=cpp),
        which also owns the shared helix_params.yaml; this package ships no

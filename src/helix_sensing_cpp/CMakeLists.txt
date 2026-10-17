@@ -18,6 +18,9 @@ find_package(std_msgs REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(helix_msgs REQUIRED)
+find_package(rcl_interfaces REQUIRED)
+find_package(yaml_cpp_vendor REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 # ROS-free detection core and Python-compatible number formatting/parsing.
 add_library(helix_sensing_core STATIC
@@ -73,6 +76,25 @@ rclcpp_components_register_node(topic_rate_monitor_component
   EXECUTABLE helix_topic_rate_monitor
 )
 
+# Component library: LogParserNode (/rosout -> LOG_PATTERN faults)
+add_library(log_matcher STATIC src/log_matcher.cpp)
+target_include_directories(log_matcher PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(log_matcher yaml-cpp)
+set_target_properties(log_matcher PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_library(log_parser_component SHARED src/log_parser_node.cpp)
+target_link_libraries(log_parser_component log_matcher)
+ament_target_dependencies(log_parser_component
+  rclcpp rclcpp_lifecycle rclcpp_components std_msgs rcl_interfaces helix_msgs)
+rclcpp_components_register_node(log_parser_component
+  PLUGIN "helix_sensing_cpp::LogParserNode"
+  EXECUTABLE helix_log_parser
+)
+add_executable(helix_log_replay tools/log_replay.cpp)
+target_link_libraries(helix_log_replay log_matcher)
+
 # Replay / benchmark tool for the core (no ROS): parity tests and benchmarks.
 add_executable(helix_anomaly_replay tools/anomaly_replay.cpp)
 target_link_libraries(helix_anomaly_replay helix_sensing_core)
@@ -85,11 +107,11 @@ install(DIRECTORY include/
 add_executable(helix_detector_eval tools/detector_eval.cpp)
 target_link_libraries(helix_detector_eval helix_sensing_core)
 
-install(TARGETS helix_anomaly_replay helix_detector_eval
+install(TARGETS helix_anomaly_replay helix_detector_eval helix_log_replay
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(TARGETS anomaly_detector_component topic_rate_monitor_component
+install(TARGETS anomaly_detector_component topic_rate_monitor_component log_parser_component
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -145,6 +167,12 @@ if(BUILD_TESTING)
   # Detector extensions (freeze, std floor, clear records, anchored band)
   ament_add_gtest(test_anomaly_core test/test_anomaly_core.cpp)
   target_link_libraries(test_anomaly_core helix_sensing_core)
+
+  # Native log parser vs helix_core.log_parser, record by record
+  ament_add_pytest_test(test_log_parser_parity test/test_log_parser_parity.py
+    ENV HELIX_LOG_REPLAY=$<TARGET_FILE:helix_log_replay>
+    TIMEOUT 120
+  )
 
   # Rate window contract (same as helix_adapter.rate_window)
   ament_add_gtest(test_rate_window test/test_rate_window.cpp)

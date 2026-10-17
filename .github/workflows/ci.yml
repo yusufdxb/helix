@@ -50,6 +50,8 @@ jobs:
             ros-humble-rclcpp-lifecycle \
             ros-humble-rclcpp-components \
             ros-humble-ament-cmake-gtest \
+            ros-humble-std-srvs \
+            ros-humble-yaml-cpp-vendor \
             ros-humble-twist-mux
           # pytest<8: ros-humble-launch-testing registers a pytest11 plugin with
           # the legacy pytest_pycollect_makemodule(path, parent) signature,
