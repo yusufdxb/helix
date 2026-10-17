@@ -12,7 +12,7 @@ from pathlib import Path
 EXPECTED_PACKAGES = frozenset({
     "helix_msgs", "helix_core", "helix_adapter", "helix_diagnosis",
     "helix_recovery", "helix_explanation", "helix_arbiter", "helix_arbiter_cpp",
-    "helix_bringup", "helix_sensing_cpp", "helix_supervisor_cpp",
+    "helix_bringup", "helix_sensing_cpp", "helix_supervisor_cpp", "helix_go2_sink_cpp",
 })
 
 

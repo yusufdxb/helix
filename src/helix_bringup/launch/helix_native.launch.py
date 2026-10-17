@@ -8,11 +8,13 @@ One process per node, all lifecycle nodes auto-activated:
   helix_supervisor          (helix_supervisor_cpp) heartbeat registry, fault
                             state machine, hold, controller-ack tracking
   helix_arbiter             (helix_arbiter_cpp)  sole velocity publisher
-  helix_go2_sport_sink      (helix_arbiter, Python) arbiter -> Sport API,
-                            StopMove ack + measured motion on /helix/sink/status
+  helix_go2_sport_sink      (helix_go2_sink_cpp; sink_backend:=python for the
+                            reference) arbiter -> Sport API, StopMove ack and
+                            measured motion on /helix/sink/status
 
 The supervisor replaces helix_heartbeat_monitor, helix_diagnosis_node,
-helix_context_buffer and helix_recovery_node. Python stays for offline
+helix_context_buffer and helix_recovery_node. The log parser is the only
+Python node left on the robot. Python stays for offline
 analysis, tests and the optional LLM explainer, none of which run here.
 
 Safe by default: sink_mode:=dry_run sends nothing to the robot, and the
@@ -110,7 +112,8 @@ def native_actions(context, *args, **kwargs):
     cmd_out = arg('cmd_vel_out')
 
     actions = [LogInfo(msg=(
-        f'[helix_native] sink_mode={sink_mode} actuation_enabled={actuation} '
+        f'[helix_native] sink_mode={sink_mode} sink_backend={arg("sink_backend")} '
+        f'actuation_enabled={actuation} '
         f'auto_resume={auto_resume} arbiter_config={arbiter_config} cmd_vel_out={cmd_out}'))]
     actions += _lifecycle('helix_sensing_cpp', 'helix_topic_rate_monitor',
                           'helix_topic_rate_monitor',
@@ -127,8 +130,12 @@ def native_actions(context, *args, **kwargs):
     }])
     actions += _lifecycle('helix_arbiter_cpp', 'helix_arbiter', 'helix_arbiter',
                           [arbiter_config, {'output_topic': cmd_out}])
+    sink_backend = arg('sink_backend').strip()
+    if sink_backend not in ('cpp', 'python'):
+        raise ValueError(f"sink_backend must be 'cpp' or 'python', got {sink_backend!r}")
+    sink_pkg = 'helix_go2_sink_cpp' if sink_backend == 'cpp' else 'helix_arbiter'
     actions.append(Node(
-        package='helix_arbiter', executable='helix_go2_sport_sink',
+        package=sink_pkg, executable='helix_go2_sport_sink',
         name='helix_go2_sport_sink', namespace='',
         parameters=[{'mode': sink_mode, 'input_topic': cmd_out,
                      'feedback': parse_bool('sink_feedback', arg('sink_feedback'))}],
@@ -159,6 +166,9 @@ def generate_launch_description() -> LaunchDescription:
         DeclareLaunchArgument(
             'rate_stale_after_s', default_value='1.0',
             description='Rate monitor reports NaN once a topic is silent this long.'),
+        DeclareLaunchArgument(
+            'sink_backend', default_value='cpp',
+            description="'cpp' (helix_go2_sink_cpp) or 'python' (helix_arbiter)."),
         DeclareLaunchArgument(
             'sink_feedback', default_value='true',
             description='Sink tracks /api/sport/response and SportModeState.'),

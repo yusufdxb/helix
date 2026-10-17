@@ -61,7 +61,7 @@ jobs:
           . /opt/ros/humble/setup.sh
           colcon build --symlink-install --packages-select \
             helix_msgs helix_core helix_adapter helix_bringup \
-            helix_sensing_cpp helix_arbiter_cpp \
+            helix_sensing_cpp helix_arbiter_cpp helix_supervisor_cpp helix_go2_sink_cpp \
             helix_diagnosis helix_recovery helix_explanation helix_arbiter
 
       - name: Run unit tests (Python packages, one invocation per package for rclpy isolation)
@@ -85,12 +85,13 @@ jobs:
           python3 -m pytest src/helix_bringup/test/ -v --timeout=60
           echo "::endgroup::"
 
-      - name: Run C++ tests (helix_sensing_cpp, helix_arbiter_cpp)
+      - name: Run C++ tests (sensing, arbiter, supervisor, sink core)
         run: |
           . /opt/ros/humble/setup.sh
           . install/setup.sh
           export ROS_DOMAIN_ID=78 ROS_LOCALHOST_ONLY=1
-          colcon test --packages-select helix_sensing_cpp helix_arbiter_cpp
+          colcon test --packages-select helix_sensing_cpp helix_arbiter_cpp \
+            helix_supervisor_cpp helix_go2_sink_cpp
           colcon test-result --verbose
 
       - name: Verify launch files import cleanly
