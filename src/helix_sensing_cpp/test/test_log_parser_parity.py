@@ -55,8 +55,9 @@ class Shim:
 
 
 def python_faults(records, dedup, monkeypatch):
-    from helix_core import log_parser as lp
     from rcl_interfaces.msg import Log
+
+    from helix_core import log_parser as lp
     shim = Shim(dedup)
     shim._rules = lp.LogParser._load_rules(shim, RULES)
     clock = {'t': 0.0}

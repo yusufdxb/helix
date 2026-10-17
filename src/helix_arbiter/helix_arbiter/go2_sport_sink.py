@@ -125,9 +125,10 @@ class Go2SportSink(Node):
 
     def _setup_feedback(self) -> None:
         try:
-            from helix_msgs.msg import SinkStatus
             from unitree_api.msg import Response
             from unitree_go.msg import SportModeState
+
+            from helix_msgs.msg import SinkStatus
         except ImportError as e:
             self.get_logger().error(f'feedback disabled, missing message package: {e}')
             return
