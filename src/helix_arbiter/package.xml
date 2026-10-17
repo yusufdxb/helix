@@ -17,9 +17,11 @@
   <!-- unitree_api is only needed by go2_sport_sink in stop_only/armed mode,
        on the robot payload; it is imported lazily. -->
 
-  <test_depend>pytest</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  <test_depend>helix_diagnosis</test_depend>
+  <test_depend>helix_recovery</test_depend>
 
-  <buildtool_depend>ament_python</buildtool_depend>
+  <buildtool_depend>python3-setuptools</buildtool_depend>
 
   <export>
     <build_type>ament_python</build_type>

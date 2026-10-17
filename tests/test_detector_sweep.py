@@ -31,7 +31,7 @@ from detector_replay import (  # noqa: E402
 )
 
 DATA = ANALYSIS / "data"
-EVENTS_JSON = Path.home() / "workspace" / "helix-demo-build" / "events.json"
+EVENTS_JSON = Path(__file__).resolve().parent.parent / "dashboard" / "assets" / "events.json"
 
 PARAM_SETS = [
     dict(zscore_threshold=3.0, consecutive_trigger=3, window_size=60, min_anomaly_duration_s=2.0),

@@ -260,7 +260,14 @@ def test_17_lifecycle_deactivate_reactivate(h):
     assert h.lifecycle('helix_arbiter', Transition.TRANSITION_DEACTIVATE)
     h.pump(1.0, {'nav': (0.3, 0.0)})
     outs = h.outputs(since=t0)
-    assert outs and all(o['zero'] for o in outs), 'inactive arbiter emitted motion'
+    # The lifecycle request is asynchronous: a valid active tick may arrive
+    # after t0 but before the server begins deactivation. The reliable output
+    # stream's first shutdown zero marks the transition, not the caller's
+    # request timestamp. No later sample may contain motion.
+    first_zero = next((i for i, o in enumerate(outs) if o['zero']), None)
+    assert first_zero is not None, 'deactivation emitted no shutdown zero'
+    assert all(o['zero'] for o in outs[first_zero:]), 'inactive arbiter emitted motion'
+    assert any(s['reason'] == 'SHUTDOWN' for s in h.statuses(since=t0))
     t1 = h.mark()
     assert h.lifecycle('helix_arbiter', Transition.TRANSITION_ACTIVATE)
     h.pump(0.3)

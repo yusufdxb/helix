@@ -1,6 +1,7 @@
 build/
 install/
 log/
+.deployment/
 .colcon_cd
 __pycache__/
 *.pyc

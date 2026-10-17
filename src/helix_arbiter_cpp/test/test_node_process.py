@@ -452,7 +452,8 @@ def test_identity_qos_and_backend_label(rig_factory, backend):
 
 
 def test_changed_command_is_published_without_waiting_for_the_timer(rig_factory):
-    """A source update that changes the decision is published from its callback.
+    """
+    A source update that changes the decision is published from its callback.
 
     The timer runs at 2 Hz here, so a timer-only arbiter would take up to
     500 ms to show a change; both backends must show it well inside that,
