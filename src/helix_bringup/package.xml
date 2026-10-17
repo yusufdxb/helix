@@ -19,6 +19,8 @@
        anomaly_backend:=cpp. Python stays the default. -->
   <exec_depend>helix_arbiter_cpp</exec_depend>
   <exec_depend>helix_sensing_cpp</exec_depend>
+  <exec_depend>helix_supervisor_cpp</exec_depend>
+  <exec_depend>helix_go2_sink_cpp</exec_depend>
   <exec_depend>helix_adapter</exec_depend>
   <exec_depend>helix_diagnosis</exec_depend>
   <exec_depend>helix_recovery</exec_depend>

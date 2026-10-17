@@ -124,6 +124,15 @@ def test_detector_runs_the_round2_config(native):
     assert "/utlidar/cloud" in rates["topics"]
 
 
+def test_package_declares_every_native_node_package(native):
+    """A --packages-up-to helix_bringup build must build the whole profile."""
+    import xml.etree.ElementTree as ET
+    root = ET.parse(SOURCE / "helix_bringup" / "package.xml").getroot()
+    declared = {e.text for e in root if e.tag in ("depend", "exec_depend")}
+    nodes, _ = _graph(native)
+    assert {n.node_package for n in nodes.values()} <= declared
+
+
 def test_unknown_sink_mode_is_refused(native):
     with pytest.raises(ValueError, match="sink_mode"):
         _graph(native, sink_mode="damp")
