@@ -20,8 +20,8 @@ int64 last_ack_request_id
 int32 last_ack_code          # status.code of that response
 float64 last_ack_at
 bool stop_acked
-float64 stop_ack_sent_at     # when the acknowledged StopMove request was sent
-float64 stop_acked_at        # receipt time of the ack that made stop_acked true
+float64 stop_ack_sent_at     # when the newest acknowledged StopMove was sent
+float64 stop_acked_at        # receipt time of that acknowledgement
 float64 speed_xy             # m/s, measured
 float64 yaw_speed            # rad/s, measured
 float64 state_at             # receipt time of the newest SportModeState

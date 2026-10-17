@@ -44,14 +44,20 @@ def test_move_after_stop_clears_ack_and_late_stop_ack_ignored():
     assert not fb.stop_acked
 
 
-def test_first_ack_stamp_is_kept_across_repeats():
+def test_ack_stamp_follows_the_newest_acknowledged_stopmove():
+    # A supervisor that requested a hold at t=1.2 must see that a StopMove
+    # sent after 1.2 was answered, although StopMove was already repeating.
     fb = SinkFeedback()
     fb.on_sent(1, API_STOP_MOVE, 'ZERO', 1.0)
     fb.on_response(1, API_STOP_MOVE, 0, 1.02)
     fb.on_sent(2, API_STOP_MOVE, 'ZERO', 1.5)
-    fb.on_response(2, API_STOP_MOVE, 0, 1.52)
     assert fb.stop_ack_sent_at == 1.0
-    assert fb.stop_acked_at == 1.02
+    fb.on_response(2, API_STOP_MOVE, 0, 1.52)
+    assert fb.stop_ack_sent_at == 1.5
+    assert fb.stop_acked_at == 1.52
+    # a late answer to the older request does not move the stamp back
+    fb.on_response(1, API_STOP_MOVE, 0, 1.6)
+    assert fb.stop_ack_sent_at == 1.5
 
 
 def test_stopped_needs_still_s_below_thresholds():

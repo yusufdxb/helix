@@ -1,0 +1,27 @@
+# helix_arbiter, HW topic set for the native stop test
+# (scripts/hw/native_stop_test.py): identical to arbiter.yaml except that the
+# output and both sources live under /helix_hw/, so the robot's own /cmd_vel
+# consumers never see HELIX traffic. The armed sink reads /helix_hw/cmd_vel
+# and is the only path to /api/sport/request.
+#
+# Launch with: arbiter_config:=<share>/config/arbiter_hw.yaml
+#              cmd_vel_out:=/helix_hw/cmd_vel
+helix_arbiter:
+  ros__parameters:
+    output_topic: /helix_hw/cmd_vel
+    status_topic: /helix/arbiter/status
+    hold_topic: /helix/hold
+    rate_hz: 50.0
+    hold_timeout_sec: 0.5
+    max_abs_linear: 1.0
+    max_abs_angular: 1.5
+    shutdown_zero_count: 10
+    sources:
+      teleop:
+        topic: /helix_hw/teleop/cmd_vel
+        priority: 200
+        timeout: 0.5
+      nav:
+        topic: /helix_hw/nav/cmd_vel
+        priority: 50
+        timeout: 0.5

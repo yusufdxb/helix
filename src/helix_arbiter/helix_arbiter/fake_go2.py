@@ -7,7 +7,10 @@ and publishes the topics HELIX's adapter monitors so HELIX sees a healthy
 robot: /utlidar/robot_odom (Odometry, 150 Hz), /utlidar/imu (Imu, 250 Hz),
 /utlidar/cloud (empty PointCloud2, 15 Hz), /utlidar/robot_pose (PoseStamped,
 20 Hz, rate not measured on the GO2), /gnss and /multiplestate (JSON String,
-1 Hz). Odom/IMU/cloud rates follow GO2_FIELD_NOTES.md section 3.
+1 Hz). Odom/IMU/cloud rates follow GO2_FIELD_NOTES.md section 3. When
+unitree_go is available it also publishes SportModeState on /sportmodestate
+(150 Hz here, about 300 Hz on the robot) and /lf/sportmodestate (50 Hz)
+with the same velocity, standing (mode 1, body_height 0.32).
 
 Dynamics (a rehearsal stand-in, deliberately simple and NOT measured):
 first-order velocity lag toward the last Move target (tau_s), StopMove sets
@@ -63,6 +66,17 @@ class FakeGo2(Node):
         self.create_timer(1.0 / 15.0, lambda: self._pub_cloud.publish(self._stamped(PointCloud2())))
         self.create_timer(1.0 / 20.0, self._pose_tick)
         self.create_timer(1.0, self._json_tick)
+        self._state_cls = None
+        try:
+            from unitree_go.msg import SportModeState
+            self._state_cls = SportModeState
+            self._pub_state = self.create_publisher(SportModeState, '/sportmodestate',
+                                                    qos_profile_sensor_data)
+            self._pub_lf_state = self.create_publisher(SportModeState, '/lf/sportmodestate',
+                                                       qos_profile_sensor_data)
+            self._lf_n = 0
+        except ImportError:
+            pass
 
     def _stamped(self, m):
         stamp = time.time() + self._skew
@@ -129,6 +143,17 @@ class FakeGo2(Node):
         m.twist.twist.linear.x, m.twist.twist.linear.y = self._v[0], self._v[1]
         m.twist.twist.angular.z = self._v[2]
         self._pub_odom.publish(m)
+        if self._state_cls is not None:
+            st = self._state_cls()
+            st.mode = 1
+            st.body_height = 0.32
+            st.velocity = [float(self._v[0]), float(self._v[1]), 0.0]
+            st.yaw_speed = float(self._v[2])
+            st.position = [float(self._pose[0]), float(self._pose[1]), 0.0]
+            self._pub_state.publish(st)
+            self._lf_n += 1
+            if self._lf_n % 3 == 0:
+                self._pub_lf_state.publish(st)
 
 
 def main(args=None) -> None:

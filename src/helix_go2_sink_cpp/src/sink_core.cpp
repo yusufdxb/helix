@@ -169,8 +169,11 @@ bool SinkFeedback::on_response(
   last_ack_code = code;
   last_ack_at = now;
   const bool newer_than_move = !last_move_sent_at_ || s.sent_at >= *last_move_sent_at_;
+  // stop_ack_sent_at is the newest acknowledged StopMove, so a supervisor
+  // can tell that a StopMove sent after its hold request was answered even
+  // while the sink was already repeating StopMove.
   if (s.api_id == kApiStopMove && code == 0 && newer_than_move &&
-    last_api_id == kApiStopMove && !stop_acked)
+    last_api_id == kApiStopMove && s.sent_at >= stop_ack_sent_at)
   {
     stop_acked = true;
     stop_ack_sent_at = s.sent_at;

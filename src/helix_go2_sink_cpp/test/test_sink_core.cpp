@@ -132,6 +132,20 @@ TEST(SinkFeedback, MoveClearsAckAndStaleStopAckIgnored)
   EXPECT_FALSE(fb.stop_acked);
 }
 
+TEST(SinkFeedback, AckStampFollowsNewestAcknowledgedStopMove)
+{
+  SinkFeedback fb;
+  fb.on_sent(1, kApiStopMove, "ZERO", 1.0);
+  fb.on_response(1, kApiStopMove, 0, 1.02);
+  fb.on_sent(2, kApiStopMove, "ZERO", 1.5);
+  EXPECT_DOUBLE_EQ(fb.stop_ack_sent_at, 1.0);
+  fb.on_response(2, kApiStopMove, 0, 1.52);
+  EXPECT_DOUBLE_EQ(fb.stop_ack_sent_at, 1.5);
+  EXPECT_DOUBLE_EQ(fb.stop_acked_at, 1.52);
+  fb.on_response(1, kApiStopMove, 0, 1.6);
+  EXPECT_DOUBLE_EQ(fb.stop_ack_sent_at, 1.5);
+}
+
 TEST(SinkFeedback, StoppedNeedsStillSAndFreshState)
 {
   SinkFeedback fb(StillThresholds{0.05, 0.1, 0.3}, 1.0);

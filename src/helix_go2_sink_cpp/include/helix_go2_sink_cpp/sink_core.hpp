@@ -104,7 +104,8 @@ struct StillThresholds
 /// request ids are matched. stop_acked is true only while the newest sent
 /// request is a StopMove and the robot answered that StopMove, or one sent
 /// after the newest Move, with status code 0. A Move sent afterwards clears
-/// it. Time is the caller's monotonic clock.
+/// it. stop_ack_sent_at / stop_acked_at describe the newest acknowledged
+/// StopMove. Time is the caller's monotonic clock.
 class SinkFeedback
 {
 public:

@@ -146,7 +146,8 @@ class SinkFeedback:
     this sink sent are matched. stop_acked is true only while the newest sent
     request is a StopMove and the robot answered that StopMove, or one sent
     after the newest Move, with status code 0. A Move sent afterwards clears
-    it. Time is the caller's monotonic clock.
+    it. stop_ack_sent_at / stop_acked_at describe the newest acknowledged
+    StopMove. Time is the caller's monotonic clock.
     """
 
     MAX_TRACKED = 256
@@ -200,8 +201,11 @@ class SinkFeedback:
         self.last_ack_at = now
         newer_than_move = (self._last_move_sent_at is None
                            or sent_at >= self._last_move_sent_at)
+        # stop_ack_sent_at is the newest acknowledged StopMove, so a
+        # supervisor can tell that a StopMove sent after its hold request
+        # was answered even while the sink was already repeating StopMove.
         if (sent_api == API_STOP_MOVE and code == 0 and newer_than_move
-                and self.last_api_id == API_STOP_MOVE and not self.stop_acked):
+                and self.last_api_id == API_STOP_MOVE and sent_at >= self.stop_ack_sent_at):
             self.stop_acked = True
             self.stop_ack_sent_at = sent_at
             self.stop_acked_at = now
