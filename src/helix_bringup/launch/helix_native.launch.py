@@ -69,6 +69,46 @@ DETECTOR_OVERRIDES = {
 # CRASH fault after startup_grace_s.
 EXPECTED_NODES = ['helix_topic_rate_monitor', 'helix_anomaly_detector', 'helix_log_parser']
 
+# Fixed off-robot profile. Canonical sensor parameter names remain unchanged so
+# rate_hz metric labels keep the native detector contract after ROS remapping.
+GUARD_SIM_BASE = '/helix/experimental/native'
+# Eight child processes plus lifecycle launch and test driver exceed Cyclone's
+# default auto-participant range. ROS_LOCALHOST_ONLY supplies the loopback
+# interface; overriding its Interfaces section conflicts with the RMW config.
+GUARD_SIM_CYCLONE_URI = (
+    '<CycloneDDS><Domain><General><AllowMulticast>false</AllowMulticast></General><Discovery>'
+    '<ParticipantIndex>auto</ParticipantIndex><MaxAutoParticipantIndex>32</MaxAutoParticipantIndex>'
+    '<Peers><Peer Address="localhost"/></Peers></Discovery></Domain></CycloneDDS>'
+)
+GUARD_SIM_TOPICS = {
+    name: GUARD_SIM_BASE + '/' + name for name in (
+        'heartbeat', 'faults', 'fault_clear', 'hold', 'metrics', 'diagnostics', 'rosout',
+        'arbiter/status_raw', 'arbiter/status', 'supervisor/status', 'supervisor/release',
+        'recovery_hints', 'recovery_actions', 'cmd_vel', 'nav/cmd_vel', 'teleop/cmd_vel',
+        'sport/intent_raw', 'sport/intent', 'sport/feedback', 'sport/sink_feedback',
+        'sport/sink_trace', 'sport/guard_status', 'sport/release',
+        'controller/request_raw', 'controller/request',
+        'controller/response_raw', 'controller/response',
+        'utlidar/imu', 'utlidar/robot_odom', 'utlidar/robot_pose', 'utlidar/cloud',
+        'gnss', 'multiplestate', 'sportmodestate', 'lf/sportmodestate',
+    )
+}
+GUARD_SIM_REMAPS = [
+    ('/helix/' + original, GUARD_SIM_TOPICS[target])
+    for original, target in (
+        ('heartbeat', 'heartbeat'), ('faults', 'faults'), ('fault_clear', 'fault_clear'),
+        ('hold', 'hold'), ('metrics', 'metrics'), ('arbiter/status', 'arbiter/status_raw'),
+        ('supervisor/status', 'supervisor/status'), ('supervisor/release', 'supervisor/release'),
+        ('recovery_hints', 'recovery_hints'), ('recovery_actions', 'recovery_actions'),
+    )
+] + [
+    ('/' + topic, GUARD_SIM_TOPICS[topic]) for topic in (
+        'rosout', 'diagnostics', 'utlidar/imu', 'utlidar/robot_odom', 'utlidar/robot_pose',
+        'utlidar/cloud', 'gnss', 'multiplestate', 'sportmodestate', 'lf/sportmodestate',
+        'nav/cmd_vel', 'teleop/cmd_vel',
+    )
+]
+
 
 def _auto_activate(node: LifecycleNode):
     """Activate when the node reaches 'inactive', then emit configure."""
@@ -90,9 +130,10 @@ def _auto_activate(node: LifecycleNode):
     return [activate_on_inactive, configure]
 
 
-def _lifecycle(package, executable, name, parameters):
+def _lifecycle(package, executable, name, parameters, remappings=None):
+    options = {} if remappings is None else {'remappings': remappings}
     node = LifecycleNode(package=package, executable=executable, name=name,
-                         namespace='', parameters=parameters, output='screen')
+                         namespace='', parameters=parameters, output='screen', **options)
     return [node, *_auto_activate(node)]
 
 
@@ -142,6 +183,91 @@ def native_actions(context, *args, **kwargs):
         parameters=[{'mode': sink_mode, 'input_topic': cmd_out,
                      'feedback': parse_bool('sink_feedback', arg('sink_feedback'))}],
         output='screen'))
+    return actions
+
+
+def guard_sim_node_specs():
+    """Return the fixed native/guard/FakeGo2 parameters for launch and restarts.
+
+    The caller supplies four communication relays to exercise loss between
+    intent_raw/intent, arbiter status_raw/status, controller request_raw/request,
+    and controller response_raw/response. No relay is started by this profile.
+    """
+    bringup = get_package_share_directory('helix_bringup')
+    arbiter = get_package_share_directory('helix_arbiter')
+    params = os.path.join(bringup, 'config', 'helix_params.yaml')
+    adapter_params = os.path.join(bringup, 'config', 'helix_adapter_params.yaml')
+    rules = os.path.join(bringup, 'config', 'log_rules.yaml')
+    topics = GUARD_SIM_TOPICS
+    specs = []
+
+    def add(package, executable, parameters, lifecycle=True, name=None, remappings=None):
+        specs.append({
+            'package': package, 'executable': executable, 'name': name or executable,
+            'parameters': parameters, 'lifecycle': lifecycle,
+            'remappings': list(GUARD_SIM_REMAPS if remappings is None else remappings),
+        })
+
+    add('helix_sensing_cpp', 'helix_topic_rate_monitor',
+        [adapter_params, {'stale_after_s': 1.0}])
+    add('helix_sensing_cpp', 'helix_anomaly_detector', [params, DETECTOR_OVERRIDES])
+    add('helix_sensing_cpp', 'helix_log_parser', [params, {'rules_file_path': rules}])
+    add('helix_supervisor_cpp', 'helix_supervisor', [{
+        'expected_nodes': EXPECTED_NODES + ['helix_sport_guard'],
+        'critical_nodes': ['*'], 'actuation_enabled': True, 'auto_resume': False,
+        'require_controller_ack': True,
+        'hold_topic': topics['hold'],
+        'arbiter_status_topic': topics['arbiter/status_raw'],
+        'sink_status_topic': topics['sport/feedback'],
+    }])
+    add('helix_arbiter_cpp', 'helix_arbiter', [
+        os.path.join(arbiter, 'config', 'arbiter.yaml'), {
+            'output_topic': topics['cmd_vel'], 'protective_latch': True,
+            'hold_topic': topics['hold'], 'status_topic': topics['arbiter/status_raw'],
+        },
+    ])
+    add('helix_go2_sink_cpp', 'helix_go2_sport_sink', [{
+        'mode': 'armed', 'input_topic': topics['cmd_vel'], 'feedback': True,
+        'request_topic': topics['sport/intent_raw'],
+        'response_topic': topics['controller/response'],
+        'state_topic': topics['lf/sportmodestate'],
+        'status_topic': topics['sport/sink_feedback'],
+        'trace_topic': topics['sport/sink_trace'],
+    }], lifecycle=False)
+    add('helix_go2_sink_cpp', 'helix_sport_guard', [{
+        'mode': 'armed', 'intent_topic': topics['sport/intent'],
+        'request_topic': topics['controller/request_raw'],
+        'response_topic': topics['controller/response'],
+        'arbiter_status_topic': topics['arbiter/status'],
+        'fault_topic': topics['faults'], 'heartbeat_topic': topics['heartbeat'],
+        'status_topic': topics['sport/guard_status'], 'release_topic': topics['sport/release'],
+        'feedback_enabled': True, 'feedback_topic': topics['sport/feedback'],
+        'state_topic': topics['lf/sportmodestate'],
+        'controller_ack_watchdog': True, 'controller_ack_timeout_s': 0.3,
+        'controller_state_timeout_s': 0.3,
+    }], lifecycle=False)
+    add('helix_arbiter', 'helix_fake_go2', [{'move_timeout_s': 0.0}],
+        lifecycle=False, name='fake_go2', remappings=GUARD_SIM_REMAPS + [
+            ('/api/sport/request', topics['controller/request']),
+            ('/api/sport/response', topics['controller/response_raw']),
+        ])
+    return specs
+
+
+def guard_sim_actions():
+    """Build the fixed isolated simulation graph, without communication relays."""
+    actions = [LogInfo(msg='[helix_native_guard_sim] LOCALHOST SIMULATION ONLY; '
+                       'native supervision, protective arbitration, guard and FakeGo2')]
+    for spec in guard_sim_node_specs():
+        if spec['lifecycle']:
+            actions += _lifecycle(
+                spec['package'], spec['executable'], spec['name'],
+                spec['parameters'], spec['remappings'])
+        else:
+            actions.append(Node(
+                package=spec['package'], executable=spec['executable'], name=spec['name'],
+                namespace='', parameters=spec['parameters'],
+                remappings=spec['remappings'], output='screen'))
     return actions
 
 

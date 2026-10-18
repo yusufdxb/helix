@@ -143,3 +143,41 @@ def test_package_declares_every_native_node_package(native):
 def test_unknown_sink_mode_is_refused(native):
     with pytest.raises(ValueError, match="sink_mode"):
         _graph(native, sink_mode="damp")
+
+
+def test_guard_sim_uses_complete_native_graph_and_final_feedback(native):
+    specs = {s['name']: s for s in native.guard_sim_node_specs()}
+    assert len(specs) == 8
+    assert {s['package'] for s in specs.values()} == NATIVE_PACKAGES | {'helix_arbiter'}
+    supervisor = specs['helix_supervisor']['parameters'][-1]
+    gate = specs['helix_sport_guard']['parameters'][-1]
+    assert supervisor['auto_resume'] is False
+    assert supervisor['sink_status_topic'] == gate['feedback_topic']
+    assert 'helix_sport_guard' in supervisor['expected_nodes']
+    assert gate['controller_ack_watchdog'] is True
+    assert specs['fake_go2']['parameters'] == [{'move_timeout_s': 0.0}]
+    assert specs['helix_arbiter']['parameters'][-1]['protective_latch'] is True
+    for spec in specs.values():
+        for _, target in spec['remappings']:
+            assert target.startswith('/helix/experimental/native/')
+    assert '<Peer Address="localhost"/>' in native.GUARD_SIM_CYCLONE_URI
+
+
+@pytest.mark.parametrize('bad_env', [
+    {'ROS_LOCALHOST_ONLY': '0'}, {'RMW_IMPLEMENTATION': 'rmw_fastrtps_cpp'},
+    {'ROS_DOMAIN_ID': '0'}, {'ROS_DOMAIN_ID': '233'}, {'ROS_DOMAIN_ID': ''},
+    {'CYCLONEDDS_URI': '<CycloneDDS/>'},
+])
+def test_guard_sim_rejects_unsafe_environment(native, monkeypatch, bad_env):
+    monkeypatch.setenv('ROS_LOCALHOST_ONLY', '1')
+    monkeypatch.setenv('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp')
+    monkeypatch.setenv('ROS_DOMAIN_ID', '218')
+    monkeypatch.delenv('CYCLONEDDS_URI', raising=False)
+    for name, value in bad_env.items():
+        monkeypatch.setenv(name, value)
+    path = SOURCE / 'helix_bringup/launch/helix_native_guard_sim.launch.py'
+    spec = importlib.util.spec_from_file_location('guard_sim_launch_test', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    with pytest.raises(ValueError):
+        module.simulation_actions(LaunchContext())

@@ -17,6 +17,11 @@ first-order velocity lag toward the last Move target (tau_s), StopMove sets
 the target to zero, and a Move older than move_timeout_s decays to zero.
 The default 1 s expiry is a simulation assumption, not a GO2 guarantee.
 Set move_timeout_s:=0.0 to retain Move indefinitely for watchdog tests.
+Simulation fault parameters: stop_policy is accept, reject (negative reply,
+no braking), drop (no reply or braking), or ack_only (successful reply without
+braking). state_feedback_enabled gates both SportModeState streams while
+odometry remains available to the test observer. These are fake-controller
+faults, not settings or claimed behaviors of the GO2 controller.
 Api ids other than 1003/1008 are counted and answered with code -1.
 Evidence produced against this node is always labelled REHEARSAL.
 """
@@ -45,6 +50,9 @@ class FakeGo2(Node):
         self.declare_parameter('tau_s', 0.15)
         self.declare_parameter('move_timeout_s', 1.0)
         self.declare_parameter('clock_skew_s', 0.0)
+        # Fault injection for isolated rehearsal, never controller settings.
+        self.declare_parameter('stop_policy', 'accept')
+        self.declare_parameter('state_feedback_enabled', True)
         self._tau = self.get_parameter('tau_s').value
         self._move_timeout = self.get_parameter('move_timeout_s').value
         self._skew = self.get_parameter('clock_skew_s').value
@@ -108,7 +116,13 @@ class FakeGo2(Node):
             self._target = (float(p['x']), float(p['y']), float(p['z']))
             self._target_t = time.monotonic()
         elif api == 1003:
-            self._target = (0.0, 0.0, 0.0)
+            policy = self.get_parameter('stop_policy').value
+            if policy == 'drop':
+                return
+            if policy == 'accept':
+                self._target = (0.0, 0.0, 0.0)
+            elif policy != 'ack_only':
+                code = -1  # Includes invalid policies: never silently accept.
         else:
             self.bad_api += 1
             code = -1
@@ -145,7 +159,8 @@ class FakeGo2(Node):
         m.twist.twist.linear.x, m.twist.twist.linear.y = self._v[0], self._v[1]
         m.twist.twist.angular.z = self._v[2]
         self._pub_odom.publish(m)
-        if self._state_cls is not None:
+        if (self._state_cls is not None
+                and self.get_parameter('state_feedback_enabled').value):
             st = self._state_cls()
             st.mode = 1
             st.body_height = 0.32

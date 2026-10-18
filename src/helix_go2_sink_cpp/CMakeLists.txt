@@ -31,10 +31,10 @@ target_include_directories(helix_sink_core PUBLIC
 # from native launch and permits non-dry operation only on localhost topics.
 add_library(helix_sport_guard_core STATIC src/sport_guard_core.cpp)
 target_link_libraries(helix_sport_guard_core PUBLIC helix_sink_core)
-if(unitree_api_FOUND)
+if(unitree_api_FOUND AND unitree_go_FOUND)
   add_executable(helix_sport_guard src/sport_guard_node.cpp)
   target_link_libraries(helix_sport_guard helix_sport_guard_core)
-  ament_target_dependencies(helix_sport_guard rclcpp std_msgs helix_msgs unitree_api)
+  ament_target_dependencies(helix_sport_guard rclcpp std_msgs helix_msgs unitree_api unitree_go)
   install(TARGETS helix_sport_guard DESTINATION lib/${PROJECT_NAME})
 endif()
 

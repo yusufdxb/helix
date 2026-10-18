@@ -1,4 +1,4 @@
-# Evidence audit (2026-10-17)
+# Evidence audit (updated 2026-10-18)
 
 Every HELIX result from the native-runtime campaign, sorted by what
 produced it. A claim may only be stated at the class of its weakest link: a
@@ -291,6 +291,28 @@ results remain unchanged. The experimental independent Sport gate stops the
 fake GO2 with command expiry disabled, but is not enabled in native launch.
 See [runtime failure evidence and remaining limits](RUNTIME_FAILURES.md).
 
+### Complete native Sport gate integration (simulation only)
+
+[`native_sport_gate_integration_sim.json`](../results/native_sport_gate_integration_sim.json)
+is a separate campaign with the real native rate monitor, anomaly detector, log
+parser, supervisor, protective arbiter, sink and experimental gate, plus FakeGo2.
+The fixed localhost launch uses private topics and test-owned communication
+relays. FakeGo2 retains the last Move indefinitely, with expiry explicitly disabled.
+All previous result files, including the original restart failure and uncovered
+sink-crash result, remain unchanged.
+
+The new profile routes final-gate feedback to the supervisor and requires fresh
+controller replies and state independently of sink traffic. Its gate heartbeat
+makes gate death visible to native supervision. Health recovery, new epochs and
+repeated restarts preserve both latches. The test driver represents explicit
+operator actions; it is not a production automatic recovery controller.
+
+Gate death, final request-link loss and ineffective StopMove retain motion in the
+simulation. The passing negative cases demonstrate a known failure boundary,
+not a successful stop. A controller-side bounded motion lease or an independent
+robot-side stop/inhibit path remains required. The GO2's actual controller timeout
+is unknown. See [failure matrix, timings and reproduction](RUNTIME_FAILURES.md#complete-native-stack-integration).
+
 ## Missing experiments
 
 Each of these is needed before the corresponding claim can move up a class:
@@ -314,7 +336,8 @@ Each of these is needed before the corresponding claim can move up a class:
    from the robot's own estimator. A second sensor (external tracking, a
    tape-measured mark, or a camera) is needed to confirm travel and stop
    distance.
-7. **Sink death.** If the sink process dies, nothing sends StopMove (see
-   the crash results). Whether the GO2 stops on its own when Move requests
-   cease has not been measured.
+7. **Final output authority loss.** Native deployment has no surviving
+   StopMove path after sink death. The simulation gate covers upstream sink
+   loss, but its own death or loss of its final request link retains motion.
+   Whether the physical GO2 autonomously stops on command silence remains unknown.
 8. **Soak and jitter.** The longest native run is 10 minutes.

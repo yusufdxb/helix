@@ -3,6 +3,7 @@
 // Use of this source code is governed by an MIT-style license.
 #include "helix_go2_sink_cpp/sport_guard_core.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 
@@ -30,8 +31,9 @@ SportGuard::SportGuard(
   }
 }
 
-void SportGuard::trip(const std::string & reason)
+void SportGuard::trip(const std::string & reason, double now)
 {
+  detected_at_ = now;
   latched_ = true;
   moving_ = false;
   fault_required_ = true;
@@ -52,19 +54,37 @@ bool SportGuard::request_fresh(double now) const
 
 bool SportGuard::ready_for_release(double now) const
 {
-  return release_ready_ && latched_ && protocol_released_ && !fault_required_ && status_at_ &&
+  return output_healthy_ && release_ready_ && latched_ && protocol_released_ &&
+         !fault_required_ && status_at_ &&
          now - *status_at_ <= status_timeout_ && request_fresh(now);
 }
 
 void SportGuard::update_readiness(double now)
 {
-  const bool ready = latched_ && protocol_released_ && !fault_required_ && status_at_ &&
+  const bool ready = output_healthy_ && latched_ && protocol_released_ &&
+    !fault_required_ && status_at_ &&
     now - *status_at_ <= status_timeout_ && request_fresh(now);
   if (ready != release_ready_) {
     release_ready_ = ready;
     release_token_ = guard_session_ + ":" + std::to_string(protection_generation_) + ":" +
       std::to_string(++readiness_generation_);
   }
+}
+
+void SportGuard::on_output_health(bool healthy, const std::string & reason, double now)
+{
+  check_timeouts(now);
+  if (healthy == output_healthy_) {
+    return;
+  }
+  output_healthy_ = healthy;
+  if (!healthy) {
+    ++output_health_detections_;
+    output_health_detected_at_ = now;
+    output_health_reason_ = reason;
+    trip(reason, now);
+  }
+  update_readiness(now);
 }
 
 bool SportGuard::on_operator_release(std::string token, double now)
@@ -75,7 +95,7 @@ bool SportGuard::on_operator_release(std::string token, double now)
   }
   if (!ready_for_release(now)) {
     // Consume premature current authorization by rotating it. Never bank it.
-    trip("OPERATOR_RELEASE_NOT_READY");
+    trip("OPERATOR_RELEASE_NOT_READY", now);
     return false;
   }
   latched_ = false;
@@ -91,11 +111,11 @@ void SportGuard::check_timeouts(double now)
 {
   if (status_at_ && now - *status_at_ > status_timeout_) {
     if (!latched_ || !held_challenge_.empty()) {
-      trip("ARBITER_STATUS_TIMEOUT");
+      trip("ARBITER_STATUS_TIMEOUT", now);
     }
   }
   if ((!latched_ || release_ready_) && !request_fresh(now)) {
-    trip("SINK_PROGRESS_TIMEOUT");
+    trip("SINK_PROGRESS_TIMEOUT", now);
   }
   update_readiness(now);
 }
@@ -116,7 +136,7 @@ bool SportGuard::on_status(
     }
     if (!session_.empty()) {
       retired_sessions_.insert(session_);
-      trip("ARBITER_SESSION_CHANGED");
+      trip("ARBITER_SESSION_CHANGED", now);
     }
     session_ = session;
     status_seq_ = 0;
@@ -125,7 +145,7 @@ bool SportGuard::on_status(
     return false;
   }
   if (protective_latched && !current_challenge_.empty() && challenge != current_challenge_) {
-    trip("ARBITER_PROTECTION_GENERATION_CHANGED");
+    trip("ARBITER_PROTECTION_GENERATION_CHANGED", now);
   }
   status_seq_ = seq;
   status_at_ = now;
@@ -133,7 +153,7 @@ bool SportGuard::on_status(
   if (protective_latched) {
     protocol_released_ = false;
     if (!latched_) {
-      trip("ARBITER_PROTECTIVE_HOLD");
+      trip("ARBITER_PROTECTIVE_HOLD", now);
       // This newly observed hold itself satisfies the protective handshake.
       if (challenge != released_challenge_) {
         blocked_challenge_.clear();
@@ -151,7 +171,7 @@ bool SportGuard::on_status(
   if (hold_active) {
     protocol_released_ = false;
     if (!latched_ || !held_challenge_.empty()) {
-      trip("ARBITER_HOLD");
+      trip("ARBITER_HOLD", now);
     }
     update_readiness(now);
     return true;
@@ -162,11 +182,11 @@ bool SportGuard::on_status(
       fault_required_ = false;
       reason_ = "AWAIT_GUARD_OPERATOR_RELEASE";
     } else if (!fault_required_) {
-      trip("UNOBSERVED_PROTECTIVE_GENERATION");
+      trip("UNOBSERVED_PROTECTIVE_GENERATION", now);
     }
   } else if (challenge != released_challenge_) {
     // A new generation without an observed held state is not authorization.
-    trip("UNOBSERVED_PROTECTIVE_GENERATION");
+    trip("UNOBSERVED_PROTECTIVE_GENERATION", now);
   }
   update_readiness(now);
   return true;
@@ -180,7 +200,7 @@ std::optional<Request> SportGuard::on_request(
     return std::nullopt;
   }
   if (request.api_id != kApiMove && request.api_id != kApiStopMove) {
-    trip("INVALID_SPORT_API");
+    trip("INVALID_SPORT_API", now);
     return std::nullopt;
   }
   highest_request_id_ = id;
@@ -210,6 +230,117 @@ std::optional<Request> SportGuard::on_tick(double now)
   request.api_id = kApiStopMove;
   request.reason = reason_;
   return request;
+}
+
+ControllerWatchdog::ControllerWatchdog(
+  double ack_timeout, double state_timeout, bool require_ack, bool require_state)
+: ack_timeout_(ack_timeout), state_timeout_(state_timeout), require_ack_(require_ack),
+  require_state_(require_state)
+{
+  for (double timeout : {ack_timeout_, state_timeout_}) {
+    if (!std::isfinite(timeout) || timeout <= 0.0) {
+      throw std::invalid_argument("controller timeouts must be finite and positive");
+    }
+  }
+}
+
+void ControllerWatchdog::fail(const std::string & reason, double now)
+{
+  failure_at_ = now;
+  failure_reason_ = reason;
+}
+
+void ControllerWatchdog::expire(double now)
+{
+  for (auto it = pending_.begin(); it != pending_.end(); ) {
+    if (now - it->second.sent_at > ack_timeout_) {
+      fail("CONTROLLER_ACK_TIMEOUT", now);
+      it = pending_.erase(it);
+    } else {
+      ++it;
+    }
+  }
+}
+
+void ControllerWatchdog::on_sent(std::int64_t id, std::int32_t api, double now)
+{
+  if (!require_ack_) {
+    return;
+  }
+  expire(now);
+  if (id == 0 || (api != kApiStopMove && api != kApiMove) || pending_.count(id)) {
+    fail("CONTROLLER_REQUEST_ID_INVALID", now);
+    return;
+  }
+  if (pending_.size() >= kMaxPending) {
+    const auto oldest = std::min_element(
+      pending_.begin(), pending_.end(),
+      [](const auto & a, const auto & b) {return a.second.sent_at < b.second.sent_at;});
+    pending_.erase(oldest);
+    fail("CONTROLLER_PENDING_OVERFLOW", now);
+  }
+  pending_.emplace(id, Pending{api, now});
+}
+
+bool ControllerWatchdog::on_response(
+  std::int64_t id, std::int32_t api, std::int32_t code, double now)
+{
+  expire(now);
+  const auto it = pending_.find(id);
+  if (it == pending_.end() || it->second.api != api) {
+    return false;
+  }
+  pending_.erase(it);
+  if (code != 0) {
+    fail("CONTROLLER_REQUEST_REJECTED", now);
+  } else {
+    ack_at_ = now;
+  }
+  return true;
+}
+
+void ControllerWatchdog::on_state(bool valid, double now)
+{
+  if (state_at_ && now - *state_at_ > state_timeout_) {
+    fail("CONTROLLER_STATE_TIMEOUT", now);
+  }
+  state_at_ = now;
+  state_valid_ = valid;
+  if (!valid) {
+    fail("CONTROLLER_STATE_INVALID", now);
+  }
+}
+
+ControllerWatchdog::Health ControllerWatchdog::health(double now)
+{
+  expire(now);
+  if (require_ack_) {
+    if (!ack_at_) {
+      return {false, failure_at_ ? failure_reason_ : "CONTROLLER_ACK_MISSING"};
+    }
+    if (now - *ack_at_ > ack_timeout_) {
+      fail("CONTROLLER_ACK_TIMEOUT", now);
+      return {false, failure_reason_};
+    }
+  }
+  if (require_state_) {
+    if (!state_at_) {
+      return {false, "CONTROLLER_STATE_MISSING"};
+    }
+    if (!state_valid_) {
+      return {false, "CONTROLLER_STATE_INVALID"};
+    }
+    if (now - *state_at_ > state_timeout_) {
+      fail("CONTROLLER_STATE_TIMEOUT", now);
+      return {false, failure_reason_};
+    }
+  }
+  // Require one complete ack window without a detected downstream failure.
+  // Intermittently fresh replies cannot hide an ongoing stream of expiries.
+  if (failure_at_ && now - *failure_at_ < ack_timeout_) {
+    return {false, failure_reason_};
+  }
+  return {true, "CONTROLLER_PROOF_FRESH"};
 }
 
 }  // namespace helix_go2_sink_cpp

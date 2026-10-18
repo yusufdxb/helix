@@ -108,7 +108,8 @@ jobs:
 
           share = get_package_share_directory("helix_bringup")
           for name in ("helix_sensing.launch.py", "helix_adapter.launch.py",
-                       "helix_closedloop.launch.py"):
+                       "helix_closedloop.launch.py", "helix_native.launch.py",
+                       "helix_native_guard_sim.launch.py"):
               src = PythonLaunchDescriptionSource(os.path.join(share, "launch", name))
               ld = src.try_get_launch_description_without_context()
               assert ld is not None, name
@@ -123,3 +124,4 @@ jobs:
           python3 -c "import tests.sim_integration.test_lidar_occlusion_recovery"
           python3 -c "import tests.sim_integration.test_rule_r3_log_critical"
           python3 -c "import tests.sim_integration.test_rule_r4_crash_logonly"
+          python3 -c "import tests.sim_integration.test_native_sport_gate"

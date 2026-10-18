@@ -13,6 +13,7 @@ using helix_go2_sink_cpp::kApiStopMove;
 using helix_go2_sink_cpp::Request;
 using helix_go2_sink_cpp::SinkFeedback;
 using helix_go2_sink_cpp::SportGuard;
+using helix_go2_sink_cpp::ControllerWatchdog;
 
 namespace
 {
@@ -384,4 +385,103 @@ TEST(SportGuard, ExpiredReadyStatusTokenCannotBeRevivedByFreshStatus)
   guard.on_status(4, "arbiter:1", false, false, 0.35);
   EXPECT_FALSE(guard.on_operator_release(expired_token, 0.36));
   EXPECT_TRUE(guard.latched());
+}
+
+TEST(SportGuard, DownstreamFailureLatchesDespiteFreshUpstreamAndInvalidatesToken)
+{
+  SportGuard guard("test");
+  release(guard);
+  guard.on_request(2, move(), 0.04);
+  const auto old_token = guard.release_token();
+  guard.on_output_health(false, "CONTROLLER_ACK_TIMEOUT", 0.05);
+  EXPECT_TRUE(guard.latched());
+  EXPECT_EQ(guard.output_health_detections(), 1u);
+  EXPECT_DOUBLE_EQ(guard.output_health_detected_at(), 0.05);
+  EXPECT_FALSE(guard.on_request(3, move(), 0.06));
+  guard.on_status(3, "arbiter:2", true, true, 0.07);
+  guard.on_request(4, move(), 0.08);
+  guard.on_status(4, "arbiter:2", false, false, 0.09);
+  EXPECT_FALSE(guard.ready_for_release(0.09));
+  guard.on_output_health(true, "CONTROLLER_PROOF_FRESH", 0.10);
+  EXPECT_TRUE(guard.latched());
+  EXPECT_TRUE(guard.ready_for_release(0.10));
+  EXPECT_FALSE(guard.on_operator_release(old_token, 0.11));
+  EXPECT_TRUE(guard.on_operator_release(guard.release_token(), 0.12));
+  EXPECT_TRUE(guard.on_request(5, move(), 0.13));
+}
+
+TEST(ControllerWatchdog, OnlyExactTimelySuccessfulReplyAndFreshStateEstablishHealth)
+{
+  ControllerWatchdog watch;
+  EXPECT_FALSE(watch.health(0).healthy);
+  watch.on_sent(-7, kApiStopMove, 0.01);
+  EXPECT_FALSE(watch.on_response(7, kApiStopMove, 0, 0.02));
+  EXPECT_FALSE(watch.on_response(-7, kApiMove, 0, 0.02));
+  EXPECT_TRUE(watch.on_response(-7, kApiStopMove, 0, 0.02));
+  EXPECT_FALSE(watch.health(0.02).healthy);
+  watch.on_state(true, 0.03);
+  EXPECT_TRUE(watch.health(0.03).healthy);
+  EXPECT_FALSE(watch.on_response(-7, kApiStopMove, 0, 0.04));
+  EXPECT_FALSE(watch.health(0.34).healthy);
+}
+
+TEST(ControllerWatchdog, TimelyRepliesCannotHideOtherExpiredRequests)
+{
+  ControllerWatchdog watch;
+  watch.on_state(true, 0);
+  watch.on_sent(-1, kApiStopMove, 0);
+  watch.on_sent(42, kApiMove, 0.25);
+  watch.on_response(42, kApiMove, 0, 0.26);
+  watch.on_state(true, 0.26);
+  EXPECT_TRUE(watch.health(0.26).healthy);
+  EXPECT_FALSE(watch.health(0.31).healthy);
+  EXPECT_FALSE(watch.on_response(-1, kApiStopMove, 0, 0.32));
+  watch.on_sent(-2, kApiStopMove, 0.5);
+  watch.on_response(-2, kApiStopMove, 0, 0.51);
+  watch.on_state(true, 0.51);
+  EXPECT_FALSE(watch.health(0.51).healthy);  // Full failure-free window required.
+  EXPECT_TRUE(watch.health(0.62).healthy);
+}
+
+TEST(ControllerWatchdog, RejectionAndStateGapRequireRecoveryWindow)
+{
+  ControllerWatchdog watch;
+  watch.on_sent(-1, kApiStopMove, 0);
+  watch.on_response(-1, kApiStopMove, -1, 0.01);
+  watch.on_state(true, 0.01);
+  EXPECT_FALSE(watch.health(0.01).healthy);
+  watch.on_sent(-2, kApiStopMove, 0.02);
+  watch.on_response(-2, kApiStopMove, 0, 0.03);
+  EXPECT_FALSE(watch.health(0.03).healthy);
+  watch.on_state(true, 0.2);
+  EXPECT_TRUE(watch.health(0.32).healthy);
+  // Receipt must notice the gap before replacing the old state timestamp.
+  watch.on_state(true, 0.51);
+  watch.on_sent(-3, kApiStopMove, 0.51);
+  watch.on_response(-3, kApiStopMove, 0, 0.52);
+  EXPECT_FALSE(watch.health(0.52).healthy);
+  watch.on_state(true, 0.75);
+  watch.on_sent(-4, kApiStopMove, 0.75);
+  watch.on_response(-4, kApiStopMove, 0, 0.76);
+  EXPECT_TRUE(watch.health(0.82).healthy);
+}
+
+TEST(ControllerWatchdog, PendingStorageBoundedAcrossBothIdNamespaces)
+{
+  ControllerWatchdog watch(1, 1);
+  for (int i = 1; i <= 300; ++i) {
+    watch.on_sent(i % 2 ? i : -i, kApiStopMove, i * 0.001);
+  }
+  EXPECT_EQ(watch.pending_count(), ControllerWatchdog::kMaxPending);
+  EXPECT_FALSE(watch.on_response(1, kApiStopMove, 0, 0.31));
+  EXPECT_TRUE(watch.on_response(-300, kApiStopMove, 0, 0.31));
+  watch.on_state(true, 0.31);
+  EXPECT_FALSE(watch.health(0.31).healthy);
+}
+
+TEST(ControllerWatchdog, InvalidConfigurationRejected)
+{
+  EXPECT_THROW(ControllerWatchdog(0), std::invalid_argument);
+  EXPECT_THROW(ControllerWatchdog(1, -1), std::invalid_argument);
+  EXPECT_THROW(ControllerWatchdog(std::numeric_limits<double>::infinity()), std::invalid_argument);
 }

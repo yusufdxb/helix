@@ -6,7 +6,8 @@ the earlier evidence files are preserved. The PR remains draft.
 
 Machine-readable results: [teardown checks](../results/rate_monitor_teardown.json),
 [native latch campaign](../results/native_protective_latch_teardown_sim.json),
-and [experimental Sport gate](../results/sport_guard_sim.json).
+[experimental Sport gate](../results/sport_guard_sim.json), and
+[complete native gate integration](../results/native_sport_gate_integration_sim.json).
 
 ## Rate monitor teardown
 
@@ -72,7 +73,9 @@ separately from the memory/undefined-behavior regression run.
 ## GO2 command silence is not a stop contract
 
 The deployed firmware's behavior when Move requests cease is **unknown**.
-There is no measured physical timeout in this evidence.
+There is no measured physical timeout in this evidence. The robot was unavailable
+for passive inspection during this follow-up. No firmware version or active
+controller setting was established, and no command-silence motion test was run.
 
 - The pinned official [GO2 client implementation](https://github.com/unitreerobotics/unitree_sdk2_python/blob/814556d15970dd2ecf1c9984e845ca02ab07e206/unitree_sdk2py/go2/sport/sport_client.py#L124)
   sends only `x`, `y`, and `z` for Move. It does not send a duration or expiry.
@@ -84,7 +87,11 @@ There is no measured physical timeout in this evidence.
   It is not evidence for GO2.
 - Optional [lease support](https://github.com/unitreerobotics/unitree_sdk2_python/blob/814556d15970dd2ecf1c9984e845ca02ab07e206/unitree_sdk2py/go2/sport/sport_client.py#L28)
   defaults off. Its existence does not establish a GO2 velocity stop on lease
-  loss. The current sink sends unleased requests.
+  loss. The current sink sends unleased requests. In the pinned official
+  [reference lease server](https://github.com/unitreerobotics/unitree_sdk2_python/blob/814556d15970dd2ecf1c9984e845ca02ab07e206/unitree_sdk2py/rpc/lease_server.py#L51),
+  expiry is checked on incoming lease operations and clears bookkeeping. It
+  has no autonomous expiry timer or motion-stop callback. This reference code
+  does not establish the behavior of the deployed GO2 controller.
 
 The fake GO2's default one-second Move expiry is explicitly a simulation
 assumption. `move_timeout_s:=0.0` now disables it. A regression with the real
@@ -133,9 +140,10 @@ responsibility. A restarted sink cannot reopen the gate by itself.
 Forwarded sink request IDs remain unchanged, so existing sink response
 matching still works on the shared private controller response topic.
 Guard-generated StopMove requests use negative IDs. Guard status separates
-an acknowledged StopMove from measured stillness; it always reports
-`measured_stopped=false` because this experiment does not certify motion
-sensing or physical stopping.
+an acknowledged StopMove from measured stillness. The original last-hop profile
+has state feedback disabled and reports `measured_stopped=false`. The integrated
+simulation profile below enables simulated state feedback. Neither profile
+certifies physical motion sensing or stopping.
 
 Twenty-three vendor-independent C++ regressions and eleven ROS process tests cover
 sink SIGKILL, repeated guard restarts, duplicate intents, stale release,
@@ -145,9 +153,9 @@ Two process cases run the existing fake GO2 with expiry disabled:
 the unprotected case keeps moving, and the guarded case falls below
 0.01 m/s while retaining the latch through sink restart. Other cases use a
 controller stand-in that retains its target indefinitely and can deny or
-drop StopMove. The arbiter status producer is a trusted protocol stand-in;
-the complete native supervisor/arbiter/guard recovery wiring is not yet
-integration-tested.
+drop StopMove. The arbiter status producer in those original tests is a trusted protocol
+stand-in. The separate full native integration below replaces that stand-in
+with the real supervisor and arbiter; the original result is unchanged.
 
 ```bash
 # Built workspace with the vendor message packages sourced; simulation only.
@@ -163,8 +171,114 @@ authenticated. A lower request ID after restart fails closed, which can
 require further operator recovery for availability.
 
 The production sink-crash gap is still unresolved. Before enabling hardware
-motion, this design needs integrated native fault/release validation and an
-independent actuator/controller-side fail-safe for loss of the final guard
-or communication path. A firmware-specific vendor stop contract or approved
+motion, this design needs an independently enforced actuator/controller-side
+fail-safe for loss of the final guard or communication path. A firmware-specific vendor stop contract or approved
 physical measurement is still needed to establish GO2 command-silence behavior.
 Physical motion remains disabled; no hardware motion test was performed.
+
+## Complete native stack integration
+
+`helix_native_guard_sim.launch.py` runs the real C++ rate monitor, anomaly
+detector, log parser, supervisor, protective arbiter, sink and Sport gate with
+the Python FakeGo2. It leaves the normal native launch defaults unchanged.
+Every sensor and control topic is remapped under `/helix/experimental/native/`.
+The launch requires localhost-only Cyclone DDS and an explicit nonzero domain,
+rejects launch overrides and external Cyclone configurations, and supplies a
+fixed localhost peer configuration with room for all participants. The test
+driver owns four relays: sink intent, arbiter status, controller request and
+controller response. Removing a relay models complete traffic loss on that
+link, not every possible DDS partition or delayed-message schedule.
+
+The guard now heartbeats to the native supervisor. The supervisor uses the
+guard's own negative-ID StopMove acknowledgments and simulated state feedback,
+rather than relying on a dead sink's feedback. An independent bounded controller
+watchdog matches each signed request ID and API, rejects late/unknown replies,
+and checks both response and state receipt deadlines (300 ms). Fresh upstream
+intents cannot renew these downstream deadlines. Rejection, expired requests,
+invalid state and lost state trip the guard. Recovery requires a complete
+failure-free acknowledgment window and never clears a latch. This is
+host-side fault detection, not a controller-enforced motion lease.
+
+The twelve integration regressions keep a 0.2 m/s navigation source streaming
+through each failure. Every case checks healthy startup without Move, explicit
+native and guard release, fault detection, no Move after the first protective
+StopMove, health recovery without release, rejection of stale native releases
+and stale guard tokens, then legitimate current operator release. Each killed
+process is restarted twice without intermediate release. Stale guard tokens
+are also retried after current native release, when the arbiter alone permits
+motion. A changed protective challenge requires a separate simulated operator
+action; the driver does not add automatic recovery to runtime nodes.
+
+Results are in [the integration trace](../results/native_sport_gate_integration_sim.json).
+Timings below are one injected failure per condition, in milliseconds. Detection
+is the first observed native protective state or the guard's recorded monotonic
+trip time, whichever occurs first. Publication, delivery and acknowledgment are
+local ROS observations, not proof of controller execution. Simulated stillness
+means odometry below 0.01 m/s for at least 0.2 seconds; the time reports the
+beginning of that interval. FakeGo2's velocity lag is synthetic. These samples
+are neither tail-latency statistics nor real-time or hardware bounds.
+
+| Failure | Inject to detection | Detect to Stop publication / delivery | Detect to code-0 reply | Detect to simulated still |
+|---|---:|---:|---:|---:|
+| sink | 253.3 | 15.4 / 15.4 | 15.9 | 466.6 |
+| supervisor | 510.7 | 0.6 / 0.6 | 0.8 | 449.2 |
+| arbiter | 212.9 | 15.9 / 15.9 | 16.4 | 466.8 |
+| guard | 341.6 | none / none | none | none |
+| intent_loss | 253.3 | 15.5 / 15.5 | 16.4 | 466.8 |
+| status_loss | 307.8 | 0.1 / 0.1 | 0.5 | 452.2 |
+| request_loss | 248.8 | 0.1 / none | none | none |
+| response_loss | 269.9 | 0.1 / 0.1 | none | 450.7 |
+| state_loss | 310.5 | 0.5 / 0.5 | 1.2 | 449.4 |
+| reject_stop | 200.8 | 9.3 / 9.3 | none | none |
+| ack_only_stop | 205.5 | 14.7 / 14.7 | 15.3 | none |
+| drop_stop | 205.5 | 15.9 / 15.9 | none | none |
+
+Gate death and request-link loss leave the fake moving above 0.15 m/s for the
+5.5-second observation interval. Rejected, dropped and acknowledged-but-ineffective
+StopMove do the same. In the response-loss case the fake stops, but HELIX retains
+`STOP_UNCONFIRMED`; state loss also remains unconfirmed despite independent test
+odometry showing simulated stillness. Arbiter death prevents its hold acknowledgment,
+so native supervision cannot confirm the stop even though the independent gate
+stops the fake. Supervisor death has no live supervisor status until restart.
+All cases have zero unauthorized egress Move commands, including startup,
+restarts, health-only recovery and stale authorization attempts. A passing
+negative case means the expected unresolved failure was observed.
+
+Validation adds six core regressions (29 total), also passing with ASan/UBSan,
+and twelve complete-native ROS regressions. The original eleven last-hop ROS
+tests still pass. Launch expansion checks verify the full graph, feedback owner
+and isolation guards. Original hardware, replay, crash, latch and teardown
+evidence files are unchanged.
+
+```bash
+source install/setup.bash
+python3 scripts/sim_native_sport_gate.py --out results/native_sport_gate_integration_sim.json
+# Or run each condition as an isolated regression:
+HELIX_RUN_NATIVE_GATE_SIM=1 python3 -m pytest tests/sim_integration/test_native_sport_gate.py -v --timeout=120
+```
+
+## Required protection beyond the final gate
+
+Another same-host Sport publisher moves the last surviving sender boundary; it
+does not close it. The demonstrated gate-death and final-link failures require
+an independently enforced stop authority downstream of that boundary. A candidate
+contract is a firmware/controller-side bounded motion lease using its own clock:
+missing valid command progress must autonomously brake and latch, and restart,
+late commands or a new epoch must not reset that latch. Rearming must require
+fresh health, a new current lease and explicit operator authorization. This is
+not the reference SDK's client/ownership lease and has not been established for
+the GO2 controller.
+
+If the firmware cannot provide that contract, a vendor-supported independent
+robot-side stop or drive-inhibit mechanism is required, with appropriate separate
+power, clock and fault path. A second publisher on the same failed DDS/network
+path cannot satisfy that requirement. No supported automatic GO2 hardware
+interface or bounded stop response has been established here. A manual emergency
+action is not proof of an automatic command-loss fail-safe.
+
+The existing native deployment still has the separate sink-crash gap. The
+integrated experimental profile covers upstream process loss in simulation and
+exposes final-output failure; it is not a deployable hardware safety system.
+A firmware-specific vendor contract and independent stopping evidence are needed
+before a hardware motion campaign. Physical motion remains disabled, controller
+modes were not changed, and the PR remains draft.
