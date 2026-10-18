@@ -216,12 +216,15 @@ TEST_F(RosFixture, FaultEventFieldsAndRounding)
   EXPECT_EQ(f.context_keys[4], "zscore");
   EXPECT_EQ(f.context_keys[5], "consecutive_count");
   EXPECT_EQ(f.context_values[0], "m/test");
-  EXPECT_EQ(f.context_values[1], "100");  // round(100.0, 4) -> 100 (trailing 0s stripped)
-  // mean of {10.0, 10.1, 10.2, 10.0, 10.1, 10.2, ...} over 25 samples ≈ 10.1
+  // str(round(100.0, 4)) in the Python reference is "100.0", not "100".
+  EXPECT_EQ(f.context_values[1], "100.0");
   EXPECT_NE(f.context_values[2], "");
   EXPECT_NE(f.context_values[3], "");
   EXPECT_NE(f.context_values[4], "");
   EXPECT_EQ(f.context_values[5], "3");
+  // Exact strings for this input are pinned against the live Python node by
+  // test_python_parity.py; here only the detail shape is checked.
+  EXPECT_EQ(f.detail.rfind("Metric 'm/test' Z-score ", 0), 0u) << f.detail;
 }
 
 // ── Row 8: empty dim -> skipped ─────────────────────────────────────────
@@ -490,7 +493,9 @@ TEST_F(RosFixture, StaleFaultContextKey)
   EXPECT_EQ(f.context_values[0], "rate_hz/fake_stale");
   EXPECT_EQ(f.context_values[1], "stale");
   EXPECT_EQ(f.context_values[2], "3");
-  EXPECT_NE(f.detail.find("stale"), std::string::npos);
+  EXPECT_EQ(
+    f.detail,
+    "Metric 'rate_hz/fake_stale' stale, no samples in window on 3 consecutive checks");
 }
 
 // ── Min-anomaly-duration gate tests ─────────────────────────────────────
@@ -567,6 +572,62 @@ TEST_F(RosFixture, DurationGateStaleNaNRespected)
   }
   // Consecutive trigger met, but < 2.0s elapsed — no fault.
   EXPECT_EQ(node->fault_count_for_test(), 0u);
+}
+
+// ── Lifecycle: an inactive node neither publishes nor advances any streak ──
+// Inputs that arrive while INACTIVE are dropped, so two spikes before
+// activation plus one after do not reach a trigger of 3.
+TEST_F(RosFixture, InactiveNodeIgnoresInputs)
+{
+  rclcpp::NodeOptions opts;
+  opts.parameter_overrides(
+  {
+    rclcpp::Parameter("consecutive_trigger", 3),
+    rclcpp::Parameter("emit_cooldown_s", 0.0),
+    rclcpp::Parameter("min_anomaly_duration_s", 0.0),
+  });
+  auto node = std::make_shared<AnomalyDetectorNode>(opts);
+  node->configure();
+
+  rclcpp::executors::SingleThreadedExecutor exec;
+  exec.add_node(node->get_node_base_interface());
+  auto pub_node = rclcpp::Node::make_shared("test_inactive_pub");
+  auto pub = pub_node->create_publisher<std_msgs::msg::Float64MultiArray>(
+    "/helix/metrics", rclcpp::QoS(100).reliable());
+  exec.add_node(pub_node);
+  auto send = [&](double v) {
+      pub->publish(make_metric("m_inactive", v));
+      for (int i = 0; i < 4; ++i) {
+        exec.spin_some();
+        std::this_thread::sleep_for(3ms);
+      }
+    };
+  // Wait for discovery so dropped samples are really delivered-and-ignored.
+  for (int i = 0; i < 100 && pub->get_subscription_count() == 0; ++i) {
+    exec.spin_some();
+    std::this_thread::sleep_for(10ms);
+  }
+  ASSERT_GT(pub->get_subscription_count(), 0u);
+
+  for (int i = 0; i < 25; ++i) {
+    send(10.0 + (i % 3) * 0.1);   // inactive: ignored, the window stays empty
+  }
+  node->activate();
+  for (int i = 0; i < 25; ++i) {
+    send(10.0 + (i % 3) * 0.1);
+  }
+  node->deactivate();
+  send(100.0);
+  send(100.0);                    // inactive spikes: ignored
+  node->activate();
+  send(100.0);                    // one spike while active: streak 1 of 3
+  EXPECT_EQ(node->fault_count_for_test(), 0u);
+  send(100.0);
+  send(100.0);                    // streak reaches 3 while active
+  EXPECT_EQ(node->fault_count_for_test(), 1u);
+
+  exec.remove_node(pub_node);
+  exec.remove_node(node->get_node_base_interface());
 }
 
 int main(int argc, char ** argv)

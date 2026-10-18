@@ -1,0 +1,183 @@
+"""Expand helix_native.launch.py without starting processes or DDS.
+
+The native profile must stay non-actuating by default, run no Python node,
+and hand the supervisor the same heartbeat set the launch actually starts.
+"""
+from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+
+import pytest
+import yaml
+
+pytest.importorskip("launch.actions", reason="ROS 2 launch is not installed")
+pytest.importorskip("launch_ros", reason="ROS 2 launch_ros is not installed")
+
+import ament_index_python.packages  # noqa: E402
+from launch.actions import DeclareLaunchArgument, OpaqueFunction  # noqa: E402
+from launch_ros.actions import Node  # noqa: E402
+from launch_ros.utilities import evaluate_parameters  # noqa: E402
+
+from launch import LaunchContext, LaunchDescription  # noqa: E402
+
+SOURCE = Path(__file__).resolve().parents[2]
+NATIVE_PACKAGES = {
+    "helix_sensing_cpp", "helix_supervisor_cpp", "helix_arbiter_cpp", "helix_go2_sink_cpp",
+}
+
+
+@pytest.fixture
+def native(monkeypatch):
+    monkeypatch.setattr(
+        ament_index_python.packages,
+        "get_package_share_directory",
+        lambda package: str(SOURCE / package),
+    )
+    path = SOURCE / "helix_bringup" / "launch" / "helix_native.launch.py"
+    spec = importlib.util.spec_from_file_location("helix_native_launch_test", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _expand(description, context):
+    nodes = []
+    for action in description.entities:
+        if isinstance(action, Node):
+            nodes.append(action)
+        elif isinstance(action, OpaqueFunction):
+            nodes.extend(_expand(LaunchDescription(action.execute(context) or []), context))
+        elif isinstance(action, DeclareLaunchArgument):
+            action.execute(context)
+    return nodes
+
+
+def _graph(module, **overrides):
+    context = LaunchContext()
+    context.launch_configurations.update(overrides)
+    nodes = _expand(module.generate_launch_description(), context)
+    return {node.node_executable: node for node in nodes}, context
+
+
+def _parameters(node, context):
+    merged = {}
+    for item in evaluate_parameters(context, node._Node__parameters):
+        if isinstance(item, dict):
+            merged.update(item)
+        else:
+            loaded = yaml.safe_load(Path(item).read_text())
+            entry = loaded.get(node.node_executable, loaded.get("/**", {}))
+            merged.update(entry.get("ros__parameters", {}))
+    return merged
+
+
+def test_defaults_are_non_actuating(native):
+    nodes, ctx = _graph(native)
+    supervisor = _parameters(nodes["helix_supervisor"], ctx)
+    assert supervisor["actuation_enabled"] is False
+    assert supervisor["auto_resume"] is False
+    arbiter = _parameters(nodes["helix_arbiter"], ctx)
+    assert arbiter["output_topic"] == "/helix_dry/cmd_vel"
+    assert arbiter["protective_latch"] is True
+    assert arbiter["sources"]["nav"]["topic"].startswith("/helix_dry/")
+    assert arbiter["sources"]["teleop"]["topic"].startswith("/helix_dry/")
+    sink = _parameters(nodes["helix_go2_sport_sink"], ctx)
+    assert sink["mode"] == "dry_run"
+    assert sink["input_topic"] == arbiter["output_topic"]
+
+
+def test_arming_the_sink_alone_does_not_arm_the_supervisor(native):
+    nodes, ctx = _graph(native, sink_mode="armed")
+    assert _parameters(nodes["helix_supervisor"], ctx)["actuation_enabled"] is False
+    assert _parameters(nodes["helix_arbiter"], ctx)["output_topic"] == "/helix_dry/cmd_vel"
+
+
+def test_auto_resume_keeps_the_arbiter_protective_latch(native):
+    nodes, ctx = _graph(native, auto_resume="true", actuation_enabled="true")
+    assert _parameters(nodes["helix_supervisor"], ctx)["auto_resume"] is True
+    assert _parameters(nodes["helix_arbiter"], ctx)["protective_latch"] is True
+
+
+def test_profile_runs_no_python_node(native):
+    nodes, _ = _graph(native)
+    assert {n.node_package for n in nodes.values()} <= NATIVE_PACKAGES
+    assert len(nodes) == 6
+
+
+def test_python_sink_backend_is_the_only_python_node(native):
+    nodes, _ = _graph(native, sink_backend="python")
+    python = {n.node_executable for n in nodes.values() if n.node_package not in NATIVE_PACKAGES}
+    assert python == {"helix_go2_sport_sink"}
+
+
+def test_supervisor_expects_exactly_the_heartbeating_nodes(native):
+    nodes, ctx = _graph(native)
+    expected = _parameters(nodes["helix_supervisor"], ctx)["expected_nodes"]
+    assert set(expected) == {"helix_topic_rate_monitor", "helix_anomaly_detector",
+                             "helix_log_parser"}
+    assert set(expected) <= set(nodes)
+    assert list(_parameters(nodes["helix_supervisor"], ctx)["critical_nodes"]) == ["*"]
+
+
+def test_detector_runs_the_round2_config(native):
+    nodes, ctx = _graph(native)
+    detector = _parameters(nodes["helix_anomaly_detector"], ctx)
+    for key, value in native.DETECTOR_OVERRIDES.items():
+        assert detector[key] == value, key
+    assert detector["freeze_baseline"] is True
+    rates = _parameters(nodes["helix_topic_rate_monitor"], ctx)
+    assert rates["stale_after_s"] == 1.0
+    assert "/utlidar/cloud" in rates["topics"]
+
+
+def test_package_declares_every_native_node_package(native):
+    """A --packages-up-to helix_bringup build must build the whole profile."""
+    import xml.etree.ElementTree as ET
+    root = ET.parse(SOURCE / "helix_bringup" / "package.xml").getroot()
+    declared = {e.text for e in root if e.tag in ("depend", "exec_depend")}
+    nodes, _ = _graph(native)
+    assert {n.node_package for n in nodes.values()} <= declared
+
+
+def test_unknown_sink_mode_is_refused(native):
+    with pytest.raises(ValueError, match="sink_mode"):
+        _graph(native, sink_mode="damp")
+
+
+def test_guard_sim_uses_complete_native_graph_and_final_feedback(native):
+    specs = {s['name']: s for s in native.guard_sim_node_specs()}
+    assert len(specs) == 8
+    assert {s['package'] for s in specs.values()} == NATIVE_PACKAGES | {'helix_arbiter'}
+    supervisor = specs['helix_supervisor']['parameters'][-1]
+    gate = specs['helix_sport_guard']['parameters'][-1]
+    assert supervisor['auto_resume'] is False
+    assert supervisor['sink_status_topic'] == gate['feedback_topic']
+    assert 'helix_sport_guard' in supervisor['expected_nodes']
+    assert gate['controller_ack_watchdog'] is True
+    assert specs['fake_go2']['parameters'] == [{'move_timeout_s': 0.0}]
+    assert specs['helix_arbiter']['parameters'][-1]['protective_latch'] is True
+    for spec in specs.values():
+        for _, target in spec['remappings']:
+            assert target.startswith('/helix/experimental/native/')
+    assert '<Peer Address="localhost"/>' in native.GUARD_SIM_CYCLONE_URI
+
+
+@pytest.mark.parametrize('bad_env', [
+    {'ROS_LOCALHOST_ONLY': '0'}, {'RMW_IMPLEMENTATION': 'rmw_fastrtps_cpp'},
+    {'ROS_DOMAIN_ID': '0'}, {'ROS_DOMAIN_ID': '233'}, {'ROS_DOMAIN_ID': ''},
+    {'CYCLONEDDS_URI': '<CycloneDDS/>'},
+])
+def test_guard_sim_rejects_unsafe_environment(native, monkeypatch, bad_env):
+    monkeypatch.setenv('ROS_LOCALHOST_ONLY', '1')
+    monkeypatch.setenv('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp')
+    monkeypatch.setenv('ROS_DOMAIN_ID', '218')
+    monkeypatch.delenv('CYCLONEDDS_URI', raising=False)
+    for name, value in bad_env.items():
+        monkeypatch.setenv(name, value)
+    path = SOURCE / 'helix_bringup/launch/helix_native_guard_sim.launch.py'
+    spec = importlib.util.spec_from_file_location('guard_sim_launch_test', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    with pytest.raises(ValueError):
+        module.simulation_actions(LaunchContext())

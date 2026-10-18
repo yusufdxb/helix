@@ -53,6 +53,20 @@ _CPP_DECL = re.compile(
 )
 
 
+# C++-only detector extensions (helix_sensing_cpp/anomaly_core.hpp) and the
+# default that turns each one off. analysis/detector_eval.py evaluates them.
+CPP_EXTENSIONS = {
+    "freeze_baseline": "false",
+    "std_floor_rel": 0.0,
+    "duration_tolerance_s": 0.0,
+    "clear_samples": 0,
+    "clear_zscore": 0.0,
+    "anchor_tolerance_rel": 0.0,
+}
+# anchor_metric_prefix (a std::string, which _CPP_DECL does not parse) only
+# scopes the anchor and has no effect while anchor_tolerance_rel is 0.
+
+
 def _num(text: str):
     """Normalize a numeric literal from either language to a comparable value."""
     text = text.strip().rstrip("fF")
@@ -102,7 +116,7 @@ class TestParameterParity(unittest.TestCase):
 
     def test_same_parameter_names(self):
         only_py = sorted(set(self.py) - set(self.cpp))
-        only_cpp = sorted(set(self.cpp) - set(self.py))
+        only_cpp = sorted(set(self.cpp) - set(self.py) - set(CPP_EXTENSIONS))
         self.assertEqual(
             ([], []),
             (only_py, only_cpp),
@@ -111,6 +125,14 @@ class TestParameterParity(unittest.TestCase):
             "A parameter declared on one side only is silently ignored on "
             "the other, because both read the same YAML.",
         )
+
+    def test_cpp_extensions_default_off(self):
+        # Every C++-only parameter is a declared extension whose default
+        # keeps the reference behavior, so the shared YAML still means the
+        # same thing to both backends.
+        for name, off in CPP_EXTENSIONS.items():
+            self.assertIn(name, self.cpp, f"extension '{name}' not declared in C++")
+            self.assertEqual(self.cpp[name], off, f"extension '{name}' is not off by default")
 
     def test_same_defaults(self):
         for name in sorted(set(self.py) & set(self.cpp)):
@@ -146,19 +168,22 @@ class TestSingleParamsFile(unittest.TestCase):
         )
 
     def test_launch_files_reference_the_canonical_package(self):
-        launch = os.path.join(
-            SRC,
-            "helix_sensing_cpp",
-            "launch",
-            "anomaly_detector.launch.py",
-        )
+        # helix_bringup's sensing launch starts both anomaly backends, so it
+        # alone must resolve the shared config; the C++ package ships no
+        # launch file or config of its own that could drift.
+        launch = os.path.join(SRC, "helix_bringup", "launch", "helix_sensing.launch.py")
         with open(launch, encoding="utf-8") as fh:
             text = fh.read()
         self.assertIn(
-            'FindPackageShare("helix_bringup"), "config", "helix_params.yaml"',
+            'get_package_share_directory("helix_bringup"), "config", "helix_params.yaml"',
             text,
-            "helix_sensing_cpp's launch file must resolve the shared config "
-            "out of helix_bringup, not a package-local copy.",
+            "helix_sensing.launch.py must resolve the shared config out of "
+            "helix_bringup, not a package-local copy.",
+        )
+        self.assertFalse(
+            os.path.isdir(os.path.join(SRC, "helix_sensing_cpp", "launch")),
+            "helix_sensing_cpp must not carry its own launch files; select it "
+            "with helix_bringup's anomaly_backend:=cpp.",
         )
 
 

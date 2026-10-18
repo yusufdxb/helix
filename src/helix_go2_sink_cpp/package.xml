@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>helix_go2_sink_cpp</name>
+  <version>0.1.0</version>
+  <description>
+    Native GO2 sport sink: the HELIX arbiter output to /api/sport/request
+    (StopMove 1003 / Move 1008 only), with StopMove acknowledgement and
+    measured motion on /helix/sink/status. Port of
+    helix_arbiter/go2_sport_sink.py. Needs unitree_api and unitree_go
+    (unitree_ros2), so it lives apart from the packages CI builds without
+    them.
+  </description>
+  <maintainer email="yusuf.a.guenena@gmail.com">yusufdxb</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>helix_msgs</depend>
+  <depend>unitree_api</depend>
+  <depend>unitree_go</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>helix_arbiter</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

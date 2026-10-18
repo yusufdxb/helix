@@ -48,7 +48,7 @@ STOP_METRIC_PREFIX = "rate_hz/utlidar"
 # harness needs to reproduce must be lifted rather than reimplemented here,
 # otherwise the harness drifts from the node it claims to mirror. The
 # emit-cooldown gate is lifted for exactly that reason.
-SHIPPED_METHODS = ("_process_sample", "_cooldown_expired")
+SHIPPED_METHODS = ("_process_sample", "_cooldown_expired", "_should_log_violation")
 
 
 def load_shipped_methods() -> Dict[str, Callable]:
@@ -136,6 +136,7 @@ class ShippedShim:
         self._windows: Dict[str, Deque[float]] = {}
         self._consecutive: Dict[str, int] = {}
         self._anomaly_start: Dict[str, float] = {}
+        self._last_violation_log: Dict[str, float] = {}
         self._data_lock = _NullLock()
         self.emitted: List[dict] = []
         # The shipped source calls ``time.monotonic()``; give it a module-like
@@ -196,6 +197,7 @@ def run_shipped(samples: Iterable[tuple], **params) -> List[dict]:
     # Bind the lifted cooldown gate as a real method of the shim, so the gate
     # under test is the shipped one and not a copy.
     shim._cooldown_expired = types.MethodType(methods["_cooldown_expired"], shim)
+    shim._should_log_violation = types.MethodType(methods["_should_log_violation"], shim)
     for t, metric, value in samples:
         clock_box["t"] = float(t)
         process(shim, metric, float("nan") if value is None else float(value))

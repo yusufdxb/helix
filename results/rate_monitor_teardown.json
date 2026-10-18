@@ -1,0 +1,86 @@
+{
+  "evidence_class": "LOCALHOST SIMULATION AND SANITIZER CHECKS; no hardware access",
+  "baseline_commit": "d79ee82",
+  "fixed_commit": "8b150ef",
+  "baseline_native_teardown": {
+    "detector": [
+      "rate monitor SIGSEGV during SIGINT cleanup"
+    ],
+    "supervisor": [
+      "rate monitor SIGSEGV during SIGINT cleanup"
+    ],
+    "arbiter": [],
+    "sink": []
+  },
+  "baseline_regression_result": {
+    "tests_failed": 2,
+    "tests_passed": 0,
+    "cases": [
+      "cleanup releases subscriptions",
+      "failed configuration rollback"
+    ]
+  },
+  "debugger": {
+    "baseline_starts": 12,
+    "baseline_sigsegv_captures": 3,
+    "fault_thread": "DDS gc worker at unmapped program counter",
+    "concurrent_main_thread_stack": [
+      "process finalization",
+      "librmw_implementation",
+      "rcpputils::SharedLibrary::~SharedLibrary",
+      "rcutils_unload_shared_library",
+      "_dl_close_worker"
+    ],
+    "fixed_starts": 12,
+    "fixed_sigsegv_captures": 0,
+    "fixed_child_return_codes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "load": "all six default watched topics, 3 seconds of synthetic traffic before each shutdown"
+  },
+  "regressions": {
+    "normal_passed": 14,
+    "asan_ubsan_passed": 14,
+    "sanitizer_leak_detection_in_regression_run": false
+  },
+  "unsuppressed_leaks": {
+    "baseline_first_six_topic_report": {
+      "bytes": 21575,
+      "allocations": 205
+    },
+    "fixed_first_six_topic_report": {
+      "bytes": 1095,
+      "allocations": 17
+    },
+    "fixed_report_application_cycle_allocations": 0,
+    "remaining_origins": [
+      "ROS typesupport loading",
+      "class_loader plugin registration",
+      "generated component main retained ClassLoader"
+    ],
+    "fully_leak_free": false
+  },
+  "fixed_native_teardown": {
+    "detector": [],
+    "supervisor": [],
+    "arbiter": [],
+    "sink": []
+  },
+  "native_campaign": "results/native_protective_latch_teardown_sim.json",
+  "limitations": [
+    "ROS and DDS dependencies themselves were not rebuilt with sanitizers.",
+    "Destructor requires executor callbacks to have stopped.",
+    "Repeated successful teardown does not establish behavior for arbitrary executor misuse."
+  ]
+}

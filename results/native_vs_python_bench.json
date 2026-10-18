@@ -1,0 +1,646 @@
+{
+ "generated_utc": "2026-10-17T23:40:16Z",
+ "git_sha": "ac28a5b",
+ "host": "x86_64 host",
+ "cpus": 24,
+ "loadavg_end": [
+  1.017578125,
+  1.05810546875,
+  1.96630859375
+ ],
+ "rmw": "rmw_cyclonedds_cpp",
+ "seconds_per_run": 120.0,
+ "warmup_s": 20.0,
+ "period_s": 2.0,
+ "cloud_bytes": 65536,
+ "order": [
+  "python",
+  "cpp",
+  "cpp",
+  "python",
+  "python",
+  "cpp"
+ ],
+ "cpu_unit": "percent of one core, mean of per-sample deltas after warmup",
+ "aggregate": {
+  "helix_topic_rate_monitor": {
+   "python": {
+    "runs": 3,
+    "cpu_pct_mean": 8.639,
+    "cpu_pct_per_run": [
+     8.35,
+     8.942,
+     8.625
+    ],
+    "rss_mb_mean": 54.22
+   },
+   "cpp": {
+    "runs": 3,
+    "cpu_pct_mean": 0.816,
+    "cpu_pct_per_run": [
+     0.808,
+     0.808,
+     0.833
+    ],
+    "rss_mb_mean": 17.32
+   },
+   "cpu_change_pct": -90.6,
+   "rss_change_pct": -68.1
+  },
+  "helix_anomaly_detector": {
+   "python": {
+    "runs": 3,
+    "cpu_pct_mean": 0.466,
+    "cpu_pct_per_run": [
+     0.483,
+     0.466,
+     0.45
+    ],
+    "rss_mb_mean": 48.97
+   },
+   "cpp": {
+    "runs": 3,
+    "cpu_pct_mean": 0.061,
+    "cpu_pct_per_run": [
+     0.058,
+     0.067,
+     0.058
+    ],
+    "rss_mb_mean": 14.9
+   },
+   "cpu_change_pct": -86.9,
+   "rss_change_pct": -69.6
+  },
+  "helix_log_parser": {
+   "python": {
+    "runs": 3,
+    "cpu_pct_mean": 0.547,
+    "cpu_pct_per_run": [
+     0.583,
+     0.533,
+     0.525
+    ],
+    "rss_mb_mean": 49.48
+   },
+   "cpp": {
+    "runs": 3,
+    "cpu_pct_mean": 0.097,
+    "cpu_pct_per_run": [
+     0.1,
+     0.1,
+     0.092
+    ],
+    "rss_mb_mean": 14.66
+   },
+   "cpu_change_pct": -82.3,
+   "rss_change_pct": -70.4
+  },
+  "helix_arbiter": {
+   "python": {
+    "runs": 3,
+    "cpu_pct_mean": 2.265,
+    "cpu_pct_per_run": [
+     2.223,
+     2.29,
+     2.281
+    ],
+    "rss_mb_mean": 49.58
+   },
+   "cpp": {
+    "runs": 3,
+    "cpu_pct_mean": 0.305,
+    "cpu_pct_per_run": [
+     0.3,
+     0.325,
+     0.291
+    ],
+    "rss_mb_mean": 14.68
+   },
+   "cpu_change_pct": -86.5,
+   "rss_change_pct": -70.4
+  },
+  "helix_go2_sport_sink": {
+   "python": {
+    "runs": 3,
+    "cpu_pct_mean": 2.498,
+    "cpu_pct_per_run": [
+     2.498,
+     2.523,
+     2.473
+    ],
+    "rss_mb_mean": 51.87
+   },
+   "cpp": {
+    "runs": 3,
+    "cpu_pct_mean": 0.258,
+    "cpu_pct_per_run": [
+     0.25,
+     0.275,
+     0.25
+    ],
+    "rss_mb_mean": 14.27
+   },
+   "cpu_change_pct": -89.7,
+   "rss_change_pct": -72.5
+  },
+  "total": {
+   "python": {
+    "cpu_pct_mean": 14.415,
+    "rss_mb_mean": 254.12
+   },
+   "cpp": {
+    "cpu_pct_mean": 1.538,
+    "rss_mb_mean": 75.83
+   }
+  }
+ },
+ "runs": [
+  {
+   "arm": "python",
+   "tag": "00_python",
+   "alive_at_end": {
+    "helix_topic_rate_monitor": true,
+    "helix_anomaly_detector": true,
+    "helix_log_parser": true,
+    "helix_arbiter": true,
+    "helix_go2_sport_sink": true
+   },
+   "procs": {
+    "helix_topic_rate_monitor": {
+     "n": 60,
+     "cpu_mean": 8.35,
+     "cpu_max": 9.49,
+     "rss_mean_kb": 55864.3,
+     "rss_max_kb": 55920,
+     "threads": 33
+    },
+    "helix_anomaly_detector": {
+     "n": 60,
+     "cpu_mean": 0.483,
+     "cpu_max": 0.999,
+     "rss_mean_kb": 50150.1,
+     "rss_max_kb": 50208,
+     "threads": 33
+    },
+    "helix_log_parser": {
+     "n": 60,
+     "cpu_mean": 0.583,
+     "cpu_max": 0.999,
+     "rss_mean_kb": 50706.5,
+     "rss_max_kb": 50776,
+     "threads": 33
+    },
+    "helix_arbiter": {
+     "n": 60,
+     "cpu_mean": 2.223,
+     "cpu_max": 2.997,
+     "rss_mean_kb": 50802.5,
+     "rss_max_kb": 50852,
+     "threads": 33
+    },
+    "helix_go2_sport_sink": {
+     "n": 60,
+     "cpu_mean": 2.498,
+     "cpu_max": 3.996,
+     "rss_mean_kb": 52994.3,
+     "rss_max_kb": 53044,
+     "threads": 33
+    }
+   },
+   "driver": {
+    "elapsed_s": 140.24,
+    "sent_hz": {
+     "/utlidar/imu": 250.0,
+     "/utlidar/robot_odom": 150.0,
+     "/utlidar/robot_pose": 18.75,
+     "/utlidar/cloud": 15.4,
+     "/gnss": 1.0,
+     "/multiplestate": 1.0,
+     "/helix_dry/nav/cmd_vel": 20.0,
+     "/lf/sportmodestate": 20.0,
+     "/helix/hold": 20.0,
+     "/rosout": 10.0
+    },
+    "received": {
+     "/helix/metrics": 1680,
+     "/helix/metrics#items": 1680,
+     "/helix/faults": 14,
+     "/helix/faults#items": 14,
+     "/helix_dry/cmd_vel": 7014,
+     "/helix_dry/cmd_vel#items": 7011
+    },
+    "received_hz": {
+     "/helix/metrics": 11.979,
+     "/helix/faults": 0.1,
+     "/helix_dry/cmd_vel": 50.013
+    }
+   }
+  },
+  {
+   "arm": "cpp",
+   "tag": "01_cpp",
+   "alive_at_end": {
+    "helix_topic_rate_monitor": true,
+    "helix_anomaly_detector": true,
+    "helix_log_parser": true,
+    "helix_arbiter": true,
+    "helix_go2_sport_sink": true
+   },
+   "procs": {
+    "helix_topic_rate_monitor": {
+     "n": 60,
+     "cpu_mean": 0.808,
+     "cpu_max": 1.498,
+     "rss_mean_kb": 17772.3,
+     "rss_max_kb": 17820,
+     "threads": 10
+    },
+    "helix_anomaly_detector": {
+     "n": 60,
+     "cpu_mean": 0.058,
+     "cpu_max": 0.5,
+     "rss_mean_kb": 15485.3,
+     "rss_max_kb": 15532,
+     "threads": 10
+    },
+    "helix_log_parser": {
+     "n": 60,
+     "cpu_mean": 0.1,
+     "cpu_max": 0.5,
+     "rss_mean_kb": 15182.3,
+     "rss_max_kb": 15236,
+     "threads": 10
+    },
+    "helix_arbiter": {
+     "n": 60,
+     "cpu_mean": 0.3,
+     "cpu_max": 1.0,
+     "rss_mean_kb": 15049.6,
+     "rss_max_kb": 15096,
+     "threads": 9
+    },
+    "helix_go2_sport_sink": {
+     "n": 60,
+     "cpu_mean": 0.25,
+     "cpu_max": 0.5,
+     "rss_mean_kb": 14703.7,
+     "rss_max_kb": 14752,
+     "threads": 9
+    }
+   },
+   "driver": {
+    "elapsed_s": 140.35,
+    "sent_hz": {
+     "/utlidar/imu": 250.0,
+     "/utlidar/robot_odom": 150.0,
+     "/utlidar/robot_pose": 18.75,
+     "/utlidar/cloud": 15.4,
+     "/gnss": 1.0,
+     "/multiplestate": 1.0,
+     "/helix_dry/nav/cmd_vel": 20.0,
+     "/lf/sportmodestate": 20.0,
+     "/helix/hold": 20.0,
+     "/rosout": 10.0
+    },
+    "received": {
+     "/helix/metrics": 1680,
+     "/helix/metrics#items": 1680,
+     "/helix/faults": 14,
+     "/helix/faults#items": 14,
+     "/helix_dry/cmd_vel": 7018,
+     "/helix_dry/cmd_vel#items": 7014
+    },
+    "received_hz": {
+     "/helix/metrics": 11.97,
+     "/helix/faults": 0.1,
+     "/helix_dry/cmd_vel": 50.004
+    }
+   }
+  },
+  {
+   "arm": "cpp",
+   "tag": "02_cpp",
+   "alive_at_end": {
+    "helix_topic_rate_monitor": true,
+    "helix_anomaly_detector": true,
+    "helix_log_parser": true,
+    "helix_arbiter": true,
+    "helix_go2_sport_sink": true
+   },
+   "procs": {
+    "helix_topic_rate_monitor": {
+     "n": 60,
+     "cpu_mean": 0.808,
+     "cpu_max": 1.998,
+     "rss_mean_kb": 17648.6,
+     "rss_max_kb": 17724,
+     "threads": 10
+    },
+    "helix_anomaly_detector": {
+     "n": 60,
+     "cpu_mean": 0.067,
+     "cpu_max": 0.5,
+     "rss_mean_kb": 15185.2,
+     "rss_max_kb": 15232,
+     "threads": 10
+    },
+    "helix_log_parser": {
+     "n": 60,
+     "cpu_mean": 0.1,
+     "cpu_max": 0.999,
+     "rss_mean_kb": 15034.9,
+     "rss_max_kb": 15088,
+     "threads": 10
+    },
+    "helix_arbiter": {
+     "n": 60,
+     "cpu_mean": 0.325,
+     "cpu_max": 0.999,
+     "rss_mean_kb": 15041.3,
+     "rss_max_kb": 15088,
+     "threads": 9
+    },
+    "helix_go2_sport_sink": {
+     "n": 60,
+     "cpu_mean": 0.275,
+     "cpu_max": 0.999,
+     "rss_mean_kb": 14617.9,
+     "rss_max_kb": 14664,
+     "threads": 9
+    }
+   },
+   "driver": {
+    "elapsed_s": 140.18,
+    "sent_hz": {
+     "/utlidar/imu": 250.0,
+     "/utlidar/robot_odom": 150.0,
+     "/utlidar/robot_pose": 18.75,
+     "/utlidar/cloud": 15.39,
+     "/gnss": 1.0,
+     "/multiplestate": 1.0,
+     "/helix_dry/nav/cmd_vel": 20.0,
+     "/lf/sportmodestate": 20.0,
+     "/helix/hold": 20.0,
+     "/rosout": 9.99
+    },
+    "received": {
+     "/helix/metrics": 1680,
+     "/helix/metrics#items": 1680,
+     "/helix/faults": 14,
+     "/helix/faults#items": 14,
+     "/helix_dry/cmd_vel": 7010,
+     "/helix_dry/cmd_vel#items": 7006
+    },
+    "received_hz": {
+     "/helix/metrics": 11.984,
+     "/helix/faults": 0.1,
+     "/helix_dry/cmd_vel": 50.006
+    }
+   }
+  },
+  {
+   "arm": "python",
+   "tag": "03_python",
+   "alive_at_end": {
+    "helix_topic_rate_monitor": true,
+    "helix_anomaly_detector": true,
+    "helix_log_parser": true,
+    "helix_arbiter": true,
+    "helix_go2_sport_sink": true
+   },
+   "procs": {
+    "helix_topic_rate_monitor": {
+     "n": 60,
+     "cpu_mean": 8.942,
+     "cpu_max": 9.99,
+     "rss_mean_kb": 54887.1,
+     "rss_max_kb": 54944,
+     "threads": 33
+    },
+    "helix_anomaly_detector": {
+     "n": 60,
+     "cpu_mean": 0.466,
+     "cpu_max": 0.999,
+     "rss_mean_kb": 50227.3,
+     "rss_max_kb": 50288,
+     "threads": 33
+    },
+    "helix_log_parser": {
+     "n": 60,
+     "cpu_mean": 0.533,
+     "cpu_max": 0.999,
+     "rss_mean_kb": 50642.1,
+     "rss_max_kb": 50708,
+     "threads": 33
+    },
+    "helix_arbiter": {
+     "n": 60,
+     "cpu_mean": 2.29,
+     "cpu_max": 2.999,
+     "rss_mean_kb": 50715.3,
+     "rss_max_kb": 50764,
+     "threads": 33
+    },
+    "helix_go2_sport_sink": {
+     "n": 60,
+     "cpu_mean": 2.523,
+     "cpu_max": 2.997,
+     "rss_mean_kb": 53201.1,
+     "rss_max_kb": 53252,
+     "threads": 33
+    }
+   },
+   "driver": {
+    "elapsed_s": 140.2,
+    "sent_hz": {
+     "/utlidar/imu": 250.0,
+     "/utlidar/robot_odom": 150.0,
+     "/utlidar/robot_pose": 18.75,
+     "/utlidar/cloud": 15.4,
+     "/gnss": 1.0,
+     "/multiplestate": 1.0,
+     "/helix_dry/nav/cmd_vel": 20.0,
+     "/lf/sportmodestate": 20.0,
+     "/helix/hold": 20.0,
+     "/rosout": 10.0
+    },
+    "received": {
+     "/helix/metrics": 1680,
+     "/helix/metrics#items": 1680,
+     "/helix/faults": 14,
+     "/helix/faults#items": 14,
+     "/helix_dry/cmd_vel": 7012,
+     "/helix_dry/cmd_vel#items": 7009
+    },
+    "received_hz": {
+     "/helix/metrics": 11.983,
+     "/helix/faults": 0.1,
+     "/helix_dry/cmd_vel": 50.013
+    }
+   }
+  },
+  {
+   "arm": "python",
+   "tag": "04_python",
+   "alive_at_end": {
+    "helix_topic_rate_monitor": true,
+    "helix_anomaly_detector": true,
+    "helix_log_parser": true,
+    "helix_arbiter": true,
+    "helix_go2_sport_sink": true
+   },
+   "procs": {
+    "helix_topic_rate_monitor": {
+     "n": 60,
+     "cpu_mean": 8.625,
+     "cpu_max": 9.99,
+     "rss_mean_kb": 55817.7,
+     "rss_max_kb": 55880,
+     "threads": 33
+    },
+    "helix_anomaly_detector": {
+     "n": 60,
+     "cpu_mean": 0.45,
+     "cpu_max": 0.999,
+     "rss_mean_kb": 50058.9,
+     "rss_max_kb": 50120,
+     "threads": 33
+    },
+    "helix_log_parser": {
+     "n": 60,
+     "cpu_mean": 0.525,
+     "cpu_max": 0.999,
+     "rss_mean_kb": 50649.3,
+     "rss_max_kb": 50712,
+     "threads": 33
+    },
+    "helix_arbiter": {
+     "n": 60,
+     "cpu_mean": 2.281,
+     "cpu_max": 2.997,
+     "rss_mean_kb": 50784.7,
+     "rss_max_kb": 50840,
+     "threads": 33
+    },
+    "helix_go2_sport_sink": {
+     "n": 60,
+     "cpu_mean": 2.473,
+     "cpu_max": 2.998,
+     "rss_mean_kb": 53144.7,
+     "rss_max_kb": 53196,
+     "threads": 33
+    }
+   },
+   "driver": {
+    "elapsed_s": 140.25,
+    "sent_hz": {
+     "/utlidar/imu": 250.0,
+     "/utlidar/robot_odom": 150.0,
+     "/utlidar/robot_pose": 18.75,
+     "/utlidar/cloud": 15.4,
+     "/gnss": 1.0,
+     "/multiplestate": 1.0,
+     "/helix_dry/nav/cmd_vel": 20.0,
+     "/lf/sportmodestate": 20.0,
+     "/helix/hold": 20.0,
+     "/rosout": 10.0
+    },
+    "received": {
+     "/helix/metrics": 1680,
+     "/helix/metrics#items": 1680,
+     "/helix/faults": 14,
+     "/helix/faults#items": 14,
+     "/helix_dry/cmd_vel": 7014,
+     "/helix_dry/cmd_vel#items": 7011
+    },
+    "received_hz": {
+     "/helix/metrics": 11.979,
+     "/helix/faults": 0.1,
+     "/helix_dry/cmd_vel": 50.012
+    }
+   }
+  },
+  {
+   "arm": "cpp",
+   "tag": "05_cpp",
+   "alive_at_end": {
+    "helix_topic_rate_monitor": true,
+    "helix_anomaly_detector": true,
+    "helix_log_parser": true,
+    "helix_arbiter": true,
+    "helix_go2_sport_sink": true
+   },
+   "procs": {
+    "helix_topic_rate_monitor": {
+     "n": 60,
+     "cpu_mean": 0.833,
+     "cpu_max": 1.499,
+     "rss_mean_kb": 17801.5,
+     "rss_max_kb": 17852,
+     "threads": 10
+    },
+    "helix_anomaly_detector": {
+     "n": 60,
+     "cpu_mean": 0.058,
+     "cpu_max": 0.5,
+     "rss_mean_kb": 15112.1,
+     "rss_max_kb": 15160,
+     "threads": 10
+    },
+    "helix_log_parser": {
+     "n": 60,
+     "cpu_mean": 0.092,
+     "cpu_max": 0.5,
+     "rss_mean_kb": 14808.9,
+     "rss_max_kb": 14860,
+     "threads": 10
+    },
+    "helix_arbiter": {
+     "n": 60,
+     "cpu_mean": 0.291,
+     "cpu_max": 0.999,
+     "rss_mean_kb": 15002.4,
+     "rss_max_kb": 15052,
+     "threads": 9
+    },
+    "helix_go2_sport_sink": {
+     "n": 60,
+     "cpu_mean": 0.25,
+     "cpu_max": 0.5,
+     "rss_mean_kb": 14505.1,
+     "rss_max_kb": 14552,
+     "threads": 9
+    }
+   },
+   "driver": {
+    "elapsed_s": 140.18,
+    "sent_hz": {
+     "/utlidar/imu": 250.0,
+     "/utlidar/robot_odom": 150.0,
+     "/utlidar/robot_pose": 18.75,
+     "/utlidar/cloud": 15.39,
+     "/gnss": 1.0,
+     "/multiplestate": 1.0,
+     "/helix_dry/nav/cmd_vel": 20.0,
+     "/lf/sportmodestate": 20.0,
+     "/helix/hold": 20.0,
+     "/rosout": 9.99
+    },
+    "received": {
+     "/helix/metrics": 1680,
+     "/helix/metrics#items": 1680,
+     "/helix/faults": 14,
+     "/helix/faults#items": 14,
+     "/helix_dry/cmd_vel": 7010,
+     "/helix_dry/cmd_vel#items": 7006
+    },
+    "received_hz": {
+     "/helix/metrics": 11.984,
+     "/helix/faults": 0.1,
+     "/helix_dry/cmd_vel": 50.006
+    }
+   }
+  }
+ ],
+ "note": "run from a working tree at ac28a5b with this script uncommitted; the host had unrelated background load"
+}

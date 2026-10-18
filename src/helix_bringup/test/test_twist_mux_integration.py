@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import signal
 import subprocess
 import time
 from pathlib import Path
@@ -88,6 +89,9 @@ def twist_mux_proc(rclpy_module):
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         env=env,
+        # `ros2 run` is a wrapper: terminating it alone left the twist_mux
+        # binary running after every test. Own process group, stop it whole.
+        start_new_session=True,
     )
     # Wait for twist_mux to come up. It logs "Subscribed to topic" lines.
     # Crude readiness wait: just sleep long enough for the node to register.
@@ -98,12 +102,26 @@ def twist_mux_proc(rclpy_module):
     try:
         yield proc
     finally:
-        proc.terminate()
+        _stop_group(proc)
+
+
+def _stop_group(proc) -> None:
+    """SIGINT the wrapper's process group, then make sure nothing in it survives."""
+    try:
+        os.killpg(proc.pid, signal.SIGINT)
+        proc.wait(timeout=5.0)
+    except subprocess.TimeoutExpired:
+        pass
+    except ProcessLookupError:
+        return
+    for sig in (signal.SIGTERM, signal.SIGKILL):
         try:
-            proc.wait(timeout=5.0)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-            proc.wait(timeout=5.0)
+            os.killpg(proc.pid, sig)
+        except ProcessLookupError:
+            break
+        time.sleep(0.5)
+    if proc.poll() is None:
+        proc.wait(timeout=5.0)
 
 
 def _make_twist(linear_x: float) -> Twist:

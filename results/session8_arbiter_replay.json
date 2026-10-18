@@ -1,0 +1,522 @@
+{
+ "what": "Session 8 real GO2 FaultEvents replayed through diagnosis->recovery->arbiter->sport sink(dry_run); off-robot, NOT hardware stopping evidence",
+ "bag": "Session 8 post_fix_demo (post_fix_demo_0.db3)",
+ "bag_sha256_db3": "db41d78f78c944b2133a611ddeb64f62ba734c54c85b725c7e65a0d113427989",
+ "git_sha": "0ec54b063bb93d48e45b64878522829d40687361",
+ "faults_replayed": 30,
+ "gap_compression": {
+  "max_gap_s": 10.0,
+  "compressed": [
+   {
+    "bag_gap_s": 26.0,
+    "replayed_as_s": 10.0
+   },
+   {
+    "bag_gap_s": 17.503,
+    "replayed_as_s": 10.0
+   },
+   {
+    "bag_gap_s": 100.497,
+    "replayed_as_s": 10.0
+   },
+   {
+    "bag_gap_s": 61.507,
+    "replayed_as_s": 10.0
+   },
+   {
+    "bag_gap_s": 61.492,
+    "replayed_as_s": 10.0
+   },
+   {
+    "bag_gap_s": 17.502,
+    "replayed_as_s": 10.0
+   },
+   {
+    "bag_gap_s": 53.5,
+    "replayed_as_s": 10.0
+   }
+  ]
+ },
+ "fake_nav_vx": 0.2,
+ "original_session8": {
+  "hints": 14,
+  "actions": [
+   [
+    2.501,
+    "STOP_AND_HOLD",
+    "ACCEPTED",
+    "rate_hz/utlidar_robot_odom"
+   ],
+   [
+    5.003,
+    "STOP_AND_HOLD",
+    "SUPPRESSED_COOLDOWN",
+    "rate_hz/utlidar_robot_odom"
+   ],
+   [
+    8.06,
+    "RESUME",
+    "ACCEPTED",
+    ""
+   ],
+   [
+    154.004,
+    "STOP_AND_HOLD",
+    "ACCEPTED",
+    "rate_hz/utlidar_robot_odom"
+   ],
+   [
+    157.062,
+    "RESUME",
+    "SUPPRESSED_COOLDOWN",
+    ""
+   ],
+   [
+    215.505,
+    "STOP_AND_HOLD",
+    "ACCEPTED",
+    "rate_hz/utlidar_robot_odom"
+   ],
+   [
+    218.56,
+    "RESUME",
+    "SUPPRESSED_COOLDOWN",
+    ""
+   ],
+   [
+    277.003,
+    "STOP_AND_HOLD",
+    "ACCEPTED",
+    "rate_hz/utlidar_robot_odom"
+   ],
+   [
+    280.06,
+    "RESUME",
+    "SUPPRESSED_COOLDOWN",
+    ""
+   ],
+   [
+    294.504,
+    "STOP_AND_HOLD",
+    "ACCEPTED",
+    "rate_hz/utlidar_imu"
+   ],
+   [
+    295.005,
+    "STOP_AND_HOLD",
+    "SUPPRESSED_COOLDOWN",
+    "rate_hz/utlidar_imu"
+   ],
+   [
+    295.504,
+    "STOP_AND_HOLD",
+    "SUPPRESSED_COOLDOWN",
+    "rate_hz/utlidar_imu"
+   ],
+   [
+    296.002,
+    "STOP_AND_HOLD",
+    "SUPPRESSED_COOLDOWN",
+    "rate_hz/utlidar_imu"
+   ],
+   [
+    301.562,
+    "RESUME",
+    "ACCEPTED",
+    ""
+   ]
+  ]
+ },
+ "replay": {
+  "hints": [
+   [
+    "STOP_AND_HOLD",
+    "rate_hz/utlidar_robot_odom",
+    "R1"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "rate_hz/utlidar_robot_odom",
+    "R1"
+   ],
+   [
+    "RESUME",
+    "",
+    "R2"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "rate_hz/utlidar_robot_odom",
+    "R1"
+   ],
+   [
+    "RESUME",
+    "",
+    "R2"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "rate_hz/utlidar_robot_odom",
+    "R1"
+   ],
+   [
+    "RESUME",
+    "",
+    "R2"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "rate_hz/utlidar_robot_odom",
+    "R1"
+   ],
+   [
+    "RESUME",
+    "",
+    "R2"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "rate_hz/utlidar_imu",
+    "R1"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "rate_hz/utlidar_imu",
+    "R1"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "rate_hz/utlidar_imu",
+    "R1"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "rate_hz/utlidar_imu",
+    "R1"
+   ],
+   [
+    "RESUME",
+    "",
+    "R2"
+   ]
+  ],
+  "actions": [
+   [
+    "STOP_AND_HOLD",
+    "ACCEPTED",
+    "rate_hz/utlidar_robot_odom"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "SUPPRESSED_COOLDOWN",
+    "rate_hz/utlidar_robot_odom"
+   ],
+   [
+    "RESUME",
+    "ACCEPTED",
+    ""
+   ],
+   [
+    "STOP_AND_HOLD",
+    "ACCEPTED",
+    "rate_hz/utlidar_robot_odom"
+   ],
+   [
+    "RESUME",
+    "ACCEPTED",
+    ""
+   ],
+   [
+    "STOP_AND_HOLD",
+    "ACCEPTED",
+    "rate_hz/utlidar_robot_odom"
+   ],
+   [
+    "RESUME",
+    "ACCEPTED",
+    ""
+   ],
+   [
+    "STOP_AND_HOLD",
+    "ACCEPTED",
+    "rate_hz/utlidar_robot_odom"
+   ],
+   [
+    "RESUME",
+    "ACCEPTED",
+    ""
+   ],
+   [
+    "STOP_AND_HOLD",
+    "ACCEPTED",
+    "rate_hz/utlidar_imu"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "SUPPRESSED_COOLDOWN",
+    "rate_hz/utlidar_imu"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "SUPPRESSED_COOLDOWN",
+    "rate_hz/utlidar_imu"
+   ],
+   [
+    "STOP_AND_HOLD",
+    "SUPPRESSED_COOLDOWN",
+    "rate_hz/utlidar_imu"
+   ],
+   [
+    "RESUME",
+    "ACCEPTED",
+    ""
+   ]
+  ],
+  "accepted_stops": 5,
+  "hold_windows_s": [
+   5.604,
+   3.111,
+   3.111,
+   3.111,
+   7.111
+  ],
+  "output_msgs": 5108,
+  "nonfinite_outputs": 0,
+  "sink_stopmove_decisions": 48,
+  "sink_move_decisions_dry_run": 1171
+ },
+ "chains": [
+  {
+   "fault_id": "rate_hz/utlidar_robot_odom",
+   "times": {
+    "fault": 13862.389013114,
+    "hint": 13862.389198211,
+    "action": 13862.38924528,
+    "hold": 13862.397056639,
+    "status": 13862.397233756,
+    "output": 13862.397147388,
+    "sink": 13862.397322074
+   },
+   "deltas_ms": {
+    "fault->hint_ms": 0.185,
+    "hint->action_ms": 0.047,
+    "action->hold_ms": 7.811,
+    "hold->status_ms": 0.177,
+    "status->output_ms": -0.086,
+    "output->sink_ms": 0.175
+   },
+   "src_times": {
+    "fault": 1789697369.1170893,
+    "hint": null,
+    "action": 1789697369.1174755,
+    "hold": 1789697369.125368,
+    "status": 1789697369.1254895,
+    "output": null,
+    "sink": 1789697369.1255977
+   },
+   "src_deltas_ms": {
+    "fault->action_ms": 0.386,
+    "action->hold_ms": 7.893,
+    "hold->status_ms": 0.121,
+    "status->sink_ms": 0.108
+   },
+   "fault_to_output_src_ms": 8.4,
+   "fault_to_sink_src_ms": 8.508,
+   "action_to_output_src_ms": 8.014,
+   "complete_to_output": true,
+   "fault_to_output_ms": 8.134,
+   "first_to_output_ms": 8.134
+  },
+  {
+   "fault_id": "rate_hz/utlidar_robot_odom",
+   "times": {
+    "fault": 13899.888835488,
+    "hint": 13899.889091103,
+    "action": 13899.88924326,
+    "hold": 13899.889565834,
+    "status": 13899.889689752,
+    "output": 13899.889662302,
+    "sink": 13899.88979591
+   },
+   "deltas_ms": {
+    "fault->hint_ms": 0.256,
+    "hint->action_ms": 0.152,
+    "action->hold_ms": 0.323,
+    "hold->status_ms": 0.124,
+    "status->output_ms": -0.027,
+    "output->sink_ms": 0.134
+   },
+   "src_times": {
+    "fault": 1789697406.6169894,
+    "hint": null,
+    "action": 1789697406.6175432,
+    "hold": 1789697406.617876,
+    "status": 1789697406.6179621,
+    "output": null,
+    "sink": 1789697406.6180634
+   },
+   "src_deltas_ms": {
+    "fault->action_ms": 0.554,
+    "action->hold_ms": 0.333,
+    "hold->status_ms": 0.086,
+    "status->sink_ms": 0.101
+   },
+   "fault_to_output_src_ms": 0.973,
+   "fault_to_sink_src_ms": 1.074,
+   "action_to_output_src_ms": 0.419,
+   "complete_to_output": true,
+   "fault_to_output_ms": 0.827,
+   "first_to_output_ms": 0.827
+  },
+  {
+   "fault_id": "rate_hz/utlidar_robot_odom",
+   "times": {
+    "fault": 13909.88914845,
+    "hint": 13909.889309837,
+    "action": 13909.889451204,
+    "hold": 13909.889760829,
+    "status": 13909.889952395,
+    "output": 13909.889908026,
+    "sink": 13909.890108812
+   },
+   "deltas_ms": {
+    "fault->hint_ms": 0.161,
+    "hint->action_ms": 0.141,
+    "action->hold_ms": 0.31,
+    "hold->status_ms": 0.192,
+    "status->output_ms": -0.044,
+    "output->sink_ms": 0.201
+   },
+   "src_times": {
+    "fault": 1789697416.6171868,
+    "hint": null,
+    "action": 1789697416.6177099,
+    "hold": 1789697416.6180522,
+    "status": 1789697416.618185,
+    "output": null,
+    "sink": 1789697416.6183062
+   },
+   "src_deltas_ms": {
+    "fault->action_ms": 0.523,
+    "action->hold_ms": 0.342,
+    "hold->status_ms": 0.133,
+    "status->sink_ms": 0.121
+   },
+   "fault_to_output_src_ms": 0.998,
+   "fault_to_sink_src_ms": 1.119,
+   "action_to_output_src_ms": 0.475,
+   "complete_to_output": true,
+   "fault_to_output_ms": 0.76,
+   "first_to_output_ms": 0.76
+  },
+  {
+   "fault_id": "rate_hz/utlidar_robot_odom",
+   "times": {
+    "fault": 13919.889052641,
+    "hint": 13919.889169749,
+    "action": 13919.889320906,
+    "hold": 13919.889610121,
+    "status": 13919.889808397,
+    "output": 13919.889770428,
+    "sink": 13919.889920365
+   },
+   "deltas_ms": {
+    "fault->hint_ms": 0.117,
+    "hint->action_ms": 0.151,
+    "action->hold_ms": 0.289,
+    "hold->status_ms": 0.198,
+    "status->output_ms": -0.038,
+    "output->sink_ms": 0.15
+   },
+   "src_times": {
+    "fault": 1789697426.6171014,
+    "hint": null,
+    "action": 1789697426.617612,
+    "hold": 1789697426.61791,
+    "status": 1789697426.61806,
+    "output": null,
+    "sink": 1789697426.6181464
+   },
+   "src_deltas_ms": {
+    "fault->action_ms": 0.51,
+    "action->hold_ms": 0.298,
+    "hold->status_ms": 0.15,
+    "status->sink_ms": 0.086
+   },
+   "fault_to_output_src_ms": 0.959,
+   "fault_to_sink_src_ms": 1.045,
+   "action_to_output_src_ms": 0.448,
+   "complete_to_output": true,
+   "fault_to_output_ms": 0.718,
+   "first_to_output_ms": 0.718
+  },
+  {
+   "fault_id": "rate_hz/utlidar_imu",
+   "times": {
+    "fault": 13929.88911639,
+    "hint": 13929.889311156,
+    "action": 13929.889488853,
+    "hold": 13929.889933914,
+    "status": 13929.890091781,
+    "output": 13929.890063772,
+    "sink": 13929.890116771
+   },
+   "deltas_ms": {
+    "fault->hint_ms": 0.195,
+    "hint->action_ms": 0.178,
+    "action->hold_ms": 0.445,
+    "hold->status_ms": 0.158,
+    "status->output_ms": -0.028,
+    "output->sink_ms": 0.053
+   },
+   "src_times": {
+    "fault": 1789697436.617176,
+    "hint": null,
+    "action": 1789697436.6177037,
+    "hold": 1789697436.6181748,
+    "status": 1789697436.6183012,
+    "output": null,
+    "sink": 1789697436.6183703
+   },
+   "src_deltas_ms": {
+    "fault->action_ms": 0.528,
+    "action->hold_ms": 0.471,
+    "hold->status_ms": 0.126,
+    "status->sink_ms": 0.069
+   },
+   "fault_to_output_src_ms": 1.125,
+   "fault_to_sink_src_ms": 1.194,
+   "action_to_output_src_ms": 0.597,
+   "complete_to_output": true,
+   "fault_to_output_ms": 0.947,
+   "first_to_output_ms": 0.947
+  }
+ ],
+ "latency_summary_ms": {
+  "fault_to_output_src_ms": {
+   "n": 5,
+   "median": 0.998,
+   "max": 8.4,
+   "min": 0.959
+  },
+  "fault_to_sink_src_ms": {
+   "n": 5,
+   "median": 1.119,
+   "max": 8.508,
+   "min": 1.045
+  },
+  "action_to_output_src_ms": {
+   "n": 5,
+   "median": 0.475,
+   "max": 8.014,
+   "min": 0.419
+  },
+  "fault_to_output_ms": {
+   "n": 5,
+   "median": 0.827,
+   "max": 8.134,
+   "min": 0.718
+  }
+ },
+ "nonzero_outputs_during_hold": 0
+}

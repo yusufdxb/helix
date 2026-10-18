@@ -1,0 +1,65 @@
+[INFO] [launch]: All log files can be found below /home/unitree/.ros/log/2026-10-17-22-32-47-109431-unitree-jetson-payload-70141
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [launch.user]: [helix_native] sink_mode=armed sink_backend=cpp actuation_enabled=True auto_resume=False arbiter_config=/home/unitree/helix_native_1254bbe/install/helix_arbiter/share/helix_arbiter/config/arbiter_hw.yaml cmd_vel_out=/helix_hw/cmd_vel
+[INFO] [helix_topic_rate_monitor-1]: process started with pid [70168]
+[INFO] [helix_anomaly_detector-2]: process started with pid [70170]
+[INFO] [helix_log_parser-3]: process started with pid [70172]
+[INFO] [helix_supervisor-4]: process started with pid [70174]
+[INFO] [helix_arbiter-5]: process started with pid [70176]
+[INFO] [helix_go2_sport_sink-6]: process started with pid [70178]
+[helix_go2_sport_sink-6] [WARN] [1792276367.328829280] [helix_go2_sport_sink]: GO2 sport sink (C++) up in mode=armed
+[helix_go2_sport_sink-6] [INFO] [1792276367.375431136] [helix_go2_sport_sink]: StopMove (DEADMAN) sent_to_robot=true
+[helix_anomaly_detector-2] [INFO] [1792276367.540148192] [helix_anomaly_detector]: AnomalyDetectorNode configured - zscore_threshold=4.000 consecutive_trigger=3 window_size=60 emit_cooldown_s=1.000 min_anomaly_duration_s=1.000
+[helix_topic_rate_monitor-1] [INFO] [1792276367.541300416] [helix_topic_rate_monitor]: TopicRateMonitor configured, 6 topics, window=5.0s stale_after=1.00s
+[helix_log_parser-3] [INFO] [1792276367.541649888] [helix_log_parser]: Loaded 5 rules from '/home/unitree/helix_native_1254bbe/install/helix_bringup/share/helix_bringup/config/log_rules.yaml'
+[helix_supervisor-4] [INFO] [1792276367.544795392] [helix_supervisor]: configured: actuation_enabled=true auto_resume=false require_controller_ack=true expected=3 critical=1
+[helix_anomaly_detector-2] [INFO] [1792276367.545195392] [helix_anomaly_detector]: AnomalyDetectorNode activated (heartbeat publishing on /helix/heartbeat at 10.0 Hz).
+[helix_arbiter-5] [INFO] [1792276367.551786016] [helix_arbiter]: configured: output=/helix_hw/cmd_vel sources=[nav /helix_hw/nav/cmd_vel prio=50 timeout=0.500000, teleop /helix_hw/teleop/cmd_vel prio=200 timeout=0.500000] hold_timeout=0.50s rate=50.0Hz
+[helix_log_parser-3] [INFO] [1792276367.558471744] [helix_log_parser]: LogParser activated with 5 rules, dedup_window=5.0s
+[helix_arbiter-5] [WARN] [1792276367.559598560] [helix_arbiter]: 1 other publisher(s) on /helix_hw/cmd_vel: the arbiter must be its only publisher
+[helix_supervisor-4] [INFO] [1792276367.562260640] [helix_supervisor]: state STARTING: supervision started
+[helix_supervisor-4] [INFO] [1792276367.562377440] [helix_supervisor]: active: STARTING
+[helix_arbiter-5] [INFO] [1792276367.562547776] [helix_arbiter]: selected reason=HELIX_HOLD source=- cmd=(+0.000,+0.000,+0.000) fault=-
+[helix_supervisor-4] [INFO] [1792276367.662293184] [helix_supervisor]: state NOMINAL: all critical expected nodes beating
+[helix_arbiter-5] [INFO] [1792276367.679914912] [helix_arbiter]: selected reason=NO_LIVE_INPUT source=- cmd=(+0.000,+0.000,+0.000) fault=-
+[helix_anomaly_detector-2] [WARN] [1792276368.050709248] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' stale (NaN), consecutive violation #1
+[helix_go2_sport_sink-6] [INFO] [1792276368.379979328] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_go2_sport_sink-6] [INFO] [1792276369.399944992] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_go2_sport_sink-6] [INFO] [1792276370.399973728] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_anomaly_detector-2] [INFO] [1792276370.550780736] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/utlidar_imu' healthy: 4 consecutive samples with z <= 4.00
+[helix_anomaly_detector-2] [INFO] [1792276370.550990976] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/utlidar_robot_odom' healthy: 4 consecutive samples with z <= 4.00
+[helix_anomaly_detector-2] [INFO] [1792276370.551114752] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/utlidar_robot_pose' healthy: 4 consecutive samples with z <= 4.00
+[helix_anomaly_detector-2] [INFO] [1792276370.551219840] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/utlidar_cloud' healthy: 4 consecutive samples with z <= 4.00
+[helix_anomaly_detector-2] [INFO] [1792276371.050729824] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/gnss' healthy: 4 consecutive samples with z <= 4.00
+[helix_go2_sport_sink-6] [INFO] [1792276371.419964832] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_anomaly_detector-2] [INFO] [1792276371.550727136] [helix_anomaly_detector]: FaultClear: Metric 'rate_hz/multiplestate' healthy: 4 consecutive samples with z <= 4.00
+[helix_go2_sport_sink-6] [INFO] [1792276372.939961376] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_go2_sport_sink-6] [INFO] [1792276373.959975616] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_go2_sport_sink-6] [INFO] [1792276374.979977824] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_go2_sport_sink-6] [INFO] [1792276376.000019648] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_anomaly_detector-2] [WARN] [1792276376.550650560] [helix_anomaly_detector]: Metric 'rate_hz/multiplestate' stale (NaN), consecutive violation #1
+[helix_go2_sport_sink-6] [INFO] [1792276377.019984288] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_go2_sport_sink-6] [INFO] [1792276378.059939744] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_go2_sport_sink-6] [INFO] [1792276379.079975296] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_go2_sport_sink-6] [INFO] [1792276380.100021888] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_go2_sport_sink-6] [INFO] [1792276381.120068320] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_go2_sport_sink-6] [INFO] [1792276382.140153728] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_go2_sport_sink-6] [INFO] [1792276383.160107904] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_arbiter-5] [INFO] [1792276384.173775008] [helix_arbiter]: selected reason=SOURCE source=nav cmd=(+0.250,+0.000,+0.000) fault=-
+[helix_go2_sport_sink-6] [INFO] [1792276384.200417344] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_arbiter-5] [INFO] [1792276384.719950656] [helix_arbiter]: selected reason=NO_LIVE_INPUT source=- cmd=(+0.000,+0.000,+0.000) fault=-
+[helix_go2_sport_sink-6] [INFO] [1792276385.239993920] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_arbiter-5] [INFO] [1792276386.206475936] [helix_arbiter]: selected reason=SOURCE source=nav cmd=(+0.000,+0.000,+0.000) fault=-
+[helix_go2_sport_sink-6] [INFO] [1792276386.240064256] [helix_go2_sport_sink]: StopMove (ZERO) sent_to_robot=true
+[helix_supervisor-4] [INFO] [1792276386.610252512] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[helix_anomaly_detector-2] [INFO] [1792276386.610263968] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[helix_topic_rate_monitor-1] [INFO] [1792276386.610269792] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[helix_log_parser-3] [INFO] [1792276386.610270848] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[helix_arbiter-5] [INFO] [1792276386.619908928] [helix_arbiter]: signal 2: publishing zero burst before exit
+[helix_arbiter-5] [INFO] [1792276386.620038400] [helix_arbiter]: selected reason=SHUTDOWN source=- cmd=(+0.000,+0.000,+0.000) fault=-
+[INFO] [helix_topic_rate_monitor-1]: process has finished cleanly [pid 70168]
+[INFO] [helix_log_parser-3]: process has finished cleanly [pid 70172]
+[INFO] [helix_anomaly_detector-2]: process has finished cleanly [pid 70170]
+[INFO] [helix_supervisor-4]: process has finished cleanly [pid 70174]
+[INFO] [helix_arbiter-5]: process has finished cleanly [pid 70176]
+[INFO] [helix_go2_sport_sink-6]: process has finished cleanly [pid 70178]

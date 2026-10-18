@@ -1,0 +1,16 @@
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1792275554.678896672] [rosbag2_recorder]: Press SPACE for pausing/resuming
+[INFO] [1792275554.682687136] [rosbag2_storage]: Opened database 'bag/bag_0.db3' for READ_WRITE.
+[INFO] [1792275554.683268992] [rosbag2_recorder]: Listening for topics...
+[INFO] [1792275554.683276608] [rosbag2_recorder]: Event publisher thread: Starting
+[INFO] [1792275554.685858304] [rosbag2_recorder]: Subscribed to topic '/api/sport/request'
+[INFO] [1792275554.685959552] [rosbag2_recorder]: Recording...
+[INFO] [1792275554.789572672] [rosbag2_recorder]: Subscribed to topic '/api/sport/response'
+[INFO] [1792275554.790999392] [rosbag2_recorder]: Subscribed to topic '/utlidar/robot_odom'
+[INFO] [1792275554.792057440] [rosbag2_recorder]: Subscribed to topic '/lf/sportmodestate'
+[INFO] [1792275554.792729408] [rosbag2_recorder]: Subscribed to topic '/sportmodestate'
+[INFO] [1792275555.202550400] [rosbag2_recorder]: Subscribed to topic '/helix/fault_clear'
+[INFO] [1792275555.203308288] [rosbag2_recorder]: Subscribed to topic '/helix/faults'
+[INFO] [1792275569.834966112] [rosbag2_recorder]: Subscribed to topic '/helix_hw/nav/cmd_vel'
+[INFO] [1792275576.344003776] [rosbag2_cpp]: Writing remaining messages from cache to the bag. It may take a while
+[INFO] [1792275576.345668064] [rosbag2_recorder]: Event publisher thread: Exiting
+[INFO] [1792275576.345879744] [rosbag2_recorder]: Recording stopped

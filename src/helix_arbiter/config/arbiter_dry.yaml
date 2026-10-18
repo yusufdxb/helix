@@ -1,0 +1,27 @@
+# helix_arbiter, DRY topic set: identical to arbiter.yaml except that the
+# output and both sources live under /helix_dry/, which nothing on the robot
+# consumes. Used only for the dry variants of hardware stages A and C
+# (helix_hw_stage --topic-prefix); see docs/HW_MOTION_TEST.md. Evidence from
+# this config is marked `topics: remapped` and never unlocks a real stage.
+#
+# Launch with: arbiter_config:=<share>/config/arbiter_dry.yaml
+#              cmd_vel_out:=/helix_dry/cmd_vel enable_twist_mux:=false
+helix_arbiter:
+  ros__parameters:
+    output_topic: /helix_dry/cmd_vel
+    status_topic: /helix/arbiter/status
+    hold_topic: /helix/hold
+    rate_hz: 50.0
+    hold_timeout_sec: 0.5
+    max_abs_linear: 1.0
+    max_abs_angular: 1.5
+    shutdown_zero_count: 10
+    sources:
+      teleop:
+        topic: /helix_dry/teleop/cmd_vel
+        priority: 200
+        timeout: 0.5
+      nav:
+        topic: /helix_dry/nav/cmd_vel
+        priority: 50
+        timeout: 0.5

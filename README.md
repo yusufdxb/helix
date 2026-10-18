@@ -25,13 +25,13 @@ Diagnostics get reported, watchdogs catch dead nodes, navigation has its own
 recovery behaviors, and a mux arbitrates whose `/cmd_vel` wins, but nothing
 closes the loop from detection through a policy decision to a gated actuation
 as one system with one safety envelope. HELIX is that loop: four ROS 2
-lifecycle tiers, SENSE to CONTEXT to DIAGNOSE to RECOVER, where RECOVER is the
-only publisher of `/helix/cmd_vel` and is gated by an enable flag, a 5 s
-per-fault cooldown, and an action allowlist. It has been run on a live GO2
-across eight lab sessions, and end to end in software in the most recent, a
-439 s idle run that produced 30 detected faults, 14 recovery hints, 14 audited
-recovery actions, and 3,064 zero-twist commands published on a topic with no
-downstream subscriber. [`docs/comparison.md`](docs/comparison.md) is
+lifecycle tiers, SENSE to CONTEXT to DIAGNOSE to RECOVER, where RECOVER is
+gated by an enable flag, a 5 s per-fault cooldown, and an action allowlist,
+and asserts a hold on a single motion arbiter rather than publishing
+velocity itself. It has been run end to end on a
+live GO2 across eight lab sessions, most recently a 439 s idle run that
+produced 30 detected faults, 14 recovery hints, 14 audited recovery actions,
+and 3,064 zero-twist commands. [`docs/comparison.md`](docs/comparison.md) is
 the honest version of this paragraph: it compares HELIX against
 `diagnostic_updater`, `software_watchdogs`, `system_modes`, Nav2 recovery, and
 `twist_mux`, and says plainly where HELIX duplicates each one.
@@ -43,13 +43,53 @@ the honest version of this paragraph: it compares HELIX against
   SENSE, a rule in DIAGNOSE (R1 to R4) turns it into a `RecoveryHint`, and
   RECOVER emits an audited, allowlisted, cooldown-gated action. Session 8
   reproduced this 14 times with no allowlist or cooldown violation.
-- **Not proven**: physical stopping. `/helix/cmd_vel` had zero downstream
-  subscribers during Session 8, so STOP_AND_HOLD is a real, audited decision
-  that lands on a topic nothing is listening to. The source now routes it
-  through a `twist_mux` fallback (`helix_closedloop.launch.py`), and that path
-  stops a moving robot in simulation
-  ([`docs/sim_launch_recipe.md`](docs/sim_launch_recipe.md)), but it has not
-  been run on the GO2. Physical recovery on the robot is not demonstrated.
+- **Stop command path proven on the real controller; stopping a walking
+  robot not yet shown (2026-10-17)**: `/helix/cmd_vel` had zero downstream
+  subscribers during Session 8, and the planned `twist_mux` fallback turned out
+  to be unsafe (it goes silent on idle and lock, and forwards NaN). The path
+  is now closed **in software**: `helix_arbiter` is the single authoritative
+  velocity output, HELIX forces it to zero through a hold state, and
+  `helix_go2_sport_sink` turns it into GO2 StopMove/Move requests. This is
+  verified off-robot (20 harness scenarios, and a replay of Session 8's
+  real faults with every accepted STOP reaching a zero output, median 1.0 ms).
+  On 2026-10-17 the armed native stack ran on the real GO2 with an injected
+  (synthetic) fault, in two valid motion trials and one ack trial:
+  - StopMove went out within 1 ms of the fault, and the GO2 controller
+    answered it with code 0 within 3 ms.
+  - No Move reached the robot while held, even though the upstream source
+    kept streaming, and no other process sent sport requests.
+  - The robot's state estimate read 0.13 and 0.32 m/s at the fault and still
+    636 and 265 ms later.
+
+  What this does not show: that HELIX stops a *walking* robot. At the
+  sink's 0.25 m/s limit the stock gait never sustained a walk: the estimate
+  shows a 6 to 8 cm body displacement that mostly returned, and foot data
+  cannot tell a shift from steps. There is no stop from steady walking, no
+  no-HELIX counterfactual, no independent motion sensor (`/utlidar/robot_odom`
+  carries the same estimate as SportModeState) and few trials. See
+  [`docs/EVIDENCE_AUDIT.md`](docs/EVIDENCE_AUDIT.md) and
+  [`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md).
+- **Native runtime, 2026-10-17**: the monitoring, supervision and actuation
+  path now runs as C++ processes (`helix_native.launch.py`), with one
+  deterministic fault-state machine in place of four Python nodes. A crash
+  of a monitored node forces zero output (R4; SIGKILL tested in simulation).
+  The native arbiter retains its protective latch across supervisor process
+  and lifecycle restarts; release requires fresh health plus current operator
+  authorization. These restart guarantees are verified with the fake GO2
+  only; sink death remains an unresolved failure. Every stop records
+  arbiter-ack, controller-ack and measured-stop timestamps. Under the same
+  synthetic load the five C++ components that have Python counterparts use
+  1.54 % of one core and 75.8 MB against 14.42 % and 254.1 MB (-89.3 % CPU,
+  -70.2 % RSS, identical outputs). Re-selected on five real captures, the detector
+  keeps sustained faults active (0 false clears, against 1488 for the shipped
+  point) with 0 stop false alarms. It then passed a short held-out test on
+  two fresh GO2 captures (0.216 h): 0 false alarms, 644/644 synthetic onsets
+  detected and 0 false clears. On hardware: the stop test above, and a 10-minute cost run.
+  The 6 native processes use 7.35 % of one core and 91.5 MB, against
+  79.08 % and 587.4 MB for the 13-process Python stack (-90.7 % CPU,
+  -84.4 % RSS). Details:
+  [`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md),
+  [`docs/DETECTOR_EVAL.md`](docs/DETECTOR_EVAL.md).
 - **Found and fixed, not assumed away**: the CONTEXT tier's `ContextBuffer`
   crashed roughly one second after activation in every prior session,
   including hardware, on an `rclpy` detail (`DiagnosticStatus.level` arrives
@@ -170,6 +210,12 @@ source install/setup.bash
 # launch the sensing stack
 ros2 launch helix_bringup helix_sensing.launch.py
 
+# same stack with the C++ anomaly detector (Python is the default)
+ros2 launch helix_bringup helix_sensing.launch.py anomaly_backend:=cpp
+
+# closed loop with both C++ backends; exactly one arbiter runs
+ros2 launch helix_bringup helix_closedloop.launch.py arbiter_backend:=cpp anomaly_backend:=cpp
+
 # inject faults (separate terminal)
 ros2 run helix_bringup fault_injector
 
@@ -205,10 +251,12 @@ duplicates cannot be trusted about what it does not.
 | Tier | State | Validation |
 |---|---|---|
 | **Sense** (`helix_core`, `helix_adapter`) | stable | Hardware-validated across 8 GO2 and Jetson lab sessions (2026-04-03 to 2026-04-23). Detector operating point measured post hoc, see above; shipped config unchanged. |
-| **Sense, C++ port** (`helix_sensing_cpp`) | work in progress | 30-min hardware parity run vs the Python Session 7 plateau: RSS 42.51 MB to 19.81 MB (-53.4%), CPU 2.21% to 0.80% (-63.8%); the 46.6% RSS ratio missed the 30% design-doc target. Cross-session, not a controlled A/B ([`docs/cpp_parity_summary.md`](docs/cpp_parity_summary.md)). Launch-gated (`use_cpp_anomaly=false`). |
+| **Sense, C++ port** (`helix_sensing_cpp`) | work in progress | Detector: 30-min hardware run, -53.4% RSS and -63.8% CPU vs the Python Session 7 plateau (cross-session; RSS missed the 30% target at 46.6%). Rate monitor and log parser ported 2026-10-17 (log parser: 16 Python parity cases). In `closedloop.launch.py`, `anomaly_backend:=cpp` selects the C++ detector and Python stays the default; `helix_native.launch.py` is all C++. |
+| **Supervise, native** (`helix_supervisor_cpp`) | software-verified | One fault-state machine replacing heartbeat, diagnosis, context and recovery. 49 tests; stop chain PASS against a simulated GO2 and on the real GO2 controller (ack stage, plus 2 motion trials with an injected fault). Stopping a walking robot not shown. See [`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md). |
 | **Context** (`helix_diagnosis.context_buffer`) | fixed, re-verify on hardware | Crashed roughly 1 s after activation in every prior session on an `rclpy` bytes/int detail. Fixed and unit-tested; not yet re-confirmed on a live GO2. |
-| **Diagnose** (`helix_diagnosis`) | work in progress | Closed loop validated in software on a live GO2 in Session 8, 14/14 hints correctly ruled. |
-| **Recover** (`helix_recovery`) | work in progress | Validated end to end in software in Session 8: 14 hints consumed, allowlist and cooldown audited, 3,064 zero-twist commands published. Caveat: `/helix/cmd_vel` had 0 downstream subscribers in that session, so STOP_AND_HOLD was a void publish. The `twist_mux` fallback now in source is validated in unit tests and simulation only, not on the robot. |
+| **Diagnose** (`helix_diagnosis`) | work in progress | Closed-loop validated on a live GO2 in Session 8, 14/14 hints correctly ruled. |
+| **Recover** (`helix_recovery`) | work in progress | Validated end to end in Session 8: 14 hints consumed, allowlist and cooldown audited. Session 8's `/helix/cmd_vel` had 0 subscribers. Recovery now asserts `/helix/hold` on `helix_arbiter`; verified off-robot, hardware stage E pending. |
+| **Arbitrate** (`helix_arbiter`, `helix_arbiter_cpp`, `helix_go2_sink_cpp`) | software-verified | Single authoritative velocity output plus GO2 sport sink (Python and C++, 233 + 37 parity cases). The Python arbiter ran on the Orin on remapped topics with the sink in dry_run (2026-10-09). No StopMove from this sink has reached the robot. |
 | **Explain** (`helix_explanation`) | work in progress | 26 unit tests green. Ships `llm_enabled=false`; Jetson `llama-server` deployment pending. |
 
 Last stable release without the closed-loop stack:
@@ -220,12 +268,14 @@ closed-loop work is tagged
 
 | Package | Language | Tier | Contents |
 |---|---|---|---|
-| `helix_msgs` | msg | shared | `FaultEvent`, `RecoveryHint`, `RecoveryAction`, `GetContext` srv |
+| `helix_msgs` | msg | shared | `FaultEvent`, `RecoveryHint`, `RecoveryAction`, `HelixHold`, `ArbiterStatus`, `GetContext` srv |
 | `helix_core` | Python | Sense | `anomaly_detector`, `heartbeat_monitor`, `log_parser` (reference implementation) |
-| `helix_sensing_cpp` | C++ | Sense | C++ port of `anomaly_detector` (RollingStats kernel + LifecycleNode component). Launch-gated; Python stays default until hardware parity is re-confirmed. |
+| `helix_sensing_cpp` | C++ | Sense | C++ port of `anomaly_detector`: ROS-free core plus a lifecycle component, byte-identical fault strings (134 Python parity cases). Selected with `anomaly_backend:=cpp`; Python stays the default until hardware parity is re-confirmed. |
+| `helix_arbiter_cpp` | C++ | Arbitrate | C++ port of `helix_arbiter`: same node name, parameters, topics and QoS (233 Python parity cases, 26 process tests). Selected with `arbiter_backend:=cpp`; verified off robot only, Python stays the default. |
 | `helix_adapter` | Python | Sense | Lifecycle nodes bridging robot-specific telemetry (topic-rate monitor, JSON state parser, pose drift) to `/helix/metrics` |
 | `helix_diagnosis` | Python | Context, Diagnose | `context_buffer` (rosout ring + metric/health snapshot), `diagnosis_node` (IDLE / STOP_AND_HOLD state machine), pure-function `rules` |
-| `helix_recovery` | Python | Recover | `recovery_node` with `SafetyEnvelope` (enable, cooldown, allowlist). Only publisher of `cmd_vel`. |
+| `helix_recovery` | Python | Recover | `recovery_node` with `SafetyEnvelope` (enable, cooldown, allowlist). Publishes the `/helix/hold` state, never a velocity. |
+| `helix_arbiter` | Python | Arbitrate | `helix_arbiter` (sole `/cmd_vel` publisher), `helix_go2_sport_sink`, `helix_preflight` (GO/NO-GO), `helix_hw_stage` (gated A-F runner), `helix_trace`, `helix_fake_go2` (rehearsal only). |
 | `helix_explanation` | Python | Explain | `llm_explainer` and `llm_client`: llama-server sidecar client, `response_format: json_schema`, ThreadPoolExecutor, deterministic fallback. Advisory only. |
 | `helix_bringup` | Python | Ops | Launch files, YAML config, `fault_injector` |
 
@@ -287,23 +337,36 @@ Full evidence, scope, and limitations: [`docs/GO2_HARDWARE_EVIDENCE.md`](docs/GO
 ## Roadmap
 
 HELIX ships as a public repo and demo video: a working detect, decide, and
-command-recovery system that other roboticists can install and adapt; physical
-recovery on the robot is not yet demonstrated. Forward pillars:
+command-recovery system that other roboticists can install and adapt. The
+stop command path is shown on the real controller; stopping a walking robot
+is not. Forward pillars:
 
-1. **Close the recovery loop physically.** `/helix/cmd_vel` is now wired
-   through a `twist_mux` fallback in source and proven in simulation; the
-   remaining step is a GO2 run showing STOP_AND_HOLD reaches the robot, not a
-   void publish. This is the single biggest gap between "proven" and "true" above.
-2. **Ship the measured detector operating point.** The shipped
+1. **Close the recovery loop physically.** Ack stage and 2 motion trials
+   passed on the GO2 ([`docs/NATIVE_RUNTIME.md`](docs/NATIVE_RUNTIME.md)).
+   Next:
+   - find why the gait does not engage at 0.25 m/s or below (command
+     length, `mcf` speed threshold, BalanceStand first), recording
+     `/lowstate` for foot contact.
+   - a stop from steady walking. This may need a speed limit above the
+     sink's 0.25 m/s, which is an operator decision.
+   - the no-HELIX counterfactual: the same Move stream with no hold,
+     measuring travel.
+   - more trials, for repeat statistics, and a real sensor fault in place of
+     the injected one.
+2. **Ship the measured detector operating point.** The shipped Python
    `zscore_threshold: 4.0, window_size: 60` is measurably blind to a
-   sustained fault (1/62 detection on a 10-sigma step); `analysis/`'s
-   proposed `3.5 / 120` is not yet the default pending a hardware
-   confirmation pass, particularly on `rate_hz/utlidar_robot_odom`, which is
-   unmeasured on idle data today.
-3. **C/C++ on the hot paths.** Python is a RAM and latency liability on the
-   Jetson at steady state. The anomaly detector port has landed; the
-   heartbeat monitor, log parser, and adapter rate-monitor follow. Target:
-   under 30% of the Python RSS baseline.
+   sustained fault (1/62 detection on a 10-sigma step) and self-clears
+   during one. The proposed `3.5 / 120` failed on the October captures
+   (stop false alarms). The native profile ships a frozen-baseline
+   configuration chosen on DEV, which passed a short held-out test
+   ([`docs/DETECTOR_EVAL.md`](docs/DETECTOR_EVAL.md)). Next: longer
+   held-out time, captures with the robot walking, and a physical sensor
+   fault.
+3. **C/C++ on the hot paths.** Done for the native profile: rate monitor,
+   detector, log parser, supervisor, arbiter and sink. On the Orin, the
+   native profile uses 7.35 % of one core and 91.5 MB, against 79.08 % and
+   587.4 MB for the Python stack (10 min against 30 min, robot lying).
+   CUDA was not used: the detector works on scalar metrics at 2 Hz.
 4. **Local LLM for heal, flag, and predict.** Qwen2.5-1.5B-Instruct Q4_K_M via
    a llama-server sidecar on the Jetson (~1.5 to 1.7 GB RSS),
    schema-constrained JSON output, advisory only. See

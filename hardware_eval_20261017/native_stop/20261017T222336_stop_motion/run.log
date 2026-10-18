@@ -1,0 +1,4 @@
+start 2026-10-17T22:23:36Z sha=1254bbe09f086a2db383cb778ac2b84f13d05128 stage=motion args=--vx 0.3 --settle-s 0.5 --abort-speed 0.45
+vx must be in (0, 0.25] (sink limit)
+stage rc=2
+DONE 2026-10-17T22:24:01Z rc=2 dir=/home/unitree/helix_hw/20261017T222336_stop_motion

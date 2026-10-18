@@ -93,10 +93,14 @@ class TopicRateMonitor(LifecycleNode):
                 continue
             self._windows[topic] = RateWindow(window_sec=window_sec)
             msg_type = _TYPE_MAP[topic]
+            # Only arrivals are counted, so take the serialized bytes and
+            # skip deserialization: building a PointCloud2 object per sweep
+            # costs CPU on the robot and delays the callbacks behind it.
             sub = self.create_subscription(
                 msg_type, topic,
                 lambda _msg, t=topic: self._windows[t].record(),
                 self._qos_for(msg_type),
+                raw=True,
             )
             self._subs.append(sub)
 

@@ -1,0 +1,31 @@
+start 2026-10-17T22:32:03Z sha=1254bbe09f086a2db383cb778ac2b84f13d05128 stage=motion args=--vx 0.25 --settle-s 0.3 --abort-speed 0.40
+=== native stop test, stage motion ===
+  [PASS] supervisor status received 
+  [PASS] sink status received 
+  [PASS] SportModeState received 
+  [PASS] supervisor NOMINAL {'state': 'NOMINAL', 'faults': []}
+  [PASS] supervisor actuation_enabled 
+  [PASS] sink mode in ('armed',) {'mode': 'armed'}
+  [PASS] sink feedback available 
+  [PASS] robot still before the stage {'v': 0.011482773071825114, 'yaw': -0.008522114716470242}
+  [PASS] robot standing (body_height > 0.25 m) {'body_height': 0.32330188155174255}
+  [PASS] robot measured moving (> 0.05 m/s) under vx=0.25 {'v': 0.06608833668401876}
+  [PASS] moving at injection {'v': 0.31620936583992715}
+  [PASS] supervisor reached STOP_CONFIRMED for the injected fault {'state': 'STOP_CONFIRMED', 'hold': True, 'hold_id': 'rate_hz/utlidar_helix_injected', 'hold_requested_ms': 0.17135999996753526, 'arbiter_ack_ms': 0.6380800000442832, 'controller_ack_ms': 1.7269119998672977, 'motion_stopped_ms': 574.5471039999757}
+  [PASS] arbiter acknowledged the hold (HELIX_HOLD) 
+  [PASS] robot acknowledged StopMove (code 0) {'last_ack_code': 0}
+  [PASS] never above 0.4 m/s 
+  [PASS] SportModeState still within 1.5 s of fault {'stop_ms': 265.1182079998762}
+  [PASS] LiDAR odometry still after the deadline (independent sensor) {'odom_max': 0.0217}
+  [PASS] no Move sent while held (upstream kept streaming) {'n': 0}
+  [PASS] explicit clear -> AWAIT_RELEASE (no auto resume) {'state': 'AWAIT_RELEASE'}
+  [PASS] operator release accepted {'message': 'released'}
+  [PASS] supervisor NOMINAL, hold released {'state': 'NOMINAL'}
+  [PASS] robot still for 3 s after release (no upstream) {'max_v': 0.0}
+  [PASS] no Move sent after release {'n': 0}
+  [PASS] no real stop-worthy fault during the stage {'real': []}
+
+STAGE motion: PASS
+evidence: /home/unitree/helix_hw/20261017T223203_stop_motion/evidence/evidence.json
+stage rc=0
+DONE 2026-10-17T22:32:37Z rc=0 dir=/home/unitree/helix_hw/20261017T223203_stop_motion

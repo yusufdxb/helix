@@ -1,0 +1,3814 @@
+{
+ "generated_utc": "2026-10-18T14:55:38Z",
+ "git_sha": "8b150ef",
+ "evidence_class": "SIMULATION (fake GO2, localhost only)",
+ "cases": [
+  {
+   "case": "detector",
+   "checks": {
+    "reached_nominal": true,
+    "startup_requires_release": true,
+    "startup_release_accepted": true,
+    "moving_before_kill": true,
+    "one_target_process": true,
+    "stopmove_after_kill": true,
+    "no_move_after_first_stop": true,
+    "unhealthy_release_refused": true,
+    "restart_activated": true,
+    "await_release_after_restart": true,
+    "no_move_while_awaiting_release": true,
+    "prehealth_release_stays_invalid": true,
+    "nominal_after_release": true,
+    "move_resumes_after_release": true
+   },
+   "notes": [],
+   "startup_release": {
+    "ok": true,
+    "message": "operator release requested; check arbiter protective_latched"
+   },
+   "first_stop_after_kill_ms": 262.2,
+   "last_move_after_kill_ms": 252.0,
+   "moves_after_first_stop": 0,
+   "release": {
+    "ok": true,
+    "message": "operator release requested; check arbiter protective_latched"
+   },
+   "events": [
+    {
+     "t": 0.1699,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256002
+    },
+    {
+     "t": 0.1701,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256002,
+     "code": 0
+    },
+    {
+     "t": 0.3703,
+     "kind": "hold",
+     "hold": true,
+     "epoch": 1792335256251305819,
+     "fault": ""
+    },
+    {
+     "t": 0.4704,
+     "kind": "state",
+     "state": "NOMINAL",
+     "hold": false,
+     "reason": "all critical expected nodes beating",
+     "missing": [],
+     "faults": []
+    },
+    {
+     "t": 0.4704,
+     "kind": "hold",
+     "hold": false,
+     "epoch": 1792335256251305819,
+     "fault": ""
+    },
+    {
+     "t": 0.6703,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256003
+    },
+    {
+     "t": 0.6704,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256003,
+     "code": 0
+    },
+    {
+     "t": 1.1903,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256004
+    },
+    {
+     "t": 1.1904,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256004,
+     "code": 0
+    },
+    {
+     "t": 1.5018,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256005
+    },
+    {
+     "t": 1.502,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256005,
+     "code": 0
+    },
+    {
+     "t": 1.5704,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256006
+    },
+    {
+     "t": 1.5705,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256006,
+     "code": 0
+    },
+    {
+     "t": 1.6302,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256007
+    },
+    {
+     "t": 1.6303,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256007,
+     "code": 0
+    },
+    {
+     "t": 1.6903,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256008
+    },
+    {
+     "t": 1.6904,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256008,
+     "code": 0
+    },
+    {
+     "t": 1.7502,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256009
+    },
+    {
+     "t": 1.7504,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256009,
+     "code": 0
+    },
+    {
+     "t": 1.8103,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256010
+    },
+    {
+     "t": 1.8105,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256010,
+     "code": 0
+    },
+    {
+     "t": 1.8704,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256011
+    },
+    {
+     "t": 1.8704,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256011,
+     "code": 0
+    },
+    {
+     "t": 1.9302,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256012
+    },
+    {
+     "t": 1.9304,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256012,
+     "code": 0
+    },
+    {
+     "t": 1.9902,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256013
+    },
+    {
+     "t": 1.9903,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256013,
+     "code": 0
+    },
+    {
+     "t": 2.0502,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256014
+    },
+    {
+     "t": 2.0503,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256014,
+     "code": 0
+    },
+    {
+     "t": 2.1103,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256015
+    },
+    {
+     "t": 2.1105,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256015,
+     "code": 0
+    },
+    {
+     "t": 2.1703,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256016
+    },
+    {
+     "t": 2.1705,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256016,
+     "code": 0
+    },
+    {
+     "t": 2.2302,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256017
+    },
+    {
+     "t": 2.2304,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256017,
+     "code": 0
+    },
+    {
+     "t": 2.2903,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256018
+    },
+    {
+     "t": 2.2904,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256018,
+     "code": 0
+    },
+    {
+     "t": 2.3503,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256019
+    },
+    {
+     "t": 2.3504,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256019,
+     "code": 0
+    },
+    {
+     "t": 2.4102,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256020
+    },
+    {
+     "t": 2.4103,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256020,
+     "code": 0
+    },
+    {
+     "t": 2.4702,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256021
+    },
+    {
+     "t": 2.4704,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256021,
+     "code": 0
+    },
+    {
+     "t": 2.5302,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256022
+    },
+    {
+     "t": 2.5302,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256022,
+     "code": 0
+    },
+    {
+     "t": 2.5902,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256023
+    },
+    {
+     "t": 2.5903,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256023,
+     "code": 0
+    },
+    {
+     "t": 2.6502,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256024
+    },
+    {
+     "t": 2.6503,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256024,
+     "code": 0
+    },
+    {
+     "t": 2.7103,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256025
+    },
+    {
+     "t": 2.7104,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256025,
+     "code": 0
+    },
+    {
+     "t": 2.7702,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256026
+    },
+    {
+     "t": 2.7703,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256026,
+     "code": 0
+    },
+    {
+     "t": 2.8302,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256027
+    },
+    {
+     "t": 2.8303,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256027,
+     "code": 0
+    },
+    {
+     "t": 2.8902,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256028
+    },
+    {
+     "t": 2.8903,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256028,
+     "code": 0
+    },
+    {
+     "t": 2.9505,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256029
+    },
+    {
+     "t": 2.9506,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256029,
+     "code": 0
+    },
+    {
+     "t": 3.0103,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256030
+    },
+    {
+     "t": 3.0104,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256030,
+     "code": 0
+    },
+    {
+     "t": 3.0703,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256031
+    },
+    {
+     "t": 3.0704,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256031,
+     "code": 0
+    },
+    {
+     "t": 3.1304,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256032
+    },
+    {
+     "t": 3.1305,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256032,
+     "code": 0
+    },
+    {
+     "t": 3.1904,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256033
+    },
+    {
+     "t": 3.1905,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256033,
+     "code": 0
+    },
+    {
+     "t": 3.2504,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256034
+    },
+    {
+     "t": 3.2504,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256034,
+     "code": 0
+    },
+    {
+     "t": 3.3102,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256035
+    },
+    {
+     "t": 3.3104,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256035,
+     "code": 0
+    },
+    {
+     "t": 3.3702,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256036
+    },
+    {
+     "t": 3.3704,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256036,
+     "code": 0
+    },
+    {
+     "t": 3.4303,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256037
+    },
+    {
+     "t": 3.4304,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256037,
+     "code": 0
+    },
+    {
+     "t": 3.4903,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256038
+    },
+    {
+     "t": 3.4905,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256038,
+     "code": 0
+    },
+    {
+     "t": 3.5503,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256039
+    },
+    {
+     "t": 3.5503,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256039,
+     "code": 0
+    },
+    {
+     "t": 3.6104,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256040
+    },
+    {
+     "t": 3.6105,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256040,
+     "code": 0
+    },
+    {
+     "t": 3.6582,
+     "kind": "kill",
+     "target": "detector",
+     "pid": 1251608
+    },
+    {
+     "t": 3.6703,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256041
+    },
+    {
+     "t": 3.6703,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256041,
+     "code": 0
+    },
+    {
+     "t": 3.7304,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256042
+    },
+    {
+     "t": 3.7304,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256042,
+     "code": 0
+    },
+    {
+     "t": 3.7904,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256043
+    },
+    {
+     "t": 3.7905,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256043,
+     "code": 0
+    },
+    {
+     "t": 3.8502,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256044
+    },
+    {
+     "t": 3.8503,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256044,
+     "code": 0
+    },
+    {
+     "t": 3.9102,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256045
+    },
+    {
+     "t": 3.9103,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256045,
+     "code": 0
+    },
+    {
+     "t": 3.9203,
+     "kind": "hold",
+     "hold": true,
+     "epoch": 1792335256251305819,
+     "fault": "helix_anomaly_detector"
+    },
+    {
+     "t": 3.9204,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256046
+    },
+    {
+     "t": 3.9205,
+     "kind": "state",
+     "state": "HOLD_REQUESTED",
+     "hold": true,
+     "reason": "hold episode 1 opened by CRASH:helix_anomaly_detector",
+     "missing": [
+      "helix_anomaly_detector"
+     ],
+     "faults": [
+      "CRASH:helix_anomaly_detector"
+     ]
+    },
+    {
+     "t": 3.9206,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256046,
+     "code": 0
+    },
+    {
+     "t": 3.9207,
+     "kind": "state",
+     "state": "HOLD_APPLIED",
+     "hold": true,
+     "reason": "arbiter forced zero for this hold",
+     "missing": [
+      "helix_anomaly_detector"
+     ],
+     "faults": [
+      "CRASH:helix_anomaly_detector"
+     ]
+    },
+    {
+     "t": 3.9208,
+     "kind": "state",
+     "state": "STOP_ACKED",
+     "hold": true,
+     "reason": "robot controller acknowledged StopMove",
+     "missing": [
+      "helix_anomaly_detector"
+     ],
+     "faults": [
+      "CRASH:helix_anomaly_detector"
+     ]
+    },
+    {
+     "t": 4.4303,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256047
+    },
+    {
+     "t": 4.4304,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256047,
+     "code": 0
+    },
+    {
+     "t": 4.4592,
+     "kind": "state",
+     "state": "STOP_CONFIRMED",
+     "hold": true,
+     "reason": "measured robot motion below stop threshold",
+     "missing": [
+      "helix_anomaly_detector"
+     ],
+     "faults": [
+      "CRASH:helix_anomaly_detector"
+     ]
+    },
+    {
+     "t": 4.9502,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256048
+    },
+    {
+     "t": 4.9503,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256048,
+     "code": 0
+    },
+    {
+     "t": 5.4703,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256049
+    },
+    {
+     "t": 5.4703,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256049,
+     "code": 0
+    },
+    {
+     "t": 5.9703,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256050
+    },
+    {
+     "t": 5.9704,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256050,
+     "code": 0
+    },
+    {
+     "t": 6.4704,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256051
+    },
+    {
+     "t": 6.4706,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256051,
+     "code": 0
+    },
+    {
+     "t": 6.7011,
+     "kind": "restart",
+     "target": "detector"
+    },
+    {
+     "t": 6.9901,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256052
+    },
+    {
+     "t": 6.9903,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256052,
+     "code": 0
+    },
+    {
+     "t": 7.5101,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256053
+    },
+    {
+     "t": 7.5103,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256053,
+     "code": 0
+    },
+    {
+     "t": 8.0103,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256054
+    },
+    {
+     "t": 8.0106,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256054,
+     "code": 0
+    },
+    {
+     "t": 8.5102,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256055
+    },
+    {
+     "t": 8.5104,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256055,
+     "code": 0
+    },
+    {
+     "t": 8.8203,
+     "kind": "state",
+     "state": "CLEARING",
+     "hold": true,
+     "reason": "every stop-worthy fault cleared",
+     "missing": [],
+     "faults": []
+    },
+    {
+     "t": 9.0204,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256056
+    },
+    {
+     "t": 9.0204,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256056,
+     "code": 0
+    },
+    {
+     "t": 9.5204,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256057
+    },
+    {
+     "t": 9.5205,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256057,
+     "code": 0
+    },
+    {
+     "t": 10.0301,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256058
+    },
+    {
+     "t": 10.0303,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256058,
+     "code": 0
+    },
+    {
+     "t": 10.5503,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256059
+    },
+    {
+     "t": 10.5504,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256059,
+     "code": 0
+    },
+    {
+     "t": 10.8203,
+     "kind": "state",
+     "state": "AWAIT_RELEASE",
+     "hold": true,
+     "reason": "auto_resume false: operator release required",
+     "missing": [],
+     "faults": []
+    },
+    {
+     "t": 11.0501,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256060
+    },
+    {
+     "t": 11.0503,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256060,
+     "code": 0
+    },
+    {
+     "t": 11.5505,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256061
+    },
+    {
+     "t": 11.5505,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256061,
+     "code": 0
+    },
+    {
+     "t": 12.0703,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256062
+    },
+    {
+     "t": 12.0703,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256062,
+     "code": 0
+    },
+    {
+     "t": 12.5702,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256063
+    },
+    {
+     "t": 12.5704,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256063,
+     "code": 0
+    },
+    {
+     "t": 12.8209,
+     "kind": "state",
+     "state": "NOMINAL",
+     "hold": false,
+     "reason": "operator release",
+     "missing": [],
+     "faults": []
+    },
+    {
+     "t": 12.8209,
+     "kind": "hold",
+     "hold": false,
+     "epoch": 1792335256251305819,
+     "fault": ""
+    },
+    {
+     "t": 12.821,
+     "kind": "release",
+     "ok": true,
+     "message": "operator release requested; check arbiter protective_latched"
+    },
+    {
+     "t": 12.852,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256064
+    },
+    {
+     "t": 12.8523,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256064,
+     "code": 0
+    },
+    {
+     "t": 12.9102,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256065
+    },
+    {
+     "t": 12.9103,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256065,
+     "code": 0
+    },
+    {
+     "t": 12.9701,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256066
+    },
+    {
+     "t": 12.9702,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256066,
+     "code": 0
+    },
+    {
+     "t": 13.0301,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256067
+    },
+    {
+     "t": 13.0302,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256067,
+     "code": 0
+    },
+    {
+     "t": 13.0901,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256068
+    },
+    {
+     "t": 13.0901,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256068,
+     "code": 0
+    },
+    {
+     "t": 13.1501,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256069
+    },
+    {
+     "t": 13.1501,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256069,
+     "code": 0
+    },
+    {
+     "t": 13.2101,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256070
+    },
+    {
+     "t": 13.2103,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256070,
+     "code": 0
+    },
+    {
+     "t": 13.27,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256071
+    },
+    {
+     "t": 13.2701,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256071,
+     "code": 0
+    },
+    {
+     "t": 13.3301,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256072
+    },
+    {
+     "t": 13.3302,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256072,
+     "code": 0
+    },
+    {
+     "t": 13.3901,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256073
+    },
+    {
+     "t": 13.3901,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256073,
+     "code": 0
+    },
+    {
+     "t": 13.4502,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256074
+    },
+    {
+     "t": 13.4502,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256074,
+     "code": 0
+    },
+    {
+     "t": 13.5102,
+     "kind": "request",
+     "api": 1008,
+     "id": 335256075
+    },
+    {
+     "t": 13.5102,
+     "kind": "response",
+     "api": 1008,
+     "id": 335256075,
+     "code": 0
+    },
+    {
+     "t": 13.57,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256076
+    },
+    {
+     "t": 13.57,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256076,
+     "code": 0
+    },
+    {
+     "t": 14.0901,
+     "kind": "request",
+     "api": 1003,
+     "id": 335256077
+    },
+    {
+     "t": 14.0903,
+     "kind": "response",
+     "api": 1003,
+     "id": 335256077,
+     "code": 0
+    }
+   ],
+   "cleanup_warnings": [],
+   "passed": true
+  },
+  {
+   "case": "supervisor",
+   "checks": {
+    "reached_nominal": true,
+    "startup_requires_release": true,
+    "startup_release_accepted": true,
+    "moving_before_kill": true,
+    "one_target_process": true,
+    "stopmove_after_kill": true,
+    "no_move_after_first_stop": true,
+    "restart_activated": true,
+    "supervisor_restart_keeps_hold": true,
+    "stale_service_release_refused": true,
+    "stale_releases_cannot_clear_hold": true,
+    "held_before_supervisor_kill": true,
+    "repeated_restarts_keep_hold": true,
+    "lifecycle_restart_keeps_hold": true,
+    "stale_lifecycle_release_refused": true,
+    "operator_release_accepted": true,
+    "move_resumes_after_release": true
+   },
+   "notes": [],
+   "startup_release": {
+    "ok": true,
+    "message": "operator release requested; check arbiter protective_latched"
+   },
+   "first_stop_after_kill_ms": 490.4,
+   "last_move_after_kill_ms": 430.4,
+   "moves_after_first_stop": 0,
+   "states_after_restart": [],
+   "moves_after_restart": 0,
+   "release": {
+    "ok": true,
+    "message": "operator release requested; check arbiter protective_latched"
+   },
+   "first_move_after_restart_s": 12.45,
+   "events": [
+    {
+     "t": 0.1433,
+     "kind": "hold",
+     "hold": true,
+     "epoch": 1792335275985121883,
+     "fault": ""
+    },
+    {
+     "t": 0.1766,
+     "kind": "request",
+     "api": 1003,
+     "id": 335275969
+    },
+    {
+     "t": 0.1768,
+     "kind": "response",
+     "api": 1003,
+     "id": 335275969,
+     "code": 0
+    },
+    {
+     "t": 0.2435,
+     "kind": "hold",
+     "hold": false,
+     "epoch": 1792335275985121883,
+     "fault": ""
+    },
+    {
+     "t": 0.2438,
+     "kind": "state",
+     "state": "NOMINAL",
+     "hold": false,
+     "reason": "all critical expected nodes beating",
+     "missing": [],
+     "faults": []
+    },
+    {
+     "t": 0.6784,
+     "kind": "request",
+     "api": 1003,
+     "id": 335275970
+    },
+    {
+     "t": 0.6785,
+     "kind": "response",
+     "api": 1003,
+     "id": 335275970,
+     "code": 0
+    },
+    {
+     "t": 1.1983,
+     "kind": "request",
+     "api": 1003,
+     "id": 335275971
+    },
+    {
+     "t": 1.1985,
+     "kind": "response",
+     "api": 1003,
+     "id": 335275971,
+     "code": 0
+    },
+    {
+     "t": 1.4519,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275972
+    },
+    {
+     "t": 1.4522,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275972,
+     "code": 0
+    },
+    {
+     "t": 1.5183,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275973
+    },
+    {
+     "t": 1.5184,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275973,
+     "code": 0
+    },
+    {
+     "t": 1.5782,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275974
+    },
+    {
+     "t": 1.5782,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275974,
+     "code": 0
+    },
+    {
+     "t": 1.6382,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275975
+    },
+    {
+     "t": 1.6384,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275975,
+     "code": 0
+    },
+    {
+     "t": 1.6982,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275976
+    },
+    {
+     "t": 1.6983,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275976,
+     "code": 0
+    },
+    {
+     "t": 1.7584,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275977
+    },
+    {
+     "t": 1.7584,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275977,
+     "code": 0
+    },
+    {
+     "t": 1.8183,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275978
+    },
+    {
+     "t": 1.8184,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275978,
+     "code": 0
+    },
+    {
+     "t": 1.8781,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275979
+    },
+    {
+     "t": 1.8784,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275979,
+     "code": 0
+    },
+    {
+     "t": 1.9382,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275980
+    },
+    {
+     "t": 1.9385,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275980,
+     "code": 0
+    },
+    {
+     "t": 1.9982,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275981
+    },
+    {
+     "t": 1.9984,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275981,
+     "code": 0
+    },
+    {
+     "t": 2.0584,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275982
+    },
+    {
+     "t": 2.0584,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275982,
+     "code": 0
+    },
+    {
+     "t": 2.1183,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275983
+    },
+    {
+     "t": 2.1184,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275983,
+     "code": 0
+    },
+    {
+     "t": 2.1782,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275984
+    },
+    {
+     "t": 2.1783,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275984,
+     "code": 0
+    },
+    {
+     "t": 2.2384,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275985
+    },
+    {
+     "t": 2.2385,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275985,
+     "code": 0
+    },
+    {
+     "t": 2.2984,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275986
+    },
+    {
+     "t": 2.2984,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275986,
+     "code": 0
+    },
+    {
+     "t": 2.3581,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275987
+    },
+    {
+     "t": 2.3584,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275987,
+     "code": 0
+    },
+    {
+     "t": 2.4184,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275988
+    },
+    {
+     "t": 2.4184,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275988,
+     "code": 0
+    },
+    {
+     "t": 2.4782,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275989
+    },
+    {
+     "t": 2.4783,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275989,
+     "code": 0
+    },
+    {
+     "t": 2.5382,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275990
+    },
+    {
+     "t": 2.5383,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275990,
+     "code": 0
+    },
+    {
+     "t": 2.5981,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275991
+    },
+    {
+     "t": 2.5983,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275991,
+     "code": 0
+    },
+    {
+     "t": 2.6583,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275992
+    },
+    {
+     "t": 2.6583,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275992,
+     "code": 0
+    },
+    {
+     "t": 2.7184,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275993
+    },
+    {
+     "t": 2.7185,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275993,
+     "code": 0
+    },
+    {
+     "t": 2.7782,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275994
+    },
+    {
+     "t": 2.7785,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275994,
+     "code": 0
+    },
+    {
+     "t": 2.8382,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275995
+    },
+    {
+     "t": 2.8385,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275995,
+     "code": 0
+    },
+    {
+     "t": 2.8983,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275996
+    },
+    {
+     "t": 2.8984,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275996,
+     "code": 0
+    },
+    {
+     "t": 2.9582,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275997
+    },
+    {
+     "t": 2.9584,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275997,
+     "code": 0
+    },
+    {
+     "t": 3.0184,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275998
+    },
+    {
+     "t": 3.0185,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275998,
+     "code": 0
+    },
+    {
+     "t": 3.0783,
+     "kind": "request",
+     "api": 1008,
+     "id": 335275999
+    },
+    {
+     "t": 3.0784,
+     "kind": "response",
+     "api": 1008,
+     "id": 335275999,
+     "code": 0
+    },
+    {
+     "t": 3.1381,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276000
+    },
+    {
+     "t": 3.1385,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276000,
+     "code": 0
+    },
+    {
+     "t": 3.1981,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276001
+    },
+    {
+     "t": 3.1982,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276001,
+     "code": 0
+    },
+    {
+     "t": 3.2584,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276002
+    },
+    {
+     "t": 3.2584,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276002,
+     "code": 0
+    },
+    {
+     "t": 3.3183,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276003
+    },
+    {
+     "t": 3.3184,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276003,
+     "code": 0
+    },
+    {
+     "t": 3.3782,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276004
+    },
+    {
+     "t": 3.3782,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276004,
+     "code": 0
+    },
+    {
+     "t": 3.4383,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276005
+    },
+    {
+     "t": 3.4385,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276005,
+     "code": 0
+    },
+    {
+     "t": 3.4982,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276006
+    },
+    {
+     "t": 3.4983,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276006,
+     "code": 0
+    },
+    {
+     "t": 3.5583,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276007
+    },
+    {
+     "t": 3.5583,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276007,
+     "code": 0
+    },
+    {
+     "t": 3.6079,
+     "kind": "kill",
+     "target": "supervisor",
+     "pid": 1254042
+    },
+    {
+     "t": 3.6181,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276008
+    },
+    {
+     "t": 3.6182,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276008,
+     "code": 0
+    },
+    {
+     "t": 3.6782,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276009
+    },
+    {
+     "t": 3.6784,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276009,
+     "code": 0
+    },
+    {
+     "t": 3.7383,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276010
+    },
+    {
+     "t": 3.7384,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276010,
+     "code": 0
+    },
+    {
+     "t": 3.7982,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276011
+    },
+    {
+     "t": 3.7983,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276011,
+     "code": 0
+    },
+    {
+     "t": 3.8582,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276012
+    },
+    {
+     "t": 3.8583,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276012,
+     "code": 0
+    },
+    {
+     "t": 3.9181,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276013
+    },
+    {
+     "t": 3.9182,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276013,
+     "code": 0
+    },
+    {
+     "t": 3.9782,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276014
+    },
+    {
+     "t": 3.9782,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276014,
+     "code": 0
+    },
+    {
+     "t": 4.0383,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276015
+    },
+    {
+     "t": 4.0384,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276015,
+     "code": 0
+    },
+    {
+     "t": 4.0983,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276016
+    },
+    {
+     "t": 4.0983,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276016,
+     "code": 0
+    },
+    {
+     "t": 4.6182,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276017
+    },
+    {
+     "t": 4.6183,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276017,
+     "code": 0
+    },
+    {
+     "t": 5.1182,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276018
+    },
+    {
+     "t": 5.1184,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276018,
+     "code": 0
+    },
+    {
+     "t": 5.6382,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276019
+    },
+    {
+     "t": 5.6383,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276019,
+     "code": 0
+    },
+    {
+     "t": 6.1382,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276020
+    },
+    {
+     "t": 6.1384,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276020,
+     "code": 0
+    },
+    {
+     "t": 6.6492,
+     "kind": "restart",
+     "target": "supervisor"
+    },
+    {
+     "t": 6.6582,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276021
+    },
+    {
+     "t": 6.6583,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276021,
+     "code": 0
+    },
+    {
+     "t": 7.1783,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276022
+    },
+    {
+     "t": 7.1784,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276022,
+     "code": 0
+    },
+    {
+     "t": 7.6543,
+     "kind": "hold",
+     "hold": true,
+     "epoch": 1792335283496068798,
+     "fault": ""
+    },
+    {
+     "t": 7.6983,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276023
+    },
+    {
+     "t": 7.6984,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276023,
+     "code": 0
+    },
+    {
+     "t": 7.7544,
+     "kind": "hold",
+     "hold": false,
+     "epoch": 1792335283496068798,
+     "fault": ""
+    },
+    {
+     "t": 8.2181,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276024
+    },
+    {
+     "t": 8.2182,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276024,
+     "code": 0
+    },
+    {
+     "t": 8.7183,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276025
+    },
+    {
+     "t": 8.7184,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276025,
+     "code": 0
+    },
+    {
+     "t": 9.2183,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276026
+    },
+    {
+     "t": 9.2184,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276026,
+     "code": 0
+    },
+    {
+     "t": 9.7183,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276027
+    },
+    {
+     "t": 9.7184,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276027,
+     "code": 0
+    },
+    {
+     "t": 10.2382,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276028
+    },
+    {
+     "t": 10.2383,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276028,
+     "code": 0
+    },
+    {
+     "t": 10.7583,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276029
+    },
+    {
+     "t": 10.7584,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276029,
+     "code": 0
+    },
+    {
+     "t": 10.8586,
+     "kind": "hold",
+     "hold": false,
+     "epoch": 1792335275985121883,
+     "fault": ""
+    },
+    {
+     "t": 10.9043,
+     "kind": "hold",
+     "hold": false,
+     "epoch": 1792335283496068798,
+     "fault": ""
+    },
+    {
+     "t": 11.2782,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276030
+    },
+    {
+     "t": 11.2784,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276030,
+     "code": 0
+    },
+    {
+     "t": 11.778,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276031
+    },
+    {
+     "t": 11.7781,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276031,
+     "code": 0
+    },
+    {
+     "t": 12.1781,
+     "kind": "fault",
+     "type": "LOG_PATTERN",
+     "node": "crash_regression",
+     "detail": "synthetic critical fault"
+    },
+    {
+     "t": 12.1783,
+     "kind": "state",
+     "state": "HOLD_REQUESTED",
+     "hold": true,
+     "reason": "hold episode 1 opened by LOG_PATTERN:crash_regression",
+     "missing": [],
+     "faults": [
+      "LOG_PATTERN:crash_regression"
+     ]
+    },
+    {
+     "t": 12.1783,
+     "kind": "hold",
+     "hold": true,
+     "epoch": 1792335283496068798,
+     "fault": "crash_regression"
+    },
+    {
+     "t": 12.1784,
+     "kind": "state",
+     "state": "HOLD_APPLIED",
+     "hold": true,
+     "reason": "arbiter forced zero for this hold",
+     "missing": [],
+     "faults": [
+      "LOG_PATTERN:crash_regression"
+     ]
+    },
+    {
+     "t": 12.298,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276032
+    },
+    {
+     "t": 12.2983,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276032,
+     "code": 0
+    },
+    {
+     "t": 12.3268,
+     "kind": "state",
+     "state": "STOP_CONFIRMED",
+     "hold": true,
+     "reason": "measured robot motion below stop threshold",
+     "missing": [],
+     "faults": [
+      "LOG_PATTERN:crash_regression"
+     ]
+    },
+    {
+     "t": 12.3279,
+     "kind": "kill",
+     "target": "supervisor_repeat"
+    },
+    {
+     "t": 12.8184,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276033
+    },
+    {
+     "t": 12.8185,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276033,
+     "code": 0
+    },
+    {
+     "t": 13.3383,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276034
+    },
+    {
+     "t": 13.3384,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276034,
+     "code": 0
+    },
+    {
+     "t": 13.8581,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276035
+    },
+    {
+     "t": 13.8584,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276035,
+     "code": 0
+    },
+    {
+     "t": 14.0407,
+     "kind": "hold",
+     "hold": true,
+     "epoch": 1792335289882426641,
+     "fault": ""
+    },
+    {
+     "t": 14.1407,
+     "kind": "hold",
+     "hold": false,
+     "epoch": 1792335289882426641,
+     "fault": ""
+    },
+    {
+     "t": 14.1409,
+     "kind": "state",
+     "state": "NOMINAL",
+     "hold": false,
+     "reason": "all critical expected nodes beating",
+     "missing": [],
+     "faults": []
+    },
+    {
+     "t": 14.3781,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276036
+    },
+    {
+     "t": 14.3782,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276036,
+     "code": 0
+    },
+    {
+     "t": 14.8981,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276037
+    },
+    {
+     "t": 14.8984,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276037,
+     "code": 0
+    },
+    {
+     "t": 15.2519,
+     "kind": "kill",
+     "target": "supervisor_repeat"
+    },
+    {
+     "t": 15.4182,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276038
+    },
+    {
+     "t": 15.4183,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276038,
+     "code": 0
+    },
+    {
+     "t": 15.918,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276039
+    },
+    {
+     "t": 15.9181,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276039,
+     "code": 0
+    },
+    {
+     "t": 16.438,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276040
+    },
+    {
+     "t": 16.4382,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276040,
+     "code": 0
+    },
+    {
+     "t": 16.958,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276041
+    },
+    {
+     "t": 16.9582,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276041,
+     "code": 0
+    },
+    {
+     "t": 16.9709,
+     "kind": "hold",
+     "hold": true,
+     "epoch": 1792335292812716733,
+     "fault": ""
+    },
+    {
+     "t": 17.0709,
+     "kind": "hold",
+     "hold": false,
+     "epoch": 1792335292812716733,
+     "fault": ""
+    },
+    {
+     "t": 17.4581,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276042
+    },
+    {
+     "t": 17.4582,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276042,
+     "code": 0
+    },
+    {
+     "t": 17.9779,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276043
+    },
+    {
+     "t": 17.9781,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276043,
+     "code": 0
+    },
+    {
+     "t": 18.1785,
+     "kind": "hold",
+     "hold": true,
+     "epoch": 1792335292812716733,
+     "fault": ""
+    },
+    {
+     "t": 18.3794,
+     "kind": "state",
+     "state": "STARTING",
+     "hold": true,
+     "reason": "supervision started",
+     "missing": [
+      "helix_anomaly_detector",
+      "helix_log_parser",
+      "helix_topic_rate_monitor"
+     ],
+     "faults": []
+    },
+    {
+     "t": 18.3796,
+     "kind": "hold",
+     "hold": true,
+     "epoch": 1792335294221061665,
+     "fault": ""
+    },
+    {
+     "t": 18.478,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276044
+    },
+    {
+     "t": 18.4781,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276044,
+     "code": 0
+    },
+    {
+     "t": 18.4794,
+     "kind": "hold",
+     "hold": false,
+     "epoch": 1792335294221061665,
+     "fault": ""
+    },
+    {
+     "t": 18.4796,
+     "kind": "state",
+     "state": "NOMINAL",
+     "hold": false,
+     "reason": "all critical expected nodes beating",
+     "missing": [],
+     "faults": []
+    },
+    {
+     "t": 18.9982,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276045
+    },
+    {
+     "t": 18.9982,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276045,
+     "code": 0
+    },
+    {
+     "t": 19.1018,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276046
+    },
+    {
+     "t": 19.102,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276046,
+     "code": 0
+    },
+    {
+     "t": 19.1581,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276047
+    },
+    {
+     "t": 19.1582,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276047,
+     "code": 0
+    },
+    {
+     "t": 19.218,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276048
+    },
+    {
+     "t": 19.2182,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276048,
+     "code": 0
+    },
+    {
+     "t": 19.278,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276049
+    },
+    {
+     "t": 19.2781,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276049,
+     "code": 0
+    },
+    {
+     "t": 19.338,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276050
+    },
+    {
+     "t": 19.3381,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276050,
+     "code": 0
+    },
+    {
+     "t": 19.3981,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276051
+    },
+    {
+     "t": 19.3981,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276051,
+     "code": 0
+    },
+    {
+     "t": 19.4578,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276052
+    },
+    {
+     "t": 19.4581,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276052,
+     "code": 0
+    },
+    {
+     "t": 19.5179,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276053
+    },
+    {
+     "t": 19.5181,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276053,
+     "code": 0
+    },
+    {
+     "t": 19.5779,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276054
+    },
+    {
+     "t": 19.578,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276054,
+     "code": 0
+    },
+    {
+     "t": 19.638,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276055
+    },
+    {
+     "t": 19.6381,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276055,
+     "code": 0
+    },
+    {
+     "t": 19.6981,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276056
+    },
+    {
+     "t": 19.6983,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276056,
+     "code": 0
+    },
+    {
+     "t": 19.7581,
+     "kind": "request",
+     "api": 1008,
+     "id": 335276057
+    },
+    {
+     "t": 19.7582,
+     "kind": "response",
+     "api": 1008,
+     "id": 335276057,
+     "code": 0
+    },
+    {
+     "t": 19.818,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276058
+    },
+    {
+     "t": 19.8181,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276058,
+     "code": 0
+    },
+    {
+     "t": 20.318,
+     "kind": "request",
+     "api": 1003,
+     "id": 335276059
+    },
+    {
+     "t": 20.3182,
+     "kind": "response",
+     "api": 1003,
+     "id": 335276059,
+     "code": 0
+    }
+   ],
+   "cleanup_warnings": [],
+   "passed": true
+  },
+  {
+   "case": "arbiter",
+   "checks": {
+    "reached_nominal": true,
+    "startup_requires_release": true,
+    "startup_release_accepted": true,
+    "moving_before_kill": true,
+    "one_target_process": true,
+    "stopmove_after_kill": true,
+    "no_move_after_first_stop": true
+   },
+   "notes": [],
+   "startup_release": {
+    "ok": true,
+    "message": "operator release requested; check arbiter protective_latched"
+   },
+   "first_stop_after_kill_ms": 240.1,
+   "last_move_after_kill_ms": null,
+   "moves_after_first_stop": 0,
+   "events": [
+    {
+     "t": 0.1427,
+     "kind": "hold",
+     "hold": true,
+     "epoch": 1792335307090690998,
+     "fault": ""
+    },
+    {
+     "t": 0.1673,
+     "kind": "request",
+     "api": 1003,
+     "id": 335307077
+    },
+    {
+     "t": 0.1674,
+     "kind": "response",
+     "api": 1003,
+     "id": 335307077,
+     "code": 0
+    },
+    {
+     "t": 0.2927,
+     "kind": "hold",
+     "hold": false,
+     "epoch": 1792335307090690998,
+     "fault": ""
+    },
+    {
+     "t": 0.2929,
+     "kind": "state",
+     "state": "NOMINAL",
+     "hold": false,
+     "reason": "all critical expected nodes beating",
+     "missing": [],
+     "faults": []
+    },
+    {
+     "t": 0.6872,
+     "kind": "request",
+     "api": 1003,
+     "id": 335307078
+    },
+    {
+     "t": 0.6874,
+     "kind": "response",
+     "api": 1003,
+     "id": 335307078,
+     "code": 0
+    },
+    {
+     "t": 1.2075,
+     "kind": "request",
+     "api": 1003,
+     "id": 335307079
+    },
+    {
+     "t": 1.2078,
+     "kind": "response",
+     "api": 1003,
+     "id": 335307079,
+     "code": 0
+    },
+    {
+     "t": 1.3519,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307080
+    },
+    {
+     "t": 1.3521,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307080,
+     "code": 0
+    },
+    {
+     "t": 1.4072,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307081
+    },
+    {
+     "t": 1.4076,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307081,
+     "code": 0
+    },
+    {
+     "t": 1.4674,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307082
+    },
+    {
+     "t": 1.4674,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307082,
+     "code": 0
+    },
+    {
+     "t": 1.5275,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307083
+    },
+    {
+     "t": 1.5276,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307083,
+     "code": 0
+    },
+    {
+     "t": 1.5874,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307084
+    },
+    {
+     "t": 1.5875,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307084,
+     "code": 0
+    },
+    {
+     "t": 1.6472,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307085
+    },
+    {
+     "t": 1.6476,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307085,
+     "code": 0
+    },
+    {
+     "t": 1.7075,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307086
+    },
+    {
+     "t": 1.7076,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307086,
+     "code": 0
+    },
+    {
+     "t": 1.7672,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307087
+    },
+    {
+     "t": 1.7673,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307087,
+     "code": 0
+    },
+    {
+     "t": 1.8272,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307088
+    },
+    {
+     "t": 1.8274,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307088,
+     "code": 0
+    },
+    {
+     "t": 1.8873,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307089
+    },
+    {
+     "t": 1.8873,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307089,
+     "code": 0
+    },
+    {
+     "t": 1.9472,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307090
+    },
+    {
+     "t": 1.9473,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307090,
+     "code": 0
+    },
+    {
+     "t": 2.0072,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307091
+    },
+    {
+     "t": 2.0074,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307091,
+     "code": 0
+    },
+    {
+     "t": 2.0674,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307092
+    },
+    {
+     "t": 2.0674,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307092,
+     "code": 0
+    },
+    {
+     "t": 2.1276,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307093
+    },
+    {
+     "t": 2.1277,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307093,
+     "code": 0
+    },
+    {
+     "t": 2.1874,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307094
+    },
+    {
+     "t": 2.1874,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307094,
+     "code": 0
+    },
+    {
+     "t": 2.2473,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307095
+    },
+    {
+     "t": 2.2482,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307095,
+     "code": 0
+    },
+    {
+     "t": 2.3073,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307096
+    },
+    {
+     "t": 2.3075,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307096,
+     "code": 0
+    },
+    {
+     "t": 2.3674,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307097
+    },
+    {
+     "t": 2.3674,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307097,
+     "code": 0
+    },
+    {
+     "t": 2.4273,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307098
+    },
+    {
+     "t": 2.4274,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307098,
+     "code": 0
+    },
+    {
+     "t": 2.4874,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307099
+    },
+    {
+     "t": 2.4876,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307099,
+     "code": 0
+    },
+    {
+     "t": 2.5474,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307100
+    },
+    {
+     "t": 2.5475,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307100,
+     "code": 0
+    },
+    {
+     "t": 2.6074,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307101
+    },
+    {
+     "t": 2.6075,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307101,
+     "code": 0
+    },
+    {
+     "t": 2.6674,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307102
+    },
+    {
+     "t": 2.6675,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307102,
+     "code": 0
+    },
+    {
+     "t": 2.7274,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307103
+    },
+    {
+     "t": 2.7275,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307103,
+     "code": 0
+    },
+    {
+     "t": 2.7873,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307104
+    },
+    {
+     "t": 2.7873,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307104,
+     "code": 0
+    },
+    {
+     "t": 2.8472,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307105
+    },
+    {
+     "t": 2.8473,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307105,
+     "code": 0
+    },
+    {
+     "t": 2.9072,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307106
+    },
+    {
+     "t": 2.9073,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307106,
+     "code": 0
+    },
+    {
+     "t": 2.9672,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307107
+    },
+    {
+     "t": 2.9673,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307107,
+     "code": 0
+    },
+    {
+     "t": 3.0274,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307108
+    },
+    {
+     "t": 3.0274,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307108,
+     "code": 0
+    },
+    {
+     "t": 3.0873,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307109
+    },
+    {
+     "t": 3.0874,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307109,
+     "code": 0
+    },
+    {
+     "t": 3.1472,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307110
+    },
+    {
+     "t": 3.1473,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307110,
+     "code": 0
+    },
+    {
+     "t": 3.2073,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307111
+    },
+    {
+     "t": 3.2074,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307111,
+     "code": 0
+    },
+    {
+     "t": 3.2674,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307112
+    },
+    {
+     "t": 3.2675,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307112,
+     "code": 0
+    },
+    {
+     "t": 3.3274,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307113
+    },
+    {
+     "t": 3.3274,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307113,
+     "code": 0
+    },
+    {
+     "t": 3.3873,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307114
+    },
+    {
+     "t": 3.3873,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307114,
+     "code": 0
+    },
+    {
+     "t": 3.4473,
+     "kind": "request",
+     "api": 1008,
+     "id": 335307115
+    },
+    {
+     "t": 3.4474,
+     "kind": "response",
+     "api": 1008,
+     "id": 335307115,
+     "code": 0
+    },
+    {
+     "t": 3.4992,
+     "kind": "kill",
+     "target": "arbiter",
+     "pid": 1257690
+    },
+    {
+     "t": 3.7393,
+     "kind": "request",
+     "api": 1003,
+     "id": 335307116
+    },
+    {
+     "t": 3.7396,
+     "kind": "response",
+     "api": 1003,
+     "id": 335307116,
+     "code": 0
+    },
+    {
+     "t": 4.2432,
+     "kind": "request",
+     "api": 1003,
+     "id": 335307117
+    },
+    {
+     "t": 4.2434,
+     "kind": "response",
+     "api": 1003,
+     "id": 335307117,
+     "code": 0
+    },
+    {
+     "t": 4.7472,
+     "kind": "request",
+     "api": 1003,
+     "id": 335307118
+    },
+    {
+     "t": 4.7475,
+     "kind": "response",
+     "api": 1003,
+     "id": 335307118,
+     "code": 0
+    },
+    {
+     "t": 5.2512,
+     "kind": "request",
+     "api": 1003,
+     "id": 335307119
+    },
+    {
+     "t": 5.2513,
+     "kind": "response",
+     "api": 1003,
+     "id": 335307119,
+     "code": 0
+    },
+    {
+     "t": 5.7552,
+     "kind": "request",
+     "api": 1003,
+     "id": 335307120
+    },
+    {
+     "t": 5.7554,
+     "kind": "response",
+     "api": 1003,
+     "id": 335307120,
+     "code": 0
+    },
+    {
+     "t": 6.2592,
+     "kind": "request",
+     "api": 1003,
+     "id": 335307121
+    },
+    {
+     "t": 6.2594,
+     "kind": "response",
+     "api": 1003,
+     "id": 335307121,
+     "code": 0
+    },
+    {
+     "t": 6.7632,
+     "kind": "request",
+     "api": 1003,
+     "id": 335307122
+    },
+    {
+     "t": 6.7635,
+     "kind": "response",
+     "api": 1003,
+     "id": 335307122,
+     "code": 0
+    },
+    {
+     "t": 7.2672,
+     "kind": "request",
+     "api": 1003,
+     "id": 335307123
+    },
+    {
+     "t": 7.2674,
+     "kind": "response",
+     "api": 1003,
+     "id": 335307123,
+     "code": 0
+    }
+   ],
+   "cleanup_warnings": [],
+   "passed": true
+  },
+  {
+   "case": "sink",
+   "checks": {
+    "reached_nominal": true,
+    "startup_requires_release": true,
+    "startup_release_accepted": true,
+    "moving_before_kill": true,
+    "one_target_process": true,
+    "no_request_after_kill": true
+   },
+   "notes": [
+    "nothing publishes /api/sport/request once the sink is gone; physical controller behavior remains unmeasured"
+   ],
+   "startup_release": {
+    "ok": true,
+    "message": "operator release requested; check arbiter protective_latched"
+   },
+   "first_stop_after_kill_ms": null,
+   "last_move_after_kill_ms": null,
+   "moves_after_first_stop": null,
+   "events": [
+    {
+     "t": 0.1893,
+     "kind": "request",
+     "api": 1003,
+     "id": 335322876
+    },
+    {
+     "t": 0.1894,
+     "kind": "response",
+     "api": 1003,
+     "id": 335322876,
+     "code": 0
+    },
+    {
+     "t": 0.3903,
+     "kind": "hold",
+     "hold": true,
+     "epoch": 1792335323126312546,
+     "fault": ""
+    },
+    {
+     "t": 0.4904,
+     "kind": "state",
+     "state": "NOMINAL",
+     "hold": false,
+     "reason": "all critical expected nodes beating",
+     "missing": [],
+     "faults": []
+    },
+    {
+     "t": 0.4904,
+     "kind": "hold",
+     "hold": false,
+     "epoch": 1792335323126312546,
+     "fault": ""
+    },
+    {
+     "t": 0.6905,
+     "kind": "request",
+     "api": 1003,
+     "id": 335322877
+    },
+    {
+     "t": 0.6906,
+     "kind": "response",
+     "api": 1003,
+     "id": 335322877,
+     "code": 0
+    },
+    {
+     "t": 1.2104,
+     "kind": "request",
+     "api": 1003,
+     "id": 335322878
+    },
+    {
+     "t": 1.2106,
+     "kind": "response",
+     "api": 1003,
+     "id": 335322878,
+     "code": 0
+    },
+    {
+     "t": 1.5017,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322879
+    },
+    {
+     "t": 1.5019,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322879,
+     "code": 0
+    },
+    {
+     "t": 1.5704,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322880
+    },
+    {
+     "t": 1.5705,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322880,
+     "code": 0
+    },
+    {
+     "t": 1.6304,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322881
+    },
+    {
+     "t": 1.6305,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322881,
+     "code": 0
+    },
+    {
+     "t": 1.6904,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322882
+    },
+    {
+     "t": 1.6905,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322882,
+     "code": 0
+    },
+    {
+     "t": 1.7504,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322883
+    },
+    {
+     "t": 1.7505,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322883,
+     "code": 0
+    },
+    {
+     "t": 1.8104,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322884
+    },
+    {
+     "t": 1.8105,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322884,
+     "code": 0
+    },
+    {
+     "t": 1.8704,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322885
+    },
+    {
+     "t": 1.8704,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322885,
+     "code": 0
+    },
+    {
+     "t": 1.9304,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322886
+    },
+    {
+     "t": 1.9305,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322886,
+     "code": 0
+    },
+    {
+     "t": 1.9904,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322887
+    },
+    {
+     "t": 1.9905,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322887,
+     "code": 0
+    },
+    {
+     "t": 2.0504,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322888
+    },
+    {
+     "t": 2.0505,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322888,
+     "code": 0
+    },
+    {
+     "t": 2.1104,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322889
+    },
+    {
+     "t": 2.1105,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322889,
+     "code": 0
+    },
+    {
+     "t": 2.1704,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322890
+    },
+    {
+     "t": 2.1704,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322890,
+     "code": 0
+    },
+    {
+     "t": 2.2304,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322891
+    },
+    {
+     "t": 2.2305,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322891,
+     "code": 0
+    },
+    {
+     "t": 2.2904,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322892
+    },
+    {
+     "t": 2.2904,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322892,
+     "code": 0
+    },
+    {
+     "t": 2.3503,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322893
+    },
+    {
+     "t": 2.3505,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322893,
+     "code": 0
+    },
+    {
+     "t": 2.4103,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322894
+    },
+    {
+     "t": 2.4104,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322894,
+     "code": 0
+    },
+    {
+     "t": 2.4707,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322895
+    },
+    {
+     "t": 2.471,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322895,
+     "code": 0
+    },
+    {
+     "t": 2.5302,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322896
+    },
+    {
+     "t": 2.5305,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322896,
+     "code": 0
+    },
+    {
+     "t": 2.5903,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322897
+    },
+    {
+     "t": 2.5904,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322897,
+     "code": 0
+    },
+    {
+     "t": 2.6503,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322898
+    },
+    {
+     "t": 2.6504,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322898,
+     "code": 0
+    },
+    {
+     "t": 2.7104,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322899
+    },
+    {
+     "t": 2.7105,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322899,
+     "code": 0
+    },
+    {
+     "t": 2.7704,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322900
+    },
+    {
+     "t": 2.7705,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322900,
+     "code": 0
+    },
+    {
+     "t": 2.8303,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322901
+    },
+    {
+     "t": 2.8304,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322901,
+     "code": 0
+    },
+    {
+     "t": 2.8903,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322902
+    },
+    {
+     "t": 2.8904,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322902,
+     "code": 0
+    },
+    {
+     "t": 2.9505,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322903
+    },
+    {
+     "t": 2.9505,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322903,
+     "code": 0
+    },
+    {
+     "t": 3.0103,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322904
+    },
+    {
+     "t": 3.0104,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322904,
+     "code": 0
+    },
+    {
+     "t": 3.0703,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322905
+    },
+    {
+     "t": 3.0703,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322905,
+     "code": 0
+    },
+    {
+     "t": 3.1303,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322906
+    },
+    {
+     "t": 3.1304,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322906,
+     "code": 0
+    },
+    {
+     "t": 3.1904,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322907
+    },
+    {
+     "t": 3.1904,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322907,
+     "code": 0
+    },
+    {
+     "t": 3.2504,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322908
+    },
+    {
+     "t": 3.2505,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322908,
+     "code": 0
+    },
+    {
+     "t": 3.3104,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322909
+    },
+    {
+     "t": 3.3106,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322909,
+     "code": 0
+    },
+    {
+     "t": 3.3703,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322910
+    },
+    {
+     "t": 3.3704,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322910,
+     "code": 0
+    },
+    {
+     "t": 3.4303,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322911
+    },
+    {
+     "t": 3.4303,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322911,
+     "code": 0
+    },
+    {
+     "t": 3.4904,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322912
+    },
+    {
+     "t": 3.4904,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322912,
+     "code": 0
+    },
+    {
+     "t": 3.5503,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322913
+    },
+    {
+     "t": 3.5504,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322913,
+     "code": 0
+    },
+    {
+     "t": 3.6103,
+     "kind": "request",
+     "api": 1008,
+     "id": 335322914
+    },
+    {
+     "t": 3.6103,
+     "kind": "response",
+     "api": 1008,
+     "id": 335322914,
+     "code": 0
+    },
+    {
+     "t": 3.6582,
+     "kind": "kill",
+     "target": "sink",
+     "pid": 1259792
+    }
+   ],
+   "cleanup_warnings": [],
+   "passed": false,
+   "expected_gap_observed": true,
+   "safety_result": "UNRESOLVED_NO_STOP_PATH"
+  }
+ ],
+ "scope": "Native protective latch after rate-monitor teardown fix; sink-crash path remains unresolved. No hardware access."
+}

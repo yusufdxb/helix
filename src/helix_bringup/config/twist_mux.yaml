@@ -1,4 +1,5 @@
-# twist_mux priority arbitration for the HELIX closed loop.
+# LEGACY twist_mux configuration (enable_twist_mux:=true only; the default
+# motion path is helix_arbiter, see docs/MOTION_ARBITRATION.md).
 #
 # Wiring (highest priority wins when multiple topics publish within timeout):
 #   /teleop/cmd_vel  (priority 200)  operator override, always wins
@@ -6,18 +7,19 @@
 #   /nav/cmd_vel     (priority  50)  autonomy / planner output
 #
 # Output topic is `cmd_vel` (remapped from the upstream default `cmd_vel_out`
-# in `helix_closedloop.launch.py`). The GO2 sport-mode bridge and the
-# Isaac Sim bridge both consume `/cmd_vel`, so this single topic covers
-# both targets.
+# in `helix_closedloop.launch.py`). The Isaac Sim bridge consumes `/cmd_vel`.
+# A stock GO2 has NO `/cmd_vel` consumer (docs/GO2_FIELD_NOTES.md section 3).
 #
-# Failsafe behavior: each input has a `timeout`. If no message arrives within
+# Timeout behavior: each input has a `timeout`. If no message arrives within
 # that window, twist_mux discards it from arbitration and falls through to
-# the next-highest live input. If every input is stale, twist_mux publishes
-# zero on `cmd_vel`.
+# the next-highest live input. CORRECTION (2026-09-17, measured against the
+# real twist_mux 4.3.0 binary): if every input is stale, twist_mux publishes
+# NOTHING (it is event-driven), it does NOT publish zero. A lock also silences
+# the output rather than publishing zero, and NaN is forwarded unchanged. The
+# downstream consumer keeps its last command. twist_mux is not a safety layer.
 #
-# HELIX safety note: /helix/cmd_vel sits BELOW /teleop/cmd_vel on purpose,
-# so an operator joystick can always preempt a recovery-tier hold. It sits
-# ABOVE /nav/cmd_vel so a recovery STOP wins over autonomy commands.
+# /helix/cmd_vel sits BELOW /teleop/cmd_vel, so a live teleop stream defeats
+# a HELIX STOP_AND_HOLD on this path. The arbiter path does not have that gap.
 twist_mux:
   ros__parameters:
     topics:

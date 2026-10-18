@@ -1,0 +1,146 @@
+{
+  "evidence_class": "Sim",
+  "utc": "2026-10-18T20:40:20.609414+00:00",
+  "duration_s": 20.001443619999918,
+  "architecture": "x86_64",
+  "kernel_release": "6.8.0-138-generic",
+  "queries": {},
+  "requests_sent": [],
+  "own_publishers": [
+    "/parameter_events"
+  ],
+  "topics": {
+    "/lowstate": {
+      "count": 9998,
+      "rate_hz": 499.8563276313819,
+      "max_gap_s": 0.009992656006943434,
+      "age_at_end_s": 1.4609002391807735e-05
+    },
+    "/lf/sportmodestate": {
+      "count": 998,
+      "rate_hz": 50.01451307043017,
+      "max_gap_s": 0.027151361995493062,
+      "age_at_end_s": 0.009816267003770918
+    },
+    "/helix/sink/status": {
+      "count": 398,
+      "rate_hz": 20.050878836362173,
+      "max_gap_s": 0.055848616000730544,
+      "age_at_end_s": 0.03716734700719826
+    },
+    "/helix/arbiter/status": {
+      "count": 981,
+      "rate_hz": 50.00068624153156,
+      "max_gap_s": 0.026567468987195753,
+      "age_at_end_s": 0.017672258996753953
+    },
+    "/helix/supervisor/status": {
+      "count": 40,
+      "rate_hz": 2.0103540807495768,
+      "max_gap_s": 0.5001767299982021,
+      "age_at_end_s": 0.13758656900608912
+    }
+  },
+  "observed_sport_api_counts": {},
+  "latest": {
+    "lowstate_version_raw": [
+      0,
+      0
+    ],
+    "sport_state": {
+      "mode": 1,
+      "gait_type": 0,
+      "speed_xy": 0.0,
+      "yaw_speed": 0.0
+    },
+    "sink_mode": "dry_run",
+    "arbiter_protective_latched": true,
+    "supervisor_state": "NOMINAL",
+    "supervisor_missing_nodes": []
+  },
+  "nonactuating_profile_violations": {},
+  "resources": {
+    "helix_topic_rate_monitor": {
+      "samples": 15,
+      "cpu_mean": 0.8657797960097505,
+      "cpu_p95": 0.9999981079926655,
+      "cpu_max": 0.9999981079926655,
+      "rss_mean_kb": 15195.2,
+      "rss_max_kb": 15208
+    },
+    "helix_anomaly_detector": {
+      "samples": 15,
+      "cpu_mean": 0.1997739095085449,
+      "cpu_p95": 0.9998396357189893,
+      "cpu_max": 0.9998396357189893,
+      "rss_mean_kb": 15811.466666666667,
+      "rss_max_kb": 15824
+    },
+    "helix_log_parser": {
+      "samples": 15,
+      "cpu_mean": 0.13324277363894313,
+      "cpu_p95": 0.9999981079926655,
+      "cpu_max": 0.9999981079926655,
+      "rss_mean_kb": 15637.6,
+      "rss_max_kb": 15660
+    },
+    "helix_supervisor": {
+      "samples": 15,
+      "cpu_mean": 0.3994773240755986,
+      "cpu_p95": 1.9959689411327628,
+      "cpu_max": 1.9959689411327628,
+      "rss_mean_kb": 16482.4,
+      "rss_max_kb": 16492
+    },
+    "helix_arbiter": {
+      "samples": 15,
+      "cpu_mean": 0.3330458192989255,
+      "cpu_p95": 0.9999981079926655,
+      "cpu_max": 0.9999981079926655,
+      "rss_mean_kb": 15575.733333333334,
+      "rss_max_kb": 15588
+    },
+    "helix_go2_sport_sink": {
+      "samples": 15,
+      "cpu_mean": 0.3994657573644124,
+      "cpu_p95": 0.9999222930489616,
+      "cpu_max": 0.9999222930489616,
+      "rss_mean_kb": 14954.933333333332,
+      "rss_max_kb": 14968
+    }
+  },
+  "aggregate_resources": {
+    "samples": 15,
+    "cpu_mean": 2.330785379896175,
+    "cpu_p95": 4.993217482957407,
+    "cpu_max": 4.993217482957407,
+    "rss_mean_kb": 93657.33333333333,
+    "rss_max_kb": 93740
+  },
+  "thermal_peak_c": null,
+  "native_process_counts": {
+    "helix_topic_rate_monitor": 1,
+    "helix_anomaly_detector": 1,
+    "helix_log_parser": 1,
+    "helix_supervisor": 1,
+    "helix_arbiter": 1,
+    "helix_go2_sport_sink": 1
+  },
+  "missing_native_processes": [],
+  "native_validation_complete": true,
+  "firmware_build": null,
+  "controller_motion_timeout_s": null,
+  "motion_timeout_measured": false,
+  "notes": [
+    "API version and raw LowState.version do not identify the firmware build.",
+    "Resource samples include exact native executable names in this ROS domain, excluding this observer.",
+    "No command-silence motion test or stop mechanism test is performed."
+  ],
+  "runtime_base_commit": "4ea69c8f25da863277df5b38190e5bd54a4dd6dd",
+  "fixture": "FakeGo2 with expiry disabled; synthetic LowState at 500 Hz; default six-native launch; localhost DDS",
+  "hardware_validation": false,
+  "source_sha256": {
+    "scripts/hw/controller_inspect.py": "fb4b9a832a0ba3e122d2bcd01180e962d4443834c25b78aa61d084c181d69191",
+    "tests/sim_integration/test_controller_inspection.py": "af183677731096a6fdc593017c7a705529ed5d37c116d733e5d0b080ef245551"
+  }
+}

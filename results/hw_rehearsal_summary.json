@@ -1,0 +1,136 @@
+{
+ "what": "OFF-ROBOT REHEARSAL of docs/HW_MOTION_TEST.md stages A-F against helix_fake_go2 (real unitree_api Request/Response types, simple first-order lag dynamics). NOT hardware evidence; stop time/distance reflect the fake model only.",
+ "stages": {
+  "A": {
+   "verdict": "PASS",
+   "preflight": "GO",
+   "checks": {
+    "zero_out": "PASS",
+    "no_move": "PASS",
+    "still": "PASS",
+    "unconfounded": "PASS"
+   },
+   "measurements": {},
+   "chain_src_deltas_ms": null,
+   "fault_to_output_src_ms": null,
+   "fault_to_sink_src_ms": null
+  },
+  "B": {
+   "verdict": "PASS",
+   "preflight": "GO",
+   "checks": {
+    "selected": "PASS",
+    "zero_out": "PASS",
+    "stopmove_sent": "PASS",
+    "no_move": "PASS",
+    "robot_accepts": "PASS",
+    "still": "PASS",
+    "unconfounded": "PASS"
+   },
+   "measurements": {},
+   "chain_src_deltas_ms": null,
+   "fault_to_output_src_ms": null,
+   "fault_to_sink_src_ms": null
+  },
+  "C": {
+   "verdict": "PASS",
+   "preflight": "GO",
+   "checks": {
+    "visible": "PASS",
+    "sink_would_move": "PASS",
+    "chain": "PASS",
+    "hold_zero": "PASS",
+    "sink_would_stop": "PASS",
+    "still": "PASS",
+    "no_move": "PASS",
+    "unconfounded": "PASS"
+   },
+   "measurements": {
+    "nonzero_outputs_during_hold": 0
+   },
+   "chain_src_deltas_ms": {
+    "fault->action_ms": 0.618,
+    "action->hold_ms": 8.087,
+    "hold->status_ms": 0.217,
+    "status->sink_ms": 0.077
+   },
+   "fault_to_output_src_ms": 8.923,
+   "fault_to_sink_src_ms": 8.999
+  },
+  "D": {
+   "verdict": "PASS",
+   "preflight": "GO",
+   "checks": {
+    "moved": "PASS",
+    "stopmove_sent": "PASS",
+    "stopped": "PASS",
+    "unconfounded": "PASS"
+   },
+   "measurements": {
+    "peak_speed": 0.1504859991198693,
+    "stop_time_s": 0.2799613879997196,
+    "stop_distance_m": 0.019283733092782418,
+    "speed_at_hold": 0.14999974603041594
+   },
+   "chain_src_deltas_ms": null,
+   "fault_to_output_src_ms": null,
+   "fault_to_sink_src_ms": null
+  },
+  "E": {
+   "verdict": "PASS",
+   "preflight": "GO",
+   "checks": {
+    "moving_at_fault": "PASS",
+    "chain": "PASS",
+    "hold_zero": "PASS",
+    "stopmove_sent": "PASS",
+    "no_move_held": "PASS",
+    "robot_accepts": "PASS",
+    "physically_stopped": "PASS",
+    "resume": "PASS",
+    "no_spontaneous": "PASS",
+    "no_move_after_resume": "PASS",
+    "unconfounded": "PASS"
+   },
+   "measurements": {
+    "speed_before_fault": 0.12349543486447029,
+    "nonzero_outputs_during_hold": 0,
+    "stop_time_s": 0.24024078699949314,
+    "stop_distance_m": 0.014593879422749645,
+    "speed_at_hold": 0.12465224124495966
+   },
+   "chain_src_deltas_ms": {
+    "fault->action_ms": 0.496,
+    "action->hold_ms": 0.312,
+    "hold->status_ms": 0.342,
+    "status->sink_ms": 0.244
+   },
+   "fault_to_output_src_ms": 1.15,
+   "fault_to_sink_src_ms": 1.394
+  },
+  "F": {
+   "verdict": "PASS",
+   "preflight": "GO",
+   "checks": {
+    "held": "PASS",
+    "resume": "PASS",
+    "still_after_resume": "PASS",
+    "zero_after_resume": "PASS",
+    "deactivate_holds": "PASS",
+    "reactivated": "PASS",
+    "still_after_rearm": "PASS",
+    "zero_all": "PASS",
+    "no_move": "PASS",
+    "rearmed": "PASS",
+    "unconfounded": "PASS"
+   },
+   "measurements": {},
+   "chain_src_deltas_ms": null,
+   "fault_to_output_src_ms": null,
+   "fault_to_sink_src_ms": null
+  }
+ },
+ "git_sha": "0ec54b063bb93d48e45b64878522829d40687361",
+ "git_dirty": false,
+ "config_hash": "c819c6b0498ad03599a27c8790aff695fe17dd841c501790eab0c4bdd14285a2"
+}

@@ -22,11 +22,32 @@ What this is **not**: continuous deployment, ground-truth-labeled fault detectio
 
 The `helix_core` sensing nodes are not passive observers. The HeartbeatMonitor requires monitored nodes to explicitly publish heartbeat messages on a designated topic. HELIX's own lifecycle nodes now emit that heartbeat while active, so the stack can detect the death of one of its own tiers; until this was added no process published on `/helix/heartbeat` at all outside the demo fault injector, which left the monitor's registry permanently empty and made CRASH detection untestable against a real launch. GO2 nodes still do not emit heartbeats and remain outside its reach. The AnomalyDetector requires metric values to be forwarded onto `/helix/metrics`. The `helix_adapter` package narrows but does not eliminate this gap: it bridges a fixed, configured set of GO2 topics (rate, JSON state, pose drift) into `/helix/metrics` so the AnomalyDetector can run against a robot that does not natively publish HELIX-shaped inputs. There is still no automatic node discovery and no introspection of arbitrary topics, adapter coverage is exactly what the YAML configures and nothing more. Session 5's three physical injections (LiDAR cover, USB mic disconnect, unrelated topic flood) produced 0 FaultEvents for this reason.
 
-## Physical Recovery Actuation Is Not Yet Validated
+## Physical Recovery Actuation: Command Path Proven, Walking Stop Unverified
 
 As of Session 8 (2026-04-23), `helix_diagnosis` produces `RecoveryHint` messages and `helix_recovery` consumes them, applies the allowlist (`{STOP_AND_HOLD, RESUME, LOG_ONLY}`) and cooldown, and publishes audit events plus `/helix/cmd_vel`. The closed loop is observable end-to-end in the bag artifacts.
 
-What is **not** validated: the Session 8 GO2 graph had 0 downstream subscribers on `/helix/cmd_vel`, so STOP_AND_HOLD published zero-twist into a void and did not physically command the robot. The current source includes a `twist_mux` fallback, a canonical closed-loop launch path, and an offline bag validator that requires both muxed zero commands and odometry-confirmed stopping. Those paths have unit-level validation only. A new physical run must still prove the installed graph, the command handoff, and the robot's response before HELIX can be described as a physical safety intervention.
+What is **not** validated: the Session 8 GO2 graph had 0 downstream subscribers on `/helix/cmd_vel`, so STOP_AND_HOLD published zero-twist into a void and did not physically command the robot. The `twist_mux` fallback was found unsafe (silent on idle and lock, forwards NaN). The current path is `helix_arbiter` (sole velocity output) to the GO2 sport sink (StopMove 1003 / Move 1008 only).
+
+As of 2026-10-17 the native profile (`helix_native.launch.py`) tracks every stage of a stop: hold, arbiter ack, controller ack (`/api/sport/response` code 0), and the measured stop (`/lf/sportmodestate`). `scripts/hw/native_stop_test.py` checks all four. On 2026-10-17 the test passed on the real GO2 with the armed C++ sink: one ack stage and 2 of 4 motion attempts (`hardware_eval_20261017/native_stop/`, `docs/NATIVE_RUNTIME.md`, `docs/EVIDENCE_AUDIT.md`). The real controller answered 277 StopMove requests with code 0. In both passing motion trials the fault came about 0.35 s after the first Move at vx 0.25; the state estimate read 0.13 and 0.32 m/s at the fault and still 636 and 265 ms later. Limits:
+- The robot never sustained a walk at 0.25 m/s or below, the sink's limit: the estimate shows a 6 to 8 cm body displacement that returned toward the start in two of three runs. Foot fields are zero in `mcf` and `/lowstate` was not recorded, so a body shift cannot be told from steps. A stop from steady walking is not shown.
+- No counterfactual: how far the robot travels under the same Move stream without the hold is not measured.
+- No independent motion sensor. `/utlidar/robot_odom` carries the same estimate as `/sportmodestate` (median velocity difference 0), so it cannot confirm it.
+- The estimate spikes for one 3 ms sample at Move onset (up to 0.43 m/s). The first runner abort rule tripped on one (1 of 3 trials at vx 0.25). The runner now uses a persistence-plus-ceiling guard (`scripts/hw/stop_guard.py`); the HELIX stop path itself never depended on that rule.
+- The fault was a synthetic `FaultEvent`, not a degraded sensor.
+- Remote input was not recorded during those trials (it is now). Request ids show no other process sent sport requests.
+
+HELIX is not a substitute for the remote or the e-stop at any stage.
+
+## Native Runtime Limits (2026-10-17)
+
+- Native CPU and RSS on the Orin: 7.35 % of one core and 91.5 MB over 10 min, with the robot lying. The Python baseline is 79.08 % and 587.4 MB over 30 min. The profiles do different work: the native profile has no LLM explainer, context buffer, pose-drift monitor or JSON parser. Ten minutes is not a soak.
+- The native detector configuration was selected on five real captures (1.057 h). It passed a short held-out test on 0.216 h: 0 stop false alarms (95 % bound about 13.9 per hour), all synthetic onsets detected, 0 false clears. Fault onsets are synthetic, injected into real streams; no physical sensor fault has been scored. Round 1 of the same protocol failed held-out (2 stop false alarms from `rate_hz/utlidar_cloud` stalls); see `docs/DETECTOR_EVAL.md`.
+- The chosen configuration still raises log-only faults on `pose/displacement_rate_m_s` (19 episodes in 30 min on a lying robot). They never hold, but they add audit noise.
+- No live fault injection (topic loss, rate collapse, drift), SIGKILL crash test on the Orin, DDS-liveliness comparison, long soak or jitter measurement has been run on the native stack. Crash recovery is tested in simulation only (`scripts/sim_native_crash_recovery.py`).
+- The native arbiter now owns a protective latch across supervisor restarts, epoch changes and heartbeat gaps. Startup and recovery require fresh supervisor health plus an explicit operator release bound to the current latch, epoch and supervisor revision. Regression evidence is from the fake GO2 only; physical restart behavior remains unverified. Legacy Python arbitration does not implement this native protocol.
+- **Unresolved sink-crash failure:** if the sink process dies, no surviving process sends StopMove. The arbiter latch does not repair that missing output path. The physical controller's behavior when Move requests stop has not been measured; the fake GO2 timeout provides no hardware guarantee. This remains a separate deployment blocker.
+- `helix_supervisor_cpp` has no Python counterpart to check parity against. Its behavior rests on its own 49 tests and the rehearsal.
+- `json_state_parser` and `pose_drift_monitor` are not in the native profile.
 
 ## No End-to-End Field Deployment
 

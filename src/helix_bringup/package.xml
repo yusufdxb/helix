@@ -8,14 +8,29 @@
   <license>MIT</license>
 
   <depend>rclpy</depend>
+  <exec_depend>python3-yaml</exec_depend>
   <depend>std_msgs</depend>
   <depend>rcl_interfaces</depend>
   <depend>helix_msgs</depend>
   <depend>helix_core</depend>
   <depend>ros2launch</depend>
+  <exec_depend>helix_arbiter</exec_depend>
+  <!-- Optional native backends, selected with arbiter_backend:=cpp and
+       anomaly_backend:=cpp. Python stays the default. -->
+  <exec_depend>helix_arbiter_cpp</exec_depend>
+  <exec_depend>helix_sensing_cpp</exec_depend>
+  <exec_depend>helix_supervisor_cpp</exec_depend>
+  <exec_depend>helix_go2_sink_cpp</exec_depend>
+  <exec_depend>helix_adapter</exec_depend>
+  <exec_depend>helix_diagnosis</exec_depend>
+  <exec_depend>helix_recovery</exec_depend>
+  <exec_depend>helix_explanation</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
   <exec_depend>twist_mux</exec_depend>
+  <test_depend>python3-pytest</test_depend>
+  <test_depend>rmw_cyclonedds_cpp</test_depend>
 
-  <buildtool_depend>ament_python</buildtool_depend>
+  <buildtool_depend>python3-setuptools</buildtool_depend>
 
   <export>
     <build_type>ament_python</build_type>

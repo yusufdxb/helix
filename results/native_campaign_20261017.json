@@ -1,0 +1,726 @@
+{
+ "schema": "helix.native_campaign.v1",
+ "date": "2026-10-17",
+ "branch_head": "see git log; hardware runs at 1254bbe + ddf816c packaging fix",
+ "python_baseline_hw": {
+  "kind": "HARDWARE",
+  "robot": "GO2 lying, sink dry_run",
+  "build": "3f648a8",
+  "duration_s": 1796,
+  "source": "hardware_eval_20261017/pybaseline/procs.jsonl",
+  "total_cpu_pct": 79.08,
+  "total_rss_mb": 587.4,
+  "processes": [
+   {
+    "name": "helix_topic_rate_monitor",
+    "cpu_pct_mean": 36.55,
+    "rss_mb_mean": 62.4,
+    "samples": 360
+   },
+   {
+    "name": "helix_arbiter",
+    "cpu_pct_mean": 7.61,
+    "rss_mb_mean": 55.5,
+    "samples": 360
+   },
+   {
+    "name": "helix_heartbeat_monitor",
+    "cpu_pct_mean": 7.04,
+    "rss_mb_mean": 38.2,
+    "samples": 360
+   },
+   {
+    "name": "helix_go2_sport_sink",
+    "cpu_pct_mean": 5.85,
+    "rss_mb_mean": 55.3,
+    "samples": 360
+   },
+   {
+    "name": "helix_context_buffer",
+    "cpu_pct_mean": 3.79,
+    "rss_mb_mean": 38.4,
+    "samples": 360
+   },
+   {
+    "name": "helix_pose_drift_monitor",
+    "cpu_pct_mean": 3.66,
+    "rss_mb_mean": 55.4,
+    "samples": 360
+   },
+   {
+    "name": "helix_recovery_node",
+    "cpu_pct_mean": 3.64,
+    "rss_mb_mean": 54.2,
+    "samples": 360
+   },
+   {
+    "name": "helix_anomaly_detector",
+    "cpu_pct_mean": 3.43,
+    "rss_mb_mean": 38.3,
+    "samples": 360
+   },
+   {
+    "name": "helix_json_state_parser",
+    "cpu_pct_mean": 2.36,
+    "rss_mb_mean": 39.6,
+    "samples": 360
+   },
+   {
+    "name": "helix_diagnosis_node",
+    "cpu_pct_mean": 2.3,
+    "rss_mb_mean": 40.0,
+    "samples": 360
+   },
+   {
+    "name": "helix_log_parser",
+    "cpu_pct_mean": 1.98,
+    "rss_mb_mean": 38.3,
+    "samples": 360
+   },
+   {
+    "name": "helix_llm_explainer",
+    "cpu_pct_mean": 0.88,
+    "rss_mb_mean": 47.5,
+    "samples": 360
+   },
+   {
+    "name": "helix_arbiter",
+    "cpu_pct_mean": 0.0,
+    "rss_mb_mean": 24.2,
+    "samples": 360
+   }
+  ],
+  "note": "totals from unrounded per-process means"
+ },
+ "native_hw_smoke": {
+  "kind": "HARDWARE",
+  "build": "6ace4d7",
+  "actuating": false,
+  "lifecycle_active": 5,
+  "supervisor_state": "NOMINAL",
+  "sink_feedback_available": true,
+  "rates_hz": {
+   "utlidar_imu": 247.8,
+   "utlidar_robot_odom": 150.6,
+   "utlidar_robot_pose": 18.75,
+   "utlidar_cloud": 15.39,
+   "gnss": 1.0,
+   "multiplestate": 1.0
+  },
+  "source": "session log (not committed)"
+ },
+ "stop_chain_rehearsal": {
+  "kind": "REHEARSAL (helix_fake_go2, not hardware)",
+  "script": "scripts/hw/native_stop_test.py",
+  "stages": {
+   "ack": {
+    "verdict": "PASS",
+    "checks_passed": 18,
+    "checks": 18,
+    "hold_requested_ms": 0.08,
+    "arbiter_ack_ms": 0.32,
+    "controller_ack_ms": 442.17,
+    "stop_confirmed_ms": 453.3,
+    "measured_stop_ms": null
+   },
+   "motion": {
+    "verdict": "PASS",
+    "checks_passed": 24,
+    "checks": 24,
+    "hold_requested_ms": 0.06,
+    "arbiter_ack_ms": 0.21,
+    "controller_ack_ms": 0.41,
+    "stop_confirmed_ms": 466.3,
+    "measured_stop_ms": 166.7
+   }
+  },
+  "note": "stop_confirmed includes the 0.3 s still dwell; measured_stop is the first still SportModeState sample"
+ },
+ "stop_chain_hw": {
+  "kind": "PROVEN_COMMAND_PATH; WALKING_STOP_UNVERIFIED",
+  "build": "1254bbe + ddf816c",
+  "sink": "helix_go2_sink_cpp armed",
+  "robot": "standing, mcf, operator on remote",
+  "runs": [
+   {
+    "run": "221913",
+    "stage": "ack",
+    "verdict": "FAIL",
+    "checks": "1/3",
+    "why": "helix_supervisor_cpp not built (missing exec_depend), fixed ddf816c"
+   },
+   {
+    "run": "222125",
+    "stage": "ack",
+    "verdict": "PASS",
+    "checks": "18/18",
+    "hold_ms": 0.15,
+    "arbiter_ack_ms": 0.62,
+    "controller_ack_ms": 159.2,
+    "stop_confirmed_ms": 205.8
+   },
+   {
+    "run": "222205",
+    "stage": "motion",
+    "args": "vx 0.15 settle 1.0",
+    "verdict": "FAIL",
+    "checks": "23/24",
+    "why": "speed at fault 0.032 m/s: gait stalled",
+    "estimate_peak_disp_m": 0.076,
+    "estimate_disp_at_4s_m": 0.014
+   },
+   {
+    "run": "222336",
+    "stage": "motion",
+    "args": "vx 0.3",
+    "verdict": "REFUSED",
+    "why": "runner rejects vx > 0.25 (sink limit); no Move sent"
+   },
+   {
+    "run": "222412",
+    "stage": "motion",
+    "args": "vx 0.25 settle 0.3 abort 0.40",
+    "verdict": "PASS",
+    "checks": "24/24",
+    "v_at_fault": 0.13,
+    "hold_ms": 0.18,
+    "arbiter_ack_ms": 0.65,
+    "controller_ack_ms": 2.62,
+    "stop_confirmed_ms": 925.5,
+    "sportmodestate_still_ms": 635.9,
+    "odom_max_after_deadline": 0.0243,
+    "travel_before_fault_m": 0.057,
+    "travel_after_fault_3s_m": 0.051,
+    "estimate_peak_disp_m": 0.062,
+    "estimate_disp_at_4s_m": 0.006
+   },
+   {
+    "run": "223203",
+    "stage": "motion",
+    "args": "vx 0.25 settle 0.3 abort 0.40",
+    "verdict": "PASS",
+    "checks": "24/24",
+    "v_at_fault": 0.316,
+    "hold_ms": 0.17,
+    "arbiter_ack_ms": 0.64,
+    "controller_ack_ms": 1.73,
+    "stop_confirmed_ms": 574.5,
+    "sportmodestate_still_ms": 265.1,
+    "odom_max_after_deadline": 0.0217,
+    "travel_before_fault_m": 0.06,
+    "travel_after_fault_3s_m": 0.021,
+    "estimate_peak_disp_m": 0.084,
+    "estimate_disp_at_4s_m": 0.08
+   },
+   {
+    "run": "223245",
+    "stage": "motion",
+    "args": "vx 0.25 settle 0.3 abort 0.40",
+    "verdict": "FAIL",
+    "checks": "9/10",
+    "why": "runner overspeed abort on a one-sample estimator spike at Move onset: 0.431 m/s on one SportModeState sample 26 ms after the first Move, then on one odometry sample (same estimate); no fault injected; StopMove 1 ms after abort; 0.006 m peak displacement",
+    "estimate_peak_disp_m": 0.006,
+    "estimate_disp_at_4s_m": 0.004
+   }
+  ],
+  "bag_check": {
+   "stopmove_code0": 277,
+   "move_code0": 31,
+   "stopmove_no_recorded_response": 2,
+   "move_after_fault": 0,
+   "foreign_request_id_breaks": 0,
+   "responses_to_unknown_ids": 0,
+   "remote_input": "not recorded in these runs; recorded and checked since ac28a5b"
+  },
+  "not_shown": [
+   "that the robot was walking: 6-8 cm body displacement, returned toward start in 222205 and 222412; foot fields zero in mcf, /lowstate not recorded, so shift vs steps unresolved",
+   "stop from steady walking (gait does not sustain at <= 0.25 m/s; limit not raised)",
+   "no-HELIX counterfactual: travel under the same Move stream without the hold",
+   "independent motion sensor",
+   "repeat statistics",
+   "real sensor fault"
+  ],
+  "evidence": "hardware_eval_20261017/native_stop/",
+  "trigger": "synthetic FaultEvent (rate_hz/utlidar_helix_injected) in every stop; no real sensor fault",
+  "estimator": "/sportmodestate and /utlidar/robot_odom carry the same estimate (median velocity difference 0); odom_* fields are not an independent sensor",
+  "posture_event": {
+   "window": "2026-10-17T22:28:14Z to 22:28:33Z, between runs 222412 and 223203",
+   "evidence": "hardware_eval_20261017/native_partial/bag /helix/sink/status",
+   "helix_sent": "nothing (sink dry_run, last_api_id 0 throughout)",
+   "peak_speed_m_s": 1.419,
+   "peak_yaw_rad_s": 2.784,
+   "cause": "not established; /api/sport/request and /wirelesscontroller not recorded in that window"
+  }
+ },
+ "detector_round2": {
+  "kind": "DEV + HELD-OUT PASS (short)",
+  "source": "analysis/results/detector_eval_round2_dev.json",
+  "dev_hours": 1.057,
+  "dev_sources": [
+   "apr06_extended_5min",
+   "apr06_adapter_session",
+   "apr23_session8_sportmodestate",
+   "oct06_loaded_standing",
+   "oct17_lying_pybaseline"
+  ],
+  "chosen": "freeze_z4.0_w60_f0.02_d1.0_a0.1",
+  "configs": {
+   "shipped_z4_w60": {
+    "stop_false_alarms": 0,
+    "stop_false_alarms_per_h": 0.0,
+    "detected": {
+     "collapse_50": "539/539",
+     "collapse_75": "539/539",
+     "death": "539/539",
+     "death_s1": "539/539",
+     "drift_70": "317/539",
+     "slowdrift_70": "93/392"
+    },
+    "false_clears_during_fault": 1488,
+    "detection_latency_median_s": {
+     "collapse_50": [
+      2.5,
+      2.522,
+      3.0,
+      2.501
+     ],
+     "collapse_75": [
+      2.5,
+      2.522,
+      3.0,
+      2.751
+     ],
+     "death": [
+      6.5,
+      7.022,
+      7.0,
+      7.0
+     ],
+     "death_s1": [
+      3.0,
+      3.026,
+      3.5,
+      3.501
+     ],
+     "drift_70": [
+      3.0,
+      3.023,
+      3.0,
+      3.0
+     ],
+     "slowdrift_70": [
+      3.0,
+      3.499
+     ]
+    },
+    "recovery_cleared": {
+     "collapse_50": "0/539",
+     "death_s1": "539/539"
+    }
+   },
+   "proposed_z3.5_w120": {
+    "stop_false_alarms": 3,
+    "stop_false_alarms_per_h": 2.84,
+    "detected": {
+     "collapse_50": "535/539",
+     "collapse_75": "535/539",
+     "death": "535/539",
+     "death_s1": "535/539",
+     "drift_70": "530/539",
+     "slowdrift_70": "179/392"
+    },
+    "false_clears_during_fault": 1779,
+    "detection_latency_median_s": {
+     "collapse_50": [
+      2.5,
+      2.522,
+      3.0,
+      2.501
+     ],
+     "collapse_75": [
+      2.5,
+      2.522,
+      3.0,
+      2.999
+     ],
+     "death": [
+      6.5,
+      7.022,
+      7.0,
+      7.0
+     ],
+     "death_s1": [
+      3.0,
+      3.026,
+      3.5,
+      3.501
+     ],
+     "drift_70": [
+      3.0,
+      2.773,
+      4.001,
+      4.499
+     ],
+     "slowdrift_70": [
+      3.5,
+      5.0
+     ]
+    },
+    "recovery_cleared": {
+     "collapse_50": "0/539",
+     "death_s1": "535/539"
+    }
+   },
+   "freeze_z4.0_w60_f0.02_d1.0_a0.1": {
+    "stop_false_alarms": 0,
+    "stop_false_alarms_per_h": 0.0,
+    "detected": {
+     "collapse_50": "539/539",
+     "collapse_75": "539/539",
+     "death": "539/539",
+     "death_s1": "539/539",
+     "drift_70": "539/539",
+     "slowdrift_70": "392/392"
+    },
+    "false_clears_during_fault": 0,
+    "detection_latency_median_s": {
+     "collapse_50": [
+      2.0,
+      2.023,
+      2.0,
+      2.0
+     ],
+     "collapse_75": [
+      3.0,
+      3.026,
+      3.0,
+      3.0
+     ],
+     "death": [
+      5.5,
+      5.522,
+      6.0,
+      5.999
+     ],
+     "death_s1": [
+      2.0,
+      2.023,
+      2.5,
+      2.5
+     ],
+     "drift_70": [
+      21.25,
+      21.023,
+      21.001,
+      21.499
+     ],
+     "slowdrift_70": [
+      101.0,
+      101.499
+     ]
+    },
+    "recovery_cleared": {
+     "collapse_50": "539/539",
+     "death_s1": "539/539"
+    }
+   }
+  },
+  "round1": {
+   "chosen": "freeze_z4.0_w120_f0.01_d1.0_a0.0",
+   "heldout_oct17_stop_false_alarms": 2,
+   "verdict": "FAILED held-out"
+  },
+  "heldout": {
+   "source": "analysis/results/detector_eval_round2_heldout.json",
+   "hours": 0.2157,
+   "captures": {
+    "oct17_standing_native_175s": "hardware_eval_20261017/native_partial/bag",
+    "oct17_lying_native_600s": "hardware_eval_20261017/native/bag"
+   },
+   "poisson95_upper_stop_fa_per_h": 13.9,
+   "configs": {
+    "shipped_z4_w60": {
+     "stop_false_alarms": 0,
+     "all_fault_episodes": 0,
+     "stop_false_alarms_per_h": 0.0,
+     "detected": {
+      "collapse_50": "120/120",
+      "collapse_75": "120/120",
+      "death": "120/120",
+      "death_s1": "120/120",
+      "drift_70": "88/120",
+      "slowdrift_70": "8/44"
+     },
+     "false_clears_during_fault": 336,
+     "detection_latency_median_s": {
+      "collapse_50": [
+       3.0,
+       2.5
+      ],
+      "collapse_75": [
+       3.0,
+       2.5
+      ],
+      "death": [
+       6.5,
+       7.0
+      ],
+      "death_s1": [
+       3.0,
+       3.5
+      ],
+      "drift_70": [
+       3.0,
+       3.25
+      ],
+      "slowdrift_70": [
+       3.25
+      ]
+     },
+     "recovery_cleared": {
+      "collapse_50": "0/120",
+      "death_s1": "120/120"
+     }
+    },
+    "proposed_z3.5_w120": {
+     "stop_false_alarms": 1,
+     "all_fault_episodes": 3,
+     "stop_false_alarms_per_h": 4.64,
+     "detected": {
+      "collapse_50": "118/120",
+      "collapse_75": "118/120",
+      "death": "118/120",
+      "death_s1": "118/120",
+      "drift_70": "117/120",
+      "slowdrift_70": "31/44"
+     },
+     "false_clears_during_fault": 384,
+     "detection_latency_median_s": {
+      "collapse_50": [
+       3.0,
+       2.5
+      ],
+      "collapse_75": [
+       3.0,
+       2.5
+      ],
+      "death": [
+       6.5,
+       7.0
+      ],
+      "death_s1": [
+       3.0,
+       3.5
+      ],
+      "drift_70": [
+       4.25,
+       3.5
+      ],
+      "slowdrift_70": [
+       7.5
+      ]
+     },
+     "recovery_cleared": {
+      "collapse_50": "0/120",
+      "death_s1": "118/120"
+     }
+    },
+    "freeze_z4.0_w60_f0.02_d1.0_a0.1": {
+     "stop_false_alarms": 0,
+     "all_fault_episodes": 0,
+     "stop_false_alarms_per_h": 0.0,
+     "detected": {
+      "collapse_50": "120/120",
+      "collapse_75": "120/120",
+      "death": "120/120",
+      "death_s1": "120/120",
+      "drift_70": "120/120",
+      "slowdrift_70": "44/44"
+     },
+     "false_clears_during_fault": 0,
+     "detection_latency_median_s": {
+      "collapse_50": [
+       2.0,
+       2.0
+      ],
+      "collapse_75": [
+       3.0,
+       3.0
+      ],
+      "death": [
+       5.5,
+       6.0
+      ],
+      "death_s1": [
+       2.0,
+       2.5
+      ],
+      "drift_70": [
+       21.5,
+       21.5
+      ],
+      "slowdrift_70": [
+       101.5
+      ]
+     },
+     "recovery_cleared": {
+      "collapse_50": "120/120",
+      "death_s1": "120/120"
+     }
+    },
+    "freeze_z4.0_w60_f0.02_d1.0_a0.2": {
+     "stop_false_alarms": 0,
+     "all_fault_episodes": 0,
+     "stop_false_alarms_per_h": 0.0,
+     "detected": {
+      "collapse_50": "120/120",
+      "collapse_75": "120/120",
+      "death": "120/120",
+      "death_s1": "120/120",
+      "drift_70": "1/120",
+      "slowdrift_70": "44/44"
+     },
+     "false_clears_during_fault": 1,
+     "detection_latency_median_s": {
+      "collapse_50": [
+       2.0,
+       2.0
+      ],
+      "collapse_75": [
+       3.0,
+       3.0
+      ],
+      "death": [
+       5.5,
+       6.0
+      ],
+      "death_s1": [
+       2.0,
+       2.5
+      ],
+      "drift_70": [
+       null,
+       12.0
+      ],
+      "slowdrift_70": [
+       201.25
+      ]
+     },
+     "recovery_cleared": {
+      "collapse_50": "120/120",
+      "death_s1": "120/120"
+     }
+    }
+   },
+   "caveats": [
+    "0.216 h only",
+    "no pose/ metrics in native captures",
+    "synthetic onsets"
+   ]
+  }
+ },
+ "native_hw_cost_partial": {
+  "kind": "PARTIAL",
+  "build": "1254bbe",
+  "utc_start": "2026-10-17T22:25:48Z",
+  "samples_s": 175.1,
+  "planned_s": 600,
+  "robot": "standing",
+  "method": "per-PID mean of proc_sampler cpu_pct and rss_kb, period 5 s",
+  "total_cpu_pct": 7.06,
+  "total_rss_mb": 83.5,
+  "processes": 6,
+  "per_process": {
+   "helix_topic_rate_monitor": [
+    2.63,
+    17.3
+   ],
+   "helix_supervisor": [
+    1.42,
+    15.8
+   ],
+   "helix_go2_sport_sink": [
+    1.07,
+    11.9
+   ],
+   "helix_arbiter": [
+    0.94,
+    12.5
+   ],
+   "helix_anomaly_detector": [
+    0.55,
+    13.0
+   ],
+   "helix_log_parser": [
+    0.46,
+    12.9
+   ]
+  },
+  "python_same_first_175s": {
+   "cpu_pct": 92.63,
+   "rss_mb": 570.2
+  },
+  "python_full": {
+   "cpu_pct": 79.08,
+   "rss_mb": 587.4
+  },
+  "caveats": [
+   "175 s not 600 s",
+   "robot standing vs lying in the Python run",
+   "profiles do different work (no LLM, context buffer, pose drift, json parser in native)"
+  ],
+  "evidence": "hardware_eval_20261017/native_partial/procs.jsonl"
+ },
+ "native_hw_cost": {
+  "kind": "PROVEN",
+  "build": "1254bbe",
+  "utc": "2026-10-17T22:40:37Z/22:51:17Z",
+  "samples_s": 595.5,
+  "robot": "lying",
+  "method": "per-PID mean of proc_sampler cpu_pct and rss_kb, period 5 s, warmup 30 s",
+  "total_cpu_pct": 7.35,
+  "total_rss_mb": 91.5,
+  "processes": 6,
+  "per_process": {
+   "helix_topic_rate_monitor": [
+    2.69,
+    19.7
+   ],
+   "helix_supervisor": [
+    1.44,
+    14.3
+   ],
+   "helix_go2_sport_sink": [
+    1.12,
+    14.2
+   ],
+   "helix_arbiter": [
+    1.03,
+    14.6
+   ],
+   "helix_anomaly_detector": [
+    0.58,
+    15.1
+   ],
+   "helix_log_parser": [
+    0.49,
+    13.5
+   ]
+  },
+  "vs_python": {
+   "python_cpu_pct": 79.08,
+   "python_rss_mb": 587.4,
+   "cpu_reduction_pct": 90.7,
+   "rss_reduction_pct": 84.4
+  },
+  "faults_in_bag": 0,
+  "supervisor_states": {
+   "NOMINAL": 1200
+  },
+  "caveats": [
+   "profiles do different work",
+   "10 min, not a soak"
+  ],
+  "evidence": "hardware_eval_20261017/native/"
+ }
+}

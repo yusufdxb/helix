@@ -1,0 +1,13 @@
+start 2026-10-17T19:26:58Z sha=3f648a8 dirty=0 secs=1800
+helix_heartbeat_monitor active [3]
+helix_anomaly_detector active [3]
+helix_log_parser active [3]
+helix_topic_rate_monitor active [3]
+helix_json_state_parser active [3]
+helix_pose_drift_monitor active [3]
+helix_context_buffer active [3]
+helix_diagnosis_node active [3]
+helix_recovery_node active [3]
+helix_arbiter active [3]
+{"summary": {"helix_anomaly_detector": {"n": 354, "cpu_mean": 3.413, "cpu_max": 4.797, "rss_mean_kb": 39194.9, "rss_max_kb": 40248}, "helix_arbiter": {"n": 708, "cpu_mean": 3.793, "cpu_max": 9.592, "rss_mean_kb": 40789.7, "rss_max_kb": 58132}, "helix_context_buffer": {"n": 354, "cpu_mean": 3.774, "cpu_max": 5.195, "rss_mean_kb": 39380.5, "rss_max_kb": 40268}, "helix_diagnosis_node": {"n": 354, "cpu_mean": 2.29, "cpu_max": 3.398, "rss_mean_kb": 41025.1, "rss_max_kb": 42100}, "helix_go2_sport_sink": {"n": 354, "cpu_mean": 5.832, "cpu_max": 7.594, "rss_mean_kb": 56630.6, "rss_max_kb": 57668}, "helix_heartbeat_monitor": {"n": 354, "cpu_mean": 7.025, "cpu_max": 8.793, "rss_mean_kb": 39182.9, "rss_max_kb": 40424}, "helix_json_state_parser": {"n": 354, "cpu_mean": 2.346, "cpu_max": 3.598, "rss_mean_kb": 40559.1, "rss_max_kb": 41604}, "helix_llm_explainer": {"n": 354, "cpu_mean": 0.87, "cpu_max": 1.998, "rss_mean_kb": 48693.1, "rss_max_kb": 49756}, "helix_log_parser": {"n": 354, "cpu_mean": 1.973, "cpu_max": 3.197, "rss_mean_kb": 39288.9, "rss_max_kb": 41008}, "helix_pose_drift_monitor": {"n": 354, "cpu_mean": 3.65, "cpu_max": 4.996, "rss_mean_kb": 56767.2, "rss_max_kb": 57848}, "helix_recovery_node": {"n": 354, "cpu_mean": 3.624, "cpu_max": 4.996, "rss_mean_kb": 55496.3, "rss_max_kb": 56572}, "helix_topic_rate_monitor": {"n": 354, "cpu_mean": 36.505, "cpu_max": 40.767, "rss_mean_kb": 63964.1, "rss_max_kb": 64664}}}
+DONE 2026-10-17T19:57:50Z

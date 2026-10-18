@@ -1,0 +1,56 @@
+{
+  "git_sha": "acd01bb",
+  "evidence_class": "LOCALHOST SIMULATION ONLY",
+  "physical_motion_enabled": false,
+  "native_launch_includes_guard": false,
+  "topology": "real C++ sink -> private intents -> separate C++ Sport guard -> simulated controller",
+  "authority": "Trusted ArbiterStatus protocol stand-in plus explicit guard instance/protection/readiness token; complete native recovery integration not tested.",
+  "core_regressions_passed": 23,
+  "ros_process_tests": {
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "ros_cases": [
+    "test_unprotected_sink_sigkill_leaves_persistent_controller_moving",
+    "test_sink_sigkill_stops_and_restart_requires_current_operator_release",
+    "test_guard_restarts_keep_latch_and_guard_death_leaves_gap",
+    "test_duplicate_intents_cannot_extend_move_watchdog",
+    "test_denied_or_lost_stop_remains_unproven[deny]",
+    "test_denied_or_lost_stop_remains_unproven[drop]",
+    "test_forwarded_stop_identity_preserves_existing_sink_ack_chain",
+    "test_guard_dry_run_and_arming_boundaries",
+    "test_fake_go2_without_expiry_keeps_moving_after_unprotected_sink_kill",
+    "test_fake_go2_guard_stops_after_sink_kill_and_keeps_latch",
+    "test_replayed_arbiter_pair_and_old_guard_token_cannot_open_restart"
+  ],
+  "fake_go2_cases": {
+    "implementation": "helix_arbiter.fake_go2.FakeGo2 process",
+    "move_timeout_s": 0.0,
+    "unprotected_sink_sigkill": "simulated vx > 0.15 m/s beyond 1.1 seconds after kill",
+    "guarded_sink_sigkill": "independent repeated StopMove; simulated vx < 0.01 m/s; latch retained through sink restart"
+  },
+  "other_controller_model": "Retains last Move target indefinitely; StopMove can be accepted, denied or dropped.",
+  "authorization_regressions": [
+    "Old held/released status pair cannot automatically reopen a restarted guard.",
+    "Old guard instance token is rejected.",
+    "Same-instance prehealth token delivered after readiness is rejected.",
+    "Request/status gaps invalidate ready authorization before incoming timestamp refresh.",
+    "Current explicit authorization succeeds after continuous current readiness."
+  ],
+  "acknowledgment": "Positive forwarded sink IDs and shared controller response preserve sink matching; negative IDs track guard Stops. Guard telemetry always reports measured_stopped=false.",
+  "observed_remaining_failures": [
+    "Unprotected native sink death has no surviving controller stop sender.",
+    "Guard death leaves persistent simulated motion.",
+    "Denied or dropped StopMove leaves persistent simulated motion."
+  ],
+  "limitations": [
+    "No physical GO2 stop-on-command-silence contract or measurement.",
+    "No protection established against common host, power, DDS or network failure.",
+    "Competing controller publishers and actuator/controller failure are outside the guarantee.",
+    "Receipt ordering cannot establish emission age of unseen queued messages; protocol is not authenticated.",
+    "Lower request IDs after restart fail closed, limiting availability."
+  ],
+  "reproduce": "source install/setup.bash; ROS_LOCALHOST_ONLY=1 python3 -m pytest tests/sim_integration/test_sport_guard.py -q"
+}

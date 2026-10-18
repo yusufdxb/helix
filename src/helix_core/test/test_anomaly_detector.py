@@ -337,3 +337,19 @@ def test_stale_nan_respects_duration_gate():
     finally:
         node._fault_pub.publish = original
         _teardown_node(node)
+
+
+def test_violation_warnings_are_throttled_per_metric_not_faults():
+    """First violation of a streak logs, then at most once per period per metric."""
+    from helix_core.anomaly_detector import VIOLATION_LOG_PERIOD_S, AnomalyDetector
+
+    node = AnomalyDetector()
+    try:
+        log = node._should_log_violation
+        assert log("a", 1, 100.0) is True             # streak start
+        assert log("a", 2, 100.1) is False            # inside the period
+        assert log("b", 2, 100.1) is True             # other metric, independent
+        assert log("a", 3, 100.0 + VIOLATION_LOG_PERIOD_S) is True
+        assert log("a", 1, 100.0 + VIOLATION_LOG_PERIOD_S + 0.01) is True  # new streak
+    finally:
+        node.destroy_node()

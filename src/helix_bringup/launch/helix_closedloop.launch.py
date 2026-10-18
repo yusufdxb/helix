@@ -10,7 +10,9 @@ explainer (advisory, llm_enabled gated).
 Safety-relevant defaults:
     recovery_enabled:=false     : actuation path off unless operator asks
     llm_enabled:=false          : explainer runs template-only
-    use_cpp_anomaly:=false      : Python anomaly detector path
+    anomaly_backend:=           : Python anomaly detector (cpp selects the C++ port;
+                                  legacy use_cpp_anomaly:=true still works)
+    arbiter_backend:=python     : Python arbiter (cpp selects helix_arbiter_cpp)
 
 Typical operator sequence on live hardware:
     # bring up the whole stack, recovery held off
@@ -25,16 +27,35 @@ Typical operator sequence on live hardware:
 This launcher auto-activates diagnosis by default, but recovery comes up in
 ``unconfigured`` so the operator can gate the actuation path on body-height
 verification. Sense and adapter auto-activate as they always have.
+
+Motion path (docs/MOTION_ARBITRATION.md): by default ``helix_arbiter`` is the
+single authoritative publisher of ``cmd_vel_out``. HELIX recovery enters it
+through the /helix/hold state, never as a velocity source. The arbiter is
+auto-activated: with no live HELIX state it publishes zero, so it is safe.
+The GO2 sport sink is NOT started here; the operator starts it per hardware
+stage with an explicit mode (dry_run / stop_only / armed).
+
+``arbiter_backend:=cpp`` starts the C++ arbiter (helix_arbiter_cpp) in place
+of the Python one: same node name, parameters, topics and QoS. Exactly one
+arbiter runs.
+
+``enable_twist_mux:=true`` selects the legacy twist_mux path instead (used by
+the Isaac Sim closure scenario). It is mutually exclusive with the arbiter,
+so combining it with ``arbiter_backend:=cpp`` stops the launch. twist_mux goes
+silent (does not publish zero) on idle and on lock, and passes NaN through;
+it is not a safety layer.
 """
 import os
 
 import launch.events
 from ament_index_python.packages import get_package_share_directory
+from helix_bringup.backends import executable, resolve_arbiter_backend
 from launch.actions import (
     DeclareLaunchArgument,
     EmitEvent,
     IncludeLaunchDescription,
     LogInfo,
+    OpaqueFunction,
     RegisterEventHandler,
 )
 from launch.conditions import IfCondition
@@ -49,14 +70,11 @@ from launch import LaunchDescription
 
 
 def _auto_activate(node: LifecycleNode, condition):
-    """Configure-then-activate sequence, mirroring helix_sensing.launch.py."""
-    configure = EmitEvent(
-        event=ChangeState(
-            lifecycle_node_matcher=launch.events.matches_action(node),
-            transition_id=Transition.TRANSITION_CONFIGURE,
-        ),
-        condition=condition,
-    )
+    """Configure-then-activate sequence, mirroring helix_sensing.launch.py.
+
+    The activate handler is registered before configure is emitted, so a fast
+    configure transition cannot be missed.
+    """
     activate_on_inactive = RegisterEventHandler(
         OnStateTransition(
             target_lifecycle_node=node,
@@ -72,7 +90,41 @@ def _auto_activate(node: LifecycleNode, condition):
         ),
         condition=condition,
     )
-    return [configure, activate_on_inactive]
+    configure = EmitEvent(
+        event=ChangeState(
+            lifecycle_node_matcher=launch.events.matches_action(node),
+            transition_id=Transition.TRANSITION_CONFIGURE,
+        ),
+        condition=condition,
+    )
+    return [activate_on_inactive, configure]
+
+
+def arbiter_actions(context, *args, **kwargs):
+    """Start at most one arbiter: the selected backend, or none under twist_mux."""
+    backend = resolve_arbiter_backend(
+        LaunchConfiguration("arbiter_backend").perform(context),
+        LaunchConfiguration("enable_twist_mux").perform(context),
+    )
+    if backend is None:
+        return [LogInfo(msg="[helix_closedloop] enable_twist_mux:=true, no arbiter")]
+    package, exe = executable("arbiter", backend)
+    node = LifecycleNode(
+        package=package,
+        executable=exe,
+        name="helix_arbiter",
+        namespace="",
+        parameters=[LaunchConfiguration("arbiter_config"),
+                    {"output_topic": LaunchConfiguration("cmd_vel_out")}],
+        output="screen",
+    )
+    # The arbiter is auto-activated: with no live HELIX state it publishes
+    # zero, so it is safe.
+    return [
+        LogInfo(msg=f"[helix_closedloop] arbiter backend: {backend} ({package})"),
+        node,
+        *_auto_activate(node, None),
+    ]
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -105,9 +157,9 @@ def generate_launch_description() -> LaunchDescription:
         default_value="false",
         description=(
             "Auto-configure/activate the recovery node. SAFETY-RELEVANT: "
-            "recovery is the only node that publishes cmd_vel. Default false "
-            "so the operator can gate on body_height verification at the robot "
-            "before enabling the actuation path."
+            "recovery owns the /helix/hold state; while it is not active the "
+            "arbiter holds the output at zero. Default false so the operator "
+            "can gate on body_height verification at the robot first."
         ),
     )
     recovery_enabled_arg = DeclareLaunchArgument(
@@ -134,21 +186,44 @@ def generate_launch_description() -> LaunchDescription:
     )
     enable_twist_mux_arg = DeclareLaunchArgument(
         "enable_twist_mux",
-        default_value="true",
+        default_value="false",
         description=(
-            "Start the twist_mux arbiter that fans /helix/cmd_vel, "
-            "/teleop/cmd_vel, and /nav/cmd_vel onto the muxed cmd_vel "
-            "output. Set false if an external mux is already running."
+            "LEGACY. Use twist_mux (fed by /helix/cmd_vel zero-twist) instead "
+            "of helix_arbiter. Mutually exclusive with the arbiter."
         ),
+    )
+    arbiter_config_arg = DeclareLaunchArgument(
+        "arbiter_config",
+        default_value=os.path.join(
+            get_package_share_directory("helix_arbiter"), "config", "arbiter.yaml"),
+        description="helix_arbiter parameter file.",
     )
     cmd_vel_out_arg = DeclareLaunchArgument(
         "cmd_vel_out",
         default_value="/cmd_vel",
         description=(
-            "Topic that twist_mux publishes the muxed velocity onto. "
-            "Default /cmd_vel matches the GO2 sport-mode bridge and the "
-            "Isaac Sim go2_ros2_bridge subscriber."
+            "Authoritative velocity output (arbiter, or legacy twist_mux). "
+            "Consumed by helix_go2_sport_sink on the robot (a stock GO2 has "
+            "no /cmd_vel consumer) and by the Isaac Sim bridge."
         ),
+    )
+    arbiter_backend_arg = DeclareLaunchArgument(
+        "arbiter_backend",
+        default_value="python",
+        description=(
+            "Arbiter backend: 'python' (helix_arbiter) or 'cpp' "
+            "(helix_arbiter_cpp). Refused together with enable_twist_mux:=true."
+        ),
+    )
+    anomaly_backend_arg = DeclareLaunchArgument(
+        "anomaly_backend",
+        default_value="",
+        description="Forwarded to helix_sensing.launch.py: python, cpp, or empty.",
+    )
+    use_cpp_anomaly_arg = DeclareLaunchArgument(
+        "use_cpp_anomaly",
+        default_value="false",
+        description="Forwarded to helix_sensing.launch.py (legacy alias for cpp).",
     )
     twist_mux_config_arg = DeclareLaunchArgument(
         "twist_mux_config",
@@ -162,7 +237,11 @@ def generate_launch_description() -> LaunchDescription:
     # --- sense + adapter (re-use existing launchers) --------------------------
     sense_include = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(sensing_launch),
-        launch_arguments={"auto_activate": LaunchConfiguration("sense_auto_activate")}.items(),
+        launch_arguments={
+            "auto_activate": LaunchConfiguration("sense_auto_activate"),
+            "anomaly_backend": LaunchConfiguration("anomaly_backend"),
+            "use_cpp_anomaly": LaunchConfiguration("use_cpp_anomaly"),
+        }.items(),
     )
     adapter_include = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(adapter_launch),
@@ -197,6 +276,7 @@ def generate_launch_description() -> LaunchDescription:
         parameters=[{
             "enabled": LaunchConfiguration("recovery_enabled"),
             "cooldown_seconds": LaunchConfiguration("recovery_cooldown_seconds"),
+            "publish_legacy_cmd_vel": LaunchConfiguration("enable_twist_mux"),
         }],
         output="screen",
     )
@@ -243,6 +323,10 @@ def generate_launch_description() -> LaunchDescription:
         enable_twist_mux_arg,
         cmd_vel_out_arg,
         twist_mux_config_arg,
+        arbiter_config_arg,
+        arbiter_backend_arg,
+        anomaly_backend_arg,
+        use_cpp_anomaly_arg,
         sense_include,
         adapter_include,
         context_buffer,
@@ -250,6 +334,8 @@ def generate_launch_description() -> LaunchDescription:
         recovery_node,
         llm_explainer,
         twist_mux_node,
+        # helix_arbiter: the single authoritative motion output.
+        OpaqueFunction(function=arbiter_actions),
     ]
     actions.extend(_auto_activate(context_buffer, diag_cond))
     actions.extend(_auto_activate(diagnosis_node, diag_cond))
