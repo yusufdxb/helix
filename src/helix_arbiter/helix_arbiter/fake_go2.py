@@ -15,6 +15,8 @@ with the same velocity, standing (mode 1, body_height 0.32).
 Dynamics (a rehearsal stand-in, deliberately simple and NOT measured):
 first-order velocity lag toward the last Move target (tau_s), StopMove sets
 the target to zero, and a Move older than move_timeout_s decays to zero.
+The default 1 s expiry is a simulation assumption, not a GO2 guarantee.
+Set move_timeout_s:=0.0 to retain Move indefinitely for watchdog tests.
 Api ids other than 1003/1008 are counted and answered with code -1.
 Evidence produced against this node is always labelled REHEARSAL.
 """
@@ -121,7 +123,7 @@ class FakeGo2(Node):
         now = time.monotonic()
         dt, self._t = now - self._t, now
         tgt = self._target
-        if now - self._target_t > self._move_timeout:
+        if self._move_timeout > 0.0 and now - self._target_t > self._move_timeout:
             tgt = (0.0, 0.0, 0.0)
         a = 1.0 - math.exp(-dt / self._tau)
         for i in range(3):

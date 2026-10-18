@@ -27,6 +27,17 @@ target_include_directories(helix_sink_core PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
+# Vendor-independent experimental last-hop protection. Its node is isolated
+# from native launch and permits non-dry operation only on localhost topics.
+add_library(helix_sport_guard_core STATIC src/sport_guard_core.cpp)
+target_link_libraries(helix_sport_guard_core PUBLIC helix_sink_core)
+if(unitree_api_FOUND)
+  add_executable(helix_sport_guard src/sport_guard_node.cpp)
+  target_link_libraries(helix_sport_guard helix_sport_guard_core)
+  ament_target_dependencies(helix_sport_guard rclcpp std_msgs helix_msgs unitree_api)
+  install(TARGETS helix_sport_guard DESTINATION lib/${PROJECT_NAME})
+endif()
+
 if(unitree_api_FOUND AND unitree_go_FOUND)
   add_executable(helix_go2_sport_sink src/sink_node.cpp)
   target_link_libraries(helix_go2_sport_sink helix_sink_core)
@@ -53,6 +64,9 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_sink_core test/test_sink_core.cpp)
   target_link_libraries(test_sink_core helix_sink_core)
+
+  ament_add_gtest(test_sport_guard_core test/test_sport_guard_core.cpp)
+  target_link_libraries(test_sport_guard_core helix_sport_guard_core)
 
   ament_add_pytest_test(test_python_parity test/test_python_parity.py
     ENV HELIX_SINK_REPLAY=$<TARGET_FILE:helix_sink_replay>
