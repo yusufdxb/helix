@@ -11,11 +11,43 @@ simulated crash recovery is not a robot result.
 |---|---|
 | **HW-real** | Real robot, real trigger, real robot response |
 | **HW-command** | Real robot and real controller, synthetic trigger (an injected `FaultEvent`) |
-| **HW-passive** | Real robot graph, HELIX non-actuating (dry_run, nothing sent) |
+| **HW-passive** | Real robot graph, HELIX non-actuating; any read-only metadata queries explicitly listed |
 | **Replay** | Recorded real streams replayed offline, with synthetic fault onsets |
 | **Sim** | Fake GO2 (`helix_fake_go2`, a first-order stand-in) on localhost |
 | **Bench** | Host benchmark under a synthetic load, no robot |
 | **Unit** | Software tests and parity suites |
+
+## Current controller investigation and readiness
+
+The follow-up from `4ea69c8` adds no software watchdog. Physical motion remains
+disabled, controller modes were not changed, and all earlier evidence files are
+preserved. The PR remains draft. [Controller inspection](CONTROLLER_INSPECTION.md)
+separates vendor interface evidence from measured controller behavior; the
+[readiness record](../results/controller_readiness.json) explicitly blocks a
+physical demonstration.
+
+Read-only access and discovery could not identify/reach the payload. No remote
+command succeeded. Current robot firmware, mode, command-silence behavior and
+current-candidate ARM resource usage therefore remain unverified. API versions,
+raw `LowState.version` fields and payload OS versions are not firmware identity.
+The vendor's GO2-W one-second and B2W half-second comments do not establish a
+timeout for the installed legged GO2.
+
+The finite query-only inspector was tested with synthetic replies. A separate
+20-second [host simulation](../results/nonactuating_native_host_sim.json) ran all
+six default native processes with FakeGo2 and synthetic LowState: no Sport requests,
+retained protective latch and fresh native status. Aggregate CPU averaged 2.33%
+of one host core (sample maximum 4.99%); peak summed RSS was 93,740 KiB. These are
+short x86 simulation measurements, not ARM, thermal or timing guarantees.
+
+The [walking-stop protocol](WALKING_STOP_EXPERIMENT.md) requires independent body
+tracking and foot-contact evidence, clock/calibration bounds, supported separate
+operator-stop validation and physical containment covering final-command-path
+failure. Its offline analyzer is tested only with synthetic inputs. The optional
+`--keep-held` runner mode leaves the injected fault and protective latch active;
+the prepared trial never clears or releases automatically. No physical trial or
+handheld emergency action was performed. The manual's damping mapping establishes
+an interface, not a measured independent stop guarantee.
 
 ## Stops: hardware commands, not hardware detections
 

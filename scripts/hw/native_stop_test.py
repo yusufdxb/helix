@@ -317,6 +317,13 @@ class Stage:
         io = self.io
         self.stream_vx = None
         io.zero()
+        if self.a.keep_held:
+            # A supervised walking-stop trial ends in protection. Clearing the
+            # injected fault or authorizing release is a separate operator task.
+            io.spin(1.0)
+            self.check('kept_held', 'trial ends with the protective latch retained',
+                       io.arb is not None and io.arb.protective_latched)
+            return
         io.clear()
         cleared = io.wait_for(lambda: io.sup.state in ('AWAIT_RELEASE', 'NOMINAL'), 6.0)
         self.check('await_release', 'explicit clear -> AWAIT_RELEASE (no auto resume)',
@@ -425,6 +432,8 @@ def main() -> int:
     ap.add_argument('--stop-deadline-s', type=float, default=1.5)
     ap.add_argument('--hold-stream-s', type=float, default=3.0)
     ap.add_argument('--abort-speed', type=float, default=0.35)
+    ap.add_argument('--keep-held', action='store_true',
+                    help='leave the injected fault and protective latch active; never clear or release')
     a = ap.parse_args()
     if not 0.0 < a.vx <= 0.25:
         print('vx must be in (0, 0.25] (sink limit)')

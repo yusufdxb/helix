@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-18",
+  "runtime_base_commit": "4ea69c8f25da863277df5b38190e5bd54a4dd6dd",
+  "status": "BLOCKED_CURRENT_HARDWARE_VALIDATION",
+  "physical_demonstration_ready": false,
+  "physical_motion_initiated": false,
+  "controller_modes_changed": false,
+  "new_watchdog_layers": 0,
+  "current_hardware_inspection": {
+    "completed": false,
+    "access_method": "Read-only discovery and connection attempts",
+    "result": "No matching payload discovered; connection timed out",
+    "host_key_failure": false,
+    "remote_command_executed": false,
+    "firmware_build": null,
+    "current_mode": null,
+    "controller_motion_timeout_s": null,
+    "controller_timeout_measured": false,
+    "current_arm_candidate_built": false,
+    "current_arm_resource_measurement": null
+  },
+  "historical_hardware_evidence": {
+    "preserved": true,
+    "reference": "docs/EVIDENCE_AUDIT.md",
+    "limits": "Earlier command acknowledgments and small body movements do not establish sustained walking or physical stop distance. Earlier resource measurements predate this candidate."
+  },
+  "sdk_evidence": {
+    "cpp_commit": "d1abf001220d3e5f59e00a0c4aaa595e00089a4a",
+    "python_commit": "814556d15970dd2ecf1c9984e845ca02ab07e206",
+    "move_expiry_parameter": false,
+    "absence_of_parameter_proves_firmware_timeout": false,
+    "rpc_timeout_is_motion_ttl": false,
+    "reference_lease_expiry_proves_robot_stop": false,
+    "other_platform_comments": {
+      "B2W_silence_s": 0.5,
+      "GO2W_single_Move_s": 1.0,
+      "applies_to_installed_legged_go2": false
+    },
+    "api_version_identifies_firmware": false
+  },
+  "independent_stop": {
+    "handheld_mapping": "Official manual: hold L2 and click B for damping/emergency stop",
+    "manual_mapping_verified": true,
+    "same_unit_operation_verified": false,
+    "response_bound_verified": false,
+    "controller_failure_independence_verified": false,
+    "supported_hardwired_stop_established": false,
+    "required_final_path_contingency": "Separately validated operator handset path for payload/Sport loss plus qualified independent physical containment for common controller failure. No same-host publisher fallback is claimed."
+  },
+  "local_validation": {
+    "evidence_class": "Sim and Unit; no current hardware execution",
+    "nonactuating_native_record": "results/nonactuating_native_host_sim.json",
+    "native_process_count": 6,
+    "duration_s": 20,
+    "zero_sport_requests": true,
+    "queries": "Exactly five allowlisted metadata requests in a separate localhost process test; synthetic replies only",
+    "external_analysis": "Synthetic regressions only; provenance and overall hardware verdict require review",
+    "root_tests_passed": 197,
+    "local_ros_process_regressions_passed": 2,
+    "lint_passed": true
+  },
+  "before_physical_pilot": [
+    "Restore canonical payload access and identify actual robot firmware, motion build and unchanged current mode.",
+    "Establish firmware-specific silence behavior with vendor evidence, or retain it as unknown under validated containment; no command-loss motion test yet.",
+    "Build the complete candidate and message ABI on ARM; complete ten-minute dry native validation with real inputs, agreed resource/timing budgets and clean teardown.",
+    "Validate the documented separate handset action on the same physically supported robot under payload/Sport loss, with separate authorization for that mode-changing test.",
+    "Approve rated independent restraint/fall containment and exclusion area covering failure of both command paths; predeclare intervention deadline from measured fallback response and space.",
+    "Calibrate independent motion/foot-contact recording, establish timestamp uncertainty, preserve raw calibration and synchronization evidence.",
+    "Establish sustained walking within unchanged speed/travel/mode bounds; otherwise stop and seek a separate decision.",
+    "Obtain explicit supervised physical-test authorization; start with a single pilot, retained protective latch and no automatic release."
+  ],
+  "reports": [
+    "docs/CONTROLLER_INSPECTION.md",
+    "docs/WALKING_STOP_EXPERIMENT.md"
+  ]
+}

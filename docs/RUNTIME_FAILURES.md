@@ -9,6 +9,12 @@ Machine-readable results: [teardown checks](../results/rate_monitor_teardown.jso
 [experimental Sport gate](../results/sport_guard_sim.json), and
 [complete native gate integration](../results/native_sport_gate_integration_sim.json).
 
+The subsequent [controller inspection and readiness report](CONTROLLER_INSPECTION.md)
+adds no watchdog layer. Current payload access is blocked, so firmware identity,
+controller timeout and ARM validation remain unknown. The
+[supervised walking-stop protocol](WALKING_STOP_EXPERIMENT.md) prepares independent
+measurement and a final-path contingency; no physical experiment was executed.
+
 ## Rate monitor teardown
 
 The baseline reproduced SIGSEGV in two of four native campaign teardowns.
