@@ -49,6 +49,33 @@ the prepared trial never clears or releases automatically. No physical trial or
 handheld emergency action was performed. The manual's damping mapping establishes
 an interface, not a measured independent stop guarantee.
 
+### Access-only readiness follow-up from `92d81ed`
+
+The [access diagnostic record](../results/hardware_readiness_access.json) captures
+the renewed hardware-readiness attempt. The access daemon was healthy, but automatic
+site detection reported AWAY: none of the three configured lab networks was attached.
+The cached target address was outside the attached subnets. A staged discovery and
+an additional attached-private-subnet scan (254 addresses, seven responsive hosts)
+found no matching pinned target identity. Both existing target hostname lookups
+returned no addresses. The target-specific doctor skipped all seven checks because
+the site was AWAY. Its aggregate `ready` verdict excludes AWAY devices and is not
+evidence of target health.
+
+Normal remote execution was refused as unreachable. Retrying through the same
+canonical device with its pinned host key retained failed with SSH exit 255 after
+5,014 ms: TCP connection timed out before handshake or authentication. No remote
+command executed. No host-key mismatch was observed, and the current target identity
+could not be verified. These observations do not establish whether the device is
+powered off, on a different network, or blocked by routing/filtering.
+
+Hardware work stopped at this boundary. No ARM64 build, interface/consumer rebuild,
+deployment or 600-second real-input capture was started. CPU, RSS, thermal behavior,
+live topic freshness, controller metadata, protective-latch behavior and native
+shutdown therefore remain unmeasured for this candidate. No additional simulation
+was run. Services, networking, site selection, trust and controller modes were not
+changed; no Sport request was sent. All 32 earlier result files remain unchanged.
+The PR remains draft. A reachable, identity-verified payload is required to resume.
+
 ## Stops: hardware commands, not hardware detections
 
 Every stop the native stack sent to the real GO2 was triggered by one
