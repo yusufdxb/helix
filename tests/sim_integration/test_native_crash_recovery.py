@@ -68,3 +68,9 @@ def test_sink_crash_remains_an_unresolved_failure(cases):
     assert c['first_stop_after_kill_ms'] is None, c
     assert c['safety_result'] == 'UNRESOLVED_NO_STOP_PATH', c
     assert c['passed'] is False, c
+
+
+@pytest.mark.timeout(660)
+def test_process_teardown_has_no_crash_warnings(cases):
+    for c in cases.values():
+        assert c['cleanup_warnings'] == [], c

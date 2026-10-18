@@ -385,7 +385,7 @@ The full classification of every result by evidence class is in
 | SIGKILL of the detector holds and stops; restart then needs operator release | **Proven (simulation)** | `results/native_crash_recovery_sim.json`: StopMove 265 ms after the kill, 0 Move after it, AWAIT_RELEASE after restart, NOMINAL only on release ([`EVIDENCE_AUDIT.md`](EVIDENCE_AUDIT.md)) |
 | SIGKILL of the supervisor or arbiter fails closed | **Proven (simulation)** | StopMove 495 ms (supervisor, arbiter hold timeout) and 237 ms (arbiter, sink deadman) after the kill |
 | A hold survives supervisor restarts, heartbeat recovery and new epochs | **Proven (simulation)** | native protective-latch regressions: repeated supervisor SIGKILL/restart, stale releases refused, motion resumes only after current operator authorization; `results/native_protective_latch_sim.json` |
-| A sink crash stops the robot | **Unverified, no mechanism** | nothing sends StopMove once the sink is gone; the GO2's own Move timeout is not measured |
+| A sink crash stops the robot | **Unverified in native deployment** | native launch has no surviving StopMove sender; an isolated experimental Sport gate passes localhost fake-GO2 tests with expiry disabled, but is not deployed; [failure analysis](RUNTIME_FAILURES.md) |
 | Crash detection by SIGKILL of a live node on the Orin | **Unverified** | simulation only |
 | C++ components cost about a tenth of their Python counterparts under the same load | **Proven (bench, x86 host)** | `results/native_vs_python_bench.json`: five components 14.42 % to 1.54 % CPU (-89.3 %), 254.1 to 75.8 MB (-70.2 %), identical outputs |
 | DDS liveliness compared with the heartbeat | **Unverified** | not evaluated |

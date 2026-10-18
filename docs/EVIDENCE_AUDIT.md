@@ -282,10 +282,14 @@ The fake GO2's timeout proves nothing about the physical controller. The
 supervisor-restart fix does not close this deployment blocker. The PR stays
 draft; physical crash-recovery and motion validation remain unverified.
 
-A validation run also showed the rate monitor exiting with SIGSEGV during
-SIGINT cleanup, after the safety assertions and input shutdown. Cleanup
-warnings are recorded separately; these passing latch assertions do not
-establish clean process teardown.
+The original validation also showed the rate monitor exiting with SIGSEGV
+during SIGINT cleanup. A follow-up reproduced it, identified a subscription
+ownership cycle retaining DDS resources through RMW unload, and removed the
+cycle while fixing timer cleanup. Repeated lifecycle/process and sanitizer
+regressions pass; the new native campaign has no cleanup warnings. Original
+results remain unchanged. The experimental independent Sport gate stops the
+fake GO2 with command expiry disabled, but is not enabled in native launch.
+See [runtime failure evidence and remaining limits](RUNTIME_FAILURES.md).
 
 ## Missing experiments
 
