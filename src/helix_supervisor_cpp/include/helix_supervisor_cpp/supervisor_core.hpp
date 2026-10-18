@@ -45,8 +45,9 @@
 //   CLEARING / AWAIT_RELEASE returns to the ack stage of the same episode.
 //
 // actuation_enabled gates only the published hold. The same machine runs
-// either way, so there is exactly one answer to "is HELIX holding": hold is
-// would_hold && actuation_enabled, applied immediately when the flag flips.
+// either way: hold is would_hold && actuation_enabled, applied immediately
+// when the flag flips. The native arbiter separately owns protective latching;
+// a false supervisor hold never authorizes release of that arbiter latch.
 #ifndef HELIX_SUPERVISOR_CPP__SUPERVISOR_CORE_HPP_
 #define HELIX_SUPERVISOR_CPP__SUPERVISOR_CORE_HPP_
 

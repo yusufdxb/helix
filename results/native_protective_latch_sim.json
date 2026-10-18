@@ -1,0 +1,176 @@
+{
+  "generated_utc": "2026-10-18T13:39:19Z",
+  "git_base": "02e0378",
+  "tested_working_tree": true,
+  "evidence_class": "SIMULATION (fake GO2, localhost only)",
+  "physical_motion_enabled": false,
+  "hardware_accessed": false,
+  "source_sha256": "a0ad6e8588cd773d6fd2c3cf74d5fea1e7ea45c3c3ad976e24db238755c179b7",
+  "source_hash_recipe": "SHA256 of sorted source_files, each encoded as UTF-8 path + NUL + file bytes + NUL",
+  "source_files": [
+    "scripts/hw/native_stop_test.py",
+    "scripts/sim_native_crash_recovery.py",
+    "src/helix_arbiter/helix_arbiter/trace.py",
+    "src/helix_arbiter/test/test_trace_analyze.py",
+    "src/helix_arbiter_cpp/include/helix_arbiter_cpp/arbiter_config.hpp",
+    "src/helix_arbiter_cpp/include/helix_arbiter_cpp/arbiter_core.hpp",
+    "src/helix_arbiter_cpp/src/arbiter_config.cpp",
+    "src/helix_arbiter_cpp/src/arbiter_core.cpp",
+    "src/helix_arbiter_cpp/src/arbiter_node.cpp",
+    "src/helix_arbiter_cpp/test/test_arbiter_config.cpp",
+    "src/helix_arbiter_cpp/test/test_arbiter_core.cpp",
+    "src/helix_bringup/launch/helix_native.launch.py",
+    "src/helix_bringup/test/test_native_launch.py",
+    "src/helix_msgs/CMakeLists.txt",
+    "src/helix_msgs/msg/ArbiterStatus.msg",
+    "src/helix_msgs/msg/HelixHold.msg",
+    "src/helix_msgs/msg/SupervisorStatus.msg",
+    "src/helix_msgs/srv/ReleaseHold.srv",
+    "src/helix_supervisor_cpp/CMakeLists.txt",
+    "src/helix_supervisor_cpp/include/helix_supervisor_cpp/supervisor_core.hpp",
+    "src/helix_supervisor_cpp/package.xml",
+    "src/helix_supervisor_cpp/src/supervisor_node.cpp",
+    "tests/sim_integration/test_native_crash_recovery.py"
+  ],
+  "validation": {
+    "fake_go2_pytest_passed": 7,
+    "supporting_pytest_passed": 218,
+    "native_package_tests": 471,
+    "native_errors": 0,
+    "native_failures": 0,
+    "native_skipped": 20,
+    "new_latch_core_regressions": 12,
+    "workspace_build": "PASS",
+    "ruff": "PASS",
+    "mutation_regression": "PASS: reintroducing automatic release on hold=false fails the repeated-epoch regression"
+  },
+  "cases": [
+    {
+      "case": "detector",
+      "checks": {
+        "reached_nominal": true,
+        "startup_requires_release": true,
+        "startup_release_accepted": true,
+        "moving_before_kill": true,
+        "one_target_process": true,
+        "stopmove_after_kill": true,
+        "no_move_after_first_stop": true,
+        "unhealthy_release_refused": true,
+        "restart_activated": true,
+        "await_release_after_restart": true,
+        "no_move_while_awaiting_release": true,
+        "prehealth_release_stays_invalid": true,
+        "nominal_after_release": true,
+        "move_resumes_after_release": true
+      },
+      "notes": [],
+      "startup_release": {
+        "ok": true,
+        "message": "operator release requested; check arbiter protective_latched"
+      },
+      "first_stop_after_kill_ms": 352.9,
+      "last_move_after_kill_ms": 310.6,
+      "moves_after_first_stop": 0,
+      "release": {
+        "ok": true,
+        "message": "operator release requested; check arbiter protective_latched"
+      },
+      "cleanup_warnings": [],
+      "passed": true
+    },
+    {
+      "case": "supervisor",
+      "checks": {
+        "reached_nominal": true,
+        "startup_requires_release": true,
+        "startup_release_accepted": true,
+        "moving_before_kill": true,
+        "one_target_process": true,
+        "stopmove_after_kill": true,
+        "no_move_after_first_stop": true,
+        "restart_activated": true,
+        "supervisor_restart_keeps_hold": true,
+        "stale_service_release_refused": true,
+        "stale_releases_cannot_clear_hold": true,
+        "held_before_supervisor_kill": true,
+        "repeated_restarts_keep_hold": true,
+        "lifecycle_restart_keeps_hold": true,
+        "stale_lifecycle_release_refused": true,
+        "operator_release_accepted": true,
+        "move_resumes_after_release": true
+      },
+      "notes": [],
+      "startup_release": {
+        "ok": true,
+        "message": "operator release requested; check arbiter protective_latched"
+      },
+      "first_stop_after_kill_ms": 483.1,
+      "last_move_after_kill_ms": 423.1,
+      "moves_after_first_stop": 0,
+      "states_after_restart": [],
+      "moves_after_restart": 0,
+      "release": {
+        "ok": true,
+        "message": "operator release requested; check arbiter protective_latched"
+      },
+      "first_move_after_restart_s": 12.46,
+      "cleanup_warnings": [],
+      "passed": true
+    },
+    {
+      "case": "arbiter",
+      "checks": {
+        "reached_nominal": true,
+        "startup_requires_release": true,
+        "startup_release_accepted": true,
+        "moving_before_kill": true,
+        "one_target_process": true,
+        "stopmove_after_kill": true,
+        "no_move_after_first_stop": true
+      },
+      "notes": [],
+      "startup_release": {
+        "ok": true,
+        "message": "operator release requested; check arbiter protective_latched"
+      },
+      "first_stop_after_kill_ms": 235.2,
+      "last_move_after_kill_ms": null,
+      "moves_after_first_stop": 0,
+      "cleanup_warnings": [],
+      "passed": true
+    },
+    {
+      "case": "sink",
+      "checks": {
+        "reached_nominal": true,
+        "startup_requires_release": true,
+        "startup_release_accepted": true,
+        "moving_before_kill": true,
+        "one_target_process": true,
+        "no_request_after_kill": true
+      },
+      "notes": [
+        "nothing publishes /api/sport/request once the sink is gone; physical controller behavior remains unmeasured"
+      ],
+      "startup_release": {
+        "ok": true,
+        "message": "operator release requested; check arbiter protective_latched"
+      },
+      "first_stop_after_kill_ms": null,
+      "last_move_after_kill_ms": null,
+      "moves_after_first_stop": null,
+      "cleanup_warnings": [
+        "rate monitor SIGSEGV during SIGINT cleanup"
+      ],
+      "passed": false,
+      "expected_gap_observed": true,
+      "safety_result": "UNRESOLVED_NO_STOP_PATH"
+    }
+  ],
+  "limitations": [
+    "Physical restart, controller Move timeout and walking-stop behavior remain unverified.",
+    "Sink SIGKILL leaves no surviving StopMove path and remains an unresolved deployment blocker.",
+    "A rate-monitor SIGSEGV occurred during SIGINT cleanup after safety assertions; clean teardown is not established.",
+    "Legacy Python recovery does not implement the native protective protocol."
+  ]
+}

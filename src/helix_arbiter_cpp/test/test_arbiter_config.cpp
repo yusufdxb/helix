@@ -91,7 +91,21 @@ TEST(ArbiterConfig, DefaultsAreTheDocumentedOnes)
   EXPECT_EQ(c.limits.max_abs_linear, 1.0);
   EXPECT_EQ(c.limits.max_abs_angular, 1.5);
   EXPECT_FALSE(c.autostart);
+  EXPECT_FALSE(c.protective_latch);  // Legacy protocol unless native profile selects it.
   EXPECT_EQ(c.sources[0].timeout_sec, 1.0);
+}
+
+TEST(ArbiterConfig, NativeProtectiveProtocolIsExplicitAndStrictlyTyped)
+{
+  EXPECT_TRUE(
+    helix_arbiter_cpp::parse_config(with(shipped(), "protective_latch", true))
+    .protective_latch);
+  EXPECT_TRUE(
+    helix_arbiter_cpp::unknown_parameters(
+      with(shipped(), "protective_latch", true)).empty());
+  EXPECT_THROW(
+    helix_arbiter_cpp::parse_config(
+      with(shipped(), "protective_latch", std::string("true"))), ConfigError);
 }
 
 TEST(ArbiterConfig, TypesAreStrict)

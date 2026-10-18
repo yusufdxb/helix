@@ -20,8 +20,9 @@ analysis, tests and the optional LLM explainer, none of which run here.
 
 Safe by default: sink_mode:=dry_run sends nothing to the robot, and the
 arbiter and its sources live on /helix_dry/* (arbiter_dry.yaml). The
-supervisor starts with actuation_enabled:=false, so a fault is detected,
-traced and acked but never held. Arming is three explicit choices:
+supervisor starts with actuation_enabled:=false. The arbiter independently
+starts protectively latched and requires health plus operator release.
+Arming is three explicit choices:
     sink_mode:=armed arbiter_config:=<arbiter.yaml> actuation_enabled:=true
 and moving still needs an upstream command source on the arbiter.
 """
@@ -130,7 +131,7 @@ def native_actions(context, *args, **kwargs):
         'auto_resume': auto_resume,
     }])
     actions += _lifecycle('helix_arbiter_cpp', 'helix_arbiter', 'helix_arbiter',
-                          [arbiter_config, {'output_topic': cmd_out}])
+                          [arbiter_config, {'output_topic': cmd_out, 'protective_latch': True}])
     sink_backend = arg('sink_backend').strip()
     if sink_backend not in ('cpp', 'python'):
         raise ValueError(f"sink_backend must be 'cpp' or 'python', got {sink_backend!r}")
@@ -155,8 +156,8 @@ def generate_launch_description() -> LaunchDescription:
             description='Supervisor asserts /helix/hold on stop-worthy faults.'),
         DeclareLaunchArgument(
             'auto_resume', default_value='false',
-            description='Release the hold automatically once every fault has cleared '
-                        'for clear_hold_s (false: operator release service).'),
+            description='Clear the supervisor episode automatically after clear_hold_s. '
+                        'The arbiter protective latch still requires operator release.'),
         DeclareLaunchArgument(
             'arbiter_config',
             default_value=os.path.join(arbiter_share, 'config', 'arbiter_dry.yaml'),

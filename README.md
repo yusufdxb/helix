@@ -72,9 +72,11 @@ the honest version of this paragraph: it compares HELIX against
 - **Native runtime, 2026-10-17**: the monitoring, supervision and actuation
   path now runs as C++ processes (`helix_native.launch.py`), with one
   deterministic fault-state machine in place of four Python nodes. A crash
-  of a monitored node holds the robot (R4; SIGKILL tested in simulation), a
-  hold releases only on evidence plus operator release (except across a
-  restart of the supervisor itself, an open gap), and every stop records
+  of a monitored node forces zero output (R4; SIGKILL tested in simulation).
+  The native arbiter retains its protective latch across supervisor process
+  and lifecycle restarts; release requires fresh health plus current operator
+  authorization. These restart guarantees are verified with the fake GO2
+  only; sink death remains an unresolved failure. Every stop records
   arbiter-ack, controller-ack and measured-stop timestamps. Under the same
   synthetic load the five C++ components that have Python counterparts use
   1.54 % of one core and 75.8 MB against 14.42 % and 254.1 MB (-89.3 % CPU,

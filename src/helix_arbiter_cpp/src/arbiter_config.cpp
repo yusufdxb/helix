@@ -27,7 +27,7 @@ const std::set<std::string> & known_top_level()
   static const std::set<std::string> names{
     "output_topic", "status_topic", "hold_topic", "rate_hz", "hold_timeout_sec",
     "max_abs_linear", "max_abs_angular", "shutdown_zero_count", "autostart",
-    "use_sim_time", "arbiter_backend"};
+    "use_sim_time", "arbiter_backend", "protective_latch"};
   return names;
 }
 
@@ -99,6 +99,7 @@ std::vector<std::pair<std::string, ParamValue>> default_parameters()
     {"max_abs_angular", d.limits.max_abs_angular},
     {"shutdown_zero_count", d.shutdown_zero_count},
     {"autostart", d.autostart},
+    {"protective_latch", d.protective_latch},
   };
 }
 
@@ -183,6 +184,9 @@ ArbiterConfig parse_config(const ParamMap & params)
     throw ConfigError("'shutdown_zero_count' must be between 1 and 1000");
   }
   c.autostart = as_bool(require(params, "autostart"), "autostart");
+  if (params.count("protective_latch") != 0) {
+    c.protective_latch = as_bool(require(params, "protective_latch"), "protective_latch");
+  }
   c.sources = parse_sources(params);
   return c;
 }

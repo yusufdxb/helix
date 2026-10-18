@@ -79,6 +79,7 @@ def test_defaults_are_non_actuating(native):
     assert supervisor["auto_resume"] is False
     arbiter = _parameters(nodes["helix_arbiter"], ctx)
     assert arbiter["output_topic"] == "/helix_dry/cmd_vel"
+    assert arbiter["protective_latch"] is True
     assert arbiter["sources"]["nav"]["topic"].startswith("/helix_dry/")
     assert arbiter["sources"]["teleop"]["topic"].startswith("/helix_dry/")
     sink = _parameters(nodes["helix_go2_sport_sink"], ctx)
@@ -90,6 +91,12 @@ def test_arming_the_sink_alone_does_not_arm_the_supervisor(native):
     nodes, ctx = _graph(native, sink_mode="armed")
     assert _parameters(nodes["helix_supervisor"], ctx)["actuation_enabled"] is False
     assert _parameters(nodes["helix_arbiter"], ctx)["output_topic"] == "/helix_dry/cmd_vel"
+
+
+def test_auto_resume_keeps_the_arbiter_protective_latch(native):
+    nodes, ctx = _graph(native, auto_resume="true", actuation_enabled="true")
+    assert _parameters(nodes["helix_supervisor"], ctx)["auto_resume"] is True
+    assert _parameters(nodes["helix_arbiter"], ctx)["protective_latch"] is True
 
 
 def test_profile_runs_no_python_node(native):

@@ -16,7 +16,6 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(std_srvs REQUIRED)
 find_package(helix_msgs REQUIRED)
 
 # ROS-free fault-state machine.
@@ -30,7 +29,7 @@ set_target_properties(helix_supervisor_core PROPERTIES POSITION_INDEPENDENT_CODE
 add_library(supervisor_component SHARED src/supervisor_node.cpp)
 target_link_libraries(supervisor_component helix_supervisor_core)
 ament_target_dependencies(supervisor_component
-  rclcpp rclcpp_lifecycle rclcpp_components lifecycle_msgs std_msgs std_srvs helix_msgs)
+  rclcpp rclcpp_lifecycle rclcpp_components lifecycle_msgs std_msgs helix_msgs)
 rclcpp_components_register_node(supervisor_component
   PLUGIN "helix_supervisor_cpp::SupervisorNode"
   EXECUTABLE helix_supervisor

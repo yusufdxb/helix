@@ -56,7 +56,7 @@ latency than the whole computation.
 |---|---|---|
 | R4: a CRASH mapped to `LOG_ONLY`, so a dead sensing node never stopped anything | A CRASH of a node in `critical_nodes` (`"*"` in the native launch) is stop-worthy | `supervisor_core.hpp` (R4) |
 | RESUME fired 3 s after the last fault, with no evidence that the fault was gone | A fault holds until evidence clears it. ANOMALY: the detector's clear record (4 normal samples). CRASH: 1 s of continuous heartbeats. Critical LOG_PATTERN: latched until operator release. After that, `clear_hold_s` (2 s) in CLEARING, then AWAIT_RELEASE (operator `/helix/supervisor/release`) unless `auto_resume` is set | `supervisor_core.hpp`, `anomaly_core.cpp` |
-| Diagnosis and recovery kept separate state and could disagree about whether a stop was accepted | One process, one state machine. `SupervisorStatus` is the only answer to "is HELIX holding" | `helix_supervisor_cpp` |
+| Diagnosis and recovery kept separate fault state and could disagree | One supervisor owns fault diagnosis and clearance. `SupervisorStatus` reports that state; `ArbiterStatus.protective_latched` separately reports the arbiter's protective stop authority | `helix_supervisor_cpp`, `helix_arbiter_cpp` |
 | The `enable` parameter was not synced with the safety envelope | `hold = would_hold && actuation_enabled`, applied on the next publish when the parameter flips. The same machine runs either way, so `would_hold` is always visible | `SupervisorCore::hold()` |
 | A node missing at startup was invisible (its heartbeat registry never saw it) | `expected_nodes` are seeded at start. The supervisor holds in STARTING, and a node never seen within `startup_grace_s` (5 s) raises CRASH "never started" | `SupervisorCore::start()` |
 | `twist_mux` did not guarantee a stop: it went silent on idle and lock and forwarded NaN | No `twist_mux`. The arbiter is the only velocity output. It outputs zero on hold, on a missing or stale (> 0.5 s) HELIX state, and when no input is live; it rejects non-finite input and drops that source's last command. The sink sends StopMove on zero, on bad input, and on its own 0.5 s deadman | `arbiter_core.hpp` P1 to P10, `sink_core.hpp` |
@@ -75,10 +75,52 @@ The defaults are non-actuating: `sink_mode:=dry_run` creates no
 supervisor starts with `actuation_enabled:=false`. Arming takes three
 explicit choices (`sink_mode:=armed`, a non-dry arbiter config,
 `actuation_enabled:=true`), and motion still needs an upstream command
-source. The sink can produce only 1003 (StopMove) and 1008 (Move).
+source and an explicit operator release of the arbiter latch. The sink can produce only 1003 (StopMove) and 1008 (Move).
 `make_request` refuses every other api id, including 1001 (Damp). On
 SIGINT or SIGTERM the C++ sink sends three StopMove requests before it
 exits.
+
+### Arbiter-owned protective latch
+
+The native launch always sets `protective_latch=true` on the C++ arbiter.
+It starts latched and latches again on a supervisor hold, unhealthy state,
+heartbeat timeout, supervisor epoch change, or arbiter lifecycle reset.
+A supervisor that restarts into NOMINAL cannot release this latch.
+Every supervisor activation uses a newer epoch, including lifecycle
+cleanup/configure/activate cycles that reconstruct its state revision.
+`auto_resume=true` can clear a supervisor episode but cannot authorize motion.
+Setting `actuation_enabled=false` also cannot clear the arbiter's latch or
+turn unhealthy supervision into healthy state.
+
+The arbiter publishes `protective_latched`, `release_challenge` and
+`supervisor_epoch` in `ArbiterStatus`. Its challenge combines a random
+arbiter session with a protection generation. Every new protection event
+invalidates earlier challenges. In this mode, older or duplicate `(epoch,
+seq)` messages remain rejected after heartbeat expiry; a wall-clock rollback
+that produces an older supervisor epoch therefore stays stopped.
+
+An operator calls `/helix/supervisor/release` using
+`helix_msgs/srv/ReleaseHold`, supplying the epoch and challenge from fresh
+`ArbiterStatus` and `supervisor_revision` from fresh `SupervisorStatus.revision`.
+This replaces the argument-free `std_srvs/Trigger` interface. Rebuild and
+restart all message consumers together. The supervisor checks that exact
+authorization and current heartbeat health before clearing its episode. It
+then publishes healthy state and a single authorization. The arbiter accepts
+that authorization only after fresh healthy state in the same supervisor
+epoch and only for its current challenge. Periodic health messages never
+carry authorization. A refused request is discarded; callers must not
+refresh its fields and retry without another operator action.
+
+Service success means a release request was published. Verify
+`ArbiterStatus.protective_latched=false` before supplying motion. Release
+flushes all stored commands, so motion also requires new upstream input.
+The hardware test runner refuses a stage while the arbiter is latched and
+does not release the startup latch automatically.
+
+This protocol is specific to the native supervisor profile. The standalone
+C++ arbiter's `protective_latch=false` default retains the legacy Python
+recovery protocol and its parity tests. It is not the native launch policy.
+Validation uses only the localhost fake GO2; physical motion remains disabled.
 
 ## Parity and tests
 
@@ -342,7 +384,7 @@ The full classification of every result by evidence class is in
 | Live fault injection (topic loss, rate collapse, drift) on the robot | **Unverified** | not run |
 | SIGKILL of the detector holds and stops; restart then needs operator release | **Proven (simulation)** | `results/native_crash_recovery_sim.json`: StopMove 265 ms after the kill, 0 Move after it, AWAIT_RELEASE after restart, NOMINAL only on release ([`EVIDENCE_AUDIT.md`](EVIDENCE_AUDIT.md)) |
 | SIGKILL of the supervisor or arbiter fails closed | **Proven (simulation)** | StopMove 495 ms (supervisor, arbiter hold timeout) and 237 ms (arbiter, sink deadman) after the kill |
-| A hold survives a supervisor restart | **Refuted (simulation)** | the restarted supervisor released within 0.1 s and Move resumed with no operator release; open decision |
+| A hold survives supervisor restarts, heartbeat recovery and new epochs | **Proven (simulation)** | native protective-latch regressions: repeated supervisor SIGKILL/restart, stale releases refused, motion resumes only after current operator authorization; `results/native_protective_latch_sim.json` |
 | A sink crash stops the robot | **Unverified, no mechanism** | nothing sends StopMove once the sink is gone; the GO2's own Move timeout is not measured |
 | Crash detection by SIGKILL of a live node on the Orin | **Unverified** | simulation only |
 | C++ components cost about a tenth of their Python counterparts under the same load | **Proven (bench, x86 host)** | `results/native_vs_python_bench.json`: five components 14.42 % to 1.54 % CPU (-89.3 %), 254.1 to 75.8 MB (-70.2 %), identical outputs |

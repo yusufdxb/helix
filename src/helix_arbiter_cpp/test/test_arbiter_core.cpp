@@ -59,6 +59,190 @@ struct Rig
 
 }  // namespace
 
+namespace
+{
+struct ProtectiveRig
+{
+  Arbiter arb{{kNav}, 0.5, Limits{}, "test-session"};
+  std::uint64_t epoch{1000};
+  std::uint64_t seq{0};
+  double t{0.0};
+
+  bool state(bool hold = false, bool healthy = true, const std::string & token = "")
+  {
+    return arb.on_hold(hold, hold ? "fault" : "", epoch, ++seq, t, healthy, token);
+  }
+  void source() {ASSERT_TRUE(arb.on_source(0, vx(0.2), t));}
+  void expect_stopped()
+  {
+    source();
+    const auto d = arb.decide(t);
+    EXPECT_EQ(d.command, kZero);
+    EXPECT_TRUE(d.helix_forced());
+    EXPECT_TRUE(arb.protective_latched());
+  }
+  void release()
+  {
+    ASSERT_TRUE(state());
+    const auto token = arb.release_challenge();
+    ASSERT_TRUE(state(false, true, token));
+    ASSERT_FALSE(arb.protective_latched());
+  }
+};
+}  // namespace
+
+TEST(ProtectiveLatch, StartupHealthDoesNotAuthorizeMotion)
+{
+  ProtectiveRig r;
+  r.expect_stopped();
+  ASSERT_TRUE(r.state());
+  r.expect_stopped();
+  EXPECT_EQ(r.arb.decide(r.t).reason, Reason::kProtective);
+}
+
+TEST(ProtectiveLatch, ReleaseRequiresPriorHealthAndCurrentChallenge)
+{
+  ProtectiveRig r;
+  const auto token = r.arb.release_challenge();
+  ASSERT_TRUE(r.state(false, true, token));  // No prior health.
+  r.expect_stopped();
+  ASSERT_TRUE(r.state(false, true, "old-session:1"));
+  r.expect_stopped();
+  r.release();
+  r.source();
+  EXPECT_EQ(r.arb.decide(r.t).command.vx, 0.2);
+}
+
+TEST(ProtectiveLatch, ReleaseDiscardsCommandsArrivingBetweenOutputTicks)
+{
+  ProtectiveRig r;
+  ASSERT_TRUE(r.state());
+  r.source();
+  ASSERT_TRUE(r.state(false, true, r.arb.release_challenge()));
+  EXPECT_EQ(r.arb.decide(r.t).reason, Reason::kNoInput);
+  r.source();
+  EXPECT_EQ(r.arb.decide(r.t).command.vx, 0.2);
+}
+
+TEST(ProtectiveLatch, HeartbeatRecoveryNeverAutomaticallyReleases)
+{
+  ProtectiveRig r;
+  r.release();
+  r.t = 0.501;
+  r.expect_stopped();
+  ASSERT_TRUE(r.state());
+  r.expect_stopped();
+  r.release();
+  r.source();
+  EXPECT_EQ(r.arb.decide(r.t).command.vx, 0.2);
+}
+
+TEST(ProtectiveLatch, TimeoutBeforeAnyOutputTickInvalidatesRelease)
+{
+  ProtectiveRig r;
+  r.release();
+  const auto old = r.arb.release_challenge();
+  r.t = 0.501;
+  ASSERT_TRUE(r.state(false, true, old));
+  EXPECT_NE(r.arb.release_challenge(), old);
+  r.expect_stopped();
+  ASSERT_TRUE(r.state(false, true, old));
+  r.expect_stopped();
+}
+
+TEST(ProtectiveLatch, DuplicateAfterTimeoutCannotRenewHealth)
+{
+  ProtectiveRig r;
+  r.release();
+  const auto old = r.arb.release_challenge();
+  r.t = 0.501;
+  EXPECT_FALSE(r.arb.on_hold(false, "", r.epoch, r.seq, r.t, true, old));
+  EXPECT_NE(r.arb.release_challenge(), old);
+  r.expect_stopped();
+  EXPECT_EQ(r.arb.decide(r.t).reason, Reason::kStale);
+}
+
+TEST(ProtectiveLatch, RepeatedNewEpochsCannotReleaseEvenWithoutHeartbeatGap)
+{
+  ProtectiveRig r;
+  r.release();
+  for (int restart = 0; restart < 5; ++restart) {
+    const auto old = r.arb.release_challenge();
+    ++r.epoch;
+    r.seq = 0;
+    ASSERT_TRUE(r.state(false, true, old));
+    EXPECT_NE(r.arb.release_challenge(), old);
+    r.expect_stopped();
+    ASSERT_TRUE(r.state());
+    r.expect_stopped();
+  }
+  r.release();
+  r.source();
+  EXPECT_EQ(r.arb.decide(r.t).command.vx, 0.2);
+}
+
+TEST(ProtectiveLatch, OldEpochCannotReplaceWatermarkAfterTimeout)
+{
+  ProtectiveRig r;
+  r.release();
+  r.t = 1.0;
+  const auto token = r.arb.release_challenge();
+  EXPECT_FALSE(r.arb.on_hold(false, "", r.epoch - 1, kU64Max, r.t, true, token));
+  r.expect_stopped();
+  EXPECT_EQ(r.arb.hold_state()->epoch, r.epoch);
+}
+
+TEST(ProtectiveLatch, OldReleaseCannotClearNewFaultOrItsClearance)
+{
+  ProtectiveRig r;
+  r.release();
+  const auto old = r.arb.release_challenge();
+  ASSERT_TRUE(r.state(true, false, old));
+  r.expect_stopped();
+  ASSERT_TRUE(r.state());  // Includes automatic supervisor clearance.
+  ASSERT_TRUE(r.state(false, true, old));
+  r.expect_stopped();
+  r.release();
+}
+
+TEST(ProtectiveLatch, HealthLossHoldsEvenWithActuationDisabled)
+{
+  ProtectiveRig r;
+  r.release();
+  const auto old = r.arb.release_challenge();
+  ASSERT_TRUE(r.state(false, false, old));
+  r.expect_stopped();
+  ASSERT_TRUE(r.state());
+  ASSERT_TRUE(r.state(false, true, old));
+  r.expect_stopped();
+}
+
+TEST(ProtectiveLatch, ResetRequiresNewHealthAndInvalidatesAuthorization)
+{
+  ProtectiveRig r;
+  r.release();
+  const auto old = r.arb.release_challenge();
+  r.arb.reset();
+  EXPECT_NE(r.arb.release_challenge(), old);
+  ASSERT_TRUE(r.state(false, true, old));
+  r.expect_stopped();
+  r.release();
+}
+
+TEST(ProtectiveLatch, RestartedArbiterRejectsPriorSessionRelease)
+{
+  ProtectiveRig r;
+  r.release();
+  Arbiter restarted{{kNav}, 0.5, Limits{}, "new-session"};
+  ASSERT_TRUE(restarted.on_hold(false, "", r.epoch, ++r.seq, r.t, true));
+  ASSERT_TRUE(
+    restarted.on_hold(
+      false, "", r.epoch, ++r.seq, r.t, true, r.arb.release_challenge()));
+  ASSERT_TRUE(restarted.on_source(0, vx(0.2), r.t));
+  EXPECT_EQ(restarted.decide(r.t).command, kZero);
+  EXPECT_TRUE(restarted.protective_latched());
+}
+
 TEST(ArbiterCore, MissingHoldStateFailsClosed)
 {
   Rig r;

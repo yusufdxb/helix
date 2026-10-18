@@ -20,3 +20,10 @@ uint64 epoch             # publisher start time in ns, changes on restart
 uint64 seq               # strictly increasing within an epoch
 float64 stamp            # publisher clock, seconds (tracing only)
 float64 asserted_stamp   # publisher clock when the hold was asserted, 0 if not holding
+
+# Native protective-latch protocol. Legacy publishers leave these at defaults.
+# healthy requires NOMINAL and current expected-node heartbeats, even with
+# actuation disabled. Only an explicit operator release echoes the arbiter's
+# current challenge, once. Periodic state and auto_resume never carry it.
+bool healthy
+string release_challenge

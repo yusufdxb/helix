@@ -60,6 +60,7 @@ struct ArbiterConfig
   Limits limits{};
   std::int64_t shutdown_zero_count{10};
   bool autostart{false};
+  bool protective_latch{false};  // native supervisor protocol; legacy parity otherwise
   std::vector<SourceSpec> sources;  // sorted by name
 };
 

@@ -25,13 +25,15 @@ const char * reason_name(Reason reason) noexcept
     case Reason::kMissing: return "HELIX_STATE_MISSING";
     case Reason::kNoInput: return "NO_LIVE_INPUT";
     case Reason::kShutdown: return "SHUTDOWN";
+    case Reason::kProtective: return "PROTECTIVE_HOLD";
   }
   return "UNKNOWN";
 }
 
 bool is_helix_forced(Reason reason) noexcept
 {
-  return reason == Reason::kHold || reason == Reason::kStale || reason == Reason::kMissing;
+  return reason == Reason::kHold || reason == Reason::kStale || reason == Reason::kMissing ||
+         reason == Reason::kProtective;
 }
 
 const char * rejection_name(Rejection why) noexcept
@@ -74,8 +76,11 @@ std::optional<Command> validate_twist(
   return Command{in.lx + 0.0, in.ly + 0.0, in.az + 0.0};
 }
 
-Arbiter::Arbiter(std::vector<SourceSpec> sources, double hold_timeout_sec, Limits limits)
-: hold_timeout_sec_(hold_timeout_sec), limits_(limits)
+Arbiter::Arbiter(
+  std::vector<SourceSpec> sources, double hold_timeout_sec, Limits limits,
+  std::string protective_session)
+: hold_timeout_sec_(hold_timeout_sec), limits_(limits),
+  protective_session_(std::move(protective_session))
 {
   if (sources.empty()) {
     throw std::invalid_argument("arbiter needs at least one source");
@@ -109,6 +114,7 @@ Arbiter::Arbiter(std::vector<SourceSpec> sources, double hold_timeout_sec, Limit
   for (auto & s : sources) {
     slots_.push_back(Slot{std::move(s), std::nullopt, 0.0, 0, 0});
   }
+  latch_protection();
 }
 
 std::optional<std::size_t> Arbiter::index_of(std::string_view name) const noexcept
@@ -139,9 +145,11 @@ bool Arbiter::on_source(std::size_t index, const Twist6 & twist, double now, Rej
 }
 
 bool Arbiter::on_hold(
-  bool hold, std::string_view fault_id, std::uint64_t epoch, std::uint64_t seq, double now)
+  bool hold, std::string_view fault_id, std::uint64_t epoch, std::uint64_t seq, double now,
+  bool healthy, std::string_view release_challenge)
 {
-  if (hold_ && hold_fresh(now)) {
+  check_protection_timeout(now);
+  if (hold_ && (hold_fresh(now) || !protective_session_.empty())) {
     // Lexicographic (epoch, seq) <= (cur.epoch, cur.seq) on full-width
     // unsigned integers, exactly like the Python tuple comparison on ints.
     const bool not_newer = epoch < hold_->epoch || (epoch == hold_->epoch && seq <= hold_->seq);
@@ -151,7 +159,25 @@ bool Arbiter::on_hold(
     }
   }
   const bool prev_effective = effective_hold(now);
-  hold_ = HoldState{hold, std::string(fault_id), epoch, seq, now};
+  if (!protective_session_.empty()) {
+    // Check the gap before replacing received_at, including gaps between
+    // timer ticks. Epoch changes and newly asserted stops invalidate releases.
+    if (hold_ && (epoch != hold_->epoch ||
+      (hold && !hold_->hold) || (!healthy && hold_->healthy)))
+    {
+      latch_protection();
+    }
+    const bool prior_health = hold_ && hold_fresh(now) && hold_->epoch == epoch &&
+      hold_->healthy && !hold_->hold;
+    if (protective_latched_ && !hold && healthy && prior_health &&
+      !release_challenge.empty() && release_challenge == release_challenge_)
+    {
+      protective_latched_ = false;
+      clear_sources();  // Never replay a command received before release.
+    }
+    heartbeat_lost_ = false;
+  }
+  hold_ = HoldState{hold, std::string(fault_id), epoch, seq, now, healthy};
   if (effective_hold(now) != prev_effective) {
     clear_sources();  // P7
     ++counters_.hold_transitions;
@@ -161,6 +187,7 @@ bool Arbiter::on_hold(
 
 Decision Arbiter::decide(double now)
 {
+  check_protection_timeout(now);
   if (effective_hold(now)) {
     // Staleness is also a hold transition: clear sources so a command stored
     // before the state went stale cannot resume motion later.
@@ -178,6 +205,11 @@ Decision Arbiter::decide(double now)
   }
   if (hold_->hold) {
     d.reason = Reason::kHold;
+    d.hold_fault_id = hold_->fault_id;
+    return d;
+  }
+  if (protective_latched_) {
+    d.reason = Reason::kProtective;
     d.hold_fault_id = hold_->fault_id;
     return d;
   }
@@ -204,10 +236,35 @@ Decision Arbiter::decide(double now)
   return d;
 }
 
-void Arbiter::reset() noexcept
+void Arbiter::reset()
 {
   clear_sources();
-  hold_.reset();
+  if (protective_session_.empty()) {
+    hold_.reset();
+  } else if (hold_) {
+    hold_->healthy = false;
+  }
+  // Keep the ordering watermark through lifecycle resets. A new process
+  // gets a new session, so old challenges cannot authorize its startup.
+  latch_protection();
+}
+
+void Arbiter::latch_protection()
+{
+  if (protective_session_.empty()) {
+    return;
+  }
+  protective_latched_ = true;
+  release_challenge_ = protective_session_ + ":" + std::to_string(++protection_generation_);
+  clear_sources();
+}
+
+void Arbiter::check_protection_timeout(double now)
+{
+  if (!protective_session_.empty() && hold_ && !hold_fresh(now) && !heartbeat_lost_) {
+    latch_protection();
+    heartbeat_lost_ = true;
+  }
 }
 
 bool Arbiter::hold_fresh(double now) const noexcept
@@ -217,7 +274,7 @@ bool Arbiter::hold_fresh(double now) const noexcept
 
 bool Arbiter::effective_hold(double now) const noexcept
 {
-  return !hold_.has_value() || !hold_fresh(now) || hold_->hold;
+  return protective_latched_ || !hold_.has_value() || !hold_fresh(now) || hold_->hold;
 }
 
 bool Arbiter::source_fresh(const Slot & slot, double now) noexcept

@@ -12,7 +12,8 @@ sending Move (1008) and the supervisor is NOMINAL, then SIGKILLs one node:
                 the operator release NOMINAL and Move again.
     supervisor  helix_supervisor: the hold stream stops. Expect the arbiter to
                 fail closed (hold_timeout_sec) and the sink to send StopMove.
-                The supervisor is then restarted and what follows is recorded.
+                Three restarts retain the arbiter latch. Stale topic and
+                service releases fail; a current operator release resumes.
     arbiter     helix_arbiter: the sink input stops. Expect the sink deadman
                 (input_timeout_sec) to send StopMove.
     sink        helix_go2_sport_sink: the only /api/sport/request publisher.
@@ -59,9 +60,12 @@ def _pids(fragment: str) -> list[int]:
             continue
         try:
             cmd = Path(f'/proc/{entry}/cmdline').read_bytes().split(b'\0')[0].decode()
+            process_env = Path(f'/proc/{entry}/environ').read_bytes().split(b'\0')
         except OSError:
             continue
-        if cmd.endswith(fragment):
+        domain = f"ROS_DOMAIN_ID={os.environ['ROS_DOMAIN_ID']}".encode()
+        if (cmd.endswith(fragment) and domain in process_env
+                and b'ROS_LOCALHOST_ONLY=1' in process_env):
             out.append(int(entry))
     return out
 
@@ -105,10 +109,15 @@ class Recorder:
         from geometry_msgs.msg import Twist
         from rclpy.node import Node
         from rclpy.qos import QoSProfile, ReliabilityPolicy
-        from std_srvs.srv import Trigger
         from unitree_api.msg import Request, Response
 
-        from helix_msgs.msg import FaultEvent, HelixHold, SupervisorStatus
+        from helix_msgs.msg import (
+            ArbiterStatus,
+            FaultEvent,
+            HelixHold,
+            SupervisorStatus,
+        )
+        from helix_msgs.srv import ReleaseHold
 
         self.rclpy = rclpy
         rclpy.init()
@@ -116,8 +125,11 @@ class Recorder:
         self.events: list[dict] = []
         self.t0 = time.monotonic()
         rel = QoSProfile(depth=50, reliability=ReliabilityPolicy.RELIABLE)
-        be = QoSProfile(depth=50, reliability=ReliabilityPolicy.BEST_EFFORT)
         self.state = None
+        self.supervisor = None
+        self.arbiter = None
+        self.last_hold = None
+        self.authorizations = []
         self._last_hold = None
         self.node.create_subscription(Request, '/api/sport/request', lambda m: self.ev(
             'request', api=m.header.identity.api_id, id=m.header.identity.id), rel)
@@ -126,16 +138,28 @@ class Recorder:
             code=m.header.status.code), rel)
         self.node.create_subscription(SupervisorStatus, '/helix/supervisor/status',
                                       self._status, rel)
-        self.node.create_subscription(HelixHold, '/helix/hold', lambda m: self.ev(
-            'hold', hold=m.hold, epoch=m.epoch, fault=m.fault_id), be)
+        self.node.create_subscription(HelixHold, '/helix/hold', self._hold, rel)
+        self.node.create_subscription(ArbiterStatus, '/helix/arbiter/status',
+                                      self._arbiter, rel)
         self.node.create_subscription(FaultEvent, '/helix/faults', lambda m: self.ev(
             'fault', type=m.fault_type, node=m.node_name, detail=m.detail[:120]), rel)
         self.nav = self.node.create_publisher(Twist, '/helix_hw/nav/cmd_vel', rel)
+        self.hold_pub = self.node.create_publisher(HelixHold, '/helix/hold', rel)
+        self.fault_pub = self.node.create_publisher(FaultEvent, '/helix/faults', rel)
         self.twist = Twist()
         self.streaming = False
         self.node.create_timer(0.05, self._nav)
-        self.release = self.node.create_client(Trigger, '/helix/supervisor/release')
-        self.Trigger = Trigger
+        self.release = self.node.create_client(ReleaseHold, '/helix/supervisor/release')
+        self.ReleaseHold = ReleaseHold
+
+    def _hold(self, m) -> None:
+        self.last_hold = m
+        if m.release_challenge:
+            self.authorizations.append(m)
+        self.ev('hold', hold=m.hold, epoch=m.epoch, fault=m.fault_id)
+
+    def _arbiter(self, m) -> None:
+        self.arbiter = m
 
     def now(self) -> float:
         return time.monotonic() - self.t0
@@ -149,6 +173,7 @@ class Recorder:
         self.events.append({'t': round(self.now(), 4), 'kind': kind, **kw})
 
     def _status(self, m) -> None:
+        self.supervisor = m
         if m.state != self.state:
             self.state = m.state
             self.ev('state', state=m.state, hold=m.hold, reason=m.reason[:120],
@@ -176,13 +201,21 @@ class Recorder:
         return sum(1 for e in self.events
                    if e['kind'] == 'request' and e['api'] == MOVE and e['t'] > t)
 
-    def call_release(self) -> dict:
+    def call_release(self, authorization=None) -> dict:
         if not self.release.wait_for_service(timeout_sec=5.0):
             return {'ok': False, 'message': 'no release service'}
-        fut = self.release.call_async(self.Trigger.Request())
+        if authorization is None:
+            authorization = self.authorization()
+        fut = self.release.call_async(authorization)
         self.rclpy.spin_until_future_complete(self.node, fut, timeout_sec=5.0)
         r = fut.result()
         return {'ok': bool(r and r.success), 'message': r.message if r else 'timeout'}
+
+    def authorization(self):
+        return self.ReleaseHold.Request(
+            supervisor_epoch=self.arbiter.supervisor_epoch,
+            supervisor_revision=self.supervisor.revision,
+            release_challenge=self.arbiter.release_challenge)
 
     def close(self) -> None:
         self.node.destroy_node()
@@ -213,6 +246,12 @@ def _lifecycle_up(rec: Recorder, name: str) -> str:
         if time.monotonic() > end:
             return 'no change_state service'
     for tid in (Transition.TRANSITION_CONFIGURE, Transition.TRANSITION_ACTIVATE):
+        # The original launch process can auto-activate a restarted node.
+        if tid == Transition.TRANSITION_ACTIVATE:
+            rec.spin_for(0.2)
+            current = probe.call_async(GetState.Request())
+            if rec.spin_until(current.done, 2.0) and current.result().current_state.id == 3:
+                return ''
         fut = cli.call_async(ChangeState.Request(transition=Transition(id=tid)))
         rec.spin_until(fut.done, 10.0)
         if not fut.done():
@@ -238,11 +277,20 @@ def run_case(case: str, log_dir: Path) -> dict:
     rec = Recorder()
     out = {'case': case, 'checks': {}, 'notes': []}
     try:
-        ok = rec.spin_until(lambda: rec.state == 'NOMINAL', 40.0)
+        ok = rec.spin_until(lambda: rec.state == 'NOMINAL' and rec.arbiter is not None
+                            and rec.last_hold is not None
+                            and rec.arbiter.supervisor_epoch == rec.last_hold.epoch, 40.0)
         out['checks']['reached_nominal'] = ok
         if not ok:
             return out
         rec.streaming = True
+        t_startup = rec.now()
+        rec.spin_for(1.0)
+        out['checks']['startup_requires_release'] = (
+            rec.moves_since(t_startup) == 0 and rec.arbiter.protective_latched)
+        out['startup_release'] = rec.call_release()
+        out['checks']['startup_release_accepted'] = out['startup_release']['ok']
+        initial_authorization = rec.authorization()
         t_stream = rec.now()
         out['checks']['moving_before_kill'] = rec.spin_until(
             lambda: rec.moves_since(t_stream) >= 20, 10.0)
@@ -267,10 +315,13 @@ def run_case(case: str, log_dir: Path) -> dict:
         if case in ('detector', 'supervisor', 'arbiter'):
             out['checks']['stopmove_after_kill'] = bool(stops)
             out['checks']['no_move_after_first_stop'] = out['moves_after_first_stop'] == 0
+            if case == 'detector':
+                unhealthy_authorization = rec.authorization()
+                out['checks']['unhealthy_release_refused'] = not rec.call_release()['ok']
         else:
             out['checks']['no_request_after_kill'] = not after
             out['notes'].append('nothing publishes /api/sport/request once the sink is gone; '
-                                'the robot keeps its last Move until its own timeout')
+                                'physical controller behavior remains unmeasured')
         if case in ('detector', 'supervisor'):
             with tempfile.TemporaryDirectory() as tmp:
                 argv = _restart_argv(case, Path(tmp))
@@ -289,6 +340,8 @@ def run_case(case: str, log_dir: Path) -> dict:
                     lambda: rec.state == 'AWAIT_RELEASE', 15.0)
                 rec.spin_for(2.0)
                 out['checks']['no_move_while_awaiting_release'] = rec.moves_since(t_restart) == 0
+                out['checks']['prehealth_release_stays_invalid'] = not rec.call_release(
+                    unhealthy_authorization)['ok']
                 t_rel = rec.now()
                 out['release'] = rec.call_release()
                 rec.ev('release', **out['release'])
@@ -297,11 +350,86 @@ def run_case(case: str, log_dir: Path) -> dict:
                 out['checks']['move_resumes_after_release'] = rec.spin_until(
                     lambda: rec.moves_since(t_rel) >= 5, 5.0)
             else:
-                rec.spin_for(12.0)
+                rec.spin_for(3.0)
                 states = [e['state'] for e in rec.events
                           if e['kind'] == 'state' and e['t'] > t_restart]
                 out['states_after_restart'] = states
                 out['moves_after_restart'] = rec.moves_since(t_restart)
+                out['checks']['supervisor_restart_keeps_hold'] = (
+                    out['moves_after_restart'] == 0 and rec.arbiter.protective_latched)
+                out['checks']['stale_service_release_refused'] = not rec.call_release(
+                    initial_authorization)['ok']
+                # Replay an exact earlier release, then a higher-sequence
+                # current-epoch message carrying that retired challenge.
+                rec.hold_pub.publish(rec.authorizations[0])
+                rec.spin_for(0.3)
+                import copy
+                stale = copy.deepcopy(rec.last_hold)
+                stale.seq += 1
+                stale.release_challenge = rec.authorizations[0].release_challenge
+                rec.hold_pub.publish(stale)
+                rec.spin_for(1.0)
+                out['checks']['stale_releases_cannot_clear_hold'] = (
+                    rec.moves_since(t_restart) == 0 and rec.arbiter.protective_latched)
+                # Repeat restarts without releasing, including another
+                # epoch that starts healthy and has no local fault episode.
+                restart_checks = []
+                for repeat in range(2):
+                    if repeat == 0:
+                        # Also kill while the supervisor owns a critical
+                        # latched fault, after the first kill from motion.
+                        from helix_msgs.msg import FaultEvent
+                        fault = FaultEvent(
+                            fault_type='LOG_PATTERN', node_name='crash_regression',
+                            severity=3, detail='synthetic critical fault')
+                        rec.fault_pub.publish(fault)
+                        out['checks']['held_before_supervisor_kill'] = rec.spin_until(
+                            lambda: rec.state in ('STOP_CONFIRMED', 'STOP_UNCONFIRMED'), 8.0)
+                    restarted.kill()
+                    restarted.wait(timeout=5)
+                    rec.ev('kill', target='supervisor_repeat')
+                    rec.spin_for(0.7)
+                    old_epoch = rec.last_hold.epoch
+                    with tempfile.TemporaryDirectory() as tmp:
+                        restarted = subprocess.Popen(
+                            _restart_argv(case, Path(tmp)), env=env,
+                            stdout=open(log_dir / f'supervisor_repeat_{repeat}.log', 'w'),
+                            stderr=subprocess.STDOUT, start_new_session=True)
+                        why = _lifecycle_up(rec, 'helix_supervisor')
+                    fresh = rec.spin_until(
+                        lambda: rec.last_hold.epoch != old_epoch and rec.last_hold.healthy
+                        and rec.arbiter.supervisor_epoch == rec.last_hold.epoch, 8.0)
+                    rec.spin_for(1.0)
+                    restart_checks.append(not why and fresh and rec.moves_since(t_restart) == 0
+                                          and rec.arbiter.protective_latched)
+                out['checks']['repeated_restarts_keep_hold'] = all(restart_checks)
+                # Lifecycle cleanup reconstructs the core and resets its
+                # revision. It must also start a new authorization epoch.
+                from lifecycle_msgs.msg import Transition
+                from lifecycle_msgs.srv import ChangeState
+                lifecycle_authorization = rec.authorization()
+                old_epoch = rec.last_hold.epoch
+                cli = rec.node.create_client(ChangeState, '/helix_supervisor/change_state')
+                cycled = True
+                for tid in (Transition.TRANSITION_DEACTIVATE, Transition.TRANSITION_CLEANUP):
+                    fut = cli.call_async(ChangeState.Request(transition=Transition(id=tid)))
+                    cycled &= rec.spin_until(fut.done, 5.0) and fut.result().success
+                why = _lifecycle_up(rec, 'helix_supervisor') if cycled else 'cycle refused'
+                healthy = rec.spin_until(
+                    lambda: rec.last_hold.epoch > old_epoch and rec.last_hold.healthy
+                    and rec.arbiter.supervisor_epoch == rec.last_hold.epoch, 8.0)
+                rec.spin_for(0.5)
+                out['checks']['lifecycle_restart_keeps_hold'] = (
+                    cycled and not why and healthy and rec.moves_since(t_restart) == 0
+                    and rec.arbiter.protective_latched)
+                out['checks']['stale_lifecycle_release_refused'] = not rec.call_release(
+                    lifecycle_authorization)['ok']
+                t_release = rec.now()
+                out['release'] = rec.call_release()
+                out['checks']['operator_release_accepted'] = out['release']['ok']
+                out['checks']['move_resumes_after_release'] = rec.spin_until(
+                    lambda: rec.moves_since(t_release) >= 5
+                    and not rec.arbiter.protective_latched, 6.0)
                 first_move = next((e['t'] for e in rec.events if e['kind'] == 'request'
                                    and e['api'] == MOVE and e['t'] > t_restart), None)
                 out['first_move_after_restart_s'] = (round(first_move - t_restart, 2)
@@ -321,7 +449,17 @@ def run_case(case: str, log_dir: Path) -> dict:
                 p.wait(timeout=15)
             except subprocess.TimeoutExpired:
                 os.killpg(p.pid, signal.SIGKILL)
+        # Safety assertions finish before process cleanup. Retain unexpected
+        # teardown failures separately rather than hiding them in launch logs.
+        launch_log = (log_dir / f'{case}_launch.log').read_text(errors='replace')
+        out['cleanup_warnings'] = [
+            'rate monitor SIGSEGV during SIGINT cleanup'
+        ] if 'exit code -11' in launch_log else []
     out['passed'] = all(out['checks'].values()) and bool(out['checks'])
+    if case == 'sink':
+        out['expected_gap_observed'] = out['passed']
+        out['passed'] = False
+        out['safety_result'] = 'UNRESOLVED_NO_STOP_PATH'
     return out
 
 

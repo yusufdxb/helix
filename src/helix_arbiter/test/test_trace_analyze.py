@@ -39,6 +39,15 @@ def test_real_leak_during_hold_is_counted():
     assert analyze(E)['nonzero_outputs_during_hold'] == 1
 
 
+def test_protective_latch_extends_hold_window_after_supervisor_clearance():
+    events = _chain_events(True)
+    for event in events:
+        if event['kind'] == 'status' and event['reason'] == 'HELIX_HOLD' and event['t'] > 0.02:
+            event['reason'] = 'PROTECTIVE_HOLD'
+    events.append(dict(kind='output', t=0.05, zero=False, vx=0.3))
+    assert analyze(events)['nonzero_outputs_during_hold'] == 1
+
+
 def test_chain_complete_and_source_latency():
     c = analyze(_chain_events(True))['chains'][0]
     assert c['complete_to_output']

@@ -12,6 +12,8 @@
 #include <exception>
 #include <limits>
 #include <memory>
+#include <random>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -152,7 +154,16 @@ ArbiterNode::CallbackReturn ArbiterNode::on_configure(const rclcpp_lifecycle::St
   std::unique_ptr<Arbiter> arb;
   try {
     cfg = parse_config(params);
-    arb = std::make_unique<Arbiter>(cfg.sources, cfg.hold_timeout_sec, cfg.limits);
+    std::string session;
+    if (cfg.protective_latch) {
+      std::random_device random;
+      std::ostringstream id;
+      for (int i = 0; i < 4; ++i) {
+        id << std::hex << random() << ":";
+      }
+      session = id.str();
+    }
+    arb = std::make_unique<Arbiter>(cfg.sources, cfg.hold_timeout_sec, cfg.limits, session);
     // Compare RESOLVED names, so a relative alias ("cmd_vel" in the root
     // namespace) or a remapping cannot feed the arbiter its own output.
     const auto topics = get_node_topics_interface();
@@ -211,7 +222,7 @@ ArbiterNode::CallbackReturn ArbiterNode::on_activate(const rclcpp_lifecycle::Sta
   }
   subs_.push_back(
     create_subscription<helix_msgs::msg::HelixHold>(
-      cfg_->hold_topic, input_qos(),
+      cfg_->hold_topic, cfg_->protective_latch ? rclcpp::QoS(10).reliable() : input_qos(),
       [this](helix_msgs::msg::HelixHold::ConstSharedPtr m) {on_hold(*m);}));
   LifecycleNode::on_activate(state);  // enables the managed publishers
 
@@ -330,7 +341,8 @@ void ArbiterNode::on_hold(const helix_msgs::msg::HelixHold & msg)
   if (!arb_) {
     return;
   }
-  arb_->on_hold(msg.hold, msg.fault_id, msg.epoch, msg.seq, now());
+  arb_->on_hold(
+    msg.hold, msg.fault_id, msg.epoch, msg.seq, now(), msg.healthy, msg.release_challenge);
   // Apply a hold assertion on the very next publish, not up to 1/rate later.
   if (msg.hold && active_) {
     on_tick();
@@ -365,6 +377,9 @@ void ArbiterNode::emit(const Decision & d)
   st.out_angular_z = d.command.wz;
   st.stamp = seconds_since_epoch(std::chrono::system_clock::now());
   st.seq = seq_;
+  st.protective_latched = arb_ && arb_->protective_latched();
+  st.release_challenge = arb_ ? arb_->release_challenge() : "";
+  st.supervisor_epoch = arb_ && arb_->hold_state() ? arb_->hold_state()->epoch : 0;
   // uint32 / int32 fields: saturate instead of wrapping.
   const std::uint64_t rejected = arb_ ? arb_->counters().rejected : 0;
   st.rejected_total = static_cast<std::uint32_t>(

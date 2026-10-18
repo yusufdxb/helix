@@ -1,0 +1,10 @@
+# Explicit operator authorization for exactly one arbiter protection episode.
+# Copy epoch and challenge from fresh ArbiterStatus, revision from fresh
+# SupervisorStatus. Never update and retry automatically: changed state or a
+# changed challenge requires another operator action.
+uint64 supervisor_epoch
+uint64 supervisor_revision  # from fresh SupervisorStatus, rejects pre-health requests
+string release_challenge
+---
+bool success
+string message

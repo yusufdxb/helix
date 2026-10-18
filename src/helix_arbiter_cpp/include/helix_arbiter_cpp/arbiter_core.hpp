@@ -23,6 +23,11 @@
 //     state is fresh. Once stale, any epoch is accepted.
 // P9  Only linear.x, linear.y, angular.z pass; all six axes must be finite.
 // P10 Freshness uses the caller's monotonic receipt clock only.
+// P11 Native protective mode (nonempty protective_session): startup, holds,
+//     health loss, heartbeat gaps and epoch changes latch stop authority in
+//     this arbiter. P8 never forgets its ordering watermark after timeout.
+// P12 Only a current one-shot operator challenge, with fresh healthy state
+//     in the same supervisor epoch, releases that latch. Sources are flushed.
 //
 // Times are seconds as double, exactly like time.monotonic() in the Python
 // node, so boundary comparisons round identically on both sides.
@@ -49,6 +54,7 @@ enum class Reason : std::uint8_t
   kMissing,   // no HELIX state received yet
   kNoInput,   // released, but no valid fresh source
   kShutdown,  // deactivating or exiting
+  kProtective,  // arbiter-owned latch requires fresh health and operator release
 };
 
 /// The ArbiterStatus.reason string for @p reason.
@@ -123,6 +129,7 @@ struct HoldState
   std::uint64_t epoch{0};
   std::uint64_t seq{0};
   double received_at{0.0};
+  bool healthy{false};
 };
 
 struct Decision
@@ -150,7 +157,9 @@ public:
   /// arbiter_core.Arbiter refuses: no sources, empty or duplicate names,
   /// a source timeout or hold timeout that is not finite and > 0, or a
   /// velocity limit that is not finite and >= 0.
-  Arbiter(std::vector<SourceSpec> sources, double hold_timeout_sec, Limits limits = Limits{});
+  Arbiter(
+    std::vector<SourceSpec> sources, double hold_timeout_sec, Limits limits = Limits{},
+    std::string protective_session = "");
 
   std::size_t source_count() const noexcept {return slots_.size();}
   const SourceSpec & spec(std::size_t index) const {return slots_.at(index).spec;}
@@ -162,15 +171,20 @@ public:
 
   /// Record a HELIX hold state. Returns false if dropped as out of order (P8).
   bool on_hold(
-    bool hold, std::string_view fault_id, std::uint64_t epoch, std::uint64_t seq, double now);
+    bool hold, std::string_view fault_id, std::uint64_t epoch, std::uint64_t seq, double now,
+    bool healthy = false, std::string_view release_challenge = "");
+
+  bool protective_latched() const noexcept {return protective_latched_;}
+  const std::string & release_challenge() const noexcept {return release_challenge_;}
 
   /// The output for time @p now. Not const: a HELIX-forced zero clears the
   /// stored source commands (P7).
   Decision decide(double now);
 
-  /// Forget all inputs and HELIX state (lifecycle activate/deactivate).
-  /// Counters are kept, as in the Python reference.
-  void reset() noexcept;
+  /// Forget inputs on lifecycle activation/deactivation. Protective mode
+  /// keeps the ordering watermark, invalidates health and rotates its latch
+  /// challenge. Legacy mode forgets HELIX state. Counters are kept.
+  void reset();
 
   const Counters & counters() const noexcept {return counters_;}
   std::uint64_t rejected_by_source(std::size_t index) const {return slots_.at(index).rejected;}
@@ -192,6 +206,8 @@ private:
   bool effective_hold(double now) const noexcept;
   static bool source_fresh(const Slot & slot, double now) noexcept;
   void clear_sources() noexcept;
+  void latch_protection();
+  void check_protection_timeout(double now);
 
   std::vector<Slot> slots_;
   double hold_timeout_sec_;
@@ -199,6 +215,11 @@ private:
   std::optional<HoldState> hold_;
   std::uint64_t order_{0};
   Counters counters_;
+  std::string protective_session_;
+  std::uint64_t protection_generation_{0};
+  std::string release_challenge_;
+  bool protective_latched_{false};
+  bool heartbeat_lost_{false};
 };
 
 }  // namespace helix_arbiter_cpp

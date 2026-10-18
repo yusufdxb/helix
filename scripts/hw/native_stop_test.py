@@ -43,14 +43,14 @@ from pathlib import Path
 
 import rclpy
 from geometry_msgs.msg import Twist
-from helix_msgs.msg import ArbiterStatus, FaultEvent, SinkStatus, SupervisorStatus
 from nav_msgs.msg import Odometry
 from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
 from std_msgs.msg import String
-from std_srvs.srv import Trigger
+from stop_guard import OverspeedGuard
 from unitree_go.msg import SportModeState, WirelessController
 
-from stop_guard import OverspeedGuard
+from helix_msgs.msg import ArbiterStatus, FaultEvent, SinkStatus, SupervisorStatus
+from helix_msgs.srv import ReleaseHold
 
 INJECTED = 'rate_hz/utlidar_helix_injected'
 RELIABLE = QoSProfile(history=HistoryPolicy.KEEP_LAST, depth=100,
@@ -94,7 +94,7 @@ class Io:
         # only while a stick or key is in use (silence is not "remote off").
         n.create_subscription(WirelessController, '/wirelesscontroller', self._remote,
                               BEST_EFFORT)
-        self.release_cli = n.create_client(Trigger, '/helix/supervisor/release')
+        self.release_cli = n.create_client(ReleaseHold, '/helix/supervisor/release')
 
     def ev(self, kind, **kw):
         kw.update(kind=kind, t=time.monotonic())
@@ -219,7 +219,12 @@ class Io:
     def release(self):
         if not self.release_cli.wait_for_service(timeout_sec=3.0):
             return False, 'release service unavailable'
-        fut = self.release_cli.call_async(Trigger.Request())
+        if self.arb is None or self.sup is None:
+            return False, 'arbiter or supervisor status unavailable'
+        fut = self.release_cli.call_async(ReleaseHold.Request(
+            supervisor_epoch=self.arb.supervisor_epoch,
+            supervisor_revision=self.sup.revision,
+            release_challenge=self.arb.release_challenge))
         end = time.monotonic() + 3.0
         while not fut.done() and time.monotonic() < end:
             rclpy.spin_once(self.node, timeout_sec=0.02)
@@ -275,6 +280,9 @@ class Stage:
         ok &= self.check('feedback', 'sink feedback available', io.sink.feedback_available)
         ok &= self.check('still', 'robot still before the stage',
                          io.speed < STILL and abs(io.yaw) < STILL_YAW, v=io.speed, yaw=io.yaw)
+        ok &= self.check('protective_release', 'arbiter explicitly released before stage',
+                         io.arb is not None and not io.arb.protective_latched,
+                         instruction='operator release required before a new stage')
         return ok
 
     def chain(self, t_inject, held_deadline=3.0):
@@ -315,7 +323,8 @@ class Stage:
                    cleared and io.sup.state == 'AWAIT_RELEASE', state=io.sup.state)
         ok, msg = io.release()
         self.check('released', 'operator release accepted', ok, message=msg)
-        nominal = io.wait_for(lambda: io.sup.state == 'NOMINAL' and not io.sup.hold, 3.0)
+        nominal = io.wait_for(lambda: io.sup.state == 'NOMINAL' and not io.sup.hold
+                             and io.arb is not None and not io.arb.protective_latched, 3.0)
         self.check('nominal_after', 'supervisor NOMINAL, hold released', nominal,
                    state=io.sup.state)
         t0 = time.monotonic()

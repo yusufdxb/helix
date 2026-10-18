@@ -12,7 +12,7 @@
 // Out:  /helix/hold          HelixHold      at hold_rate_hz and on every change
 //       /helix/supervisor/status SupervisorStatus  on every change and at status_rate_hz
 //       /helix/recovery_hints, /helix/recovery_actions  audit trail (legacy schema)
-// Srv:  /helix/supervisor/release  std_srvs/Trigger  operator release
+// Srv:  /helix/supervisor/release  helix_msgs/ReleaseHold  operator release
 //
 // actuation_enabled and auto_resume may be changed at runtime with
 // `ros2 param set`; the change is applied to the live state machine at once.
@@ -20,6 +20,7 @@
 // Time is the steady clock: the sink stamps its status on the same host's
 // monotonic clock and the core compares the two directly.
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <memory>
@@ -34,13 +35,13 @@
 #include "helix_msgs/msg/recovery_hint.hpp"
 #include "helix_msgs/msg/sink_status.hpp"
 #include "helix_msgs/msg/supervisor_status.hpp"
+#include "helix_msgs/srv/release_hold.hpp"
 #include "helix_supervisor_cpp/supervisor_core.hpp"
 #include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_components/register_node_macro.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "std_srvs/srv/trigger.hpp"
 
 namespace helix_supervisor_cpp
 {
@@ -154,8 +155,18 @@ public:
 
   CallbackReturn on_activate(const rclcpp_lifecycle::State & state) override
   {
+    // A lifecycle restart is a new supervision session too. Core revision
+    // may restart after cleanup/configure, so never reuse its authorization
+    // epoch, even if the wall clock moved backward within this process.
+    const auto activation_epoch = static_cast<std::uint64_t>(
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
+    epoch_ = std::max(epoch_ + 1, activation_epoch);
     LifecycleNode::on_activate(state);
     core_->start(steady_now());
+    arbiter_challenge_.clear();
+    arbiter_protective_latched_ = false;
+    arbiter_seen_at_ = 0.0;
 
     sub_fault_ = create_subscription<helix_msgs::msg::FaultEvent>(
       "/helix/faults", reliable(100),
@@ -177,6 +188,11 @@ public:
     sub_arbiter_ = create_subscription<helix_msgs::msg::ArbiterStatus>(
       get_parameter("arbiter_status_topic").as_string(), reliable(50),
       [this](helix_msgs::msg::ArbiterStatus::ConstSharedPtr m) {
+        if (m->supervisor_epoch == epoch_) {
+          arbiter_challenge_ = m->release_challenge;
+          arbiter_protective_latched_ = m->protective_latched;
+          arbiter_seen_at_ = steady_now();
+        }
         core_->on_arbiter_status(m->reason, m->hold_fault_id, steady_now());
         flush();
       });
@@ -193,12 +209,39 @@ public:
         core_->on_sink_feedback(fb, steady_now());
         flush();
       });
-    srv_release_ = create_service<std_srvs::srv::Trigger>(
+    srv_release_ = create_service<helix_msgs::srv::ReleaseHold>(
       "/helix/supervisor/release",
-      [this](const std::shared_ptr<std_srvs::srv::Trigger::Request>,
-      std::shared_ptr<std_srvs::srv::Trigger::Response> res) {
+      [this](const std::shared_ptr<helix_msgs::srv::ReleaseHold::Request> req,
+      std::shared_ptr<helix_msgs::srv::ReleaseHold::Response> res) {
+        const double now = steady_now();
+        // Recheck liveness here, not at the preceding timer tick. An operator
+        // request is never queued for later health or a later arbiter latch.
+        core_->tick(now);
         std::string why;
-        res->success = core_->operator_release(steady_now(), why);
+        const bool protection_request = arbiter_protective_latched_ &&
+        !arbiter_challenge_.empty() && now - arbiter_seen_at_ <= 0.5 &&
+        req->supervisor_epoch == epoch_ && req->supervisor_revision == core_->revision() &&
+        req->release_challenge == arbiter_challenge_;
+        if (!protection_request) {
+          why = "stale or mismatched operator authorization";
+          res->success = false;
+        } else if (!core_->missing_nodes(now).empty() || core_->state() == State::kStarting) {
+          why = "fresh supervisor health required";
+          res->success = false;
+        } else if (core_->state() == State::kNominal) {
+          res->success = true;
+          why = "operator release requested";
+        } else {
+          res->success = core_->operator_release(now, why);
+        }
+        flush();
+        if (res->success && protection_request && core_->state() == State::kNominal) {
+          // First publish current health, then the one-shot authorization.
+          // Periodic heartbeats and auto_resume never echo this challenge.
+          publish_hold();
+          publish_hold_value(false, "operator release requested", arbiter_challenge_);
+          why = "operator release requested; check arbiter protective_latched";
+        }
         res->message = why;
         RCLCPP_WARN(
           get_logger(), "operator release: %s (%s)",
@@ -364,7 +407,8 @@ private:
     publish_hold_value(core_->hold(), to_string(core_->state()));
   }
 
-  void publish_hold_value(bool hold, const std::string & reason)
+  void publish_hold_value(
+    bool hold, const std::string & reason, const std::string & release_challenge = "")
   {
     helix_msgs::msg::HelixHold m;
     m.hold = hold;
@@ -374,6 +418,9 @@ private:
     m.seq = ++seq_;
     m.stamp = steady_now();
     m.asserted_stamp = hold && core_ ? core_->hold_requested_at() : 0.0;
+    m.healthy = core_ && core_->state() == State::kNominal &&
+      core_->missing_nodes(m.stamp).empty();
+    m.release_challenge = release_challenge;
     pub_hold_->publish(m);
     last_hold_ = hold;
     last_hold_id_ = m.fault_id;
@@ -406,12 +453,16 @@ private:
     s.cleared_at = core_->cleared_at();
     s.stamp = now;
     s.seq = ++status_seq_;
+    s.revision = core_->revision();
     s.hold_episodes = core_->hold_episodes();
     pub_status_->publish(s);
     last_revision_ = core_->revision();
   }
 
   std::unique_ptr<SupervisorCore> core_;
+  std::string arbiter_challenge_;
+  bool arbiter_protective_latched_{false};
+  double arbiter_seen_at_{0.0};
   OnSetParametersCallbackHandle::SharedPtr param_cb_;
   rclcpp_lifecycle::LifecyclePublisher<helix_msgs::msg::HelixHold>::SharedPtr pub_hold_;
   rclcpp_lifecycle::LifecyclePublisher<helix_msgs::msg::SupervisorStatus>::SharedPtr pub_status_;
@@ -423,7 +474,7 @@ private:
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_beat_;
   rclcpp::Subscription<helix_msgs::msg::ArbiterStatus>::SharedPtr sub_arbiter_;
   rclcpp::Subscription<helix_msgs::msg::SinkStatus>::SharedPtr sub_sink_;
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr srv_release_;
+  rclcpp::Service<helix_msgs::srv::ReleaseHold>::SharedPtr srv_release_;
   rclcpp::TimerBase::SharedPtr tick_timer_;
   rclcpp::TimerBase::SharedPtr hold_timer_;
   rclcpp::TimerBase::SharedPtr status_timer_;

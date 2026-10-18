@@ -18,6 +18,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/SupervisorStatus.msg"
   "msg/SinkStatus.msg"
   "srv/GetContext.srv"
+  "srv/ReleaseHold.srv"
   DEPENDENCIES std_msgs
 )
 

@@ -139,7 +139,8 @@ def analyze(events: List[dict]) -> Dict[str, object]:
             summary[key] = {'n': len(vals), 'median': statistics.median(vals),
                             'max': max(vals), 'min': min(vals)}
     nonzero_after_hold = []
-    forced = ('HELIX_HOLD', 'HELIX_STATE_STALE', 'HELIX_STATE_MISSING', 'SHUTDOWN')
+    forced = ('HELIX_HOLD', 'HELIX_STATE_STALE', 'HELIX_STATE_MISSING',
+              'PROTECTIVE_HOLD', 'SHUTDOWN')
     for c in chains:
         th = c['times']['status']
         if th is None:

@@ -24,6 +24,8 @@
 #
 # hold is what is published on /helix/hold. When actuation_enabled is false
 # the same state machine runs (would_hold) but hold stays false.
+# The native arbiter owns a separate protective latch. NOMINAL or hold=false
+# here does not release that latch; inspect ArbiterStatus.protective_latched.
 
 string state
 bool hold
@@ -43,4 +45,5 @@ float64 motion_stopped_at
 float64 cleared_at
 float64 stamp                # steady clock, seconds
 uint64 seq
+uint64 revision             # changes with faults, health/state and operator decisions
 uint32 hold_episodes

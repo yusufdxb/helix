@@ -213,7 +213,7 @@ the native profile does not. Ten minutes is not a soak.
 `scripts/sim_native_crash_recovery.py`, result
 `results/native_crash_recovery_sim.json`. **Class: Sim.**
 
-Each case runs a fresh armed native stack (actuation on, `auto_resume`
+The original 2026-10-17 run used a fresh armed native stack (actuation on, `auto_resume`
 false) against the fake GO2, streams vx 0.2 m/s and waits until the sink is
 sending Move and the supervisor is NOMINAL. It then SIGKILLs one process
 while the nav source keeps streaming.
@@ -221,25 +221,22 @@ while the nav source keeps streaming.
 | Killed | What stopped motion | Last Move after the kill | First StopMove after the kill | Move after that StopMove | Recovery |
 |---|---|---|---|---|---|
 | anomaly detector | supervisor: missed heartbeat, CRASH fault, hold | 254 ms | 265 ms | 0 | **PASS**: the restarted detector led to CLEARING and then AWAIT_RELEASE, with no Move while waiting; the operator release returned NOMINAL and Move resumed |
-| supervisor | arbiter: hold stream stale (`hold_timeout_sec` 0.5 s), forced zero | 435 ms | 495 ms | 0 | **gap**, see below |
+| supervisor | arbiter: hold stream stale (`hold_timeout_sec` 0.5 s), forced zero | 435 ms | 495 ms | 0 | historical P0, fixed by the native arbiter latch below |
 | arbiter | sink: input deadman (`input_timeout_sec` 0.25 s) | none | 237 ms | 0 | not tested |
 | sink | nothing | none | none | none | **gap**: no process is left to send StopMove |
 
 Findings:
 
-- **A supervisor restart drops the latched hold.** In this run:
+- **Historical P0: supervisor restart dropped the latched hold.** In the original run:
   - The restarted supervisor started a new epoch.
   - It published hold=true, then hold=false 0.1 s later, as soon as every
     expected node was beating.
   - Move resumed 1.15 s after the restart, 198 Move requests in 12 s,
     with no operator release and `auto_resume` false.
 
-  The launch file does not respawn the supervisor, so only an operator
-  restart causes this. But it contradicts "a hold releases only on
-  evidence plus operator release". A fix (start latched when actuation is
-  enabled, or have the arbiter refuse a new epoch after a stale period
-  until released) changes the startup procedure. It is left as an open
-  decision, not changed in this audit.
+  The native arbiter-owned protective latch now prevents that restart from
+  releasing motion. The original result above is retained as the failure
+  evidence, rather than reclassified as a passing run.
 - **The supervisor's own death costs up to 0.5 s.** Move kept flowing for
   435 ms after the kill, bounded by the arbiter's `hold_timeout_sec`.
 - **Sink death is uncovered.** Whether the GO2 stops when Move requests
@@ -250,6 +247,45 @@ Findings:
   therefore see `change_state` as ready and send a request the restarted
   process never receives. The harness waits for an answered `get_state`
   first. Any restart tooling on the robot needs the same wait.
+
+### Protective-latch regression (2026-10-18, simulation only)
+
+`results/native_protective_latch_sim.json` records the regression campaign
+against the localhost fake GO2. Physical motion was disabled; no lab host
+or robot was accessed. Each case first verifies that healthy startup plus
+streaming input sends no Move until explicit operator release.
+
+The supervisor case first kills it while moving, then asserts a latched
+critical fault before another SIGKILL during three supervisor restarts.
+NOMINAL health and new epochs do not
+release the arbiter latch. Exact old release messages, old challenges with
+newer sequence numbers, and stale service authorizations are rejected.
+Motion resumes only after a current operator authorization and new source
+input. A supervisor lifecycle cleanup/configure/activate cycle also keeps
+the latch and rejects its previous authorization. The detector case also rejects a release while unhealthy and rejects
+that pre-health authorization after recovery. Core regressions additionally
+cover heartbeat recovery without an intervening output tick, arbiter startup
+and lifecycle reset, a new arbiter session, source-cache flushing, and
+automatic supervisor clearance without operator authorization.
+
+The release service now uses `helix_msgs/srv/ReleaseHold`. It binds the
+operator action to the current supervisor epoch, supervisor health/state
+revision and arbiter challenge. `ArbiterStatus.protective_latched` is the
+authority for whether that release actually took effect. See
+[`NATIVE_RUNTIME.md`](NATIVE_RUNTIME.md#arbiter-owned-protective-latch).
+
+**Separate unresolved failure: sink SIGKILL.** The campaign confirms that
+no process sends StopMove after the sink dies. Its result is explicitly
+`UNRESOLVED_NO_STOP_PATH`, not a successful safety case. A surviving
+watchdog/output path or a measured controller-side timeout is still needed.
+The fake GO2's timeout proves nothing about the physical controller. The
+supervisor-restart fix does not close this deployment blocker. The PR stays
+draft; physical crash-recovery and motion validation remain unverified.
+
+A validation run also showed the rate monitor exiting with SIGSEGV during
+SIGINT cleanup, after the safety assertions and input shutdown. Cleanup
+warnings are recorded separately; these passing latch assertions do not
+establish clean process teardown.
 
 ## Missing experiments
 
