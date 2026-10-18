@@ -86,6 +86,16 @@ public:
     heartbeat_ = std::make_unique<Heartbeat>(this);
   }
 
+  ~TopicRateMonitorNode() override
+  {
+    // Signal-driven component destruction does not invoke lifecycle shutdown.
+    // The executor must stop using the node before destruction, as in the
+    // generated standalone component main.
+    stop_runtime();
+    watched_.clear();
+    pub_.reset();
+  }
+
   CallbackReturn on_configure(const rclcpp_lifecycle::State &) override
   {
     const double window = get_parameter("window_sec").as_double();
@@ -130,9 +140,16 @@ public:
           qos.reliable();
         }
         qos.durability_volatile();
+        // Watched owns the subscription. A strong callback capture would form
+        // a cycle, retaining DDS readers and their node/context past shutdown.
+        const std::weak_ptr<Watched> weak = w;
         w->sub = create_generic_subscription(
           topic, type, qos,
-          [w](std::shared_ptr<rclcpp::SerializedMessage>) {w->window.record(steady_now());});
+          [weak](std::shared_ptr<rclcpp::SerializedMessage>) {
+            if (const auto watched = weak.lock()) {
+              watched->window.record(steady_now());
+            }
+          });
         watched_.push_back(w);
       }
     } catch (const std::exception & e) {
@@ -160,17 +177,14 @@ public:
 
   CallbackReturn on_deactivate(const rclcpp_lifecycle::State & state) override
   {
-    heartbeat_->stop();
-    if (timer_) {
-      timer_->cancel();
-      timer_.reset();
-    }
+    stop_runtime();
     LifecycleNode::on_deactivate(state);
     return CallbackReturn::SUCCESS;
   }
 
   CallbackReturn on_cleanup(const rclcpp_lifecycle::State &) override
   {
+    stop_runtime();
     watched_.clear();
     pub_.reset();
     return CallbackReturn::SUCCESS;
@@ -182,6 +196,15 @@ public:
   }
 
 private:
+  void stop_runtime()
+  {
+    if (timer_) {
+      timer_->cancel();
+      timer_.reset();
+    }
+    heartbeat_->stop();
+  }
+
   struct Watched
   {
     Watched(std::string t, double window, double stale)

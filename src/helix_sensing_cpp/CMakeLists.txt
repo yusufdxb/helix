@@ -180,6 +180,12 @@ if(BUILD_TESTING)
     ${CMAKE_CURRENT_SOURCE_DIR}/include
   )
 
+  ament_add_pytest_test(test_rate_monitor_teardown test/test_rate_monitor_teardown.py
+    ENV RATE_MONITOR_EXECUTABLE=$<TARGET_FILE:helix_topic_rate_monitor>
+      ROS_DOMAIN_ID=89 ROS_LOCALHOST_ONLY=1 RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    TIMEOUT 180
+  )
+
   # Node integration
   ament_add_gtest(test_anomaly_detector_node test/test_anomaly_detector_node.cpp)
   target_include_directories(test_anomaly_detector_node PRIVATE

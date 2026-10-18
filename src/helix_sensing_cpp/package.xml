@@ -39,6 +39,8 @@
        by test/test_python_parity.py. -->
   <test_depend>helix_core</test_depend>
   <test_depend>python3-pytest</test_depend>
+  <test_depend>rclpy</test_depend>
+  <test_depend>rmw_cyclonedds_cpp</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
