@@ -49,6 +49,7 @@ jobs:
             ros-humble-geometry-msgs \
             ros-humble-rclcpp-lifecycle \
             ros-humble-rclcpp-components \
+            ros-humble-rmw-cyclonedds-cpp \
             ros-humble-ament-cmake-gtest \
             ros-humble-std-srvs \
             ros-humble-yaml-cpp-vendor \
