@@ -49,35 +49,52 @@ V3_PARAMS = "healer tick_hz=20 fast_repair=0 adaptive=0\n"
 AGENT = {"history": "", "mlp": "", "llm": ""}
 
 
-OLLAMA = "http://127.0.0.1:11434"
+def ollama_url(arg: str) -> str:
+    """Server base URL from the agent_llm argument "model[@host:port]" (default 127.0.0.1:11434)."""
+    return "http://" + (arg.split("@", 1)[1] if "@" in arg else "127.0.0.1:11434")
 
 
-def ollama_cpu_s() -> float:
-    """CPU seconds used so far by every process named ollama (server plus model runners).
-    The server is shared, so the run's delta is an upper bound on what the agent caused."""
-    tot = 0.0
+def ollama_cpu_s(arg: str) -> tuple[float, bool]:
+    """CPU seconds used so far by the Ollama server named in `arg` and its model runners.
+    A server started by this user is identified by OLLAMA_HOST in its environment (runners
+    inherit it), so its CPU is attributable to the agent. Otherwise (the shared system
+    service, whose environment is unreadable) every process named ollama is summed and the
+    figure is flagged as an upper bound."""
+    hostport = ollama_url(arg).removeprefix("http://")
+    own, every = 0.0, 0.0
+    found = False
     tick = os.sysconf("SC_CLK_TCK")
     for d in Path("/proc").iterdir():
         try:
-            if d.name.isdigit() and (d / "comm").read_text().strip() == "ollama":
-                f = (d / "stat").read_text().rsplit(")", 1)[1].split()
-                tot += (int(f[11]) + int(f[12])) / tick
+            if not d.name.isdigit() or (d / "comm").read_text().strip() != "ollama":
+                continue
+            f = (d / "stat").read_text().rsplit(")", 1)[1].split()
+            cpu = (int(f[11]) + int(f[12])) / tick
+            every += cpu
+            try:
+                env = (d / "environ").read_bytes().split(b"\0")
+            except OSError:
+                continue
+            if f"OLLAMA_HOST={hostport}".encode() in env:
+                own += cpu
+                found = True
         except OSError:
             continue
-    return tot
+    return (own, True) if found else (every, False)
 
 
-def ollama_warm(model: str) -> dict:
+def ollama_warm(arg: str) -> dict:
     """Loads the model once (so load time is not charged to the first repair) and reports its
     resident size from /api/ps."""
     import urllib.request
+    model, url = arg.split("@", 1)[0], ollama_url(arg)
     body = json.dumps(dict(model=model, stream=False, think=False, keep_alive="30m",
                            messages=[dict(role="user", content="ok")], options=dict(num_predict=1))).encode()
     t = time.time()
-    urllib.request.urlopen(urllib.request.Request(OLLAMA + "/api/chat", body, {"Content-Type": "application/json"}),
+    urllib.request.urlopen(urllib.request.Request(url + "/api/chat", body, {"Content-Type": "application/json"}),
                            timeout=120).read()
     load_s = time.time() - t
-    ps = json.loads(urllib.request.urlopen(OLLAMA + "/api/ps", timeout=10).read())
+    ps = json.loads(urllib.request.urlopen(url + "/api/ps", timeout=10).read())
     m = next((x for x in ps.get("models", []) if x.get("name") == model or x.get("model") == model), {})
     return dict(llm_load_s=round(load_s, 2), llm_gpu_mb=round(m.get("size_vram", 0) / 2**20),
                 llm_size_mb=round(m.get("size", 0) / 2**20), llm_ctx=m.get("context_length"))
@@ -254,7 +271,7 @@ def main() -> None:
         if not a.agent_llm:
             sys.exit("agent_llm needs --agent-llm")
         info.update(ollama_warm(a.agent_llm))
-        info["ollama_cpu_s_start"] = ollama_cpu_s()
+        info["ollama_cpu_s_start"], info["ollama_cpu_attributable"] = ollama_cpu_s(a.agent_llm)
         print(f"llm {a.agent_llm}: load {info['llm_load_s']} s, {info['llm_gpu_mb']} MB on GPU", flush=True)
     (out / "agent.json").write_text(json.dumps(info, indent=1))
     pick = set(filter(None, a.scenarios.split(",")))
@@ -267,9 +284,10 @@ def main() -> None:
     free = list(range(a.slots))
     done = 0
 
-    # agent_llm episodes run one at a time: Ollama 0.18.3's runner aborts (GGML_ASSERT in seq_cp)
-    # on concurrent requests that share a prompt prefix, and a deployed healer only ever has one
-    # request in flight. Other arms keep running in the remaining slots.
+    # agent_llm episodes run one at a time, as a deployed healer only ever has one request in
+    # flight. Serializing alone does not avoid an Ollama 0.18.3 runner abort (GGML_ASSERT in
+    # seq_cp): a multi-slot server copies a shared prompt prefix between slots even for
+    # sequential requests, so the agent's server must run with OLLAMA_NUM_PARALLEL=1.
     llm_gate = threading.Semaphore(1)
 
     def job(ep: dict) -> dict:
@@ -288,7 +306,7 @@ def main() -> None:
                   flush=True)
     left = subprocess.run(["pgrep", "-c", "-f", "helix_demo/demo_node"], capture_output=True, text=True).stdout.strip()
     if use_llm:
-        info["ollama_cpu_s"] = round(ollama_cpu_s() - info.pop("ollama_cpu_s_start"), 2)
+        info["ollama_cpu_s"] = round(ollama_cpu_s(a.agent_llm)[0] - info.pop("ollama_cpu_s_start"), 2)
         (out / "agent.json").write_text(json.dumps(info, indent=1))
     print(f"stray demo_node processes after run: {left or 0}; episode processes reaped after healer exit: "
           f"{sum(json.loads((Path(e['dir']) / 'meta.json').read_text())['stray'] for e in eps)}")

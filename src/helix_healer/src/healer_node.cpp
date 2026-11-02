@@ -847,9 +847,15 @@ class Healer : public rclcpp::Node {
       };
       char buf[32];
       snprintf(buf, sizeof buf, "%.3f", ms);
+      std::string x;  // evidence features, so offline training can pair them with the verdict
+      for (float f : hh::features(e)) {
+        char fb[16];
+        snprintf(fb, sizeof fb, "%.4g", f);
+        x += (x.empty() ? "" : ",") + std::string(fb);
+      }
       emit({now(), node, "act", d.fault, chosen, d.incident_action,
             std::string("ranker=") + ranker_->name() + " ms=" + buf + " cands=" + names(d.candidates) +
-                " order=" + names(order) + " sig=" + hh::signature(e) + note});
+                " order=" + names(order) + " sig=" + hh::signature(e) + " x=" + x + note});
       {
         std::lock_guard lk(pend_mu_);
         pending_[node] = Pending{e, chosen, chosen == hh::Action::ParamRestore ? prev : std::vector<rclcpp::Parameter>{},

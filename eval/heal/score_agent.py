@@ -287,6 +287,12 @@ def main() -> None:
     print(table(rows, ["scenario", "policy"]))
     print()
     print(analyse(rows))
+    for root in a.dirs:  # run-level LLM server cost; CPU is attributable only on a dedicated server
+        info = agent_info(Path(root) / "x")
+        if "llm_gpu_mb" in info:
+            print(f"\nLLM {root}: {info.get('llm', '?')} load {info.get('llm_load_s')} s, "
+                  f"{info.get('llm_gpu_mb')} MB GPU, server CPU {info.get('ollama_cpu_s', '-')} s "
+                  f"({'attributable' if info.get('ollama_cpu_attributable') else 'shared server, NOT attributable'})")
     if missing:
         print(f"\nincomplete episodes: {missing}")
     if a.csv and rows:
