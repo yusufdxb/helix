@@ -8,6 +8,7 @@
 #include <ament_index_cpp/get_package_prefix.hpp>
 #include <diagnostic_msgs/msg/diagnostic_array.hpp>
 #include <helix_msgs/msg/heal_event.hpp>
+#include <helix_healer/envelope.hpp>
 #include <lifecycle_msgs/msg/state.hpp>
 #include <lifecycle_msgs/msg/transition.hpp>
 #include <lifecycle_msgs/srv/change_state.hpp>
@@ -72,6 +73,12 @@ struct TopicState {
   rclcpp::GenericSubscription::SharedPtr sub;
 };
 
+// Adaptive envelope of one (producer, topic). Reset when the producer's process changes.
+struct EnvSlot {
+  hh::Envelope e;
+  double start_t = -1e18;
+};
+
 struct Managed {
   hh::NodeSpec spec;
   std::vector<std::string> argv;  // resolved
@@ -91,6 +98,12 @@ struct Managed {
   double last_cpu_s = -1, last_cpu_t = 0;
   rclcpp::Client<lifecycle_msgs::srv::ChangeState>::SharedPtr change;
   rclcpp::Client<lifecycle_msgs::srv::GetState>::SharedPtr get;
+  bool learn_ok = false;  // the policy judged it healthy at the last tick: its timing may be learned
+  // attach mode: adopted from an outside launcher; argv/env/cwd captured to re-execute it
+  bool adopted = false;
+  std::vector<std::string> env;
+  std::string cwd;
+  std::vector<std::vector<std::string>> then;  // resolved helper commands
 };
 
 struct Result {
@@ -133,7 +146,9 @@ class Healer : public rclcpp::Node {
     for (const auto& ns : spec_.nodes) {
       Managed m;
       m.spec = ns;
-      m.argv = resolve_argv(ns);
+      if (!ns.argv.empty()) m.argv = resolve_argv(ns);
+      for (const auto& h : ns.then) m.then.push_back(resolve_exe(h));
+      for (const auto& o : ns.outputs) producers_[o.topic].push_back(ns.name);
       if (ns.lifecycle) {
         m.change = create_client<lifecycle_msgs::srv::ChangeState>("/" + ns.name + "/change_state");
         m.get = create_client<lifecycle_msgs::srv::GetState>("/" + ns.name + "/get_state");
@@ -149,7 +164,9 @@ class Healer : public rclcpp::Node {
             if (o.topic == in && other != name) m.upstream.insert(other);
 
     for (auto& [name, m] : nodes_)
-      if (m.spec.autostart) start_job(name, [this, name] { return spawn_and_bring_up(name, true); }, false);
+      if (m.spec.autostart && m.spec.attach.empty())
+        start_job(name, [this, name] { return spawn_and_bring_up(name, true); }, false);
+    try_attach();
 
     const auto& p = spec_.p;
     tick_ = create_wall_timer(std::chrono::duration<double>(1.0 / p.tick_hz), [this] { tick(); });
@@ -174,14 +191,18 @@ class Healer : public rclcpp::Node {
 
   double now() const { return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0_).count(); }
 
-  std::vector<std::string> resolve_argv(const hh::NodeSpec& ns) {
-    std::vector<std::string> a = ns.argv;
+  static std::vector<std::string> resolve_exe(std::vector<std::string> a) {
     if (!a.empty() && a[0].size() > 1 && a[0][0] == '@') {
       const auto slash = a[0].find('/');
       if (slash == std::string::npos) throw std::runtime_error("exec '" + a[0] + "': expected @pkg/exe");
       const std::string pkg = a[0].substr(1, slash - 1);
       a[0] = ament_index_cpp::get_package_prefix(pkg) + "/lib/" + pkg + "/" + a[0].substr(slash + 1);
     }
+    return a;
+  }
+
+  std::vector<std::string> resolve_argv(const hh::NodeSpec& ns) {
+    std::vector<std::string> a = resolve_exe(ns.argv);
     bool named = false;
     for (const auto& s : a)
       if (s.find("__node:=") != std::string::npos) named = true;
@@ -228,6 +249,16 @@ class Healer : public rclcpp::Node {
   void on_msg(const std::string& topic) {
     auto& ts = topics_[topic];
     const double t = now();
+    if (auto pr = producers_.find(topic); pr != producers_.end()) {
+      std::lock_guard lk(mu_);
+      for (const auto& name : pr->second) {
+        const auto& m = nodes_.at(name);
+        if (!m.started || !m.alive) continue;
+        auto& slot = env_slot(name, topic);
+        if (slot.start_t != m.start_t) slot.e.reset_process(), slot.start_t = m.start_t;
+        slot.e.arrival(t, m.learn_ok);
+      }
+    }
     ts.last = t;
     if (ts.first < 0) ts.first = t;
     ts.arrivals.push_back(t);
@@ -253,10 +284,82 @@ class Healer : public rclcpp::Node {
     ob.age_s = ts.last >= 0 ? t - ts.last : t - m.start_t;
     const double w = ob.expected_hz > 0 ? std::max(p.rate_window_s, 3.0 / ob.expected_hz) : p.rate_window_s;
     int c = 0;
-    for (auto it = ts.arrivals.rbegin(); it != ts.arrivals.rend() && t - *it <= w; ++it) ++c;
-    ob.rate_hz = c / w;
+    // Since a respawn the window would still hold the outage, so a freshly restarted node is
+    // judged on the arrivals since it started, once it has had three periods to show them.
+    const double since = t - m.start_t;
+    if (p.fast_repair > 0 && ob.expected_hz > 0 && since < w && since >= 3.0 / ob.expected_hz) {
+      for (auto it = ts.arrivals.rbegin(); it != ts.arrivals.rend() && *it > m.start_t; ++it) ++c;
+      double first = t;
+      for (auto it = ts.arrivals.rbegin(); it != ts.arrivals.rend() && *it > m.start_t; ++it) first = *it;
+      ob.rate_hz = c >= 2 ? (c - 1) / std::max(t - first, 1e-3) : 0.0;
+    } else {
+      for (auto it = ts.arrivals.rbegin(); it != ts.arrivals.rend() && t - *it <= w; ++it) ++c;
+      ob.rate_hz = c / w;
+    }
     ob.own_endpoint = own_.count({m.spec.name, o.topic}) > 0;
+    if (p.adaptive > 0 && m.alive) {
+      auto& slot = env_slot(m.spec.name, o.topic);
+      if (slot.start_t == m.start_t && slot.e.ready()) {
+        ob.stale_limit_s = slot.e.stale_limit();
+        ob.deficit = slot.e.deficit(t);
+        ob.deficit_limit = slot.e.deficit_limit();
+      }
+    }
     return ob;
+  }
+
+  EnvSlot& env_slot(const std::string& node, const std::string& topic) {
+    auto it = env_.find({node, topic});
+    if (it != env_.end()) return it->second;
+    const auto& p = spec_.p;
+    hh::EnvelopeParams ep;
+    ep.floor_s = p.adaptive_floor_s;
+    ep.stale_mult = p.adaptive_stale_mult;
+    ep.min_gaps = p.adaptive_min_gaps;
+    ep.min_s = p.adaptive_min_s;
+    ep.tau_s = p.adaptive_tau_s;
+    ep.h_min = p.adaptive_cusum_h_min;
+    ep.h_mult = p.adaptive_cusum_mult;
+    ep.degraded_ratio = p.degraded_ratio;
+    return env_.emplace(std::make_pair(node, topic), EnvSlot{hh::Envelope(ep)}).first->second;
+  }
+
+  // attach mode: adopt each attach= node's process once it exists.
+  void try_attach() {
+    for (auto& [name, m] : nodes_) {
+      if (m.spec.attach.empty() || m.started || !m.spec.autostart) continue;
+      if (adopt_running(name)) emit_simple(name, "attach", "pid " + std::to_string(m.pid) + " " + join(m.argv));
+    }
+  }
+
+  // Caller must not hold mu_. Adopts a live process matching the node's attach pattern.
+  bool adopt_running(const std::string& name) {
+    const auto info = hh::find_process(nodes_.at(name).spec.attach);  // /proc scan outside the lock
+    std::lock_guard lk(mu_);
+    auto& m = nodes_.at(name);
+    if (info.pid <= 0 || info.pid == m.pid || !sup_.adopt(info.pid)) return false;
+    if (info.matches > 1)
+      RCLCPP_WARN(get_logger(), "attach %s: %d processes match '%s', took the newest leaf pid %d", name.c_str(),
+                  info.matches, m.spec.attach.c_str(), info.pid);
+    m.pid = info.pid;
+    m.argv = info.argv;
+    m.env = info.env;
+    m.cwd = info.cwd;
+    m.adopted = true;
+    m.alive = true;
+    m.started = true;
+    m.start_t = now() - info.age_s;
+    m.rss_base = 0;
+    m.rss_hist.clear();
+    m.last_cpu_s = -1;
+    m.cpu = 0;
+    return true;
+  }
+
+  static std::string join(const std::vector<std::string>& v) {
+    std::string o;
+    for (const auto& x : v) o += (o.empty() ? "" : " ") + x;
+    return o;
   }
 
   hh::Snapshot snapshot(double t) {
@@ -313,6 +416,7 @@ class Healer : public rclcpp::Node {
       }
     }
     own_.swap(own);
+    try_attach();
     std::lock_guard lk(mu_);
     for (auto& [name, m] : nodes_) {
       for (const auto& u : ups[name]) m.upstream.insert(u);
@@ -376,6 +480,11 @@ class Healer : public rclcpp::Node {
     auto out = policy_->step(snap);
     for (const auto& e : out.events) emit(e);
     for (const auto& d : out.decisions) dispatch(d);
+    {
+      std::lock_guard lk(mu_);
+      for (auto& [name, m] : nodes_)
+        m.learn_ok = m.alive && t - m.start_t >= spec_.p.startup_grace_s && policy_->healthy(name);
+    }
     if (snaps_.is_open() && (t - last_snap_ >= 0.25 || !out.decisions.empty())) {
       last_snap_ = t;
       write_snapshot(snap, out);
@@ -398,7 +507,8 @@ class Healer : public rclcpp::Node {
       for (std::size_t i = 0; i < n.outputs.size(); ++i) {
         const auto& ob = n.outputs[i];
         o << (i ? "," : "") << "{\"topic\":\"" << ob.topic << "\",\"hz\":" << ob.expected_hz << ",\"age\":" << ob.age_s
-          << ",\"rate\":" << ob.rate_hz << ",\"own\":" << ob.own_endpoint << "}";
+          << ",\"rate\":" << ob.rate_hz << ",\"own\":" << ob.own_endpoint << ",\"lim\":" << ob.stale_limit_s
+          << ",\"def\":" << ob.deficit << ",\"dlim\":" << ob.deficit_limit << "}";
       }
       o << "]}";
       first = false;
@@ -458,7 +568,8 @@ class Healer : public rclcpp::Node {
     const std::string node = d.node;
     switch (d.action) {
       case hh::Action::Restart:
-        start_job(node, [this, node, delay = d.delay_s] { return restart(node, delay); }, true, d.action);
+        start_job(node, [this, node, delay = d.delay_s, f = d.fault] { return restart(node, delay, f); }, true,
+                  d.action);
         break;
       case hh::Action::LifecycleReset:
         start_job(node, [this, node] { return lifecycle_reset(node); }, true, d.action);
@@ -487,7 +598,7 @@ class Healer : public rclcpp::Node {
     return !stopping_;
   }
 
-  void kill(const std::string& node) {
+  void kill(const std::string& node, double grace_s = -1) {
     pid_t old;
     {
       std::lock_guard lk(mu_);
@@ -498,17 +609,34 @@ class Healer : public rclcpp::Node {
       m.pid = -1;
       m.cpu = 0;
     }
-    if (old > 0) sup_.terminate(old, spec_.p.term_grace_s);
+    if (old > 0) sup_.terminate(old, grace_s >= 0 ? grace_s : spec_.p.term_grace_s);
   }
 
   bool spawn_and_bring_up(const std::string& node, bool initial) {
     if (stopping_) return false;
+    // An attached node may already have been restarted by its own launcher: take that one
+    // instead of starting a second copy.
+    if (!nodes_.at(node).spec.attach.empty() && adopt_running(node)) {
+      emit_simple(node, "attach", "pid " + std::to_string(nodes_.at(node).pid) + " (restarted elsewhere)");
+      return true;
+    }
     pid_t pid;
+    std::vector<std::vector<std::string>> helpers;
     {
       std::lock_guard lk(mu_);
       auto& m = nodes_.at(node);
       const std::string log = log_dir_.empty() ? "" : log_dir_ + "/" + node + ".log";
-      pid = sup_.spawn(m.argv, log);
+      hh::SpawnOpts o;
+      if (m.adopted) {
+        // Started elsewhere: run it the way it was run, and let it outlive the healer like the original would.
+        o.set_env = !m.env.empty();
+        o.env = m.env;
+        o.cwd = m.cwd;
+        o.detach = true;
+      }
+      if (m.argv.empty()) return false;  // attach node never seen running
+      pid = sup_.spawn(m.argv, log, o);
+      helpers = m.then;
       m.pid = pid;
       m.alive = pid > 0;
       m.started = true;
@@ -521,9 +649,15 @@ class Healer : public rclcpp::Node {
     emit_simple(node, "spawn", "pid " + std::to_string(pid));
     if (pid <= 0) return false;
     const auto& m = nodes_.at(node);
-    if (!m.spec.lifecycle) return true;
     // A freshly spawned process needs time to create its services.
-    return bring_up(node, initial ? spec_.p.startup_grace_s : std::max(2.0, spec_.p.lifecycle_timeout_s));
+    const bool ok =
+        !m.spec.lifecycle ||
+        bring_up(node, initial ? spec_.p.startup_grace_s : std::max(2.0, spec_.p.lifecycle_timeout_s));
+    for (const auto& h : helpers) {
+      const std::string log = log_dir_.empty() ? "" : log_dir_ + "/" + node + ".then.log";
+      emit_simple(node, "then", "pid " + std::to_string(sup_.spawn(h, log)) + " " + join(h));
+    }
+    return ok;
   }
 
   template <class Srv>
@@ -577,8 +711,10 @@ class Healer : public rclcpp::Node {
     return s == State::PRIMARY_STATE_ACTIVE;
   }
 
-  bool restart(const std::string& node, double delay) {
-    kill(node);
+  bool restart(const std::string& node, double delay, hh::Fault f = hh::Fault::None) {
+    // A hung or spinning process will not shut down cleanly; waiting for it only adds to the outage.
+    const bool hard = spec_.p.fast_repair > 0 && (f == hh::Fault::Hang || f == hh::Fault::CpuRunaway);
+    kill(node, hard ? 0.0 : -1);
     if (!sleep_for(delay)) return false;
     return spawn_and_bring_up(node, false);
   }
@@ -628,6 +764,8 @@ class Healer : public rclcpp::Node {
   std::map<std::string, Managed> nodes_;
   std::map<std::string, TopicState> topics_;  // executor thread only
   std::set<std::pair<std::string, std::string>> own_;  // (node, topic) currently advertised
+  std::map<std::string, std::vector<std::string>> producers_;  // topic -> declaring nodes (const after ctor)
+  std::map<std::pair<std::string, std::string>, EnvSlot> env_;  // executor thread only
 
   std::mutex res_mu_;
   std::vector<Result> results_;
