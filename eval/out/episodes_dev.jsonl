@@ -1,0 +1,1152 @@
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 10.0, "det": {"B-rate": 0.025802000000000547, "B-range": null, "union": 0.025802000000000547, "HELIX": 0.025802000000000547, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 16.0, "det": {"B-rate": 0.027720999999999663, "B-range": null, "union": 0.027720999999999663, "HELIX": 0.027720999999999663, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 22.0, "det": {"B-rate": 0.02561499999999839, "B-range": null, "union": 0.02561499999999839, "HELIX": 0.02561499999999839, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 28.0, "det": {"B-rate": 0.025489000000000317, "B-range": null, "union": 0.025489000000000317, "HELIX": 0.025489000000000317, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 34.0, "det": {"B-rate": 0.02742099999999681, "B-range": null, "union": 0.02742099999999681, "HELIX": 0.02742099999999681, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 40.0, "det": {"B-rate": 0.026088000000001443, "B-range": null, "union": 0.026088000000001443, "HELIX": 0.026088000000001443, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 46.0, "det": {"B-rate": 0.025154000000000565, "B-range": null, "union": 0.025154000000000565, "HELIX": 0.025154000000000565, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 52.0, "det": {"B-rate": 0.027988999999998043, "B-range": null, "union": 0.027988999999998043, "HELIX": 0.027988999999998043, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 58.0, "det": {"B-rate": 0.02689399999999864, "B-range": null, "union": 0.02689399999999864, "HELIX": 0.02689399999999864, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 64.0, "det": {"B-rate": 0.02677699999999561, "B-range": null, "union": 0.02677699999999561, "HELIX": 0.02677699999999561, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 10.0, "det": {"B-rate": 0.539676, "B-range": null, "union": 0.539676, "HELIX": 0.539676, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 16.0, "det": {"B-rate": 0.5476990000000015, "B-range": null, "union": 0.5476990000000015, "HELIX": 0.5476990000000015, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 22.0, "det": {"B-rate": 0.5417200000000015, "B-range": null, "union": 0.5417200000000015, "HELIX": 0.5417200000000015, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 28.0, "det": {"B-rate": 0.5275409999999994, "B-range": null, "union": 0.5275409999999994, "HELIX": 0.5275409999999994, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 34.0, "det": {"B-rate": 0.5312950000000001, "B-range": null, "union": 0.5312950000000001, "HELIX": 0.5312950000000001, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 40.0, "det": {"B-rate": 0.5452020000000033, "B-range": null, "union": 0.5452020000000033, "HELIX": 0.5452020000000033, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 46.0, "det": {"B-rate": 0.5319909999999979, "B-range": null, "union": 0.5319909999999979, "HELIX": 0.5319909999999979, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 52.0, "det": {"B-rate": 0.5577919999999992, "B-range": null, "union": 0.5577919999999992, "HELIX": 0.5577919999999992, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 58.0, "det": {"B-rate": 0.5304920000000024, "B-range": null, "union": 0.5304920000000024, "HELIX": 0.5304920000000024, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 64.0, "det": {"B-rate": 0.5527430000000066, "B-range": null, "union": 0.5527430000000066, "HELIX": 0.5527430000000066, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04890800000000084, "frozen": 0.04890800000000084, "stamp": 0.05414200000000058, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04885200000000012, "frozen": 0.04885200000000012, "stamp": 0.05432199999999909, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04820000000000135, "frozen": 0.04820000000000135, "stamp": 0.052678000000000225, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04755099999999857, "frozen": 0.04755099999999857, "stamp": 0.05261899999999997, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05010099999999795, "frozen": 0.05010099999999795, "stamp": 0.05548999999999893, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04942400000000191, "frozen": 0.04942400000000191, "stamp": 0.05456199999999711, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.047798999999997704, "frozen": 0.047798999999997704, "stamp": 0.05224799999999874, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05010300000000001, "frozen": 0.05010300000000001, "stamp": 0.054620999999997366, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049559999999999604, "frozen": 0.049559999999999604, "stamp": 0.0540499999999966, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 64.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049942000000001485, "frozen": 0.049942000000001485, "stamp": 0.05389999999999873, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04890800000000084, "frozen": 0.04890800000000084, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04885200000000012, "frozen": 0.04885200000000012, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04820000000000135, "frozen": 0.04820000000000135, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04755099999999857, "frozen": 0.04755099999999857, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05010099999999795, "frozen": 0.05010099999999795, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04942400000000191, "frozen": 0.04942400000000191, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.047798999999997704, "frozen": 0.047798999999997704, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05010300000000001, "frozen": 0.05010300000000001, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049559999999999604, "frozen": 0.049559999999999604, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 64.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049942000000001485, "frozen": 0.049942000000001485, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2814180000000004, "frozen": null, "stamp": null, "residual": 0.2814180000000004}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2836999999999996, "frozen": null, "stamp": null, "residual": 0.2836999999999996}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2814900000000016, "frozen": null, "stamp": null, "residual": 0.2814900000000016}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2815380000000012, "frozen": null, "stamp": null, "residual": 0.2815380000000012}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.28335400000000277, "frozen": null, "stamp": null, "residual": 0.28335400000000277}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2823660000000032, "frozen": null, "stamp": null, "residual": 0.2823660000000032}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.28313099999999736, "frozen": null, "stamp": null, "residual": 0.28313099999999736}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.28310499999999905, "frozen": null, "stamp": null, "residual": 0.28310499999999905}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2829290000000029, "frozen": null, "stamp": null, "residual": 0.2829290000000029}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 64.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.28244899999999973, "frozen": null, "stamp": null, "residual": 0.28244899999999973}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 64.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 64.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 64.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 64.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21143, "frozen": null, "stamp": null, "residual": 0.21143}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2113429999999994, "frozen": null, "stamp": null, "residual": 0.2113429999999994}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21070800000000034, "frozen": null, "stamp": null, "residual": 0.21070800000000034}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21149300000000082, "frozen": null, "stamp": null, "residual": 0.21149300000000082}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21332999999999913, "frozen": null, "stamp": null, "residual": 0.21332999999999913}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21286599999999822, "frozen": null, "stamp": null, "residual": 0.21286599999999822}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21116599999999863, "frozen": null, "stamp": null, "residual": 0.21116599999999863}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2126310000000018, "frozen": null, "stamp": null, "residual": 0.2126310000000018}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21309699999999765, "frozen": null, "stamp": null, "residual": 0.21309699999999765}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 64.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2127930000000049, "frozen": null, "stamp": null, "residual": 0.2127930000000049}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 10.0, "det": {"B-rate": 0.02568600000000032, "B-range": null, "union": 0.02568600000000032, "HELIX": 0.02568600000000032, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 16.0, "det": {"B-rate": 0.025832999999998663, "B-range": null, "union": 0.025832999999998663, "HELIX": 0.025832999999998663, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 22.0, "det": {"B-rate": 0.015564000000001244, "B-range": null, "union": 0.015564000000001244, "HELIX": 0.015564000000001244, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 28.0, "det": {"B-rate": 0.027622000000000924, "B-range": null, "union": 0.027622000000000924, "HELIX": 0.027622000000000924, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 34.0, "det": {"B-rate": 0.027411999999998216, "B-range": null, "union": 0.027411999999998216, "HELIX": 0.027411999999998216, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 40.0, "det": {"B-rate": 0.0260809999999978, "B-range": null, "union": 0.0260809999999978, "HELIX": 0.0260809999999978, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 46.0, "det": {"B-rate": 0.028317000000001258, "B-range": null, "union": 0.028317000000001258, "HELIX": 0.028317000000001258, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 52.0, "det": {"B-rate": 0.025069000000002006, "B-range": null, "union": 0.025069000000002006, "HELIX": 0.025069000000002006, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 58.0, "det": {"B-rate": 0.023034000000002663, "B-range": null, "union": 0.023034000000002663, "HELIX": 0.023034000000002663, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 10.0, "det": {"B-rate": 0.5529919999999997, "B-range": null, "union": 0.5529919999999997, "HELIX": 0.5529919999999997, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 16.0, "det": {"B-rate": 0.5556310000000018, "B-range": null, "union": 0.5556310000000018, "HELIX": 0.5556310000000018, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 22.0, "det": {"B-rate": 0.5515320000000017, "B-range": null, "union": 0.5515320000000017, "HELIX": 0.5515320000000017, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 28.0, "det": {"B-rate": 0.5597150000000006, "B-range": null, "union": 0.5597150000000006, "HELIX": 0.5597150000000006, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 34.0, "det": {"B-rate": 0.5595440000000025, "B-range": null, "union": 0.5595440000000025, "HELIX": 0.5595440000000025, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 40.0, "det": {"B-rate": 0.5591289999999987, "B-range": null, "union": 0.5591289999999987, "HELIX": 0.5591289999999987, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 46.0, "det": {"B-rate": 0.548684999999999, "B-range": null, "union": 0.548684999999999, "HELIX": 0.548684999999999, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 52.0, "det": {"B-rate": 0.5530680000000032, "B-range": null, "union": 0.5530680000000032, "HELIX": 0.5530680000000032, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 58.0, "det": {"B-rate": 0.5500129999999999, "B-range": null, "union": 0.5500129999999999, "HELIX": 0.5500129999999999, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04860299999999995, "frozen": 0.04860299999999995, "stamp": 0.05363499999999988, "residual": 0.43584000000000067}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04752300000000176, "frozen": 0.04752300000000176, "stamp": 0.052051999999999765, "residual": 0.5097629999999995}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.041429000000000826, "frozen": 0.041429000000000826, "stamp": 0.05245899999999892, "residual": 0.2469619999999999}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.050319999999999254, "frozen": 0.050319999999999254, "stamp": 0.054819999999999425, "residual": 0.27546299999999846}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04962199999999939, "frozen": 0.04962199999999939, "stamp": 0.054071000000000424, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049473999999996465, "frozen": 0.049473999999996465, "stamp": 0.053618000000000166, "residual": 0.25737000000000165}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049140000000001294, "frozen": 0.049140000000001294, "stamp": 0.054001999999997, "residual": 0.4312219999999982}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048561999999996885, "frozen": 0.048561999999996885, "stamp": 0.05341399999999652, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.046205000000000496, "frozen": 0.046205000000000496, "stamp": 0.05080800000000352, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04860299999999995, "frozen": 0.04860299999999995, "stamp": null, "residual": 0.43584000000000067}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04752300000000176, "frozen": 0.04752300000000176, "stamp": null, "residual": 0.5097629999999995}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.041429000000000826, "frozen": 0.041429000000000826, "stamp": null, "residual": 0.2469619999999999}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.050319999999999254, "frozen": 0.050319999999999254, "stamp": null, "residual": 0.27546299999999846}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04962199999999939, "frozen": 0.04962199999999939, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049473999999996465, "frozen": 0.049473999999996465, "stamp": null, "residual": 0.25737000000000165}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049140000000001294, "frozen": 0.049140000000001294, "stamp": null, "residual": 0.4312219999999982}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048561999999996885, "frozen": 0.048561999999996885, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.046205000000000496, "frozen": 0.046205000000000496, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2818529999999999, "frozen": null, "stamp": null, "residual": 0.2818529999999999}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.28632400000000047, "frozen": null, "stamp": null, "residual": 0.28632400000000047}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2676729999999985, "frozen": null, "stamp": null, "residual": 0.2676729999999985}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2835569999999983, "frozen": null, "stamp": null, "residual": 0.2835569999999983}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.28423899999999946, "frozen": null, "stamp": null, "residual": 0.28423899999999946}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.283216000000003, "frozen": null, "stamp": null, "residual": 0.283216000000003}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2815379999999976, "frozen": null, "stamp": null, "residual": 0.2815379999999976}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.26324499999999773, "frozen": null, "stamp": null, "residual": 0.26324499999999773}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2828060000000008, "frozen": null, "stamp": null, "residual": 0.2828060000000008}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 1.3578569999999992, "frozen": null, "stamp": null, "residual": 1.3578569999999992}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 1.803364000000002, "frozen": null, "stamp": null, "residual": 1.803364000000002}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.6532120000000035, "frozen": null, "stamp": null, "residual": 0.6532120000000035}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 1.1315990000000014, "frozen": null, "stamp": null, "residual": 1.1315990000000014}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 1.7672099999999986, "frozen": null, "stamp": null, "residual": 1.7672099999999986}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 46.0, "det": {"B-rate": null, "B-range": 0.6480010000000007, "union": 0.6480010000000007, "HELIX": 0.6213070000000016, "frozen": null, "stamp": null, "residual": 0.6213070000000016}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21201499999999918, "frozen": null, "stamp": null, "residual": 0.21201499999999918}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21191299999999913, "frozen": null, "stamp": null, "residual": 0.21191299999999913}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.20174400000000148, "frozen": null, "stamp": null, "residual": 0.20174400000000148}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21347199999999944, "frozen": null, "stamp": null, "residual": 0.21347199999999944}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21399100000000004, "frozen": null, "stamp": null, "residual": 0.21399100000000004}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21331899999999848, "frozen": null, "stamp": null, "residual": 0.21331899999999848}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21316199999999697, "frozen": null, "stamp": null, "residual": 0.21316199999999697}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.20771299999999826, "frozen": null, "stamp": null, "residual": 0.20771299999999826}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21114200000000238, "frozen": null, "stamp": null, "residual": 0.21114200000000238}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 10.0, "det": {"B-rate": 0.027091999999999672, "B-range": null, "union": 0.027091999999999672, "HELIX": 0.027091999999999672, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 16.0, "det": {"B-rate": 0.02493700000000132, "B-range": null, "union": 0.02493700000000132, "HELIX": 0.02493700000000132, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 22.0, "det": {"B-rate": 0.026949999999999363, "B-range": null, "union": 0.026949999999999363, "HELIX": 0.026949999999999363, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 28.0, "det": {"B-rate": 0.025369999999998782, "B-range": null, "union": 0.025369999999998782, "HELIX": 0.025369999999998782, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 34.0, "det": {"B-rate": 0.026035999999997728, "B-range": null, "union": 0.026035999999997728, "HELIX": 0.026035999999997728, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 40.0, "det": {"B-rate": 0.026761999999997954, "B-range": null, "union": 0.026761999999997954, "HELIX": 0.026761999999997954, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 10.0, "det": {"B-rate": 0.5552949999999992, "B-range": null, "union": 0.5552949999999992, "HELIX": 0.5552949999999992, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 16.0, "det": {"B-rate": 0.5512259999999998, "B-range": null, "union": 0.5512259999999998, "HELIX": 0.5512259999999998, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 22.0, "det": {"B-rate": 0.5571610000000007, "B-range": null, "union": 0.5571610000000007, "HELIX": 0.5571610000000007, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 28.0, "det": {"B-rate": 0.5628749999999982, "B-range": null, "union": 0.5628749999999982, "HELIX": 0.5628749999999982, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 34.0, "det": {"B-rate": 0.5613969999999995, "B-range": null, "union": 0.5613969999999995, "HELIX": 0.5613969999999995, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 40.0, "det": {"B-rate": 0.5546369999999996, "B-range": null, "union": 0.5546369999999996, "HELIX": 0.5546369999999996, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05038899999999913, "frozen": 0.05038899999999913, "stamp": 0.055429999999999424, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04685500000000076, "frozen": 0.04685500000000076, "stamp": 0.05180199999999857, "residual": 0.2510210000000015}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05217800000000139, "frozen": 0.05217800000000139, "stamp": 0.05217800000000139, "residual": 0.248899999999999}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05210999999999899, "frozen": 0.05210999999999899, "stamp": 0.05210999999999899, "residual": 0.21141899999999936}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04856099999999941, "frozen": 0.04856099999999941, "stamp": 0.05370500000000078, "residual": 0.287466000000002}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04996200000000073, "frozen": 0.04996200000000073, "stamp": 0.054025000000002876, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05038899999999913, "frozen": 0.05038899999999913, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04685500000000076, "frozen": 0.04685500000000076, "stamp": null, "residual": 0.2510210000000015}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05217800000000139, "frozen": 0.05217800000000139, "stamp": null, "residual": 0.248899999999999}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05210999999999899, "frozen": 0.05210999999999899, "stamp": null, "residual": 0.21141899999999936}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04856099999999941, "frozen": 0.04856099999999941, "stamp": null, "residual": 0.287466000000002}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04996200000000073, "frozen": 0.04996200000000073, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2831039999999998, "frozen": null, "stamp": null, "residual": 0.2831039999999998}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2710019999999993, "frozen": null, "stamp": null, "residual": 0.2710019999999993}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.23098999999999847, "frozen": null, "stamp": null, "residual": 0.23098999999999847}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.22685500000000047, "frozen": null, "stamp": null, "residual": 0.22685500000000047}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.22690699999999708, "frozen": null, "stamp": null, "residual": 0.22690699999999708}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.28197999999999723, "frozen": null, "stamp": null, "residual": 0.28197999999999723}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.4513670000000012, "frozen": null, "stamp": null, "residual": 0.4513670000000012}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.276173, "frozen": null, "stamp": null, "residual": 0.276173}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.26473299999999966, "frozen": null, "stamp": null, "residual": 0.26473299999999966}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.25797099999999773, "frozen": null, "stamp": null, "residual": 0.25797099999999773}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2255919999999989, "frozen": null, "stamp": null, "residual": 0.2255919999999989}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21175300000000163, "frozen": null, "stamp": null, "residual": 0.21175300000000163}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.21141899999999936, "frozen": null, "stamp": null, "residual": 0.21141899999999936}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.212727000000001, "frozen": null, "stamp": null, "residual": 0.212727000000001}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 16.0, "det": {"B-rate": null, "B-range": 0.16788499999999829, "union": 0.16788499999999829, "HELIX": 0.20708000000000126, "frozen": null, "stamp": null, "residual": 0.20708000000000126}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 22.0, "det": {"B-rate": null, "B-range": 0.0017530000000007817, "union": 0.0017530000000007817, "HELIX": 0.20300399999999996, "frozen": null, "stamp": null, "residual": 0.20300399999999996}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 28.0, "det": {"B-rate": null, "B-range": 0.0016110000000004732, "union": 0.0016110000000004732, "HELIX": 0.2028660000000002, "frozen": null, "stamp": null, "residual": 0.2028660000000002}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 34.0, "det": {"B-rate": null, "B-range": 0.0025210000000015498, "union": 0.0025210000000015498, "HELIX": 0.20281299999999902, "frozen": null, "stamp": null, "residual": 0.20281299999999902}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 22.0, "det": {"B-rate": null, "B-range": 1.2982680000000002, "union": 1.2982680000000002, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 34.0, "det": {"B-rate": null, "B-range": 0.7589770000000016, "union": 0.7589770000000016, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": null, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2152750000000001, "frozen": null, "stamp": null, "residual": 0.2152750000000001}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 16.0, "det": {"B-rate": null, "B-range": 0.6322569999999992, "union": 0.6322569999999992, "HELIX": 0.2111060000000009, "frozen": null, "stamp": null, "residual": 0.2111060000000009}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 22.0, "det": {"B-rate": null, "B-range": 0.0017530000000007817, "union": 0.0017530000000007817, "HELIX": 0.20706699999999856, "frozen": null, "stamp": null, "residual": 0.20706699999999856}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 28.0, "det": {"B-rate": null, "B-range": 0.0016110000000004732, "union": 0.0016110000000004732, "HELIX": 0.2061099999999989, "frozen": null, "stamp": null, "residual": 0.2061099999999989}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 34.0, "det": {"B-rate": null, "B-range": 0.006501999999997565, "union": 0.006501999999997565, "HELIX": 0.20678900000000056, "frozen": null, "stamp": null, "residual": 0.20678900000000056}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.2127440000000007, "frozen": null, "stamp": null, "residual": 0.2127440000000007}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 10.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 16.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 22.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 28.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 34.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 40.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 46.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 52.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 58.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 64.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 10.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 16.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 22.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 28.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 34.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 40.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 46.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 52.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 58.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 64.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 10.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 16.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 22.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 28.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 34.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 40.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 46.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 52.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 58.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 64.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 10.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 16.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 22.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 28.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 34.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 40.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 46.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 52.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 58.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 64.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 10.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 16.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 22.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 28.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 34.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 40.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 46.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 52.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 58.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 64.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 10.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 16.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 22.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 28.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 34.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 40.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 46.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 52.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 58.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 64.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 10.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 16.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 22.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 28.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 34.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 40.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 46.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 52.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 58.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 64.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 10.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 16.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 22.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 28.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 34.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 40.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 46.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 52.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 58.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 64.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 10.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 16.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 22.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 28.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 34.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 40.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 46.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 52.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 58.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 64.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 10.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 16.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 22.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 28.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 34.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 40.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 46.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 52.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 58.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 64.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 46.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 52.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 58.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 46.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 52.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 58.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 46.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 52.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 58.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 46.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 52.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 58.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 46.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 52.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 58.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 46.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 52.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 58.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 46.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 52.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 58.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 46.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 52.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 58.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 46.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 52.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 58.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 46.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 52.0, "det": {"sham": null}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 58.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 40.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 10.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 16.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 22.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 28.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 34.0, "det": {"sham": null}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 40.0, "det": {"sham": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 46.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 64.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 46.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 64.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 46.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3a", "onset": 64.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 46.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F3b", "onset": 64.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 10.0, "det": {"oracle": 0.24976999999999983}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 16.0, "det": {"oracle": 0.24964599999999848}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 22.0, "det": {"oracle": 0.2496009999999984}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 28.0, "det": {"oracle": 0.2494960000000006}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 34.0, "det": {"oracle": 0.25032999999999817}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 40.0, "det": {"oracle": 0.24956099999999992}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 46.0, "det": {"oracle": 0.24318600000000146}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 52.0, "det": {"oracle": 0.251061}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 58.0, "det": {"oracle": 0.2509500000000031}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.2", "onset": 64.0, "det": {"oracle": 0.2501840000000044}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 10.0, "det": {"oracle": 0.3422319999999992}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 16.0, "det": {"oracle": 0.3467960000000012}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 22.0, "det": {"oracle": 0.33757900000000163}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 28.0, "det": {"oracle": 0.34346800000000144}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 34.0, "det": {"oracle": 0.35334900000000147}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 40.0, "det": {"oracle": 0.34238100000000316}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 46.0, "det": {"oracle": 0.33719399999999666}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 52.0, "det": {"oracle": 0.33815799999999996}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 58.0, "det": {"oracle": 0.3470429999999993}}
+{"rec": "odin-hw-20260901-1926", "cls": "F4_0.1", "onset": 64.0, "det": {"oracle": 0.33786000000000627}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 46.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F5", "onset": 64.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 46.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F6", "onset": 64.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 10.0, "det": {"oracle": 1.0434079999999994}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 34.0, "det": {"oracle": 0.9329589999999968}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 46.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "odin-hw-20260901-1926", "cls": "F7", "onset": 64.0, "det": {"oracle": 1.6870360000000062}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 10.0, "det": {"oracle": 0.20783300000000082}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 16.0, "det": {"oracle": 0.20767299999999977}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 22.0, "det": {"oracle": 0.20759599999999878}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 28.0, "det": {"oracle": 0.2074840000000009}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 34.0, "det": {"oracle": 0.20933500000000294}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 40.0, "det": {"oracle": 0.2086710000000025}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 46.0, "det": {"oracle": 0.20678000000000196}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 52.0, "det": {"oracle": 0.2090079999999972}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 58.0, "det": {"oracle": 0.20893900000000087}}
+{"rec": "odin-hw-20260901-1926", "cls": "BIAS_1.0", "onset": 64.0, "det": {"oracle": 0.20882600000000195}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 46.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F1", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 46.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F2", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 10.0, "det": {"oracle": 0.43049599999999977}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 16.0, "det": {"oracle": 0.38587300000000013}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 22.0, "det": {"oracle": 0.23785900000000026}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 28.0, "det": {"oracle": 0.24148699999999934}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 40.0, "det": {"oracle": 0.2513700000000014}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 46.0, "det": {"oracle": 0.42391800000000046}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F3a", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 10.0, "det": {"oracle": 0.43049599999999977}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 16.0, "det": {"oracle": 0.38587300000000013}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 22.0, "det": {"oracle": 0.23785900000000026}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 28.0, "det": {"oracle": 0.24148699999999934}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 40.0, "det": {"oracle": 0.2513700000000014}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 46.0, "det": {"oracle": 0.42391800000000046}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F3b", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 10.0, "det": {"oracle": 0.24862899999999932}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 16.0, "det": {"oracle": 0.25368800000000036}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 22.0, "det": {"oracle": 0.2335649999999987}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 28.0, "det": {"oracle": 0.2515250000000009}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 34.0, "det": {"oracle": 0.251648000000003}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 40.0, "det": {"oracle": 0.2481170000000006}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 46.0, "det": {"oracle": 0.2414139999999989}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 52.0, "det": {"oracle": 0.23506900000000286}}
+{"rec": "G1_varied_speed", "cls": "F4_0.2", "onset": 58.0, "det": {"oracle": 0.2469859999999997}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 10.0, "det": {"oracle": 0.34065999999999974}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 16.0, "det": {"oracle": 0.3534930000000003}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 22.0, "det": {"oracle": 0.33965299999999843}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 28.0, "det": {"oracle": 0.35765599999999864}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 34.0, "det": {"oracle": 0.3516079999999988}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 40.0, "det": {"oracle": 0.35744100000000145}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 46.0, "det": {"oracle": 0.3514240000000015}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 52.0, "det": {"oracle": 0.29313199999999995}}
+{"rec": "G1_varied_speed", "cls": "F4_0.1", "onset": 58.0, "det": {"oracle": 0.34902699999999953}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 22.0, "det": {"oracle": 1.2197470000000017}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 28.0, "det": {"oracle": 0.6136769999999991}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 40.0, "det": {"oracle": 0.3174369999999982}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 46.0, "det": {"oracle": 0.32114899999999835}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F5", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 16.0, "det": {"oracle": 1.093703999999999}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 22.0, "det": {"oracle": 0.4229909999999997}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 28.0, "det": {"oracle": 0.8422969999999985}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 40.0, "det": {"oracle": 1.7569019999999966}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 46.0, "det": {"oracle": 0.6191590000000033}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F6", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 34.0, "det": {"oracle": 1.3239260000000002}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 46.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 52.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "F7", "onset": 58.0, "det": {"oracle": null}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 10.0, "det": {"oracle": 0.2077530000000003}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 16.0, "det": {"oracle": 0.2060449999999996}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 22.0, "det": {"oracle": 0.20174400000000148}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 28.0, "det": {"oracle": 0.21151000000000053}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 34.0, "det": {"oracle": 0.20964000000000027}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 40.0, "det": {"oracle": 0.2073869999999971}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 46.0, "det": {"oracle": 0.20723300000000222}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 52.0, "det": {"oracle": 0.20771299999999826}}
+{"rec": "G1_varied_speed", "cls": "BIAS_1.0", "onset": 58.0, "det": {"oracle": 0.20717400000000197}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F1", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 16.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 28.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 34.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F2", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 16.0, "det": {"oracle": 0.22909800000000047}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 28.0, "det": {"oracle": 0.2061099999999989}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 34.0, "det": {"oracle": 0.27682000000000073}}
+{"rec": "G1_yaw_in_place", "cls": "F3a", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 16.0, "det": {"oracle": 0.22909800000000047}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 28.0, "det": {"oracle": 0.2061099999999989}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 34.0, "det": {"oracle": 0.27682000000000073}}
+{"rec": "G1_yaw_in_place", "cls": "F3b", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 10.0, "det": {"oracle": 0.25043400000000027}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 16.0, "det": {"oracle": 0.2451180000000015}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 28.0, "det": {"oracle": 0.21141899999999936}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 34.0, "det": {"oracle": 0.20678900000000056}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.2", "onset": 40.0, "det": {"oracle": 0.25072899999999976}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 10.0, "det": {"oracle": 0.34338900000000017}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 16.0, "det": {"oracle": 0.30406699999999987}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 28.0, "det": {"oracle": 0.21692799999999934}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 34.0, "det": {"oracle": 0.212727000000001}}
+{"rec": "G1_yaw_in_place", "cls": "F4_0.1", "onset": 40.0, "det": {"oracle": 0.35264099999999843}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 16.0, "det": {"oracle": 0.2151689999999995}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 28.0, "det": {"oracle": 0.21141899999999936}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 34.0, "det": {"oracle": 0.212727000000001}}
+{"rec": "G1_yaw_in_place", "cls": "F5", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 10.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 16.0, "det": {"oracle": 0.20708000000000126}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 28.0, "det": {"oracle": 0.2028660000000002}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 34.0, "det": {"oracle": 0.20281299999999902}}
+{"rec": "G1_yaw_in_place", "cls": "F6", "onset": 40.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 10.0, "det": {"oracle": 1.0231060000000003}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 16.0, "det": {"oracle": 1.529122000000001}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 28.0, "det": {"oracle": 0.40097899999999953}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 34.0, "det": {"oracle": 1.8608389999999986}}
+{"rec": "G1_yaw_in_place", "cls": "F7", "onset": 40.0, "det": {"oracle": 1.728703000000003}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 10.0, "det": {"oracle": 0.20921399999999934}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 16.0, "det": {"oracle": 0.20708000000000126}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 22.0, "det": {"oracle": null}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 28.0, "det": {"oracle": 0.2028660000000002}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 34.0, "det": {"oracle": 0.20281299999999902}}
+{"rec": "G1_yaw_in_place", "cls": "BIAS_1.0", "onset": 40.0, "det": {"oracle": 0.20924300000000073}}
+{"rec": "motion", "cls": "F1", "onset": 10.0, "det": {"B-rate": 0.035819000000000045, "B-range": null, "union": 0.035819000000000045, "HELIX": 0.035819000000000045, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 16.0, "det": {"B-rate": 0.037776999999998395, "B-range": null, "union": 0.037776999999998395, "HELIX": 0.037776999999998395, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 22.0, "det": {"B-rate": 0.03746399999999994, "B-range": null, "union": 0.03746399999999994, "HELIX": 0.03746399999999994, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 28.0, "det": {"B-rate": 0.03757799999999989, "B-range": null, "union": 0.03757799999999989, "HELIX": 0.03757799999999989, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 34.0, "det": {"B-rate": 0.03564000000000078, "B-range": null, "union": 0.03564000000000078, "HELIX": 0.03564000000000078, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 40.0, "det": {"B-rate": 0.03539599999999865, "B-range": null, "union": 0.03539599999999865, "HELIX": 0.03539599999999865, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 46.0, "det": {"B-rate": 0.03716000000000008, "B-range": null, "union": 0.03716000000000008, "HELIX": 0.03716000000000008, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 52.0, "det": {"B-rate": 0.03715100000000149, "B-range": null, "union": 0.03715100000000149, "HELIX": 0.03715100000000149, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 58.0, "det": {"B-rate": 0.03697400000000073, "B-range": null, "union": 0.03697400000000073, "HELIX": 0.03697400000000073, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 64.0, "det": {"B-rate": 0.03569000000000244, "B-range": null, "union": 0.03569000000000244, "HELIX": 0.03569000000000244, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 70.0, "det": {"B-rate": 0.03896299999999542, "B-range": null, "union": 0.03896299999999542, "HELIX": 0.03896299999999542, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 76.0, "det": {"B-rate": 0.0365939999999938, "B-range": null, "union": 0.0365939999999938, "HELIX": 0.0365939999999938, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 82.0, "det": {"B-rate": 0.036555000000007, "B-range": null, "union": 0.036555000000007, "HELIX": 0.036555000000007, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 88.0, "det": {"B-rate": 0.03638800000000231, "B-range": null, "union": 0.03638800000000231, "HELIX": 0.03638800000000231, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 94.0, "det": {"B-rate": 0.03457699999999875, "B-range": null, "union": 0.03457699999999875, "HELIX": 0.03457699999999875, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 100.0, "det": {"B-rate": 0.03816999999999382, "B-range": null, "union": 0.03816999999999382, "HELIX": 0.03816999999999382, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 106.0, "det": {"B-rate": 0.037988999999996054, "B-range": null, "union": 0.037988999999996054, "HELIX": 0.037988999999996054, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 112.0, "det": {"B-rate": 0.035990999999995665, "B-range": null, "union": 0.035990999999995665, "HELIX": 0.035990999999995665, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 118.0, "det": {"B-rate": 0.03609600000000057, "B-range": null, "union": 0.03609600000000057, "HELIX": 0.03609600000000057, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 124.0, "det": {"B-rate": 0.0380349999999936, "B-range": null, "union": 0.0380349999999936, "HELIX": 0.0380349999999936, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 130.0, "det": {"B-rate": 0.03765899999999078, "B-range": null, "union": 0.03765899999999078, "HELIX": 0.03765899999999078, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 136.0, "det": {"B-rate": 0.03758199999998624, "B-range": null, "union": 0.03758199999998624, "HELIX": 0.03758199999998624, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 142.0, "det": {"B-rate": 0.035595999999998185, "B-range": null, "union": 0.035595999999998185, "HELIX": 0.035595999999998185, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 148.0, "det": {"B-rate": 0.03525999999999385, "B-range": null, "union": 0.03525999999999385, "HELIX": 0.03525999999999385, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 154.0, "det": {"B-rate": 0.037292000000007874, "B-range": null, "union": 0.037292000000007874, "HELIX": 0.037292000000007874, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 160.0, "det": {"B-rate": 0.037197999999989406, "B-range": null, "union": 0.037197999999989406, "HELIX": 0.037197999999989406, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 166.0, "det": {"B-rate": 0.03725000000000023, "B-range": null, "union": 0.03725000000000023, "HELIX": 0.03725000000000023, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 172.0, "det": {"B-rate": 0.037801999999999225, "B-range": null, "union": 0.037801999999999225, "HELIX": 0.037801999999999225, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 178.0, "det": {"B-rate": 0.03492800000000784, "B-range": null, "union": 0.03492800000000784, "HELIX": 0.03492800000000784, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 184.0, "det": {"B-rate": 0.037423999999987245, "B-range": null, "union": 0.037423999999987245, "HELIX": 0.037423999999987245, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 190.0, "det": {"B-rate": 0.036571000000009235, "B-range": null, "union": 0.036571000000009235, "HELIX": 0.036571000000009235, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 196.0, "det": {"B-rate": 0.03641799999999762, "B-range": null, "union": 0.03641799999999762, "HELIX": 0.03641799999999762, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 202.0, "det": {"B-rate": 0.036840000000012196, "B-range": null, "union": 0.036840000000012196, "HELIX": 0.036840000000012196, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 208.0, "det": {"B-rate": 0.03632200000001262, "B-range": null, "union": 0.03632200000001262, "HELIX": 0.03632200000001262, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 214.0, "det": {"B-rate": 0.03819999999998913, "B-range": null, "union": 0.03819999999998913, "HELIX": 0.03819999999998913, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 220.0, "det": {"B-rate": 0.03635399999998867, "B-range": null, "union": 0.03635399999998867, "HELIX": 0.03635399999998867, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 226.0, "det": {"B-rate": 0.03596200000001204, "B-range": null, "union": 0.03596200000001204, "HELIX": 0.03596200000001204, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 232.0, "det": {"B-rate": 0.036005999999986216, "B-range": null, "union": 0.036005999999986216, "HELIX": 0.036005999999986216, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 238.0, "det": {"B-rate": 0.03773599999999533, "B-range": null, "union": 0.03773599999999533, "HELIX": 0.03773599999999533, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 244.0, "det": {"B-rate": 0.03785700000000247, "B-range": null, "union": 0.03785700000000247, "HELIX": 0.03785700000000247, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 250.0, "det": {"B-rate": 0.036536000000012336, "B-range": null, "union": 0.036536000000012336, "HELIX": 0.036536000000012336, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 256.0, "det": {"B-rate": 0.03546899999997777, "B-range": null, "union": 0.03546899999997777, "HELIX": 0.03546899999997777, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 262.0, "det": {"B-rate": 0.035037999999985914, "B-range": null, "union": 0.035037999999985914, "HELIX": 0.035037999999985914, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 268.0, "det": {"B-rate": 0.03934500000002572, "B-range": null, "union": 0.03934500000002572, "HELIX": 0.03934500000002572, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 274.0, "det": {"B-rate": 0.03708599999998796, "B-range": null, "union": 0.03708599999998796, "HELIX": 0.03708599999998796, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 280.0, "det": {"B-rate": 0.035823999999990974, "B-range": null, "union": 0.035823999999990974, "HELIX": 0.035823999999990974, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 286.0, "det": {"B-rate": 0.035621999999989384, "B-range": null, "union": 0.035621999999989384, "HELIX": 0.035621999999989384, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 292.0, "det": {"B-rate": 0.035073000000011234, "B-range": null, "union": 0.035073000000011234, "HELIX": 0.035073000000011234, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 298.0, "det": {"B-rate": 0.037364000000025044, "B-range": null, "union": 0.037364000000025044, "HELIX": 0.037364000000025044, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 304.0, "det": {"B-rate": 0.03722800000002735, "B-range": null, "union": 0.03722800000002735, "HELIX": 0.03722800000002735, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 310.0, "det": {"B-rate": 0.03659599999997454, "B-range": null, "union": 0.03659599999997454, "HELIX": 0.03659599999997454, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 316.0, "det": {"B-rate": 0.036461999999971795, "B-range": null, "union": 0.036461999999971795, "HELIX": 0.036461999999971795, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 322.0, "det": {"B-rate": 0.03484400000002097, "B-range": null, "union": 0.03484400000002097, "HELIX": 0.03484400000002097, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 328.0, "det": {"B-rate": 0.03924499999999398, "B-range": null, "union": 0.03924499999999398, "HELIX": 0.03924499999999398, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 334.0, "det": {"B-rate": 0.03792900000001964, "B-range": null, "union": 0.03792900000001964, "HELIX": 0.03792900000001964, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 340.0, "det": {"B-rate": 0.03596599999997352, "B-range": null, "union": 0.03596599999997352, "HELIX": 0.03596599999997352, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 346.0, "det": {"B-rate": 0.03599000000002661, "B-range": null, "union": 0.03599000000002661, "HELIX": 0.03599000000002661, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 352.0, "det": {"B-rate": 0.03788600000001452, "B-range": null, "union": 0.03788600000001452, "HELIX": 0.03788600000001452, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 358.0, "det": {"B-rate": 0.03779400000001942, "B-range": null, "union": 0.03779400000001942, "HELIX": 0.03779400000001942, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 364.0, "det": {"B-rate": 0.037394000000006145, "B-range": null, "union": 0.037394000000006145, "HELIX": 0.037394000000006145, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 370.0, "det": {"B-rate": 0.02937400000001844, "B-range": null, "union": 0.02937400000001844, "HELIX": 0.02937400000001844, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 376.0, "det": {"B-rate": 0.03564000000000078, "B-range": null, "union": 0.03564000000000078, "HELIX": 0.03564000000000078, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 382.0, "det": {"B-rate": 0.03732800000000225, "B-range": null, "union": 0.03732800000000225, "HELIX": 0.03732800000000225, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 388.0, "det": {"B-rate": 0.037241999999992004, "B-range": null, "union": 0.037241999999992004, "HELIX": 0.037241999999992004, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 394.0, "det": {"B-rate": 0.03690599999998767, "B-range": null, "union": 0.03690599999998767, "HELIX": 0.03690599999998767, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 400.0, "det": {"B-rate": 0.03679699999997865, "B-range": null, "union": 0.03679699999997865, "HELIX": 0.03679699999997865, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 406.0, "det": {"B-rate": 0.035455000000013115, "B-range": null, "union": 0.035455000000013115, "HELIX": 0.035455000000013115, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 412.0, "det": {"B-rate": 0.038667999999972835, "B-range": null, "union": 0.038667999999972835, "HELIX": 0.038667999999972835, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 418.0, "det": {"B-rate": 0.03660200000001623, "B-range": null, "union": 0.03660200000001623, "HELIX": 0.03660200000001623, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 424.0, "det": {"B-rate": 0.03704800000002706, "B-range": null, "union": 0.03704800000002706, "HELIX": 0.03704800000002706, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 430.0, "det": {"B-rate": 0.036315000000001874, "B-range": null, "union": 0.036315000000001874, "HELIX": 0.036315000000001874, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 436.0, "det": {"B-rate": 0.03756399999997484, "B-range": null, "union": 0.03756399999997484, "HELIX": 0.03756399999997484, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 442.0, "det": {"B-rate": 0.03673700000001645, "B-range": null, "union": 0.03673700000001645, "HELIX": 0.03673700000001645, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 448.0, "det": {"B-rate": 0.03606000000002041, "B-range": null, "union": 0.03606000000002041, "HELIX": 0.03606000000002041, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 454.0, "det": {"B-rate": 0.03678000000002157, "B-range": null, "union": 0.03678000000002157, "HELIX": 0.03678000000002157, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 460.0, "det": {"B-rate": 0.03572800000000598, "B-range": null, "union": 0.03572800000000598, "HELIX": 0.03572800000000598, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F1", "onset": 466.0, "det": {"B-rate": 0.02584799999999632, "B-range": null, "union": 0.02584799999999632, "HELIX": 0.02584799999999632, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05029700000000048, "frozen": 0.05029700000000048, "stamp": 0.05349299999999957, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04940200000000061, "frozen": 0.04940200000000061, "stamp": 0.05599799999999888, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048799999999999955, "frozen": 0.048799999999999955, "stamp": 0.0521729999999998, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05137300000000167, "frozen": 0.05137300000000167, "stamp": 0.05137300000000167, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.050628000000003226, "frozen": 0.050628000000003226, "stamp": 0.050628000000003226, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05001299999999986, "frozen": 0.05001299999999986, "stamp": 0.053288999999999476, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04984400000000022, "frozen": 0.04984400000000022, "stamp": 0.05250199999999694, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048445999999998435, "frozen": 0.048445999999998435, "stamp": 0.05510100000000051, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05098000000000269, "frozen": 0.05098000000000269, "stamp": 0.05554999999999666, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 64.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05038000000000409, "frozen": 0.05038000000000409, "stamp": 0.05038000000000409, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 70.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04972800000000177, "frozen": 0.04972800000000177, "stamp": 0.057618000000005054, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 76.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049210000000002196, "frozen": 0.049210000000002196, "stamp": 0.05248000000000275, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 82.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05152999999999963, "frozen": 0.05152999999999963, "stamp": 0.05503699999999867, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 88.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.050888999999997964, "frozen": 0.050888999999997964, "stamp": 0.054164999999997576, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 94.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04706099999999935, "frozen": 0.04706099999999935, "stamp": 0.053651000000002114, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 100.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05300900000000297, "frozen": 0.05300900000000297, "stamp": 0.05300900000000297, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 106.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048900000000003274, "frozen": 0.048900000000003274, "stamp": 0.052414999999996326, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 112.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.051272999999994795, "frozen": 0.051272999999994795, "stamp": 0.05447399999999902, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 118.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05065500000000611, "frozen": 0.05065500000000611, "stamp": 0.05399699999999541, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 124.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04994800000000055, "frozen": 0.04994800000000055, "stamp": 0.053263999999998646, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 130.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05254800000000159, "frozen": 0.05254800000000159, "stamp": 0.05609599999999659, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 136.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04864299999999844, "frozen": 0.04864299999999844, "stamp": 0.0529369999999858, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 142.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05110300000001189, "frozen": 0.05110300000001189, "stamp": 0.054442999999992026, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 148.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05062899999998649, "frozen": 0.05062899999998649, "stamp": 0.05062899999998649, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 154.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049870999999996, "frozen": 0.049870999999996, "stamp": 0.05328199999999583, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 160.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04913899999999671, "frozen": 0.04913899999999671, "stamp": 0.05247499999998695, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 166.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04852299999998877, "frozen": 0.04852299999998877, "stamp": 0.05500000000000682, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 172.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04785899999998833, "frozen": 0.04785899999998833, "stamp": 0.05448599999999715, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 178.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05032600000001253, "frozen": 0.05032600000001253, "stamp": 0.05032600000001253, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 184.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04965699999999629, "frozen": 0.04965699999999629, "stamp": 0.053097000000008165, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 190.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048890999999997575, "frozen": 0.048890999999997575, "stamp": 0.05222299999999791, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 196.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05170899999998824, "frozen": 0.05170899999998824, "stamp": 0.05498900000000617, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 202.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.050840999999991254, "frozen": 0.050840999999991254, "stamp": 0.054264999999986685, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 208.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.050245999999987134, "frozen": 0.050245999999987134, "stamp": 0.050245999999987134, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 214.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.053423000000009324, "frozen": 0.053423000000009324, "stamp": 0.053423000000009324, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 220.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04861500000001229, "frozen": 0.04861500000001229, "stamp": 0.05191500000000815, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 226.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04818000000000211, "frozen": 0.04818000000000211, "stamp": 0.05448999999998705, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 232.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04762800000000311, "frozen": 0.04762800000000311, "stamp": 0.05061900000001174, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 238.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05321499999999446, "frozen": 0.05321499999999446, "stamp": 0.05665899999999624, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 244.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0524509999999907, "frozen": 0.0524509999999907, "stamp": 0.05575600000000236, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 250.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048457000000013295, "frozen": 0.048457000000013295, "stamp": 0.051805000000001655, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 256.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.047925000000020646, "frozen": 0.047925000000020646, "stamp": 0.054728000000011434, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 262.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.047214999999994234, "frozen": 0.047214999999994234, "stamp": 0.05094600000001037, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 268.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05304200000000492, "frozen": 0.05304200000000492, "stamp": 0.05647399999998015, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 274.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049135999999975866, "frozen": 0.049135999999975866, "stamp": 0.05569300000001931, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 280.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04824800000000096, "frozen": 0.04824800000000096, "stamp": 0.05480399999999008, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 286.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.047622999999987314, "frozen": 0.047622999999987314, "stamp": 0.05096200000002682, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 292.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0467970000000264, "frozen": 0.0467970000000264, "stamp": 0.050561000000016065, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 298.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0528990000000249, "frozen": 0.0528990000000249, "stamp": 0.0528990000000249, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 304.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05204700000001594, "frozen": 0.05204700000001594, "stamp": 0.05555700000002162, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 310.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04823599999997441, "frozen": 0.04823599999997441, "stamp": 0.051537999999993644, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 316.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.047505999999998494, "frozen": 0.047505999999998494, "stamp": 0.05071299999997336, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 322.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04998999999997977, "frozen": 0.04998999999997977, "stamp": 0.053589999999985594, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 328.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049339999999972406, "frozen": 0.049339999999972406, "stamp": 0.05598900000001095, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 334.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.051862000000028274, "frozen": 0.051862000000028274, "stamp": 0.05517200000002731, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 340.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048555000000021664, "frozen": 0.048555000000021664, "stamp": 0.0544659999999908, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 346.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0472700000000259, "frozen": 0.0472700000000259, "stamp": 0.053875000000005, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 352.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.053175000000010186, "frozen": 0.053175000000010186, "stamp": 0.05653999999998405, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 358.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.052450000000021646, "frozen": 0.052450000000021646, "stamp": 0.05580400000002328, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 364.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04841900000002397, "frozen": 0.04841900000002397, "stamp": 0.05175900000000411, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 370.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04454500000002781, "frozen": 0.04454500000002781, "stamp": 0.057718000000022585, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 376.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05027499999999918, "frozen": 0.05027499999999918, "stamp": 0.053514000000006945, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 382.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049713999999994485, "frozen": 0.049713999999994485, "stamp": 0.052967000000023745, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 388.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.052248000000020056, "frozen": 0.052248000000020056, "stamp": 0.052248000000020056, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 394.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04821700000002238, "frozen": 0.04821700000002238, "stamp": 0.05155500000000757, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 400.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0508270000000266, "frozen": 0.0508270000000266, "stamp": 0.05417299999999159, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 406.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04679399999997713, "frozen": 0.04679399999997713, "stamp": 0.0534799999999791, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 412.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.052690999999981614, "frozen": 0.052690999999981614, "stamp": 0.052690999999981614, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 418.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048590999999987616, "frozen": 0.048590999999987616, "stamp": 0.05532599999997956, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 424.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05126799999999321, "frozen": 0.05126799999999321, "stamp": 0.054553999999995995, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 430.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05058999999999969, "frozen": 0.05058999999999969, "stamp": 0.05395099999998365, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 436.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04993500000000495, "frozen": 0.04993500000000495, "stamp": 0.056581999999991694, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 442.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05268999999998414, "frozen": 0.05268999999998414, "stamp": 0.05268999999998414, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 448.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.051773000000025604, "frozen": 0.051773000000025604, "stamp": 0.05517400000002226, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 454.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05120899999997164, "frozen": 0.05120899999997164, "stamp": 0.05447199999997565, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 460.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0503400000000056, "frozen": 0.0503400000000056, "stamp": 0.05387999999999238, "residual": null}}
+{"rec": "motion", "cls": "F3a", "onset": 466.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.03957100000002356, "frozen": 0.03957100000002356, "stamp": 0.05646600000000035, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 10.0, "det": {"B-rate": 0.03780000000000072, "B-range": null, "union": 0.03780000000000072, "HELIX": 0.03780000000000072, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 16.0, "det": {"B-rate": 0.0356039999999993, "B-range": null, "union": 0.0356039999999993, "HELIX": 0.0356039999999993, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 22.0, "det": {"B-rate": 0.035819000000000045, "B-range": null, "union": 0.035819000000000045, "HELIX": 0.035819000000000045, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 28.0, "det": {"B-rate": 0.03746900000000153, "B-range": null, "union": 0.03746900000000153, "HELIX": 0.03746900000000153, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 34.0, "det": {"B-rate": 0.03744199999999864, "B-range": null, "union": 0.03744199999999864, "HELIX": 0.03744199999999864, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 40.0, "det": {"B-rate": 0.037292999999998244, "B-range": null, "union": 0.037292999999998244, "HELIX": 0.037292999999998244, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 46.0, "det": {"B-rate": 0.03312999999999988, "B-range": null, "union": 0.03312999999999988, "HELIX": 0.03312999999999988, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 52.0, "det": {"B-rate": 0.03524099999999919, "B-range": null, "union": 0.03524099999999919, "HELIX": 0.03524099999999919, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 58.0, "det": {"B-rate": 0.038867000000003316, "B-range": null, "union": 0.038867000000003316, "HELIX": 0.038867000000003316, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 64.0, "det": {"B-rate": 0.03682799999999986, "B-range": null, "union": 0.03682799999999986, "HELIX": 0.03682799999999986, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 70.0, "det": {"B-rate": 0.0367779999999982, "B-range": null, "union": 0.0367779999999982, "HELIX": 0.0367779999999982, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 76.0, "det": {"B-rate": 0.03668500000000563, "B-range": null, "union": 0.03668500000000563, "HELIX": 0.03668500000000563, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 82.0, "det": {"B-rate": 0.03445100000000423, "B-range": null, "union": 0.03445100000000423, "HELIX": 0.03445100000000423, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 88.0, "det": {"B-rate": 0.03829399999999339, "B-range": null, "union": 0.03829399999999339, "HELIX": 0.03829399999999339, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 94.0, "det": {"B-rate": 0.0385519999999957, "B-range": null, "union": 0.0385519999999957, "HELIX": 0.0385519999999957, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 100.0, "det": {"B-rate": 0.036410000000003606, "B-range": null, "union": 0.036410000000003606, "HELIX": 0.036410000000003606, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 106.0, "det": {"B-rate": 0.03645299999999452, "B-range": null, "union": 0.03645299999999452, "HELIX": 0.03645299999999452, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 112.0, "det": {"B-rate": 0.03802299999999548, "B-range": null, "union": 0.03802299999999548, "HELIX": 0.03802299999999548, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 118.0, "det": {"B-rate": 0.03779400000000521, "B-range": null, "union": 0.03779400000000521, "HELIX": 0.03779400000000521, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 124.0, "det": {"B-rate": 0.03602499999999509, "B-range": null, "union": 0.03602499999999509, "HELIX": 0.03602499999999509, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 130.0, "det": {"B-rate": 0.03604899999999134, "B-range": null, "union": 0.03604899999999134, "HELIX": 0.03604899999999134, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 136.0, "det": {"B-rate": 0.035662999999999556, "B-range": null, "union": 0.035662999999999556, "HELIX": 0.035662999999999556, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 142.0, "det": {"B-rate": 0.03854499999999916, "B-range": null, "union": 0.03854499999999916, "HELIX": 0.03854499999999916, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 148.0, "det": {"B-rate": 0.037448000000011916, "B-range": null, "union": 0.037448000000011916, "HELIX": 0.037448000000011916, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 154.0, "det": {"B-rate": 0.037310999999988326, "B-range": null, "union": 0.037310999999988326, "HELIX": 0.037310999999988326, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 160.0, "det": {"B-rate": 0.037108999999986736, "B-range": null, "union": 0.037108999999986736, "HELIX": 0.037108999999986736, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 166.0, "det": {"B-rate": 0.03497999999999024, "B-range": null, "union": 0.03497999999999024, "HELIX": 0.03497999999999024, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 172.0, "det": {"B-rate": 0.038868000000007896, "B-range": null, "union": 0.038868000000007896, "HELIX": 0.038868000000007896, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 178.0, "det": {"B-rate": 0.03491700000000719, "B-range": null, "union": 0.03491700000000719, "HELIX": 0.03491700000000719, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 184.0, "det": {"B-rate": 0.03667400000000498, "B-range": null, "union": 0.03667400000000498, "HELIX": 0.03667400000000498, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 190.0, "det": {"B-rate": 0.03665799999998853, "B-range": null, "union": 0.03665799999998853, "HELIX": 0.03665799999998853, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 196.0, "det": {"B-rate": 0.034521000000012236, "B-range": null, "union": 0.034521000000012236, "HELIX": 0.034521000000012236, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 202.0, "det": {"B-rate": 0.03827899999998863, "B-range": null, "union": 0.03827899999998863, "HELIX": 0.03827899999998863, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 208.0, "det": {"B-rate": 0.03656899999998586, "B-range": null, "union": 0.03656899999998586, "HELIX": 0.03656899999998586, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 214.0, "det": {"B-rate": 0.03613400000000411, "B-range": null, "union": 0.03613400000000411, "HELIX": 0.03613400000000411, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 220.0, "det": {"B-rate": 0.03607199999999011, "B-range": null, "union": 0.03607199999999011, "HELIX": 0.03607199999999011, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 226.0, "det": {"B-rate": 0.03815299999999411, "B-range": null, "union": 0.03815299999999411, "HELIX": 0.03815299999999411, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 232.0, "det": {"B-rate": 0.0378340000000037, "B-range": null, "union": 0.0378340000000037, "HELIX": 0.0378340000000037, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 238.0, "det": {"B-rate": 0.03782200000000557, "B-range": null, "union": 0.03782200000000557, "HELIX": 0.03782200000000557, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 244.0, "det": {"B-rate": 0.03565499999999133, "B-range": null, "union": 0.03565499999999133, "HELIX": 0.03565499999999133, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 250.0, "det": {"B-rate": 0.03751600000001076, "B-range": null, "union": 0.03751600000001076, "HELIX": 0.03751600000001076, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 256.0, "det": {"B-rate": 0.03752300000002151, "B-range": null, "union": 0.03752300000002151, "HELIX": 0.03752300000002151, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 262.0, "det": {"B-rate": 0.03720600000002605, "B-range": null, "union": 0.03720600000002605, "HELIX": 0.03720600000002605, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 268.0, "det": {"B-rate": 0.03716500000001588, "B-range": null, "union": 0.03716500000001588, "HELIX": 0.03716500000001588, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 274.0, "det": {"B-rate": 0.03520900000000893, "B-range": null, "union": 0.03520900000000893, "HELIX": 0.03520900000000893, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 280.0, "det": {"B-rate": 0.03494100000000344, "B-range": null, "union": 0.03494100000000344, "HELIX": 0.03494100000000344, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 286.0, "det": {"B-rate": 0.03908000000001266, "B-range": null, "union": 0.03908000000001266, "HELIX": 0.03908000000001266, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 292.0, "det": {"B-rate": 0.03685899999999265, "B-range": null, "union": 0.03685899999999265, "HELIX": 0.03685899999999265, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 298.0, "det": {"B-rate": 0.03673300000002655, "B-range": null, "union": 0.03673300000002655, "HELIX": 0.03673300000002655, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 304.0, "det": {"B-rate": 0.03665799999998853, "B-range": null, "union": 0.03665799999998853, "HELIX": 0.03665799999998853, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 310.0, "det": {"B-rate": 0.034534000000007836, "B-range": null, "union": 0.034534000000007836, "HELIX": 0.034534000000007836, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 316.0, "det": {"B-rate": 0.03828199999998105, "B-range": null, "union": 0.03828199999998105, "HELIX": 0.03828199999998105, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 322.0, "det": {"B-rate": 0.03637700000001587, "B-range": null, "union": 0.03637700000001587, "HELIX": 0.03637700000001587, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 328.0, "det": {"B-rate": 0.03607199999999011, "B-range": null, "union": 0.03607199999999011, "HELIX": 0.03607199999999011, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 334.0, "det": {"B-rate": 0.036102000000028056, "B-range": null, "union": 0.036102000000028056, "HELIX": 0.036102000000028056, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 340.0, "det": {"B-rate": 0.03802400000000716, "B-range": null, "union": 0.03802400000000716, "HELIX": 0.03802400000000716, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 346.0, "det": {"B-rate": 0.03803099999998949, "B-range": null, "union": 0.03803099999998949, "HELIX": 0.03803099999998949, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 352.0, "det": {"B-rate": 0.0357670000000212, "B-range": null, "union": 0.0357670000000212, "HELIX": 0.0357670000000212, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 358.0, "det": {"B-rate": 0.03555999999997539, "B-range": null, "union": 0.03555999999997539, "HELIX": 0.03555999999997539, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 364.0, "det": {"B-rate": 0.03551399999997784, "B-range": null, "union": 0.03551399999997784, "HELIX": 0.03551399999997784, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 370.0, "det": {"B-rate": 0.03751899999997477, "B-range": null, "union": 0.03751899999997477, "HELIX": 0.03751899999997477, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 376.0, "det": {"B-rate": 0.03728899999998703, "B-range": null, "union": 0.03728899999998703, "HELIX": 0.03728899999998703, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 382.0, "det": {"B-rate": 0.03718400000002475, "B-range": null, "union": 0.03718400000002475, "HELIX": 0.03718400000002475, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 388.0, "det": {"B-rate": 0.03716700000001083, "B-range": null, "union": 0.03716700000001083, "HELIX": 0.03716700000001083, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 394.0, "det": {"B-rate": 0.03491900000000214, "B-range": null, "union": 0.03491900000000214, "HELIX": 0.03491900000000214, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 400.0, "det": {"B-rate": 0.03682800000001407, "B-range": null, "union": 0.03682800000001407, "HELIX": 0.03682800000001407, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 406.0, "det": {"B-rate": 0.03665399999999863, "B-range": null, "union": 0.03665399999999863, "HELIX": 0.03665399999999863, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 412.0, "det": {"B-rate": 0.036641999999972086, "B-range": null, "union": 0.036641999999972086, "HELIX": 0.036641999999972086, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 418.0, "det": {"B-rate": 0.03669600000000628, "B-range": null, "union": 0.03669600000000628, "HELIX": 0.03669600000000628, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 424.0, "det": {"B-rate": 0.03845599999999649, "B-range": null, "union": 0.03845599999999649, "HELIX": 0.03845599999999649, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 430.0, "det": {"B-rate": 0.038344999999992524, "B-range": null, "union": 0.038344999999992524, "HELIX": 0.038344999999992524, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 436.0, "det": {"B-rate": 0.036217000000021926, "B-range": null, "union": 0.036217000000021926, "HELIX": 0.036217000000021926, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 442.0, "det": {"B-rate": 0.0362660000000119, "B-range": null, "union": 0.0362660000000119, "HELIX": 0.0362660000000119, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 448.0, "det": {"B-rate": 0.03448700000001281, "B-range": null, "union": 0.03448700000001281, "HELIX": 0.03448700000001281, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 454.0, "det": {"B-rate": 0.037956000000008316, "B-range": null, "union": 0.037956000000008316, "HELIX": 0.037956000000008316, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 460.0, "det": {"B-rate": 0.03773799999999028, "B-range": null, "union": 0.03773799999999028, "HELIX": 0.03773799999999028, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F1", "onset": 466.0, "det": {"B-rate": 0.037637000000017906, "B-range": null, "union": 0.037637000000017906, "HELIX": 0.037637000000017906, "frozen": null, "stamp": null, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 10.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04870900000000056, "frozen": 0.04870900000000056, "stamp": 0.052049999999999486, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 16.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04795299999999969, "frozen": 0.04795299999999969, "stamp": 0.05146099999999976, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 22.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05043500000000023, "frozen": 0.05043500000000023, "stamp": 0.05357000000000056, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 28.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04998600000000053, "frozen": 0.04998600000000053, "stamp": 0.056509999999999394, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 34.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0492360000000005, "frozen": 0.0492360000000005, "stamp": 0.055900999999998646, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 40.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048431999999998254, "frozen": 0.048431999999998254, "stamp": 0.05190300000000292, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 46.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04778199999999799, "frozen": 0.04778199999999799, "stamp": 0.05787600000000026, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 52.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.050474999999998715, "frozen": 0.050474999999998715, "stamp": 0.053755999999999915, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 58.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05308000000000135, "frozen": 0.05308000000000135, "stamp": 0.05308000000000135, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 64.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04936999999999614, "frozen": 0.04936999999999614, "stamp": 0.0556619999999981, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 70.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05156900000000064, "frozen": 0.05156900000000064, "stamp": 0.054899000000006026, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 76.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.047585999999995465, "frozen": 0.047585999999995465, "stamp": 0.05421400000000176, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 82.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04692099999999755, "frozen": 0.04692099999999755, "stamp": 0.05364600000000053, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 88.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04979899999999304, "frozen": 0.04979899999999304, "stamp": 0.052897000000001526, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 94.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05217600000000289, "frozen": 0.05217600000000289, "stamp": 0.05553799999999853, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 100.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048044000000004417, "frozen": 0.048044000000004417, "stamp": 0.051474999999996385, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 106.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05096100000000092, "frozen": 0.05096100000000092, "stamp": 0.05096100000000092, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 112.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05011899999999514, "frozen": 0.05011899999999514, "stamp": 0.053489999999996485, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 118.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049335999999996716, "frozen": 0.049335999999996716, "stamp": 0.05581300000000056, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 124.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04858900000000688, "frozen": 0.04858900000000688, "stamp": 0.055136000000004515, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 130.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.047791999999986956, "frozen": 0.047791999999986956, "stamp": 0.05113299999999299, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 136.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.047183999999987236, "frozen": 0.047183999999987236, "stamp": 0.050549999999986994, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 142.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.053145000000000664, "frozen": 0.053145000000000664, "stamp": 0.05651800000001117, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 148.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049040999999988344, "frozen": 0.049040999999988344, "stamp": 0.052505999999993946, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 154.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048570000000012215, "frozen": 0.048570000000012215, "stamp": 0.05178399999999783, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 160.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0478819999999871, "frozen": 0.0478819999999871, "stamp": 0.051346999999992704, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 166.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05026000000000863, "frozen": 0.05026000000000863, "stamp": 0.05376499999999851, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 172.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.049626999999986765, "frozen": 0.049626999999986765, "stamp": 0.05623099999999681, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 178.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04589200000000915, "frozen": 0.04589200000000915, "stamp": 0.05221900000000801, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 184.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.048293999999998505, "frozen": 0.048293999999998505, "stamp": 0.05169300000000021, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 190.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04744800000000282, "frozen": 0.04744800000000282, "stamp": 0.05096399999999335, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 196.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04683399999998983, "frozen": 0.04683399999998983, "stamp": 0.05359699999999634, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 202.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04952399999999102, "frozen": 0.04952399999999102, "stamp": 0.05606000000000222, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 208.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04874300000000176, "frozen": 0.04874300000000176, "stamp": 0.05197999999998615, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 214.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05132900000000973, "frozen": 0.05132900000000973, "stamp": 0.05466200000000754, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 220.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04735500000001025, "frozen": 0.04735500000001025, "stamp": 0.05078599999998801, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 226.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.053199000000006436, "frozen": 0.053199000000006436, "stamp": 0.05644399999999905, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 232.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04922899999999686, "frozen": 0.04922899999999686, "stamp": 0.05257299999999532, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 238.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04879500000001258, "frozen": 0.04879500000001258, "stamp": 0.05179999999998586, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 244.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05107200000000489, "frozen": 0.05107200000000489, "stamp": 0.05450300000001107, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 250.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0504669999999976, "frozen": 0.0504669999999976, "stamp": 0.053667999999987615, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 256.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04977400000001353, "frozen": 0.04977400000001353, "stamp": 0.056533999999999196, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 262.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05231400000002395, "frozen": 0.05231400000002395, "stamp": 0.05231400000002395, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 268.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.051551000000017666, "frozen": 0.051551000000017666, "stamp": 0.054807999999979984, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 274.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05078200000002653, "frozen": 0.05078200000002653, "stamp": 0.05413299999997889, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 280.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.046927999999979875, "frozen": 0.046927999999979875, "stamp": 0.05022400000001426, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 286.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05280900000002475, "frozen": 0.05280900000002475, "stamp": 0.05625400000002401, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 292.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05212799999998197, "frozen": 0.05212799999998197, "stamp": 0.05546199999997725, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 298.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04799700000000939, "frozen": 0.04799700000000939, "stamp": 0.05464999999998099, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 304.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04776700000002165, "frozen": 0.04776700000002165, "stamp": 0.05077399999998988, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 310.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04667899999998326, "frozen": 0.04667899999998326, "stamp": 0.053165999999976066, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 316.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04960599999998294, "frozen": 0.04960599999998294, "stamp": 0.0559949999999958, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 322.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04871400000001813, "frozen": 0.04871400000001813, "stamp": 0.055250999999998385, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 328.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05120199999998931, "frozen": 0.05120199999998931, "stamp": 0.05120199999998931, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 334.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04766499999999496, "frozen": 0.04766499999999496, "stamp": 0.06195999999999913, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 340.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05309099999999489, "frozen": 0.05309099999999489, "stamp": 0.05634900000001153, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 346.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05260500000002821, "frozen": 0.05260500000002821, "stamp": 0.05260500000002821, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 352.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04837300000002642, "frozen": 0.04837300000002642, "stamp": 0.05161500000002661, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 358.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04788899999999785, "frozen": 0.04788899999999785, "stamp": 0.05110000000001946, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 364.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04694399999999632, "frozen": 0.04694399999999632, "stamp": 0.050325999999984106, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 370.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.052817000000004555, "frozen": 0.052817000000004555, "stamp": 0.05612700000000359, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 376.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0488510000000133, "frozen": 0.0488510000000133, "stamp": 0.055454999999994925, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 382.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04840100000001257, "frozen": 0.04840100000001257, "stamp": 0.054795000000012806, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 388.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04779999999999518, "frozen": 0.04779999999999518, "stamp": 0.05427300000002333, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 394.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05001700000002529, "frozen": 0.05001700000002529, "stamp": 0.05346300000002202, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 400.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05262900000002446, "frozen": 0.05262900000002446, "stamp": 0.05605400000001737, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 406.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0519909999999868, "frozen": 0.0519909999999868, "stamp": 0.0519909999999868, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 412.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05111299999998664, "frozen": 0.05111299999998664, "stamp": 0.055230999999992036, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 418.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04720900000000938, "frozen": 0.04720900000000938, "stamp": 0.0504579999999919, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 424.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05318099999999504, "frozen": 0.05318099999999504, "stamp": 0.05645900000001802, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 430.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.052441999999985, "frozen": 0.052441999999985, "stamp": 0.05561099999999897, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 436.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.051779000000010456, "frozen": 0.051779000000010456, "stamp": 0.051779000000010456, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 442.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.05111399999998412, "frozen": 0.05111399999998412, "stamp": 0.05451299999998582, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 448.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04706499999997504, "frozen": 0.04706499999997504, "stamp": 0.04706499999997504, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 454.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04993000000001757, "frozen": 0.04993000000001757, "stamp": 0.05315600000000131, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 460.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.04896800000000212, "frozen": 0.04896800000000212, "stamp": 0.052462999999988824, "residual": null}}
+{"rec": "motion2", "cls": "F3a", "onset": 466.0, "det": {"B-rate": null, "B-range": null, "union": null, "HELIX": 0.0514039999999909, "frozen": 0.0514039999999909, "stamp": 0.05476499999997486, "residual": null}}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 10.0, "det": null}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 16.0, "det": null}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 22.0, "det": null}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 28.0, "det": null}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 34.0, "det": null}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 40.0, "det": null}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 46.0, "det": null}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 52.0, "det": null}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 58.0, "det": null}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F1", "onset": 64.0, "det": null}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 10.0, "det": 2.0}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 16.0, "det": 2.0}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 22.0, "det": 2.0}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 28.0, "det": 2.0}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 34.0, "det": 2.0}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 40.0, "det": 2.0}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 46.0, "det": 2.0}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 52.0, "det": 2.0}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 58.0, "det": 2.0}
+{"bz": 1, "rec": "odin-hw-20260901-1926", "cls": "F2", "onset": 64.0, "det": 2.0}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F1", "onset": 10.0, "det": null}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F1", "onset": 16.0, "det": null}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F1", "onset": 22.0, "det": null}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F1", "onset": 28.0, "det": null}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F1", "onset": 34.0, "det": null}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F1", "onset": 40.0, "det": null}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F1", "onset": 46.0, "det": null}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F1", "onset": 52.0, "det": null}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F1", "onset": 58.0, "det": null}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F2", "onset": 10.0, "det": 2.0}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F2", "onset": 16.0, "det": 2.0}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F2", "onset": 22.0, "det": 2.0}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F2", "onset": 28.0, "det": 2.0}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F2", "onset": 34.0, "det": 2.0}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F2", "onset": 40.0, "det": 2.0}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F2", "onset": 46.0, "det": 2.0}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F2", "onset": 52.0, "det": 2.0}
+{"bz": 1, "rec": "G1_varied_speed", "cls": "F2", "onset": 58.0, "det": 2.0}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F1", "onset": 10.0, "det": null}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F1", "onset": 16.0, "det": null}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F1", "onset": 22.0, "det": null}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F1", "onset": 28.0, "det": null}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F1", "onset": 34.0, "det": null}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F1", "onset": 40.0, "det": null}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F2", "onset": 10.0, "det": 2.0}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F2", "onset": 16.0, "det": 2.0}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F2", "onset": 22.0, "det": 2.0}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F2", "onset": 28.0, "det": 2.0}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F2", "onset": 34.0, "det": 2.0}
+{"bz": 1, "rec": "G1_yaw_in_place", "cls": "F2", "onset": 40.0, "det": 2.0}
+{"stop": 1, "rec": "faultwalk1", "event": 0, "t_cmd": 168.46945095062256, "variant": "genuine", "sham_source": "faultwalk1@329.94", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0.713727, "joints": 0.228305, "inertial": 0.0629525}, "helix_latency": 0.781490049377453, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 0, "t_cmd": 168.46945095062256, "variant": "splice", "sham_source": "faultwalk1@329.94", "HELIX": "FAILED", "helix_metrics": {"estimator": 6.0868, "joints": 2.97665, "inertial": 0.230158}, "helix_latency": 2.0000000493774337, "B-est": "UNVERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 0, "t_cmd": 168.46945095062256, "variant": "lies", "sham_source": "faultwalk1@329.94", "HELIX": "FAILED", "helix_metrics": {"estimator": 0, "joints": 2.97665, "inertial": 0.230158}, "helix_latency": 2.0000000493774337, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 0, "t_cmd": 168.46945095062256, "variant": "sham", "sham_source": "faultwalk1@329.94", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0, "joints": 0.150187, "inertial": 0.0282226}, "helix_latency": 0.5000130493774293, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 1, "t_cmd": 184.4702000617981, "variant": "genuine", "sham_source": "faultwalk1@329.94", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 1.4168, "joints": 0.199237, "inertial": 0.0478596}, "helix_latency": 0.6904679382018912, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 1, "t_cmd": 184.4702000617981, "variant": "splice", "sham_source": "faultwalk1@329.94", "HELIX": "FAILED", "helix_metrics": {"estimator": 5.89474, "joints": 3.08867, "inertial": 0.207873}, "helix_latency": 1.9999999382019098, "B-est": "UNVERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 1, "t_cmd": 184.4702000617981, "variant": "lies", "sham_source": "faultwalk1@329.94", "HELIX": "FAILED", "helix_metrics": {"estimator": 0, "joints": 3.08867, "inertial": 0.207873}, "helix_latency": 1.9999999382019098, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 1, "t_cmd": 184.4702000617981, "variant": "sham", "sham_source": "faultwalk1@329.94", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0, "joints": 0.122633, "inertial": 0.015341}, "helix_latency": 0.4999999382019098, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 2, "t_cmd": 216.9803967475891, "variant": "genuine", "sham_source": "faultwalk1@184.47", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0.992471, "joints": 0.253644, "inertial": 0.0482725}, "helix_latency": 0.9181552524108838, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 2, "t_cmd": 216.9803967475891, "variant": "splice", "sham_source": "faultwalk1@184.47", "HELIX": "FAILED", "helix_metrics": {"estimator": 5.70572, "joints": 3.75767, "inertial": 0.284322}, "helix_latency": 2.0000002524108993, "B-est": "UNVERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 2, "t_cmd": 216.9803967475891, "variant": "lies", "sham_source": "faultwalk1@184.47", "HELIX": "FAILED", "helix_metrics": {"estimator": 0, "joints": 3.75767, "inertial": 0.284322}, "helix_latency": 2.0000002524108993, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 2, "t_cmd": 216.9803967475891, "variant": "sham", "sham_source": "faultwalk1@184.47", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0, "joints": 0.124422, "inertial": 0.0154138}, "helix_latency": 0.5008762524108761, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 3, "t_cmd": 232.98083090782166, "variant": "genuine", "sham_source": "faultwalk1@265.46", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 1.49137, "joints": 0.230664, "inertial": 0.0469684}, "helix_latency": 0.6709990921783344, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 3, "t_cmd": 232.98083090782166, "variant": "splice", "sham_source": "faultwalk1@265.46", "HELIX": "FAILED", "helix_metrics": {"estimator": 5.72058, "joints": 2.94885, "inertial": 0.226905}, "helix_latency": 2.0000000921783396, "B-est": "UNVERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 3, "t_cmd": 232.98083090782166, "variant": "lies", "sham_source": "faultwalk1@265.46", "HELIX": "FAILED", "helix_metrics": {"estimator": 0, "joints": 2.94885, "inertial": 0.226905}, "helix_latency": 2.0000000921783396, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 3, "t_cmd": 232.98083090782166, "variant": "sham", "sham_source": "faultwalk1@265.46", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0, "joints": 0.127508, "inertial": 0.016557}, "helix_latency": 0.5000000921783396, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 4, "t_cmd": 265.4619610309601, "variant": "genuine", "sham_source": "faultwalk1@329.94", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0.853757, "joints": 0.228823, "inertial": 0.0707797}, "helix_latency": 0.7571099690399024, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 4, "t_cmd": 265.4619610309601, "variant": "splice", "sham_source": "faultwalk1@329.94", "HELIX": "FAILED", "helix_metrics": {"estimator": 5.78846, "joints": 3.05109, "inertial": 0.206872}, "helix_latency": 1.9999999690398909, "B-est": "UNVERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 4, "t_cmd": 265.4619610309601, "variant": "lies", "sham_source": "faultwalk1@329.94", "HELIX": "FAILED", "helix_metrics": {"estimator": 0, "joints": 3.05109, "inertial": 0.206872}, "helix_latency": 1.9999999690398909, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 4, "t_cmd": 265.4619610309601, "variant": "sham", "sham_source": "faultwalk1@329.94", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0, "joints": 0.211259, "inertial": 0.0530811}, "helix_latency": 0.500213969039919, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 5, "t_cmd": 281.4592854976654, "variant": "genuine", "sham_source": "faultwalk1@362.42", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 1.12918, "joints": 0.228973, "inertial": 0.0440524}, "helix_latency": 0.6674485023345937, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 5, "t_cmd": 281.4592854976654, "variant": "splice", "sham_source": "faultwalk1@362.42", "HELIX": "FAILED", "helix_metrics": {"estimator": 5.55099, "joints": 2.58681, "inertial": 0.217412}, "helix_latency": 1.9999995023346173, "B-est": "UNVERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 5, "t_cmd": 281.4592854976654, "variant": "lies", "sham_source": "faultwalk1@362.42", "HELIX": "FAILED", "helix_metrics": {"estimator": 0, "joints": 2.58681, "inertial": 0.217412}, "helix_latency": 1.9999995023346173, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 5, "t_cmd": 281.4592854976654, "variant": "sham", "sham_source": "faultwalk1@362.42", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0, "joints": 0.164058, "inertial": 0.0229241}, "helix_latency": 0.4999995023346173, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 6, "t_cmd": 313.9399673938751, "variant": "genuine", "sham_source": "faultwalk1@168.47", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0.723281, "joints": 0.229751, "inertial": 0.0585647}, "helix_latency": 0.7701486061249057, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 6, "t_cmd": 313.9399673938751, "variant": "splice", "sham_source": "faultwalk1@168.47", "HELIX": "FAILED", "helix_metrics": {"estimator": 5.95473, "joints": 3.30114, "inertial": 0.253569}, "helix_latency": 1.9999996061249021, "B-est": "UNVERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 6, "t_cmd": 313.9399673938751, "variant": "lies", "sham_source": "faultwalk1@168.47", "HELIX": "FAILED", "helix_metrics": {"estimator": 0, "joints": 3.30114, "inertial": 0.253569}, "helix_latency": 1.9999996061249021, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 6, "t_cmd": 313.9399673938751, "variant": "sham", "sham_source": "faultwalk1@168.47", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0, "joints": 0.125625, "inertial": 0.0166356}, "helix_latency": 0.49999960612490213, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 7, "t_cmd": 329.942622423172, "variant": "genuine", "sham_source": "faultwalk1@362.42", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 1.20375, "joints": 0.197928, "inertial": 0.0482527}, "helix_latency": 0.7072015768280266, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 7, "t_cmd": 329.942622423172, "variant": "splice", "sham_source": "faultwalk1@362.42", "HELIX": "FAILED", "helix_metrics": {"estimator": 7.39185, "joints": 3.16759, "inertial": 0.243087}, "helix_latency": 1.9999995768279746, "B-est": "UNVERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 7, "t_cmd": 329.942622423172, "variant": "lies", "sham_source": "faultwalk1@362.42", "HELIX": "FAILED", "helix_metrics": {"estimator": 0, "joints": 3.16759, "inertial": 0.243087}, "helix_latency": 1.9999995768279746, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 7, "t_cmd": 329.942622423172, "variant": "sham", "sham_source": "faultwalk1@362.42", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0, "joints": 0.245831, "inertial": 0.0251053}, "helix_latency": 0.4999995768279746, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 8, "t_cmd": 362.4241564273834, "variant": "genuine", "sham_source": "faultwalk1@168.47", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0.745838, "joints": 0.23055, "inertial": 0.0562173}, "helix_latency": 0.8792295726165662, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 8, "t_cmd": 362.4241564273834, "variant": "splice", "sham_source": "faultwalk1@168.47", "HELIX": "FAILED", "helix_metrics": {"estimator": 6.19023, "joints": 3.08175, "inertial": 0.250681}, "helix_latency": 1.9999995726165594, "B-est": "UNVERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 8, "t_cmd": 362.4241564273834, "variant": "lies", "sham_source": "faultwalk1@168.47", "HELIX": "FAILED", "helix_metrics": {"estimator": 0, "joints": 3.08175, "inertial": 0.250681}, "helix_latency": 1.9999995726165594, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 8, "t_cmd": 362.4241564273834, "variant": "sham", "sham_source": "faultwalk1@168.47", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0, "joints": 0.125625, "inertial": 0.0166356}, "helix_latency": 0.49999957261655936, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 9, "t_cmd": 378.4237368106842, "variant": "genuine", "sham_source": "faultwalk1@232.98", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 1.10787, "joints": 0.208276, "inertial": 0.0478121}, "helix_latency": 0.6672951893157801, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 9, "t_cmd": 378.4237368106842, "variant": "splice", "sham_source": "faultwalk1@232.98", "HELIX": "FAILED", "helix_metrics": {"estimator": 4.91864, "joints": 3.04261, "inertial": 0.20819}, "helix_latency": 2.000000189315813, "B-est": "UNVERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 9, "t_cmd": 378.4237368106842, "variant": "lies", "sham_source": "faultwalk1@232.98", "HELIX": "FAILED", "helix_metrics": {"estimator": 0, "joints": 3.04261, "inertial": 0.20819}, "helix_latency": 2.000000189315813, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "faultwalk1", "event": 9, "t_cmd": 378.4237368106842, "variant": "sham", "sham_source": "faultwalk1@232.98", "HELIX": "VERIFIED", "helix_metrics": {"estimator": 0, "joints": 0.278163, "inertial": 0.0160071}, "helix_latency": 0.5000001893158128, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "20261017T222205_stop_motion", "event": 0, "t_cmd": 17.9825599193573, "variant": "genuine", "sham_source": "20261017T223245_stop_motion@17.02", "HELIX": "UNVERIFIED", "helix_metrics": {"estimator": 0.501816, "joints": null, "inertial": null}, "helix_latency": 2.0000000806426996, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "20261017T222412_stop_motion", "event": 0, "t_cmd": 17.305426359176636, "variant": "genuine", "sham_source": "20261017T223245_stop_motion@17.02", "HELIX": "UNVERIFIED", "helix_metrics": {"estimator": 0.533415, "joints": null, "inertial": null}, "helix_latency": 1.999999640823365, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "20261017T223203_stop_motion", "event": 0, "t_cmd": 17.30710244178772, "variant": "genuine", "sham_source": "20261017T222205_stop_motion@17.98", "HELIX": "UNVERIFIED", "helix_metrics": {"estimator": 0.348772, "joints": null, "inertial": null}, "helix_latency": 1.9999995582122807, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
+{"stop": 1, "rec": "20261017T223245_stop_motion", "event": 0, "t_cmd": 17.021703243255615, "variant": "genuine", "sham_source": "20261017T222412_stop_motion@17.31", "HELIX": "UNVERIFIED", "helix_metrics": {"estimator": 0.3582, "joints": null, "inertial": null}, "helix_latency": 1.9999997567443835, "B-est": "VERIFIED", "B-ack": "VERIFIED"}
