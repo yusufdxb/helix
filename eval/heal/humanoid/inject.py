@@ -22,8 +22,10 @@ the stock ros2 CLI. Fault strings:
   flaky:NODE:SIG:LO:HI:QUIET rare: SIG at random U(LO, HI) s intervals, seeded per
                              (scenario, rep) so every arm sees the same schedule; no
                              crash in the last QUIET s.
-  param:NODE:NAME:VALUE      `ros2 param set /NODE NAME VALUE` on the live node: runtime
-                             parameter corruption, the process keeps running.
+  param:NODE:NAME:VALUE      sets NODE's parameter NAME to VALUE on the live node through its
+                             set_parameters service (param_set.py, parsed as `ros2 param set`
+                             parses it), sent at t_inject: runtime parameter corruption, the
+                             process keeps running.
   deploy:NODE:FILE:OP[:ARGS] a config deploy: the episode stack's FILE is rewritten
                              atomically, then NODE gets SIGTERM as an operator restart
                              would send. OP is corrupt_urdf (robot_description cut to half,
@@ -33,12 +35,14 @@ the stock ros2 CLI. Fault strings:
 from __future__ import annotations
 
 import errno
+import json
 import os
 import random
 import re
 import select
 import signal
 import subprocess
+import sys
 import threading
 import time
 from pathlib import Path
@@ -185,7 +189,9 @@ class Injector(threading.Thread):
 
     def run(self) -> None:
         try:
-            if self.kind:
+            if self.kind == "param":
+                self._f_param(*self.parts[1:])  # starts its helper now; the helper waits for t_inject
+            elif self.kind:
                 self._wait_until(self.t_inject)
                 getattr(self, "_f_" + self.kind)(*self.parts[1:])
         except Exception as e:  # noqa: BLE001 - recorded in probe.json, never silent
@@ -285,17 +291,21 @@ class Injector(threading.Thread):
             t += self.rng.uniform(float(lo), float(hi))
 
     def _f_param(self, node: str, name: str, value: str) -> None:
-        if not self._find(node):
-            self.injected_at = time.time()
-            return
-        r = subprocess.run(["ros2", "param", "set", "--no-daemon", "--spin-time", "3", "/" + node, name, value],
-                           env=self.env, capture_output=True, text=True, timeout=20)
-        self.injected_at = time.time()  # the set returns once the node applied it (CLI startup takes ~6 s)
-        self._log(f"param_rc{r.returncode}", 0)
-        if r.returncode == 0 and "Set parameter successful" in r.stdout:
+        # param_set.py connects during warm-up and sends the set at t_inject, so injected_at is
+        # when the node acknowledged the change, not when a 6 s CLI start-up finished.
+        helper = Path(__file__).with_name("param_set.py")
+        r = subprocess.run([sys.executable, str(helper), node, name, value, repr(self.t_inject)], env=self.env,
+                           capture_output=True, text=True, timeout=max(10.0, self.t_inject - time.time() + 30))
+        try:
+            res = json.loads(r.stdout.strip().splitlines()[-1])
+        except (IndexError, json.JSONDecodeError):
+            res = {}
+        self.injected_at = res.get("t_done") or time.time()
+        self._log(f"param_ok{int(bool(res.get('ok')))}", 0)
+        if res.get("ok"):
             self.hits = 1
         else:
-            self.error = (r.stdout + r.stderr).strip()[-300:]
+            self.error = (res.get("reason") or (r.stdout + r.stderr).strip()[-300:])
 
     def _f_deploy(self, node: str, fname: str, op: str, *args: str) -> None:
         path = self.stack / fname
