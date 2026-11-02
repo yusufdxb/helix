@@ -209,3 +209,57 @@ detail as positive ones.
   code in every arm. v3's earlier learned-diagnosis comparison (GBDT and an LLM
   classifier against the rules) was negative. The dev set has 13 scenarios, too few
   for a temporal model to be anything but memorized. This is a gap, not a finding.
+
+## Amendment before freeze
+
+Written after the developmental runs and before any withheld scenario ran against a
+healer. The registered design above is unchanged except where this section says so.
+
+**LLM selection rule (fixed before the screen results were read).** The registered rule
+picks the model by valid-output rate and rule agreement on dev evidence. Every dev
+decision has a single candidate (restart), so both measures are 1.0 by construction for
+any model that answers. The tie-break is therefore mechanical: among the four registered
+models, keep those with zero LLM errors and zero fallbacks (`ranker_error`,
+`ranker_invalid`, timeout, HTTP or invalid replies) over all `ranker=llm` decisions of a
+2-rep `--set humanoid` screen; pick the lowest median ranker wall time (`ms=` in the act
+detail); a tie goes to the smaller model. If no model has zero fallbacks, the fewest
+fallbacks wins, then latency. An earlier partial screen, stopped when the LLM host
+changed, is excluded.
+
+**Disclosures (A9, A10)**
+- **Single-candidate dev data.** The dev pool yields only single-candidate decisions, so
+  the history and MLP rankers were trained on decisions where the order could not
+  matter. The warm history has 110 rows, all `restart` and all verified (60 crash,
+  17 degraded, 16 endpoint_loss, 17 hang).
+- **Predicted bias, stated before the run.** The frozen MLP scores restart about 2.0
+  above every other action at zero features (4.207 vs 2.182) and on a dev hang feature
+  vector (7.732 vs 5.707). The history ranker's restart posterior by fault label is
+  about 0.947, above the 0.6 prior for untried actions. Both learned rankers are
+  therefore expected to put restart first on withheld multi-candidate decisions, the
+  opposite of the oracle on W1 and W2. With K = 3 they may still restore, but with more
+  actions. If they do, that is the measured result, not a surprise.
+- **LLM host.** The LLM runs on a laptop-class Apple M1 Pro (32 GB unified memory,
+  Ollama, reached through an SSH tunnel), not on a Jetson Orin NX. The Orin was not
+  reachable in LabLink, so Orin latency is not measured and no estimate is given. The
+  tunnel adds network time to every ranker call.
+- **Latency benchmark seen.** To choose the host, the four models were timed on one
+  synthetic W1-like prompt (a parameter diff, candidates param_restore and restart).
+  Their answers were seen. They are not used for selection, which follows only the rule
+  above on dev data.
+- **LLM server CPU.** The harness's local Ollama CPU figure does not apply to a remote
+  server and is void. Server CPU is sampled with `ps` on the LLM host instead.
+- **Harness and healer changes since registration** (all apply to every arm):
+  - the healer names robot_state_publisher `/rsp`, so the `ros_node=` override was
+    dropped for it;
+  - after a successful in-place repair (ParamRestore, LifecycleReset), the running
+    schedule deficit resets, the same as after a respawn. Before this change a working
+    param restore on the dev_rate plumbing node was judged failed and rolled back;
+  - the `param:` injector sends SetParameters at the scheduled injection time from a
+    helper started during warm-up. The `ros2 param set` CLI took about 6 s to start, so
+    changes landed off schedule;
+  - the act event carries the ranker's feature vector (`x=`), and the LLM URL is set
+    per server;
+  - agent_llm episodes run one at a time, because the Ollama server aborted a runner
+    on concurrent requests;
+  - the `AGENT_WITHHELD` and `AGENT_PLUMBING` sets, with their expect sets, were coded
+    after registration, before any healer ran on them.
