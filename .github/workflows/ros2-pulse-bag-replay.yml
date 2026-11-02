@@ -1,0 +1,170 @@
+name: GO2 ros2_pulse rosbag replay
+
+on:
+  push:
+    branches:
+      - experiment/ros2-pulse-bag-20261102
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bag-replay:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    container:
+      image: ros:humble-ros-base
+    defaults:
+      run:
+        shell: bash
+    env:
+      ROS_DOMAIN_ID: '173'
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ROS bag tools and build dependencies
+        run: |
+          set -euo pipefail
+          apt-get update -q
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git g++ cmake python3-colcon-common-extensions \
+            ros-humble-rosbag2-transport ros-humble-rosbag2-storage-default-plugins \
+            ros-humble-rmw-cyclonedds-cpp ros-humble-rclpy \
+            ros-humble-rclcpp ros-humble-statistics-msgs ros-humble-diagnostic-msgs
+          source /opt/ros/humble/setup.bash
+          ros2 bag info hardware_eval_20261006/bags/loaded_standing_observe
+
+      - name: Build pinned ros2_pulse v0.8 source (without modifying Helix)
+        run: |
+          set -euo pipefail
+          source /opt/ros/humble/setup.bash
+          mkdir -p /tmp/pulse_ws/src
+          git clone https://github.com/TanayK07/ros2_pulse.git /tmp/pulse_ws/src/ros2_pulse
+          cd /tmp/pulse_ws/src/ros2_pulse
+          git checkout 2b362cb202c6ca936fd69d6df63ac581758620f7
+          cd /tmp/pulse_ws
+          colcon build --packages-select ros2_pulse --cmake-args -DBUILD_TESTING=OFF
+          source /tmp/pulse_ws/install/setup.bash
+          test -s "$(ros2 pkg prefix ros2_pulse)/lib/libros2_pulse.so"
+          echo "Probe built: $(ros2 pkg prefix ros2_pulse)/lib/libros2_pulse.so"
+
+      - name: Subscribe to actual GO2 bag messages under LD_PRELOAD
+        run: |
+          set -euo pipefail
+          source /opt/ros/humble/setup.bash
+          source /tmp/pulse_ws/install/setup.bash
+          cat >/tmp/helix_pulse_listener.py <<'PY'
+          import json
+          import time
+          import rclpy
+          from rclpy.node import Node
+          from rclpy.qos import qos_profile_sensor_data
+          from std_msgs.msg import String, Float64MultiArray
+          from diagnostic_msgs.msg import DiagnosticArray
+
+          class BagListener(Node):
+              def __init__(self):
+                  super().__init__('helix_pulse_bag_test_listener')
+                  self.counts = {'/helix/heartbeat': 0, '/helix/metrics': 0, '/helix/node_health': 0}
+                  self.subs = [
+                      self.create_subscription(String, '/helix/heartbeat', self.cb('/helix/heartbeat'), qos_profile_sensor_data),
+                      self.create_subscription(Float64MultiArray, '/helix/metrics', self.cb('/helix/metrics'), qos_profile_sensor_data),
+                      self.create_subscription(DiagnosticArray, '/helix/node_health', self.cb('/helix/node_health'), qos_profile_sensor_data),
+                  ]
+              def cb(self, name):
+                  def receive(msg):
+                      self.counts[name] += 1
+                  return receive
+
+          rclpy.init()
+          node = BagListener()
+          started = time.monotonic()
+          try:
+              while rclpy.ok() and time.monotonic() - started < 31:
+                  rclpy.spin_once(node, timeout_sec=0.2)
+          finally:
+              with open('/tmp/ros2_pulse_listener_counts.json', 'w') as f:
+                  json.dump(node.counts, f, indent=2)
+              print('INDEPENDENT_CALLBACK_COUNTS=' + json.dumps(node.counts), flush=True)
+              node.destroy_node()
+              rclpy.try_shutdown()
+          PY
+          export ROS_TOPIC_STATS_OUTPUT_FILE=/tmp/ros2_pulse_received.jsonl
+          export ROS_TOPIC_STATISTICS_PUBLISH_PERIOD=2
+          export ROS_TOPIC_STATS_FORMAT=jsonl
+          export ROS_TOPIC_STATS_JITTER=1
+          probe="$(ros2 pkg prefix ros2_pulse)/lib/libros2_pulse.so"
+          LD_PRELOAD="$probe" python3 -u /tmp/helix_pulse_listener.py >/tmp/ros2_pulse_listener.log 2>&1 &
+          listener_pid=$!
+          sleep 3
+          # Replay existing real GO2 telemetry with no robot connected. Accelerate
+          # 10x to collect substantial sample sizes in a bounded CI experiment.
+          set +e
+          timeout -s INT -k 5 24 ros2 bag play \
+            hardware_eval_20261006/bags/loaded_standing_observe \
+            --topics /helix/heartbeat /helix/metrics /helix/node_health \
+            -r 10 >/tmp/ros2_pulse_bag_play.log 2>&1
+          play_rc=$?
+          set -e
+          echo "rosbag play exit=$play_rc (124 means bounded timeout)"
+          wait "$listener_pid"
+          echo '--- rosbag playback log ---'
+          cat /tmp/ros2_pulse_bag_play.log
+          echo '--- probe listener log ---'
+          cat /tmp/ros2_pulse_listener.log
+          echo '--- output summary ---'
+          wc -l /tmp/ros2_pulse_received.jsonl
+          test "$play_rc" -eq 0 -o "$play_rc" -eq 124
+
+      - name: Independently compare callback counts to probe receive-side rates
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          counts = json.loads(Path('/tmp/ros2_pulse_listener_counts.json').read_text())
+          windows = [json.loads(line) for line in Path('/tmp/ros2_pulse_received.jsonl').read_text().splitlines() if line.strip()]
+          integrated = {key: 0.0 for key in counts}
+          active_windows = {key: 0 for key in counts}
+          for row in windows:
+              dt = float(row['window_s'])
+              for topic in row.get('topics', []):
+                  name = topic.get('topic')
+                  if name in counts:
+                      hz = float(topic.get('recv_inter_hz', 0)) + float(topic.get('recv_intra_hz', 0))
+                      integrated[name] += hz * dt
+                      if hz > 0:
+                          active_windows[name] += 1
+          results = {}
+          for topic, actual in counts.items():
+              estimate = integrated[topic]
+              error = abs(estimate - actual) / max(1, actual)
+              results[topic] = {'callback_count': actual, 'pulse_integrated_count': round(estimate, 2),
+                                'relative_error': round(error, 4), 'active_windows': active_windows[topic]}
+          report = {'probe_commit': '2b362cb202c6ca936fd69d6df63ac581758620f7',
+                    'helix_bag': 'hardware_eval_20261006/bags/loaded_standing_observe',
+                    'playback_speed': 10, 'probe_windows': len(windows), 'results': results}
+          Path('/tmp/ros2_pulse_report.json').write_text(json.dumps(report, indent=2))
+          print(json.dumps(report, indent=2))
+          assert len(windows) >= 5, 'Probe recorded fewer than 5 windows'
+          for topic, data in results.items():
+              assert data['callback_count'] > 10, f'{topic}: replay delivered too few messages'
+              assert data['active_windows'] >= 3, f'{topic}: no sustained probe receive rate'
+              assert data['relative_error'] <= 0.15, f'{topic}: probe and independent callback counts differ >15%'
+          print('PASS: ros2_pulse received ROS 2 bag replay traffic and counted it within 15% of independent callbacks.')
+          PY
+
+      - name: Upload replay evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: go2-ros2-pulse-bag-replay
+          if-no-files-found: warn
+          path: |
+            /tmp/ros2_pulse_received.jsonl
+            /tmp/ros2_pulse_listener_counts.json
+            /tmp/ros2_pulse_listener.log
+            /tmp/ros2_pulse_bag_play.log
+            /tmp/ros2_pulse_report.json
