@@ -88,4 +88,23 @@ HUMANOID = [
     Scenario("nearmiss_camera", "duty:camera:0.8:0.2", "", ()),
 ]
 
-SETS = {"nav": NAV, "manip": MANIP, "humanoid": HUMANOID}
+# Held-out humanoid faults, same stack, written 2026-11-02 after the HUMANOID set above had
+# been used to develop core-dump detection, fresh-message verification and the backoff rule,
+# and before any of these ran once. Labels fixed here; see
+# docs/preregistration/2026-11-02-humanoid-real.md. rsp has no backup and is critical, so a
+# crash loop on it cannot be restored and the right outcome is SAFE_STOP.
+HUMANOID_HELDOUT = [
+    Scenario("nominal", "", "", ()),
+    Scenario("term_rsp", "kill:rsp:TERM", "rsp", ("crash",)),
+    Scenario("sigkill_cm", "kill:controller_manager:KILL", "controller_manager", ("crash",)),
+    Scenario("hang_camera", "stop:camera", "camera", ("hang",)),
+    Scenario("degrade_rsp", "duty:rsp:0.3:0.2", "rsp", ("degraded", "hang")),
+    Scenario("flaky_rsp", "flaky:rsp:ABRT:4:10:10", "rsp", ("crash", "crash_loop")),
+    Scenario("crashloop_rsp", "loop:rsp:ABRT:0.3", "rsp", ("crash_loop",), restorable=False),
+    # Near misses: the right answer is no action, any decision counts as unnecessary.
+    # forward_position_controller publishes nothing the healer judges.
+    Scenario("deactivate_fwd", "ctl:controller_manager:forward_position_controller:inactive", "", ()),
+    Scenario("nearmiss_rsp", "duty:rsp:0.8:0.2", "", ()),
+]
+
+SETS = {"nav": NAV, "manip": MANIP, "humanoid": HUMANOID, "humanoid_heldout": HUMANOID_HELDOUT}

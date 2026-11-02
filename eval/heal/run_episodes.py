@@ -97,7 +97,7 @@ def run_episode(ep: dict, slot: int, warm: float, post: float) -> dict:
     d = Path(ep["dir"])
     (d / "ff").mkdir(parents=True, exist_ok=True)
     (d / "logs").mkdir(exist_ok=True)
-    real = ep["set"] == "humanoid"
+    real = ep["set"].startswith("humanoid")
     if real:
         subprocess.run([sys.executable, str(MAKE_STACK), str(d / "stack")], check=True, capture_output=True)
         text = (d / "stack/humanoid.spec").read_text()
