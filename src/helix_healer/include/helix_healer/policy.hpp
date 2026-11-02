@@ -13,11 +13,17 @@
 namespace helix_healer {
 
 enum class Fault { None, Crash, CrashLoop, Hang, EndpointLoss, CpuRunaway, MemoryLeak, Degraded, QosMismatch, Upstream, CommonMode };
-enum class Action { None, Restart, LifecycleReset, Fallback, Report };
-enum class PolicyKind { None, Respawn, Watchdog, Helix };
+// ParamRestore and RestartLKG are agent-only repairs. ParamRestore sets only the parameters that
+// differ from the node's last-known-good snapshot; RestartLKG restarts it with the last-known-good
+// copies of its config files (the user's files are never written).
+enum class Action { None, Restart, LifecycleReset, Fallback, Report, ParamRestore, RestartLKG };
+// Agent: Helix detection, diagnosis and verification, plus a per-incident repair search over
+// ranked candidate actions (the ranking itself is done by the healer, see agent.hpp).
+enum class PolicyKind { None, Respawn, Watchdog, Helix, Agent };
 
 const char* to_string(Fault f);
 const char* to_string(Action a);
+Action action_from(const std::string& name);  // Action::None when unknown
 PolicyKind policy_kind(const std::string& name);  // throws on unknown
 
 struct TopicObs {
@@ -45,6 +51,14 @@ struct NodeObs {
   bool qos_incompatible = false;  // one of its subscriptions cannot match a publisher
   std::vector<std::string> upstream;  // managed nodes publishing topics it subscribes to
   std::vector<TopicObs> outputs;
+  // Structured evidence for the agent policy, filled by the healer. Other policies ignore it.
+  struct Evidence {
+    int param_diff = 0;           // live parameters differing from the LKG snapshot
+    bool config_changed = false;  // a config file on disk differs from its LKG copy
+    bool config_ran = false;      // the current (or last) process was started with non-LKG config
+    bool config_pinned = false;   // already running on the LKG copies after a rollback
+    bool has_lkg_config = false;  // LKG copies exist, so RestartLKG is possible
+  } ev;
 };
 
 struct Snapshot {
@@ -59,6 +73,10 @@ struct Decision {
   int attempt = 0;
   double delay_s = 0;
   std::string detail;
+  // Agent policy: feasible, untried repairs in rule order. When non-empty, the healer ranks them
+  // and executes the first; `action` holds the rule choice only as a default.
+  std::vector<Action> candidates;
+  int incident_action = 0;  // 1-based index of this action within its incident
 };
 
 struct Event {
@@ -93,6 +111,9 @@ class Policy {
   // later re-adoption starts fresh. Call only when no decision for it is outstanding.
   void forget(const std::string& node);
 
+  // Agent policy: per-incident repair limit (K in the pre-registration).
+  static constexpr int kAgentK = 3;
+
   // Exposed for tests: the HELIX root-cause rule on one node, given the snapshot.
   Fault diagnose(const NodeObs& n, const Snapshot& s);
 
@@ -117,6 +138,11 @@ class Policy {
     double verify_deadline = 0;
     double verify_from = 0;      // a repair counts only once every judged output has published after this
     bool escalate = false;
+    // Agent incident: one root-cause episode on this node, closed by a verified repair.
+    bool incident_open = false;
+    double incident_t = -1;      // time of its last action
+    int incident_actions = 0;
+    std::vector<Action> tried;   // actions already run in this incident
   };
 
   void observe(const NodeObs& n, const Snapshot& s, State& st);
@@ -129,6 +155,8 @@ class Policy {
   bool output_symptom(const NodeObs& n, bool* stale, bool* own_missing, double* oldest, bool* sharp = nullptr) const;
   bool leaking(const NodeObs& n) const;
   Decision decide(const NodeObs& n, Fault f, State& st, double t, StepOut& out);
+  void decide_agent(const NodeObs& n, Fault f, State& st, double t, Decision& d, int used);
+  bool diagnoses() const { return kind_ == PolicyKind::Helix || kind_ == PolicyKind::Agent; }
   Fault baseline_fault(const NodeObs& n, State& st, double t);
   int budget_used(State& st, double t);
 
