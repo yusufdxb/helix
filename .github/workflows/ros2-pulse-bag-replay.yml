@@ -33,28 +33,28 @@ jobs:
             ros-humble-rosbag2-transport ros-humble-rosbag2-storage-default-plugins \
             ros-humble-rmw-cyclonedds-cpp ros-humble-rclpy \
             ros-humble-rclcpp ros-humble-statistics-msgs ros-humble-diagnostic-msgs
-          source /opt/ros/humble/setup.bash
+          set +u; source /opt/ros/humble/setup.bash; set -u
           ros2 bag info hardware_eval_20261006/bags/loaded_standing_observe
 
       - name: Build pinned ros2_pulse v0.8 source (without modifying Helix)
         run: |
           set -euo pipefail
-          source /opt/ros/humble/setup.bash
+          set +u; source /opt/ros/humble/setup.bash; set -u
           mkdir -p /tmp/pulse_ws/src
           git clone https://github.com/TanayK07/ros2_pulse.git /tmp/pulse_ws/src/ros2_pulse
           cd /tmp/pulse_ws/src/ros2_pulse
           git checkout 2b362cb202c6ca936fd69d6df63ac581758620f7
           cd /tmp/pulse_ws
           colcon build --packages-select ros2_pulse --cmake-args -DBUILD_TESTING=OFF
-          source /tmp/pulse_ws/install/setup.bash
+          set +u; source /tmp/pulse_ws/install/setup.bash; set -u
           test -s "$(ros2 pkg prefix ros2_pulse)/lib/libros2_pulse.so"
           echo "Probe built: $(ros2 pkg prefix ros2_pulse)/lib/libros2_pulse.so"
 
       - name: Subscribe to actual GO2 bag messages under LD_PRELOAD
         run: |
           set -euo pipefail
-          source /opt/ros/humble/setup.bash
-          source /tmp/pulse_ws/install/setup.bash
+          set +u; source /opt/ros/humble/setup.bash; set -u
+          set +u; source /tmp/pulse_ws/install/setup.bash; set -u
           cat >/tmp/helix_pulse_listener.py <<'PY'
           import json
           import time
