@@ -110,6 +110,21 @@ int log_errors(const std::string& path, std::streamoff bytes = 8192) {
   return n;
 }
 
+// Last whole lines within the final `bytes` of a log file, for the LLM ranker's prompt.
+std::string log_tail(const std::string& path, std::streamoff bytes = 1200) {
+  std::ifstream in(path, std::ios::binary | std::ios::ate);
+  if (!in) return {};
+  const std::streamoff size = in.tellg();
+  const std::streamoff from = std::max<std::streamoff>(0, size - bytes);
+  in.seekg(from);
+  std::string s((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+  if (from > 0) {
+    auto nl = s.find('\n');
+    s = nl == std::string::npos ? std::string() : s.substr(nl + 1);
+  }
+  return s;
+}
+
 using ParamMap = std::map<std::string, rcl_interfaces::msg::ParameterValue>;
 constexpr double kLkgHoldS = 5.0;  // health required past a snapshot before it becomes last-known-good
 
@@ -789,7 +804,10 @@ class Healer : public rclcpp::Node {
       e.config_changed = n.ev.config_changed;
       e.config_ran = n.ev.config_ran;
     }
-    if (!log_dir_.empty()) e.log_errors = log_errors(log_dir_ + "/" + node + ".log");
+    if (!log_dir_.empty()) {
+      e.log_errors = log_errors(log_dir_ + "/" + node + ".log");
+      if (std::string_view(ranker_->name()) == "llm") e.log_tail = log_tail(log_dir_ + "/" + node + ".log");
+    }
     std::vector<rclcpp::Parameter> restore, prev;
     std::shared_ptr<rclcpp::AsyncParametersClient> pc;
     pid_t pid;
@@ -810,13 +828,14 @@ class Healer : public rclcpp::Node {
       try {
         std::lock_guard lk(ranker_mu_);
         order = ranker_->rank(node, e, d.candidates);
+        note = ranker_->detail();
       } catch (const std::exception& ex) {
         note = std::string(" ranker_error=") + ex.what();
       }
       // A ranker may only reorder: anything else falls back to the rule order.
       auto sorted = [](std::vector<hh::Action> v) { std::sort(v.begin(), v.end()); return v; };
       if (order.empty() || sorted(order) != sorted(d.candidates)) {
-        if (note.empty() && !order.empty()) note = " ranker_invalid";
+        if (!order.empty()) note += " ranker_invalid";
         order = d.candidates;
       }
       chosen = order.front();

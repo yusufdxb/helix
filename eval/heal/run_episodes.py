@@ -13,12 +13,14 @@ humanoid/make_stack.py, and faults act on the real processes from a thread in th
 """
 
 import argparse
+import contextlib
 import itertools
 import json
 import os
 import signal
 import subprocess
 import sys
+import threading
 import time
 import zlib
 from concurrent.futures import ThreadPoolExecutor
@@ -45,6 +47,40 @@ V3_PARAMS = "healer tick_hz=20 fast_repair=0 adaptive=0\n"
 
 # Agent arms (policy agent_<ranker>): ranker inputs set once per run by main().
 AGENT = {"history": "", "mlp": "", "llm": ""}
+
+
+OLLAMA = "http://127.0.0.1:11434"
+
+
+def ollama_cpu_s() -> float:
+    """CPU seconds used so far by every process named ollama (server plus model runners).
+    The server is shared, so the run's delta is an upper bound on what the agent caused."""
+    tot = 0.0
+    tick = os.sysconf("SC_CLK_TCK")
+    for d in Path("/proc").iterdir():
+        try:
+            if d.name.isdigit() and (d / "comm").read_text().strip() == "ollama":
+                f = (d / "stat").read_text().rsplit(")", 1)[1].split()
+                tot += (int(f[11]) + int(f[12])) / tick
+        except OSError:
+            continue
+    return tot
+
+
+def ollama_warm(model: str) -> dict:
+    """Loads the model once (so load time is not charged to the first repair) and reports its
+    resident size from /api/ps."""
+    import urllib.request
+    body = json.dumps(dict(model=model, stream=False, think=False, keep_alive="30m",
+                           messages=[dict(role="user", content="ok")], options=dict(num_predict=1))).encode()
+    t = time.time()
+    urllib.request.urlopen(urllib.request.Request(OLLAMA + "/api/chat", body, {"Content-Type": "application/json"}),
+                           timeout=120).read()
+    load_s = time.time() - t
+    ps = json.loads(urllib.request.urlopen(OLLAMA + "/api/ps", timeout=10).read())
+    m = next((x for x in ps.get("models", []) if x.get("name") == model or x.get("model") == model), {})
+    return dict(llm_load_s=round(load_s, 2), llm_gpu_mb=round(m.get("size_vram", 0) / 2**20),
+                llm_size_mb=round(m.get("size", 0) / 2**20), llm_ctx=m.get("context_length"))
 
 
 def agent_params(ep: dict, ranker: str) -> list[str]:
@@ -212,7 +248,15 @@ def main() -> None:
         AGENT["history"] = str(hist)
     AGENT["mlp"] = str(Path(a.agent_mlp).resolve()) if a.agent_mlp else ""
     AGENT["llm"] = a.agent_llm
-    (out / "agent.json").write_text(json.dumps(dict(AGENT, history_warm=a.agent_history), indent=1))
+    info = dict(AGENT, history_warm=a.agent_history)
+    use_llm = "agent_llm" in a.policies.split(",")
+    if use_llm:
+        if not a.agent_llm:
+            sys.exit("agent_llm needs --agent-llm")
+        info.update(ollama_warm(a.agent_llm))
+        info["ollama_cpu_s_start"] = ollama_cpu_s()
+        print(f"llm {a.agent_llm}: load {info['llm_load_s']} s, {info['llm_gpu_mb']} MB on GPU", flush=True)
+    (out / "agent.json").write_text(json.dumps(info, indent=1))
     pick = set(filter(None, a.scenarios.split(",")))
     scen = [s for s in SETS[a.set] if not pick or s.name in pick]
     eps = []
@@ -223,12 +267,19 @@ def main() -> None:
     free = list(range(a.slots))
     done = 0
 
+    # agent_llm episodes run one at a time: Ollama 0.18.3's runner aborts (GGML_ASSERT in seq_cp)
+    # on concurrent requests that share a prompt prefix, and a deployed healer only ever has one
+    # request in flight. Other arms keep running in the remaining slots.
+    llm_gate = threading.Semaphore(1)
+
     def job(ep: dict) -> dict:
-        slot = free.pop()
-        try:
-            return run_episode(ep, slot, a.warm, a.post)
-        finally:
-            free.append(slot)
+        gate = llm_gate if ep["policy"] == "agent_llm" else contextlib.nullcontext()
+        with gate:
+            slot = free.pop()
+            try:
+                return run_episode(ep, slot, a.warm, a.post)
+            finally:
+                free.append(slot)
 
     with ThreadPoolExecutor(a.slots) as ex:
         for meta in ex.map(job, eps):
@@ -236,6 +287,9 @@ def main() -> None:
             print(f"[{done}/{len(eps)}] {meta['scenario']} {meta['policy']} rep{meta['rep']} rc={meta['healer_rc']}",
                   flush=True)
     left = subprocess.run(["pgrep", "-c", "-f", "helix_demo/demo_node"], capture_output=True, text=True).stdout.strip()
+    if use_llm:
+        info["ollama_cpu_s"] = round(ollama_cpu_s() - info.pop("ollama_cpu_s_start"), 2)
+        (out / "agent.json").write_text(json.dumps(info, indent=1))
     print(f"stray demo_node processes after run: {left or 0}; episode processes reaped after healer exit: "
           f"{sum(json.loads((Path(e['dir']) / 'meta.json').read_text())['stray'] for e in eps)}")
 

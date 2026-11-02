@@ -17,7 +17,7 @@ find_package(std_msgs REQUIRED)
 find_package(helix_msgs REQUIRED)
 
 # ROS-free core: spec parser, diagnosis/repair policy, process supervision.
-add_library(helix_healer_core STATIC src/spec.cpp src/policy.cpp src/process.cpp src/envelope.cpp src/agent.cpp)
+add_library(helix_healer_core STATIC src/spec.cpp src/policy.cpp src/process.cpp src/envelope.cpp src/agent.cpp src/llm_ranker.cpp)
 target_include_directories(helix_healer_core PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)

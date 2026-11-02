@@ -51,6 +51,12 @@ def is_safe_deploy(scenario: str) -> bool:
     return "safe_deploy" in scenario
 
 
+def agent_info(d: Path) -> dict:
+    """Run-level agent inputs and LLM resource figures written by run_episodes.py."""
+    p = d.parent / "agent.json"
+    return json.loads(p.read_text()) if p.exists() else {}
+
+
 def agent_episode(d: Path) -> dict | None:
     base = score_episode(d)
     if base is None:
@@ -92,8 +98,8 @@ def agent_episode(d: Path) -> dict | None:
         downtime_s=downtime, downtime_censored=base["latency_s"] is None,
         ranker_ms_mean=round(statistics.fmean(ms), 4) if ms else None,
         ranker_ms_max=max(ms) if ms else None,
-        advisor_cpu=meta.get("advisor_cpu_frac"), advisor_rss_mb=meta.get("advisor_rss_mb"),
-        llm_gpu_mb=meta.get("llm_gpu_mb"), llm_fallbacks=meta.get("llm_fallbacks"),
+        llm_gpu_mb=agent_info(d).get("llm_gpu_mb"),
+        llm_fallbacks=sum(1 for e in events if e["kind"] == "act" and ( "ranker_error" in e.get("detail", "") or "ranker_invalid" in e.get("detail", ""))),
     )
 
 

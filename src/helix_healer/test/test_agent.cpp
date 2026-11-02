@@ -307,3 +307,32 @@ TEST(Ranker, FeaturesHaveFixedLength) {
     EXPECT_LE(x, 1.f);
   }
 }
+
+TEST(LlmRanker, ParsesOnlyCandidateActions) {
+  const std::vector<Action> c = {Action::Restart, Action::ParamRestore};
+  const std::string ok = R"({"model":"m","message":{"role":"assistant","content":"{\"action\": \"param_restore\"}"},"done":true})";
+  EXPECT_EQ(LlmRanker::parse(ok, c), Action::ParamRestore);
+  const std::string other = R"({"message":{"content":"{\"action\":\"restart_lkg\"}"}})";
+  EXPECT_EQ(LlmRanker::parse(other, c), Action::None);  // valid action, but not a candidate
+  EXPECT_EQ(LlmRanker::parse(R"({"message":{"content":"restart"}})", c), Action::None);
+  EXPECT_EQ(LlmRanker::parse("", c), Action::None);
+}
+
+TEST(LlmRanker, RequestConstrainsOutputToCandidates) {
+  LlmRanker r("tiny@127.0.0.1:1");
+  AgentEvidence e;
+  e.fault = Fault::Crash;
+  e.log_tail = "[ERROR] \"bad\" value\n";
+  const auto body = r.request("rsp", e, {Action::RestartLKG, Action::Restart});
+  EXPECT_NE(body.find(R"("enum":["restart_lkg","restart"])"), std::string::npos);
+  EXPECT_NE(body.find(R"(\"bad\")"), std::string::npos);  // log text is escaped
+  EXPECT_EQ(body.find("param_restore"), std::string::npos);
+  EXPECT_NE(body.find("\"model\":\"tiny\""), std::string::npos);
+}
+
+TEST(LlmRanker, UnreachableServerThrowsSoTheHealerFallsBack) {
+  LlmRanker r("tiny@127.0.0.1:1", 0.5);
+  AgentEvidence e;
+  EXPECT_THROW(r.rank("n", e, {Action::Restart}), std::runtime_error);
+  EXPECT_THROW(LlmRanker(""), std::runtime_error);
+}

@@ -25,6 +25,7 @@ struct AgentEvidence {
   int log_errors = 0;
   bool lifecycle = false;
   int incident_action = 1;  // 1-based index of this action within the incident
+  std::string log_tail;     // last lines of the node's log, read only by the LLM ranker
 };
 
 // Coarse evidence key for the repair history: fault plus the discrete evidence flags.
@@ -44,6 +45,8 @@ class Ranker {
   virtual std::vector<Action> rank(const std::string& node, const AgentEvidence& e, const std::vector<Action>& cands) = 0;
   // Outcome of an executed repair (true = verified). Default: ignored.
   virtual void record(const std::string& /*node*/, const AgentEvidence& /*e*/, Action /*a*/, bool /*ok*/) {}
+  // Extra text for the act event after the last rank() call (for example model timings).
+  virtual std::string detail() const { return {}; }
 };
 
 // The hand-written rule order produced by Policy::decide_agent, unchanged.
@@ -115,10 +118,34 @@ class MlpRanker : public Ranker {
   float b2_ = 0;
 };
 
+// Asks a local Ollama model for the first action, constrained by a JSON schema to an enum over
+// cands; the rest keep rule order. arg is "model" or "model@host:port" (default 127.0.0.1:11434).
+// No connection, timeout (timeout_s) or an answer outside cands throws, and the healer then uses
+// the rule order and logs ranker_error.
+class LlmRanker : public Ranker {
+ public:
+  explicit LlmRanker(const std::string& arg, double timeout_s = 5.0);
+  const char* name() const override { return "llm"; }
+  std::vector<Action> rank(const std::string& node, const AgentEvidence& e, const std::vector<Action>& c) override;
+  std::string detail() const override { return detail_; }
+  // Prompt and request body, exposed for tests.
+  std::string prompt(const std::string& node, const AgentEvidence& e, const std::vector<Action>& c) const;
+  std::string request(const std::string& node, const AgentEvidence& e, const std::vector<Action>& c) const;
+  // Extracts the chosen action from an Ollama /api/chat response body; Action::None if absent.
+  static Action parse(const std::string& body, const std::vector<Action>& c);
+
+ private:
+  std::string model_, host_ = "127.0.0.1";
+  int port_ = 11434;
+  double timeout_s_;
+  std::string detail_;
+};
+
 // Stable sort of cands by descending score; equal scores keep the incoming (rule) order.
 std::vector<Action> order_by(const std::vector<Action>& cands, const std::vector<double>& score);
 
-// name: rule | random | oracle | history | mlp. arg: oracle spec, history path or weights path.
+// name: rule | random | oracle | history | mlp | llm. arg: oracle spec, history path, weights
+// path or model.
 std::unique_ptr<Ranker> make_ranker(const std::string& name, const std::string& arg, uint64_t seed);
 
 }  // namespace helix_healer
