@@ -6,9 +6,9 @@
 
 The full Python closed-loop stack ran on the GO2 payload computer (Jetson
 Orin NX) for 30 minutes. This is the reference the native C++ profile is
-measured against ([`docs/NATIVE_RUNTIME.md`](../docs/NATIVE_RUNTIME.md)),
+measured against ([`docs/NATIVE_RUNTIME.md`](https://github.com/yusufdxb/helix/blob/86e4e60/docs/NATIVE_RUNTIME.md)),
 and the fifth DEV capture of detector round 2
-([`docs/DETECTOR_EVAL.md`](../docs/DETECTOR_EVAL.md)).
+([`docs/DETECTOR_EVAL.md`](https://github.com/yusufdxb/helix/blob/86e4e60/docs/DETECTOR_EVAL.md)).
 
 ## Conditions
 
@@ -104,4 +104,4 @@ about 20:31Z) was lost when the Orin dropped off the network.
 
 Run 221913 failed before the stack came up, so its bag was dropped.
 `scripts/hw/stop_bag_check.py <run>/bag` re-checks a bag without the
-runner's recorder. Results: `docs/NATIVE_RUNTIME.md`.
+runner's recorder. Results: [`docs/NATIVE_RUNTIME.md` at 86e4e60](https://github.com/yusufdxb/helix/blob/86e4e60/docs/NATIVE_RUNTIME.md).
