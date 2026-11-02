@@ -151,9 +151,36 @@ Result over 120 s: **1 unnecessary restart**. It happened at 6.78 s, at the firs
 - No process was left over.
 - Running this exposed a healer bug: the healer appended `--ros-args -r __node:=<name>` to every exec line, and `ros2 bag play` reads `-r` as `--rate`. It now skips that for `ros2` CLI verbs other than `run`.
 
+## Reproduction on the pinned freeze build
+
+The held-out set was run a second time, on a clean checkout of the freeze commit `9e66b17`
+(a separate worktree, `git status` empty), 3 reps. That commit predates the
+`helix_v3params` arm, so the rerun has 4 arms and 108 episodes. Every episode exited rc=0.
+Rows are in `heldout_humanoid_repro.csv`. The build predates automatic build stamping
+(`eval/heal/provenance.py`), so the commit and the clean tree were checked by hand.
+
+```
+policy            n  restored  safe  failed  diag_ok  decisions  unneeded  outage_mean_s  blackout_med_s
+none              27         9     0      18    0/18           0        0          24.68          24.985
+respawn           27        21     0       6    9/18         220        0           8.31           0.157
+watchdog          27        21     3       3   12/18          29        0           8.73           0.389
+helix             27        24     3       0   16/18          29        0           4.43           0.274
+```
+
+- The restored / SAFE_STOP / failed grid is identical to the original run in every cell.
+- P1 reproduces exactly: diff +3, p = 0.5, 0 vs 0 unnecessary interventions.
+- **P2 reproduces in direction but not at p < 0.05.** Median -0.002 s, mean -0.132 s,
+  95% bootstrap CI [-0.260, -0.009], exact sign-flip p = 0.0728, helix shorter in 8 of 15.
+  The CI still excludes zero, so the kill criterion is still not met. The original
+  p = 0.0477 was not robust to rerun noise, and it was already not significant after Holm.
+- Diagnosis was 16/18 instead of 17/18. Both misses are term_rsp, labelled `hang` and
+  `endpoint_loss`: a clean SIGTERM exit can be seen as silence before the process is reaped.
+  The original run missed one term_rsp the same way. This label is timing-sensitive.
+
 ## What this does not show
 
 - No robot: every number is software only, on one host.
-- The held-out claims survive their kill criteria but are not significant after Holm.
+- The held-out claims survive their kill criteria but are not significant after Holm. In the
+  pinned rerun, P2 was p = 0.0728.
 - The common-mode hold is verified by unit tests only.
 - The attach test and the bag replay are single runs.
