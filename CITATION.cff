@@ -1,13 +1,12 @@
 cff-version: 1.2.0
 message: "If you use HELIX in your research, please cite it using the metadata below."
 type: software
-title: "HELIX: Hierarchical Execution and Lifecycle Intelligence eXecutor"
-abstract: "Fault sensing middleware prototype for ROS 2 robotic systems. Provides
-  lifecycle-managed detection of node failures, sensor anomalies, and log-pattern
-  faults using heartbeat monitoring, rolling Z-score analysis, and regex-based log
-  parsing. Publishes structured FaultEvent messages for downstream consumption.
-  Designed for deployment on the Unitree GO2 quadruped with Jetson Orin, validated
-  offline and in simulation."
+title: "HELIX: sensor-integrity monitoring and independent stop verification for the Unitree GO2"
+abstract: "Observe-only ROS 2 monitor for the Unitree GO2. Detects content faults that
+  rate and range checks miss (frozen payloads, stalled stamps, cross-sensor gyro
+  residual between body IMU and LiDAR IMU) and verifies commanded stops from
+  independent raw-sensor evidence instead of trusting the state estimator. Evaluated
+  in a pre-registered held-out study on real GO2 recordings with injected faults."
 authors:
   - family-names: Guenena
     given-names: Yusuf
@@ -16,15 +15,13 @@ authors:
 repository-code: "https://github.com/yusufdxb/helix"
 url: "https://github.com/yusufdxb/helix"
 license: MIT
-version: 1.0.0
-date-released: "2026-03-19"
+version: 2.0.0
+date-released: "2026-11-02"
 keywords:
   - robotics
   - ros2
-  - fault-tolerance
-  - fault-sensing
-  - fault-observability
+  - fault-detection
+  - sensor-integrity
+  - runtime-monitoring
   - unitree-go2
-  - jetson-orin
-  - middleware
   - reliability-engineering

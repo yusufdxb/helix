@@ -22,19 +22,20 @@ target_link_libraries(monitor_eval helix_monitor_core)
 
 install(TARGETS monitor_eval DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)
-install(DIRECTORY config DESTINATION share/${PROJECT_NAME} OPTIONAL)
+install(DIRECTORY config launch DESTINATION share/${PROJECT_NAME} OPTIONAL)
 
 # Thin ROS node: subscribes to the GO2 topics, feeds the core, publishes FaultEvent and stop verdicts.
 # It needs the robot's message packages; without them only the core and the eval tool are built.
 find_package(rclcpp QUIET)
+find_package(ament_index_cpp QUIET)
 find_package(sensor_msgs QUIET)
 find_package(helix_msgs QUIET)
 find_package(unitree_go QUIET)
 find_package(unitree_api QUIET)
-if(rclcpp_FOUND AND sensor_msgs_FOUND AND helix_msgs_FOUND AND unitree_go_FOUND AND unitree_api_FOUND)
+if(rclcpp_FOUND AND ament_index_cpp_FOUND AND sensor_msgs_FOUND AND helix_msgs_FOUND AND unitree_go_FOUND AND unitree_api_FOUND)
   add_executable(helix_monitor_node src/monitor_node.cpp)
   target_link_libraries(helix_monitor_node helix_monitor_core)
-  ament_target_dependencies(helix_monitor_node rclcpp sensor_msgs helix_msgs unitree_go unitree_api)
+  ament_target_dependencies(helix_monitor_node rclcpp ament_index_cpp sensor_msgs helix_msgs unitree_go unitree_api)
   install(TARGETS helix_monitor_node DESTINATION lib/${PROJECT_NAME})
 else()
   message(WARNING "rclcpp/sensor_msgs/helix_msgs/unitree_go/unitree_api not all found: helix_monitor_node is not built")

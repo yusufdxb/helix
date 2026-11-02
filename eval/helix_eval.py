@@ -245,9 +245,9 @@ def residual_line(rc, threshold=None):
 def stop_text(cal, arm):
     sc = cal["stop"]
     if arm == "B-est":
-        g = sc["estimator"]
-        return (f"group estimator sport ch=6,7,9 scale=20,20,10 raw=0 max=1 quiet=1.0 moving=1e9\n"
-                f"stop window_s=0.5 deadline_s=2.0 stale_s=0.2 min_groups=1 require_raw=0\n")
+        # Registered B-est: speed < 0.05 m/s and yaw rate < 0.1 rad/s, i.e. quiet=1.0 after scaling.
+        return ("group estimator sport ch=6,7,9 scale=20,20,10 raw=0 max=1 quiet=1.0 moving=1e9\n"
+                "stop window_s=0.5 deadline_s=2.0 stale_s=0.2 min_groups=1 require_raw=0\n")
     e, j, i = sc["estimator"], sc["joints"], sc["inertial"]
     return (f"group estimator sport ch=6,7,9 scale=20,20,10 raw=0 max=1 quiet={e['quiet']:.6g} moving={e['moving']:.6g}\n"
             f"group joints low ch={','.join(str(c) for c in range(6, 18))} raw=1 quiet={j['quiet']:.6g} moving={j['moving']:.6g}\n"
@@ -706,13 +706,17 @@ def score(args):
     sp = detection_episodes(sport_recs, body, "sport", ["F1", "F3a"])
     res["sport_secondary"] = summarize(sp, ARMS, ["F1", "F3a"])
 
-    # K4: B-z versus B-rate on F1, F2
-    bz_eps, bz_fa = bz_study(det)
-    res["bz"] = {"detection": {c: wilson(sum(e["det"] is not None for e in bz_eps if e["cls"] == c),
-                                         sum(e["cls"] == c for e in bz_eps)) for c in ("F1", "F2")},
-                 "clean_fa_lidar_rate": bz_fa,
-                 "brate_clean_fa_lidar": sum(1 for c in clean.values() for r in c["alarms"]
-                                             if r["check"] == "rate" and r["stream"] == "lidar_imu")}
+    # K4: B-z versus B-rate on F1, F2. The B-z binary (v1 AnomalyCore, helix_sensing_cpp) was removed after
+    # K4 fired; reproduce this arm from freeze commit a92c69c, where the package still exists.
+    if ZBIN.exists():
+        bz_eps, bz_fa = bz_study(det)
+        res["bz"] = {"detection": {c: wilson(sum(e["det"] is not None for e in bz_eps if e["cls"] == c),
+                                             sum(e["cls"] == c for e in bz_eps)) for c in ("F1", "F2")},
+                     "clean_fa_lidar_rate": bz_fa,
+                     "brate_clean_fa_lidar": sum(1 for c in clean.values() for r in c["alarms"]
+                                                 if r["check"] == "rate" and r["stream"] == "lidar_imu")}
+    else:
+        bz_eps, res["bz"] = [], {"skipped": f"{ZBIN} not found (B-z arm needs freeze commit a92c69c)"}
 
     # C2 stop verification
     cfgs = {"HELIX": OUT / "cfg/stop_helix.cfg", "B-est": OUT / "cfg/stop_best.cfg"}
@@ -759,8 +763,11 @@ def report(res):
     print("clean FA/h (upper95):", {a: "%d/%.3fh=%.2f (%.2f)" % (v["alarms"], v["hours"], v["fa_per_h"], v["fa_upper95"])
                                     for a, v in res["clean_fa"].items()})
     print("sham FA:", res["sham_fa"]["sham"]["alarms"], " oracle thr %.4f" % res["oracle"]["threshold"])
-    print("B-z:", {c: "%.3f" % v[0] for c, v in res["bz"]["detection"].items()}, "B-z clean FA",
-          res["bz"]["clean_fa_lidar_rate"]["alarms"], " B-rate lidar clean FA", res["bz"]["brate_clean_fa_lidar"])
+    if "skipped" in res["bz"]:
+        print("B-z:", res["bz"]["skipped"])
+    else:
+        print("B-z:", {c: "%.3f" % v[0] for c, v in res["bz"]["detection"].items()}, "B-z clean FA",
+              res["bz"]["clean_fa_lidar_rate"]["alarms"], " B-rate lidar clean FA", res["bz"]["brate_clean_fa_lidar"])
     print("sport secondary:", {c: {a: row[a]["k"] for a in ("B-rate", "B-range", "HELIX")} | {"n": row["HELIX"]["n"]}
                                for c, row in res["sport_secondary"].items()})
     for var, row in res["stop"].items():

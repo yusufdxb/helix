@@ -11,14 +11,7 @@ find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/FaultEvent.msg"
-  "msg/RecoveryHint.msg"
-  "msg/RecoveryAction.msg"
-  "msg/HelixHold.msg"
-  "msg/ArbiterStatus.msg"
-  "msg/SupervisorStatus.msg"
-  "msg/SinkStatus.msg"
-  "srv/GetContext.srv"
-  "srv/ReleaseHold.srv"
+  "msg/StopVerdict.msg"
   DEPENDENCIES std_msgs
 )
 

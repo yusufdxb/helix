@@ -1,5 +1,9 @@
 # Hardware evaluation 2026-10-17: Python cost baseline
 
+> HELIX v2 removed the v1 stack this evaluation measured, along with `docs/NATIVE_RUNTIME.md` and
+> `docs/DETECTOR_EVAL.md`. Those documents remain at commit `86e4e60`. The native-stop bags in
+> `native_stop/` are inputs to the v2 stop-verification study.
+
 The full Python closed-loop stack ran on the GO2 payload computer (Jetson
 Orin NX) for 30 minutes. This is the reference the native C++ profile is
 measured against ([`docs/NATIVE_RUNTIME.md`](../docs/NATIVE_RUNTIME.md)),
