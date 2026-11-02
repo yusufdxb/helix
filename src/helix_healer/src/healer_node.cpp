@@ -18,7 +18,9 @@
 
 #include <signal.h>
 
+#include <algorithm>
 #include <atomic>
+#include <cerrno>
 #include <chrono>
 #include <cmath>
 #include <deque>
@@ -89,6 +91,7 @@ struct Managed {
   bool started = false;
   bool retired = false;
   double start_t = 0;
+  double watch_t = 0;  // when the healer began observing this process (adoption time for attach=)
   double death_t = 0;
   int quick_deaths = 0;
   double dump_t = -1;  // first tick a core dump of the current process was seen
@@ -104,6 +107,8 @@ struct Managed {
   bool learn_ok = false;  // the policy judged it healthy at the last tick: its timing may be learned
   // attach mode: adopted from an outside launcher; argv/env/cwd captured to re-execute it
   bool adopted = false;
+  pid_t owner = -1;   // the launcher of the adopted process; its exit releases the node
+  bool ours = false;  // the current process was started by the healer, not by the launcher
   std::vector<std::string> env;
   std::string cwd;
   std::vector<std::vector<std::string>> then;  // resolved helper commands
@@ -188,6 +193,7 @@ class Healer : public rclcpp::Node {
 
  private:
   struct Job {
+    std::string node;
     std::jthread th;
     std::shared_ptr<std::atomic<bool>> done;
   };
@@ -284,7 +290,7 @@ class Healer : public rclcpp::Node {
       }
       ob.expected_hz = ts.learned_hz;
     }
-    ob.age_s = ts.last >= 0 ? t - ts.last : t - m.start_t;
+    ob.age_s = ts.last >= 0 ? t - ts.last : t - std::max(m.start_t, m.watch_t);
     const double w = ob.expected_hz > 0 ? std::max(p.rate_window_s, 3.0 / ob.expected_hz) : p.rate_window_s;
     int c = 0;
     // Since a respawn the window would still hold the outage, so a freshly restarted node is
@@ -340,7 +346,8 @@ class Healer : public rclcpp::Node {
     const auto info = hh::find_process(nodes_.at(name).spec.attach);  // /proc scan outside the lock
     std::lock_guard lk(mu_);
     auto& m = nodes_.at(name);
-    if (info.pid <= 0 || info.pid == m.pid || !sup_.adopt(info.pid)) return false;
+    // Never adopt our own child: it is a replacement the healer started (possibly one it is stopping).
+    if (info.pid <= 0 || info.pid == m.pid || info.ppid == ::getpid() || !sup_.adopt(info.pid)) return false;
     if (info.matches > 1)
       RCLCPP_WARN(get_logger(), "attach %s: %d processes match '%s', took the newest leaf pid %d", name.c_str(),
                   info.matches, m.spec.attach.c_str(), info.pid);
@@ -349,9 +356,12 @@ class Healer : public rclcpp::Node {
     m.env = info.env;
     m.cwd = info.cwd;
     m.adopted = true;
+    m.owner = info.ppid;
+    m.ours = false;
     m.alive = true;
     m.started = true;
     m.start_t = now() - info.age_s;
+    m.watch_t = now();  // judge outputs only after the healer has had its own startup grace
     m.rss_base = 0;
     m.rss_hist.clear();
     m.last_cpu_s = -1;
@@ -375,7 +385,7 @@ class Healer : public rclcpp::Node {
       hh::NodeObs n;
       n.name = name;
       n.alive = m.alive;
-      n.up_s = m.alive ? t - m.start_t : 0;
+      n.up_s = m.alive ? t - std::max(m.start_t, m.watch_t) : 0;
       n.down_s = m.alive ? 0 : t - m.death_t;
       n.cpu = m.cpu;
       n.rss_mb = m.rss;
@@ -509,6 +519,7 @@ class Healer : public rclcpp::Node {
       return true;
     });
 
+    release_orphans();
     const auto snap = snapshot(t);
     auto out = policy_->step(snap);
     for (const auto& e : out.events) emit(e);
@@ -516,7 +527,7 @@ class Healer : public rclcpp::Node {
     {
       std::lock_guard lk(mu_);
       for (auto& [name, m] : nodes_)
-        m.learn_ok = m.alive && t - m.start_t >= spec_.p.startup_grace_s && policy_->healthy(name);
+        m.learn_ok = m.alive && t - std::max(m.start_t, m.watch_t) >= spec_.p.startup_grace_s && policy_->healthy(name);
     }
     if (snaps_.is_open() && (t - last_snap_ >= 0.25 || !out.decisions.empty())) {
       last_snap_ = t;
@@ -579,7 +590,7 @@ class Healer : public rclcpp::Node {
   // ---------- repairs ----------
   void start_job(const std::string& node, std::function<bool()> fn, bool report, hh::Action a = hh::Action::None) {
     auto done = std::make_shared<std::atomic<bool>>(false);
-    Job j{std::jthread([this, node, fn = std::move(fn), report, a, done] {
+    Job j{node, std::jthread([this, node, fn = std::move(fn), report, a, done] {
             bool ok = false;
             std::string err;
             try {
@@ -651,6 +662,15 @@ class Healer : public rclcpp::Node {
     // instead of starting a second copy.
     if (!nodes_.at(node).spec.attach.empty() && adopt_running(node)) {
       emit_simple(node, "attach", "pid " + std::to_string(nodes_.at(node).pid) + " (restarted elsewhere)");
+      // The launcher restarted the process but not necessarily its helpers (a controller spawner
+      // is a one-shot action in a launch file), so run them here too. A helper that the launcher
+      // does re-run fails harmlessly on the second call (controller already loaded).
+      std::vector<std::vector<std::string>> helpers;
+      {
+        std::lock_guard lk(mu_);
+        helpers = nodes_.at(node).then;
+      }
+      run_then(node, helpers);
       return true;
     }
     pid_t pid;
@@ -672,6 +692,7 @@ class Healer : public rclcpp::Node {
       helpers = m.then;
       m.pid = pid;
       m.alive = pid > 0;
+      m.ours = true;
       m.started = true;
       m.start_t = now();
       m.rss_base = 0;
@@ -686,11 +707,48 @@ class Healer : public rclcpp::Node {
     const bool ok =
         !m.spec.lifecycle ||
         bring_up(node, initial ? spec_.p.startup_grace_s : std::max(2.0, spec_.p.lifecycle_timeout_s));
+    run_then(node, helpers);
+    return ok;
+  }
+
+  void run_then(const std::string& node, const std::vector<std::vector<std::string>>& helpers) {
     for (const auto& h : helpers) {
       const std::string log = log_dir_.empty() ? "" : log_dir_ + "/" + node + ".then.log";
       emit_simple(node, "then", "pid " + std::to_string(sup_.spawn(h, log)) + " " + join(h));
     }
-    return ok;
+  }
+
+  // attach mode: when the launcher of an adopted node exits (a launch shutdown), stop
+  // supervising the node, so the healer does not keep a stack alive that its owner stopped.
+  // A replacement the healer started is stopped too, because the launcher could not stop it.
+  // The node is adopted again if the launcher starts it again.
+  void release_orphans() {
+    std::vector<std::pair<std::string, pid_t>> gone;  // node, our pid to stop (or -1)
+    {
+      std::lock_guard lk(mu_);
+      for (auto& [name, m] : nodes_) {
+        if (!m.adopted || !m.started || m.owner <= 1) continue;
+        if (::kill(m.owner, 0) == 0 || errno != ESRCH) continue;
+        if (std::any_of(jobs_.begin(), jobs_.end(), [&](const Job& j) { return j.node == name && !j.done->load(); }))
+          continue;  // a repair is in flight: release after it reports
+        const pid_t stop = (m.ours && m.alive) ? m.pid : -1;
+        if (m.ours || !m.alive) m.pid = -1;  // a live launcher-owned orphan keeps its pid so it is not re-adopted
+        m.alive = false;
+        m.started = false;
+        m.owner = -1;
+        m.cpu = 0;
+        gone.emplace_back(name, stop);
+      }
+    }
+    for (const auto& [name, pid] : gone) {
+      policy_->forget(name);
+      emit_simple(name, "released", pid > 0 ? "launcher exited; stopping our pid " + std::to_string(pid)
+                                            : "launcher exited");
+      if (pid > 0) {
+        const double g = spec_.p.term_grace_s;
+        start_job(name, [this, pid, g] { sup_.terminate(pid, g); return true; }, false);
+      }
+    }
   }
 
   template <class Srv>

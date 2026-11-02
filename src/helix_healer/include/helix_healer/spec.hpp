@@ -33,6 +33,12 @@ struct HealerParams {
   double leak_horizon_s = 15.0;   // projected time to rss_max below this = leak
   double leak_min_growth_mb = 64; // ...and at least this much growth over the post-start baseline
   double victim_grace_s = 2.0;    // after upstream recovers, a downstream node gets this long to follow
+  // Common-mode hold (helix only): a symptom that starts within common_window_s of a symptom on
+  // another alive node with no data-flow path to or from it points at a shared cause (host or
+  // middleware stall), not at either node. Both are held for up to common_hold_s from onset, then
+  // judged individually. common_hold_s=0 disables the rule.
+  double common_window_s = 0.5;
+  double common_hold_s = 2.0;
   double lifecycle_timeout_s = 1.0;
   double term_grace_s = 1.0;      // SIGTERM -> SIGKILL
   double learn_s = 3.0;           // HZ 0 outputs: expected rate = rate measured over this window

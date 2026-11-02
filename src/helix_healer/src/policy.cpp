@@ -18,6 +18,7 @@ const char* to_string(Fault f) {
     case Fault::Degraded: return "degraded";
     case Fault::QosMismatch: return "qos_mismatch";
     case Fault::Upstream: return "upstream";
+    case Fault::CommonMode: return "common_mode";
   }
   return "?";
 }
@@ -183,6 +184,46 @@ bool Policy::input_silent_longer(const NodeObs& n, const Snapshot& s) const {
   return false;
 }
 
+// True if data can flow from a to b or from b to a, through any chain of upstream links.
+bool Policy::linked(const std::string& a, const std::string& b, const Snapshot& s) const {
+  auto reaches = [&](const std::string& from, const std::string& to) {
+    std::vector<std::string> todo{from}, seen{from};
+    while (!todo.empty()) {
+      const std::string cur = todo.back();
+      todo.pop_back();
+      for (const auto& nn : s.nodes) {
+        if (nn.name != cur) continue;
+        for (const auto& u : nn.upstream) {
+          if (u == to) return true;
+          if (std::find(seen.begin(), seen.end(), u) == seen.end()) {
+            seen.push_back(u);
+            todo.push_back(u);
+          }
+        }
+      }
+    }
+    return false;
+  };
+  return reaches(a, b) || reaches(b, a);
+}
+
+// A symptom that starts together with one on an unrelated, alive, unrepaired node has a shared
+// cause outside both. Holding it avoids restarting healthy processes for a host or middleware stall.
+bool Policy::common_mode(const NodeObs& n, const State& self, const Snapshot& s) const {
+  const auto& p = spec_.p;
+  if (p.common_hold_s <= 0 || self.onset == State::kNoOnset || s.t - self.onset > p.common_hold_s) return false;
+  for (const auto& o : s.nodes) {
+    if (o.name == n.name || !o.alive) continue;
+    auto it = st_.find(o.name);
+    if (it == st_.end()) continue;
+    const State& os = it->second;
+    if (os.phase != Phase::Normal || !os.sick || os.onset == State::kNoOnset) continue;
+    if (std::abs(os.onset - self.onset) > p.common_window_s) continue;
+    if (!linked(n.name, o.name, s)) return true;
+  }
+  return false;
+}
+
 Fault Policy::diagnose(const NodeObs& n, const Snapshot& s) {
   const auto& p = spec_.p;
   State& st = st_[n.name];
@@ -197,6 +238,7 @@ Fault Policy::diagnose(const NodeObs& n, const Snapshot& s) {
   if (n.qos_incompatible) return Fault::QosMismatch;
   if (upstream_sick(n, st, t) || resource_root_elsewhere(n.name, t)) return Fault::Upstream;
   if (stale && input_silent_longer(n, s)) return Fault::Upstream;
+  if (common_mode(n, st, s)) return Fault::CommonMode;
   if (stale) return missing ? Fault::EndpointLoss : Fault::Hang;
   return Fault::Degraded;
 }
@@ -340,10 +382,13 @@ StepOut Policy::step(const Snapshot& s) {
     const bool symptom = f == Fault::Hang || f == Fault::EndpointLoss || f == Fault::Degraded;
     const double confirm = (kind_ == PolicyKind::Helix && symptom && st.sharp) ? p.adaptive_confirm_s : p.confirm_s;
     if (!immediate && t - st.pending_since < confirm) continue;
-    if (f == Fault::Upstream) {
+    if (f == Fault::Upstream || f == Fault::CommonMode) {
       if (!st.victim_reported) {
         st.victim_reported = true;
-        out.events.push_back({t, n.name, "victim", f, Action::None, 0, "symptom explained by an upstream or resource root"});
+        if (f == Fault::Upstream)
+          out.events.push_back({t, n.name, "victim", f, Action::None, 0, "symptom explained by an upstream or resource root"});
+        else
+          out.events.push_back({t, n.name, "hold", f, Action::None, 0, "symptom began together with one on an unrelated node"});
       }
       continue;
     }
@@ -351,6 +396,11 @@ StepOut Policy::step(const Snapshot& s) {
     out.decisions.push_back(decide(n, f, st, t, out));
   }
   return out;
+}
+
+void Policy::forget(const std::string& node) {
+  auto it = st_.find(node);
+  if (it != st_.end()) it->second = State{};
 }
 
 void Policy::on_result(const std::string& node, Action a, bool ok, double t) {

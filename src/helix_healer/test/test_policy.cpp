@@ -262,6 +262,63 @@ TEST(Policy, DegradedRateIsDetected) {
   EXPECT_EQ(tr.decisions[0].fault, Fault::Degraded);
 }
 
+TEST(Policy, SimultaneousStallOnUnrelatedNodesIsHeld) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  // a and c share no data path. Both lose rate at the same moment for 1 s (a host or
+  // middleware stall), then recover: neither is restarted.
+  run(p, w, 0, 3, tr, [](World& w, double t) {
+    const double hz = t < 1.0 ? 6 : 20;
+    w.a.outputs[0].rate_hz = hz;
+    w.c.outputs[0].rate_hz = hz;
+  });
+  EXPECT_TRUE(tr.decisions.empty());
+  EXPECT_TRUE(tr.has("a", "hold"));
+  EXPECT_TRUE(tr.has("c", "hold"));
+}
+
+TEST(Policy, CommonModeHoldExpires) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  // The same shared symptom, but it never clears: after common_hold_s both are judged alone.
+  auto slow = [](World& w, double) {
+    w.a.outputs[0].rate_hz = 6;
+    w.c.outputs[0].rate_hz = 6;
+  };
+  run(p, w, 0, 1.9, tr, slow);
+  EXPECT_TRUE(tr.decisions.empty());
+  run(p, w, 1.9, 3, tr, slow);
+  EXPECT_GE(tr.count("a", Action::Restart), 1);
+  EXPECT_GE(tr.count("c", Action::LifecycleReset) + tr.count("c", Action::Restart), 1);
+}
+
+TEST(Policy, LinkedNodesAreNotACommonMode) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  // b reads a: a simultaneous symptom on both is a root and its victim, not a shared cause.
+  run(p, w, 0, 1, tr, [](World& w, double) {
+    w.a.outputs[0].rate_hz = 6;
+    w.b.outputs[0].rate_hz = 6;
+  });
+  EXPECT_FALSE(tr.has("a", "hold"));
+  EXPECT_EQ(tr.count("a", Action::Restart), 1);
+  EXPECT_EQ(tr.count("b", Action::Restart), 0);
+}
+
+TEST(Policy, CommonModeHoldCanBeDisabled) {
+  Policy p(PolicyKind::Helix, parse_spec(std::string(kSpec) + "healer common_hold_s=0\n"));
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World& w, double) {
+    w.a.outputs[0].rate_hz = 6;
+    w.c.outputs[0].rate_hz = 6;
+  });
+  EXPECT_EQ(tr.count("a", Action::Restart), 1);
+}
+
 TEST(Policy, LeakIsCaughtBeforeTheHardLimit) {
   Policy p(PolicyKind::Helix, parse_spec(kSpec));
   World w;

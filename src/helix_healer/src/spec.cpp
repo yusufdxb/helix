@@ -38,6 +38,7 @@ void set_param(HealerParams& p, int no, const std::string& k, const std::string&
       {"backoff_max_s", &p.backoff_max_s}, {"window_s", &p.window_s}, {"loop_s", &p.loop_s},
       {"cpu_sustain_s", &p.cpu_sustain_s}, {"leak_horizon_s", &p.leak_horizon_s},
       {"leak_min_growth_mb", &p.leak_min_growth_mb}, {"victim_grace_s", &p.victim_grace_s},
+      {"common_window_s", &p.common_window_s}, {"common_hold_s", &p.common_hold_s},
       {"lifecycle_timeout_s", &p.lifecycle_timeout_s}, {"term_grace_s", &p.term_grace_s},
       {"learn_s", &p.learn_s}, {"resource_period_s", &p.resource_period_s}, {"fast_repair", &p.fast_repair},
       {"core_wait_s", &p.core_wait_s},

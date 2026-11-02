@@ -301,6 +301,7 @@ ProcInfo find_process(const std::string& pattern) {
   if (!best) return out;
   const std::string base = "/proc/" + std::to_string(best->pid);
   out.pid = best->pid;
+  out.ppid = best->ppid;
   out.argv = split_nul(slurp(base + "/cmdline"));
   out.env = split_nul(slurp(base + "/environ"));
   char buf[4096];

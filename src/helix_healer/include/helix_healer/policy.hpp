@@ -12,7 +12,7 @@
 
 namespace helix_healer {
 
-enum class Fault { None, Crash, CrashLoop, Hang, EndpointLoss, CpuRunaway, MemoryLeak, Degraded, QosMismatch, Upstream };
+enum class Fault { None, Crash, CrashLoop, Hang, EndpointLoss, CpuRunaway, MemoryLeak, Degraded, QosMismatch, Upstream, CommonMode };
 enum class Action { None, Restart, LifecycleReset, Fallback, Report };
 enum class PolicyKind { None, Respawn, Watchdog, Helix };
 
@@ -89,6 +89,9 @@ class Policy {
   // True while the node is in normal operation with no pending or recent fault. The healer
   // learns timing envelopes only while this holds.
   bool healthy(const std::string& node) const;
+  // The node left supervision (attach mode: its launcher exited). Drops its fault state so a
+  // later re-adoption starts fresh. Call only when no decision for it is outstanding.
+  void forget(const std::string& node);
 
   // Exposed for tests: the HELIX root-cause rule on one node, given the snapshot.
   Fault diagnose(const NodeObs& n, const Snapshot& s);
@@ -120,6 +123,8 @@ class Policy {
   bool upstream_sick(const NodeObs& n, const State& self, double t) const;
   bool resource_root_elsewhere(const std::string& self, double t) const;
   bool input_silent_longer(const NodeObs& n, const Snapshot& s) const;
+  bool linked(const std::string& a, const std::string& b, const Snapshot& s) const;
+  bool common_mode(const NodeObs& n, const State& self, const Snapshot& s) const;
   // sharp: the symptom was flagged by a ready adaptive envelope (short confirmation applies).
   bool output_symptom(const NodeObs& n, bool* stale, bool* own_missing, double* oldest, bool* sharp = nullptr) const;
   bool leaking(const NodeObs& n) const;

@@ -31,6 +31,7 @@ struct SpawnOpts {
 // A running process found by its command line, with what is needed to start it again.
 struct ProcInfo {
   pid_t pid = -1;
+  pid_t ppid = -1;  // the process that started it (for attach=, the launcher)
   std::vector<std::string> argv;
   std::vector<std::string> env;  // empty when /proc/PID/environ is unreadable
   std::string cwd;
