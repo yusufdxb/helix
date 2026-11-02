@@ -39,7 +39,12 @@ void set_param(HealerParams& p, int no, const std::string& k, const std::string&
       {"cpu_sustain_s", &p.cpu_sustain_s}, {"leak_horizon_s", &p.leak_horizon_s},
       {"leak_min_growth_mb", &p.leak_min_growth_mb}, {"victim_grace_s", &p.victim_grace_s},
       {"lifecycle_timeout_s", &p.lifecycle_timeout_s}, {"term_grace_s", &p.term_grace_s},
-      {"learn_s", &p.learn_s}, {"resource_period_s", &p.resource_period_s}};
+      {"learn_s", &p.learn_s}, {"resource_period_s", &p.resource_period_s}, {"fast_repair", &p.fast_repair},
+      {"adaptive", &p.adaptive}, {"adaptive_floor_s", &p.adaptive_floor_s},
+      {"adaptive_stale_mult", &p.adaptive_stale_mult}, {"adaptive_min_gaps", &p.adaptive_min_gaps},
+      {"adaptive_min_s", &p.adaptive_min_s}, {"adaptive_tau_s", &p.adaptive_tau_s},
+      {"adaptive_cusum_h_min", &p.adaptive_cusum_h_min}, {"adaptive_cusum_mult", &p.adaptive_cusum_mult},
+      {"adaptive_confirm_s", &p.adaptive_confirm_s}};
   if (k == "max_attempts") p.max_attempts = static_cast<int>(num(no, v));
   else if (k == "loop_deaths") p.loop_deaths = static_cast<int>(num(no, v));
   else if (auto it = d.find(k); it != d.end()) *it->second = num(no, v);
@@ -94,6 +99,7 @@ Spec parse_spec(const std::string& text) {
         else if (k == "fallback") n.fallback = v;
         else if (k == "cpu_max") n.cpu_max = num(no, v);
         else if (k == "rss_max_mb") n.rss_max_mb = num(no, v);
+        else if (k == "attach") n.attach = v;
         else fail(no, "unknown node key '" + k + "'");
       }
       spec.nodes.push_back(std::move(n));
@@ -106,12 +112,16 @@ Spec parse_spec(const std::string& text) {
     } else if (kind == "exec") {
       if (tok.size() < 3) fail(no, "exec NAME ARGV...");
       node(tok[1]).argv.assign(tok.begin() + 2, tok.end());
+    } else if (kind == "then") {
+      if (tok.size() < 3) fail(no, "then NAME ARGV...");
+      node(tok[1]).then.emplace_back(tok.begin() + 2, tok.end());
     } else {
       fail(no, "unknown directive '" + kind + "'");
     }
   }
   for (const auto& n : spec.nodes) {
-    if (n.argv.empty()) throw std::runtime_error("spec: node '" + n.name + "' has no exec line");
+    if (n.argv.empty() && n.attach.empty())
+      throw std::runtime_error("spec: node '" + n.name + "' has no exec line and no attach= pattern");
     if (!n.fallback.empty()) {
       const NodeSpec* f = spec.find(n.fallback);
       if (!f) throw std::runtime_error("spec: node '" + n.name + "' falls back to unknown '" + n.fallback + "'");

@@ -45,6 +45,13 @@ Policy::Policy(PolicyKind kind, const Spec& spec) : kind_(kind), spec_(spec) {
   for (const auto& n : spec_.nodes) st_[n.name];
 }
 
+bool Policy::healthy(const std::string& node) const {
+  auto it = st_.find(node);
+  if (it == st_.end()) return false;
+  const State& st = it->second;
+  return st.phase == Phase::Normal && !st.sick && st.pending == Fault::None;
+}
+
 std::string Policy::phase(const std::string& node) const {
   auto it = st_.find(node);
   if (it == st_.end()) return "unknown";
@@ -61,16 +68,23 @@ namespace {
 double stale_limit(const HealerParams& p, double hz) { return std::max(p.stale_min_s, p.stale_periods / hz); }
 }  // namespace
 
-bool Policy::output_symptom(const NodeObs& n, bool* stale, bool* own_missing, double* oldest) const {
+bool Policy::output_symptom(const NodeObs& n, bool* stale, bool* own_missing, double* oldest, bool* sharp) const {
   const auto& p = spec_.p;
-  bool st = false, miss = false, slow = false;
+  const bool adaptive = kind_ == PolicyKind::Helix && p.adaptive > 0;
+  bool st = false, miss = false, slow = false, sh = false;
   double old = 0;
   for (const auto& o : n.outputs) {
     if (o.expected_hz <= 0) continue;
-    if (o.age_s > stale_limit(p, o.expected_hz)) {
+    const bool env = adaptive && o.stale_limit_s > 0;
+    const double limit = env ? o.stale_limit_s : stale_limit(p, o.expected_hz);
+    if (o.age_s > limit) {
       st = true;
+      sh = sh || env;
       old = std::max(old, o.age_s);
       if (!o.own_endpoint) miss = true;
+    } else if (adaptive && o.deficit_limit > 0 && o.deficit > o.deficit_limit) {
+      slow = true;
+      sh = true;
     } else if (o.rate_hz < p.degraded_ratio * o.expected_hz) {
       slow = true;
     }
@@ -78,6 +92,7 @@ bool Policy::output_symptom(const NodeObs& n, bool* stale, bool* own_missing, do
   if (stale) *stale = st;
   if (own_missing) *own_missing = miss;
   if (oldest) *oldest = old;
+  if (sharp) *sharp = sh;
   return st || slow;
 }
 
@@ -148,6 +163,26 @@ bool Policy::resource_root_elsewhere(const std::string& self, double t) const {
   return false;
 }
 
+// A stale node whose input went silent no later than its own output is starved, not hung,
+// even before the upstream node is itself judged sick (it may have a longer stale limit).
+bool Policy::input_silent_longer(const NodeObs& n, const Snapshot& s) const {
+  const NodeSpec* ns = spec_.find(n.name);
+  if (!ns || ns->inputs.empty()) return false;
+  double mine = 0;
+  for (const auto& o : n.outputs) mine = std::max(mine, o.expected_hz > 0 ? o.age_s : 0.0);
+  for (const auto& u : n.upstream) {
+    if (u == n.name) continue;
+    for (const auto& un : s.nodes) {
+      if (un.name != u) continue;
+      for (const auto& o : un.outputs)
+        if (o.expected_hz > 0 && std::find(ns->inputs.begin(), ns->inputs.end(), o.topic) != ns->inputs.end() &&
+            o.age_s + 1e-3 >= mine)
+          return true;
+    }
+  }
+  return false;
+}
+
 Fault Policy::diagnose(const NodeObs& n, const Snapshot& s) {
   const auto& p = spec_.p;
   State& st = st_[n.name];
@@ -156,10 +191,12 @@ Fault Policy::diagnose(const NodeObs& n, const Snapshot& s) {
   if (leaking(n)) return Fault::MemoryLeak;
   if (st.cpu_high_since >= 0) return t - st.cpu_high_since >= p.cpu_sustain_s ? Fault::CpuRunaway : Fault::None;
   if (n.up_s < p.startup_grace_s) return Fault::None;
-  bool stale = false, missing = false;
-  if (!output_symptom(n, &stale, &missing, nullptr)) return Fault::None;
+  bool stale = false, missing = false, sharp = false;
+  if (!output_symptom(n, &stale, &missing, nullptr, &sharp)) return Fault::None;
+  st.sharp = sharp;
   if (n.qos_incompatible) return Fault::QosMismatch;
   if (upstream_sick(n, st, t) || resource_root_elsewhere(n.name, t)) return Fault::Upstream;
+  if (stale && input_silent_longer(n, s)) return Fault::Upstream;
   if (stale) return missing ? Fault::EndpointLoss : Fault::Hang;
   return Fault::Degraded;
 }
@@ -205,13 +242,13 @@ Decision Policy::decide(const NodeObs& n, Fault f, State& st, double t, StepOut&
 
   if (kind_ == PolicyKind::Respawn) {
     d.action = Action::Restart;
-    d.delay_s = p.backoff_s;
+    d.delay_s = p.fast_repair > 0 ? 0.0 : p.backoff_s;  // launch respawn=true uses no delay by default
   } else if (kind_ == PolicyKind::Watchdog) {
     if (used >= p.max_attempts) {
       give_up("budget");
     } else {
       d.action = Action::Restart;
-      d.delay_s = n.alive ? 0.0 : p.backoff_s;
+      d.delay_s = (n.alive || (p.fast_repair > 0 && used == 0)) ? 0.0 : p.backoff_s;
     }
   } else {  // Helix
     if (f == Fault::QosMismatch) give_up("qos_mismatch: restart cannot fix a QoS contract");
@@ -224,7 +261,7 @@ Decision Policy::decide(const NodeObs& n, Fault f, State& st, double t, StepOut&
     else if (ns.lifecycle && (f == Fault::Degraded || f == Fault::EndpointLoss)) d.action = Action::LifecycleReset;
     else {
       d.action = Action::Restart;
-      d.delay_s = (n.alive && used == 0) ? 0.0 : backoff(used);
+      d.delay_s = ((n.alive || p.fast_repair > 0) && used == 0) ? 0.0 : backoff(used);
     }
   }
 
@@ -284,7 +321,11 @@ StepOut Policy::step(const Snapshot& s) {
     }
     if (f == Fault::None) continue;
     const bool immediate = f == Fault::Crash || f == Fault::CrashLoop;
-    if (!immediate && t - st.pending_since < p.confirm_s) continue;
+    // A symptom flagged by a ready envelope is already judged against this output's own
+    // jitter, so it needs only a short confirmation. Resource and fixed-rule faults keep confirm_s.
+    const bool symptom = f == Fault::Hang || f == Fault::EndpointLoss || f == Fault::Degraded;
+    const double confirm = (kind_ == PolicyKind::Helix && symptom && st.sharp) ? p.adaptive_confirm_s : p.confirm_s;
+    if (!immediate && t - st.pending_since < confirm) continue;
     if (f == Fault::Upstream) {
       if (!st.victim_reported) {
         st.victim_reported = true;

@@ -26,6 +26,10 @@ struct TopicObs {
   double age_s = 0;        // since the last message (or since spawn if none)
   double rate_hz = 0;
   bool own_endpoint = true;  // the node still advertises this topic in the graph
+  // Adaptive envelope (0 = not ready, the fixed rule applies). Used by the helix policy only.
+  double stale_limit_s = 0;
+  double deficit = 0;
+  double deficit_limit = 0;
 };
 
 struct NodeObs {
@@ -82,6 +86,9 @@ class Policy {
   PolicyKind kind() const { return kind_; }
   // Observable state for /diagnostics.
   std::string phase(const std::string& node) const;
+  // True while the node is in normal operation with no pending or recent fault. The healer
+  // learns timing envelopes only while this holds.
+  bool healthy(const std::string& node) const;
 
   // Exposed for tests: the HELIX root-cause rule on one node, given the snapshot.
   Fault diagnose(const NodeObs& n, const Snapshot& s);
@@ -99,6 +106,7 @@ class Policy {
     bool replaced = false;       // retired and a fallback took over successfully
     double healthy_since = 0;
     bool sick = false;
+    bool sharp = false;          // last symptom came from a ready adaptive envelope
     bool victim_reported = false;
     std::deque<double> attempts;
     Fault last_fault = Fault::None;
@@ -110,7 +118,9 @@ class Policy {
   void observe(const NodeObs& n, const Snapshot& s, State& st);
   bool upstream_sick(const NodeObs& n, const State& self, double t) const;
   bool resource_root_elsewhere(const std::string& self, double t) const;
-  bool output_symptom(const NodeObs& n, bool* stale, bool* own_missing, double* oldest) const;
+  bool input_silent_longer(const NodeObs& n, const Snapshot& s) const;
+  // sharp: the symptom was flagged by a ready adaptive envelope (short confirmation applies).
+  bool output_symptom(const NodeObs& n, bool* stale, bool* own_missing, double* oldest, bool* sharp = nullptr) const;
   bool leaking(const NodeObs& n) const;
   Decision decide(const NodeObs& n, Fault f, State& st, double t, StepOut& out);
   Fault baseline_fault(const NodeObs& n, State& st, double t);

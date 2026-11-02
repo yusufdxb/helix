@@ -15,7 +15,7 @@
 namespace helix_healer {
 
 struct HealerParams {
-  double tick_hz = 20.0;
+  double tick_hz = 100.0;        // v3 used 20
   double stale_periods = 4.0;     // an output is stale after this many expected periods...
   double stale_min_s = 0.25;      // ...but never sooner than this
   double degraded_ratio = 0.5;    // measured rate below ratio * expected = degraded
@@ -37,6 +37,23 @@ struct HealerParams {
   double term_grace_s = 1.0;      // SIGTERM -> SIGKILL
   double learn_s = 3.0;           // HZ 0 outputs: expected rate = rate measured over this window
   double resource_period_s = 0.5; // /proc sampling period
+  // Fast repair (applies to every policy): SIGKILL at once for a hung or runaway process (SIGTERM
+  // cannot be served by a blocked executor), no delay before the first restart, and post-repair
+  // rates measured only over the new process's messages. fast_repair=0 restores v3 timing.
+  double fast_repair = 1;
+  // Adaptive timing envelope (helix policy only; the watchdog keeps the fixed stale timeout).
+  // Per (node, output) it learns the inter-message gap online while the node is healthy, then
+  // judges staleness against max(adaptive_floor_s, adaptive_stale_mult * decaying max gap) and
+  // rate loss with a schedule-deficit CUSUM. adaptive=0 restores the v3 rule.
+  double adaptive = 1;
+  double adaptive_floor_s = 0.1;
+  double adaptive_stale_mult = 3.0;
+  double adaptive_min_gaps = 50;     // gaps observed before the envelope is trusted...
+  double adaptive_min_s = 2.0;       // ...and seconds of healthy observation
+  double adaptive_tau_s = 60.0;      // decay time of the learned maxima
+  double adaptive_cusum_h_min = 4.0; // deficit alarm never below this many missed periods
+  double adaptive_cusum_mult = 2.0;  // ...and never below this times the largest healthy deficit
+  double adaptive_confirm_s = 0.1;   // confirmation for symptom faults when the envelope is ready
 };
 
 struct OutputSpec {
@@ -49,6 +66,11 @@ struct NodeSpec {
   std::vector<std::string> argv;
   std::vector<OutputSpec> outputs;
   std::vector<std::string> inputs;
+  // Helpers run (not supervised) after every spawn of this node, e.g. ros2_control spawners.
+  std::vector<std::vector<std::string>> then;
+  // attach=PATTERN: adopt an already-running process whose cmdline contains PATTERN instead of
+  // launching it; on repair it is re-executed with the captured argv, env and cwd.
+  std::string attach;
   bool restart = true;
   bool critical = true;
   bool lifecycle = false;
