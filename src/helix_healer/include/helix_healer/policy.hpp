@@ -1,0 +1,125 @@
+// Diagnosis and repair policy. Pure C++, no ROS: the node feeds it observation
+// snapshots and executes the decisions it returns. A policy can only choose from
+// the closed Action enum below; it never runs commands.
+#pragma once
+
+#include <deque>
+#include <map>
+#include <string>
+#include <vector>
+
+#include "helix_healer/spec.hpp"
+
+namespace helix_healer {
+
+enum class Fault { None, Crash, CrashLoop, Hang, EndpointLoss, CpuRunaway, MemoryLeak, Degraded, QosMismatch, Upstream };
+enum class Action { None, Restart, LifecycleReset, Fallback, Report };
+enum class PolicyKind { None, Respawn, Watchdog, Helix };
+
+const char* to_string(Fault f);
+const char* to_string(Action a);
+PolicyKind policy_kind(const std::string& name);  // throws on unknown
+
+struct TopicObs {
+  std::string topic;
+  double expected_hz = 0;  // 0 = not learned yet, not judged
+  double age_s = 0;        // since the last message (or since spawn if none)
+  double rate_hz = 0;
+  bool own_endpoint = true;  // the node still advertises this topic in the graph
+};
+
+struct NodeObs {
+  std::string name;
+  bool alive = false;
+  double up_s = 0;    // since the current process was spawned
+  double down_s = 0;  // since it died (0 while alive)
+  double cpu = 0;     // cores
+  double rss_mb = 0;
+  double rss_slope = 0;  // MB/s over the recent window
+  double rss_base = 0;   // MB shortly after start
+  int quick_deaths = 0;  // consecutive exits within loop_s of spawn
+  bool qos_incompatible = false;  // one of its subscriptions cannot match a publisher
+  std::vector<std::string> upstream;  // managed nodes publishing topics it subscribes to
+  std::vector<TopicObs> outputs;
+};
+
+struct Snapshot {
+  double t = 0;
+  std::vector<NodeObs> nodes;  // only running or once-started managed nodes
+};
+
+struct Decision {
+  std::string node;
+  Fault fault = Fault::None;
+  Action action = Action::None;
+  int attempt = 0;
+  double delay_s = 0;
+  std::string detail;
+};
+
+struct Event {
+  double t = 0;
+  std::string node;
+  std::string kind;  // detect, act, verified, verify_failed, escalate, fallback, given_up, victim, report
+  Fault fault = Fault::None;
+  Action action = Action::None;
+  int attempt = 0;
+  std::string detail;
+};
+
+struct StepOut {
+  std::vector<Decision> decisions;
+  std::vector<Event> events;
+};
+
+class Policy {
+ public:
+  Policy(PolicyKind kind, const Spec& spec);
+  // Call at tick rate. Every returned decision must be answered with on_result().
+  StepOut step(const Snapshot& s);
+  // ok=false for a failed lifecycle reset escalates to a restart on the next step.
+  void on_result(const std::string& node, Action a, bool ok, double t);
+  PolicyKind kind() const { return kind_; }
+  // Observable state for /diagnostics.
+  std::string phase(const std::string& node) const;
+
+  // Exposed for tests: the HELIX root-cause rule on one node, given the snapshot.
+  Fault diagnose(const NodeObs& n, const Snapshot& s);
+
+ private:
+  enum class Phase { Normal, Acting, Verifying, Retired };
+  struct State {
+    Phase phase = Phase::Normal;
+    Fault pending = Fault::None;
+    double pending_since = -1;
+    double cpu_high_since = -1;
+    double resource_until = -1;  // this node counts as a resource root until then
+    static constexpr double kNoOnset = -1e300;
+    double onset = kNoOnset;     // when the current symptom started (may be negative early on)
+    bool replaced = false;       // retired and a fallback took over successfully
+    double healthy_since = 0;
+    bool sick = false;
+    bool victim_reported = false;
+    std::deque<double> attempts;
+    Fault last_fault = Fault::None;
+    Action last_action = Action::None;
+    double verify_deadline = 0;
+    bool escalate = false;
+  };
+
+  void observe(const NodeObs& n, const Snapshot& s, State& st);
+  bool upstream_sick(const NodeObs& n, const State& self, double t) const;
+  bool resource_root_elsewhere(const std::string& self, double t) const;
+  bool output_symptom(const NodeObs& n, bool* stale, bool* own_missing, double* oldest) const;
+  bool leaking(const NodeObs& n) const;
+  Decision decide(const NodeObs& n, Fault f, State& st, double t, StepOut& out);
+  Fault baseline_fault(const NodeObs& n, State& st, double t);
+  int budget_used(State& st, double t);
+
+  PolicyKind kind_;
+  Spec spec_;
+  std::map<std::string, State> st_;
+  std::vector<Event> pending_events_;
+};
+
+}  // namespace helix_healer

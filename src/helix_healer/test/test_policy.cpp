@@ -1,0 +1,262 @@
+#include <gtest/gtest.h>
+
+#include <functional>
+
+#include "helix_healer/policy.hpp"
+
+using namespace helix_healer;
+
+namespace {
+
+// a (driver) -> b (filter); c is a lifecycle node; a falls back to a_b.
+const char* kSpec = R"(
+healer confirm_s=0.3 verify_s=2 startup_grace_s=1 max_attempts=3 victim_grace_s=1 cpu_sustain_s=1
+node a fallback=a_b
+out a /a 20
+exec a x
+node a_b autostart=0
+out a_b /a 20
+exec a_b x
+node b
+in b /a
+out b /b 20
+exec b x
+node c lifecycle=1 critical=0
+out c /c 20
+exec c x
+)";
+
+NodeObs healthy(const std::string& name, const std::string& topic) {
+  NodeObs n;
+  n.name = name;
+  n.alive = true;
+  n.up_s = 100;
+  n.rss_mb = 50;
+  n.rss_base = 50;
+  n.outputs.push_back({topic, 20, 0.02, 20, true});
+  return n;
+}
+
+struct World {
+  NodeObs a = healthy("a", "/a"), b = healthy("b", "/b"), c = healthy("c", "/c");
+  World() { b.upstream = {"a"}; }
+  Snapshot at(double t) const { return {t, {a, b, c}}; }
+};
+
+struct Trace {
+  std::vector<Decision> decisions;
+  std::vector<Event> events;
+  int count(const std::string& node, Action a) const {
+    int k = 0;
+    for (const auto& d : decisions) k += d.node == node && d.action == a;
+    return k;
+  }
+  bool has(const std::string& node, const std::string& kind) const {
+    for (const auto& e : events)
+      if (e.node == node && e.kind == kind) return true;
+    return false;
+  }
+};
+
+// Step the policy from t0 to t1. `world` mutates the observation at each t; `ok` says
+// whether an action succeeds (results are delivered on the next step).
+void run(Policy& p, World& w, double t0, double t1, Trace& tr, const std::function<void(World&, double)>& world,
+         const std::function<bool(const Decision&)>& ok = [](const Decision&) { return true; }) {
+  for (double t = t0; t < t1; t += 0.05) {
+    world(w, t);
+    auto out = p.step(w.at(t));
+    for (auto& e : out.events) tr.events.push_back(e);
+    for (auto& d : out.decisions) {
+      tr.decisions.push_back(d);
+      p.on_result(d.node, d.action, ok(d), t);
+    }
+  }
+}
+
+}  // namespace
+
+TEST(Policy, CrashIsRestartedImmediatelyAndVerified) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World&, double) {});
+  EXPECT_TRUE(tr.decisions.empty());
+  bool restarted = false;
+  run(p, w, 1, 4, tr, [&](World& w, double t) {
+    restarted = !tr.decisions.empty();
+    w.a.alive = restarted;
+    w.a.down_s = restarted ? 0 : t - 1;
+    w.a.up_s = restarted ? 0.5 : 0;
+  });
+  ASSERT_EQ(tr.decisions.size(), 1u);
+  EXPECT_EQ(tr.decisions[0].fault, Fault::Crash);
+  EXPECT_EQ(tr.decisions[0].action, Action::Restart);
+  EXPECT_TRUE(tr.has("a", "verified"));
+  EXPECT_EQ(tr.count("b", Action::Restart), 0);  // b's stale output is a's fault, not b's
+}
+
+TEST(Policy, CrashLoopGoesToFallback) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 2, tr, [](World& w, double t) {
+    if (t > 0.5) w.a.alive = false, w.a.quick_deaths = 2, w.a.down_s = 0.1;
+  });
+  ASSERT_FALSE(tr.decisions.empty());
+  EXPECT_EQ(tr.decisions[0].fault, Fault::CrashLoop);
+  EXPECT_EQ(tr.decisions[0].action, Action::Fallback);
+  EXPECT_TRUE(tr.has("a", "fallback"));
+  EXPECT_EQ(p.phase("a"), "retired");
+}
+
+TEST(Policy, HangNeedsConfirmationThenRestarts) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  // stale for less than confirm_s past the stale limit: no action
+  run(p, w, 0, 0.28, tr, [](World& w, double t) { w.a.outputs[0].age_s = 0.25 + t; });
+  EXPECT_TRUE(tr.decisions.empty());
+  run(p, w, 0.28, 1.0, tr, [](World& w, double t) { w.a.outputs[0].age_s = 0.25 + t; });
+  ASSERT_EQ(tr.count("a", Action::Restart), 1);
+  EXPECT_EQ(tr.decisions[0].fault, Fault::Hang);
+}
+
+TEST(Policy, MissingOwnEndpointIsEndpointLoss) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World& w, double t) {
+    w.c.outputs[0].age_s = 0.3 + t;
+    w.c.outputs[0].own_endpoint = false;
+  });
+  ASSERT_FALSE(tr.decisions.empty());
+  EXPECT_EQ(tr.decisions[0].fault, Fault::EndpointLoss);
+  EXPECT_EQ(tr.decisions[0].action, Action::LifecycleReset);  // c is a lifecycle node
+}
+
+TEST(Policy, FailedLifecycleResetEscalatesToRestart) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(
+      p, w, 0, 1, tr, [](World& w, double t) { w.c.outputs[0].age_s = 0.3 + t; },
+      [](const Decision& d) { return d.action != Action::LifecycleReset; });
+  ASSERT_GE(tr.decisions.size(), 2u);
+  EXPECT_EQ(tr.decisions[0].action, Action::LifecycleReset);
+  EXPECT_EQ(tr.decisions[1].action, Action::Restart);
+  EXPECT_TRUE(tr.has("c", "escalate"));
+}
+
+TEST(Policy, DownstreamOfStaleUpstreamIsAVictim) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  // a hangs at t=0; b's output goes stale 0.1 s later because its input stopped.
+  run(
+      p, w, 0, 1.5, tr,
+      [](World& w, double t) {
+        w.a.outputs[0].age_s = 0.02 + t;
+        w.b.outputs[0].age_s = std::max(0.02, t - 0.1);
+      },
+      [](const Decision&) { return false; });  // keep a broken
+  EXPECT_GE(tr.count("a", Action::Restart), 1);
+  EXPECT_EQ(tr.count("b", Action::Restart), 0);
+  EXPECT_TRUE(tr.has("b", "victim"));
+}
+
+TEST(Policy, WatchdogBaselineRestartsTheVictimToo) {
+  Policy p(PolicyKind::Watchdog, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(
+      p, w, 0, 1.5, tr,
+      [](World& w, double t) {
+        w.a.outputs[0].age_s = 0.02 + t;
+        w.b.outputs[0].age_s = std::max(0.02, t - 0.1);
+      },
+      [](const Decision&) { return false; });
+  EXPECT_GE(tr.count("a", Action::Restart), 1);
+  EXPECT_GE(tr.count("b", Action::Restart), 1);
+}
+
+TEST(Policy, RespawnBaselineIgnoresHang) {
+  Policy p(PolicyKind::Respawn, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 3, tr, [](World& w, double t) { w.a.outputs[0].age_s = 0.02 + t; });
+  EXPECT_TRUE(tr.decisions.empty());
+}
+
+TEST(Policy, CpuRunawayIsTheRootAndStarvedNeighbourIsNot) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 1.5, tr, [](World& w, double t) {
+    w.a.cpu = 2.0;                                  // a spins
+    w.c.outputs[0].age_s = std::max(0.02, t - 0.2);  // c starves on the shared cores
+  });
+  EXPECT_EQ(tr.count("a", Action::Restart), 1);
+  EXPECT_EQ(tr.decisions.at(0).fault, Fault::CpuRunaway);
+  EXPECT_EQ(tr.count("c", Action::LifecycleReset) + tr.count("c", Action::Restart), 0);
+  EXPECT_TRUE(tr.has("c", "victim"));
+}
+
+TEST(Policy, QosMismatchSkipsRestartsAndFallsBack) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World& w, double t) {
+    w.b.qos_incompatible = true;
+    w.b.outputs[0].age_s = 0.3 + t;
+  });
+  ASSERT_EQ(tr.decisions.size(), 1u);
+  EXPECT_EQ(tr.decisions[0].fault, Fault::QosMismatch);
+  EXPECT_EQ(tr.decisions[0].action, Action::Fallback);  // b is critical with no backup: safe stop
+}
+
+TEST(Policy, DegradedRateIsDetected) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World& w, double) { w.c.outputs[0].rate_hz = 6; });
+  ASSERT_EQ(tr.decisions.size(), 1u);
+  EXPECT_EQ(tr.decisions[0].fault, Fault::Degraded);
+}
+
+TEST(Policy, LeakIsCaughtBeforeTheHardLimit) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World& w, double) {
+    w.a.rss_mb = 300;
+    w.a.rss_slope = 30;  // (512 - 300) / 30 = 7 s to the limit
+  });
+  ASSERT_FALSE(tr.decisions.empty());
+  EXPECT_EQ(tr.decisions[0].fault, Fault::MemoryLeak);
+  Policy wd(PolicyKind::Watchdog, parse_spec(kSpec));
+  World w2;
+  Trace tr2;
+  run(wd, w2, 0, 1, tr2, [](World& w, double) { w.a.rss_mb = 300, w.a.rss_slope = 30; });
+  EXPECT_TRUE(tr2.decisions.empty());  // the watchdog only acts at the hard limit
+}
+
+TEST(Policy, BudgetExhaustionFallsBack) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  // a crashes again right after every restart (but not quickly enough to be a crash loop)
+  run(p, w, 0, 30, tr, [](World& w, double) {
+    w.a.alive = false;
+    w.a.down_s = 0.1;
+  });
+  EXPECT_EQ(tr.count("a", Action::Restart), 3);
+  EXPECT_EQ(tr.count("a", Action::Fallback), 1);
+}
+
+TEST(Policy, NoneNeverActs) {
+  Policy p(PolicyKind::None, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 3, tr, [](World& w, double) { w.a.alive = false; });
+  EXPECT_TRUE(tr.decisions.empty());
+}
