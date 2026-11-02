@@ -23,8 +23,19 @@ target_include_directories(helix_healer_core PUBLIC
   $<INSTALL_INTERFACE:include>)
 set_target_properties(helix_healer_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+# Build identity, regenerated on every build; the header only changes when the commit
+# or the dirty flag changes, so it does not force rebuilds.
+set(BUILD_INFO_DIR ${CMAKE_CURRENT_BINARY_DIR}/build_info)
+add_custom_target(helix_build_info ALL
+  COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_CURRENT_SOURCE_DIR} -DOUT=${BUILD_INFO_DIR}/helix_healer/build_info.hpp
+          -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_info.cmake
+  BYPRODUCTS ${BUILD_INFO_DIR}/helix_healer/build_info.hpp)
+file(MAKE_DIRECTORY ${BUILD_INFO_DIR}/helix_healer)
+
 add_executable(helix_healer_node src/healer_node.cpp)
 target_link_libraries(helix_healer_node helix_healer_core)
+target_include_directories(helix_healer_node PRIVATE ${BUILD_INFO_DIR})
+add_dependencies(helix_healer_node helix_build_info)
 ament_target_dependencies(helix_healer_node rclcpp ament_index_cpp lifecycle_msgs diagnostic_msgs std_msgs helix_msgs)
 
 install(TARGETS helix_healer_node DESTINATION lib/${PROJECT_NAME})

@@ -8,6 +8,7 @@
 #include <ament_index_cpp/get_package_prefix.hpp>
 #include <diagnostic_msgs/msg/diagnostic_array.hpp>
 #include <helix_msgs/msg/heal_event.hpp>
+#include <helix_healer/build_info.hpp>
 #include <helix_healer/envelope.hpp>
 #include <lifecycle_msgs/msg/state.hpp>
 #include <lifecycle_msgs/msg/transition.hpp>
@@ -873,6 +874,11 @@ class Healer : public rclcpp::Node {
 };
 
 int main(int argc, char** argv) {
+  // Experiment runners record this so every result names the code that produced it.
+  if (argc > 1 && std::string(argv[1]) == "--build-info") {
+    printf("{\"commit\": \"%s\", \"dirty\": %s}\n", HELIX_BUILD_COMMIT, HELIX_BUILD_DIRTY ? "true" : "false");
+    return 0;
+  }
   rclcpp::init(argc, argv);
   int rc = 0;
   try {

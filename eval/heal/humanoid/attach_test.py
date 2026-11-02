@@ -28,7 +28,9 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent))
 from inject import Injector, find_pids  # noqa: E402
+from provenance import stamp  # noqa: E402
 
 ROOT = HERE.parents[2]
 HEALER = ROOT / "install/helix_healer/lib/helix_healer/helix_healer_node"
@@ -94,9 +96,11 @@ def main() -> None:
     ap.add_argument("--mode", choices=("norespawn", "respawn"), required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--domain", default="90")
+    ap.add_argument("--allow-dirty", action="store_true", help="run an untraceable build (recorded)")
     a = ap.parse_args()
     out = Path(a.out).resolve()
     out.mkdir(parents=True)
+    stamp(out, a.allow_dirty)
     stack = out / "stack"
     subprocess.run([sys.executable, str(HERE / "make_stack.py"), str(stack)], check=True, capture_output=True)
     (out / "launch.py").write_text(launch_file(stack, a.mode == "respawn"))

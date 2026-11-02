@@ -26,6 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from scenarios import SETS  # noqa: E402
 from humanoid.inject import Injector  # noqa: E402
+from provenance import stamp  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 HEALER = ROOT / "install/helix_healer/lib/helix_healer/helix_healer_node"
@@ -162,12 +163,14 @@ def main() -> None:
     ap.add_argument("--warm", type=float, default=7.0)
     ap.add_argument("--post", type=float, default=25.0)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--allow-dirty", action="store_true", help="run an untraceable build (recorded in build.json)")
     a = ap.parse_args()
     if not HEALER.exists():
         sys.exit(f"build first: {HEALER} missing")
     out = Path(a.out)
     if out.exists() and any(out.iterdir()):
         sys.exit(f"{out} is not empty; use a fresh directory")
+    stamp(out, a.allow_dirty)
     pick = set(filter(None, a.scenarios.split(",")))
     scen = [s for s in SETS[a.set] if not pick or s.name in pick]
     eps = []
