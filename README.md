@@ -10,11 +10,13 @@
 `respawn=true` restarts a node when its process exits. A typical watchdog also restarts a node whose output went
 stale. Neither one can tell a node that hung from a node starved by a dead upstream. Neither notices a node that still
 publishes, but at a third of its rate. Neither knows that restarting into a crash loop or a QoS misconfiguration
-achieves nothing. HELIX (`helix_healer`) is one C++20 process, about 1,500 lines, that launches and supervises the
-nodes of a pipeline from a plain-text spec. Every 50 ms it runs one loop:
+achieves nothing. HELIX (`helix_healer`) is one C++20 process, about 2,200 lines, that launches and supervises the
+nodes of a pipeline from a plain-text spec, or adopts nodes another launcher started (`attach=`). Every 10 ms it runs
+one loop:
 
 1. **Observe.** Nothing is added inside the managed nodes. HELIX reads:
-   - process exit status (`waitpid`)
+   - process exit status (`waitpid`, or a pidfd for adopted processes), and `CoreDumping` in `/proc`, so a crash is
+     seen while the kernel is still writing the core
    - CPU and RSS from `/proc`
    - the age and rate of every declared output
    - whether each output is still advertised, and any QoS-incompatible events
@@ -22,14 +24,15 @@ nodes of a pipeline from a plain-text spec. Every 50 ms it runs one loop:
 2. **Diagnose** each node as one of: crash, crash loop, memory leak, CPU runaway, QoS mismatch, endpoint loss,
    hang, degraded rate, or *upstream*. Upstream means the node is a victim, so HELIX leaves it alone.
 3. **Repair** from a closed set:
-   - restart with backoff
+   - restart: at once, except after a death within `loop_s` of start on a node with no backup, which waits with
+     exponential backoff (0.5 s doubling to 4 s)
    - lifecycle reset through the node's own lifecycle services
    - start a declared backup node
    - report only
 
    The budget is 3 attempts per 60 s.
-4. **Verify** that the node is alive and its outputs are healthy within 5 s. A failed lifecycle reset escalates to a
-   restart.
+4. **Verify** that the node is alive and that every declared output has carried a message from the new process
+   within 5 s. Old messages still in flight do not count. A failed lifecycle reset escalates to a restart.
 5. **Fall back.** When the budget is spent, or the fault cannot be fixed by a restart (a crash loop, a QoS mismatch),
    HELIX starts the backup node if there is one. Otherwise it publishes a latched `SAFE_STOP <node>` on `/helix/mode`.
 
@@ -74,6 +77,34 @@ and the watchdog end in SAFE_STOP there. HELIX recognises the crash loop and sto
   +6 restored and 0 against 51 unnecessary interventions.
 - **The healer costs 0.7% of one core and 15 MB RSS.**
 
+### Real ROS 2 humanoid stack (held-out, pre-registered)
+
+The second study used only stock ROS 2 Humble nodes:
+- `ros2_control` with mock hardware: 23 joints, /joint_states at 250 Hz, and the stock spawner;
+- `robot_state_publisher`: /tf at 83 Hz, with no backup;
+- `cam2image` at 30 Hz, with a 15 Hz backup.
+
+Faults were signals, stops and controller switches sent to the real PIDs from outside the healer. Nine held-out scenarios were run, 3 reps each, across 5 arms ([preregistration](docs/preregistration/2026-11-02-humanoid-real.md),
+[results](docs/v3/results/heldout_humanoid.md)).
+
+| Policy | Restored /27 | SAFE | Failed | Diagnosis | Decisions | Unnecessary | Median blackout |
+|---|---|---|---|---|---|---|---|
+| HELIX | **24** | 3 | 0 | 17/18 | 29 | 0 | 0.259 s |
+| Watchdog | 21 | 3 | 3 | 12/18 | 29 | 0 | 0.403 s |
+| `respawn=true` | 21 | 0 | 6 | 9/18 | 233 | 0 | 0.148 s |
+| No healer | 9 | 0 | 18 | 0/18 | 0 | 0 | 24.995 s |
+
+- **Restoration.** HELIX restored 3 more episodes than the watchdog, all in degrade_rsp, with the same 29 decisions and 0 unnecessary interventions.
+  - That meets the registered threshold of 3 exactly, but p = 0.5.
+- **Blackout.** Per restorable fault, HELIX's longest gap is shorter by a mean of 0.142 s (95% CI [-0.267, -0.021], p = 0.048, 10 of 15 blocks).
+  - After Holm correction neither result is significant. Both survive their kill criteria.
+- **Where HELIX loses.** On a node with no backup that keeps crashing, HELIX and the watchdog give up into SAFE_STOP after about 23 s of /tf blackout.
+  - Blind respawn kept /tf up with 72 to 74 restarts.
+  - On a degraded node, HELIX's repair restart costs about 0.3 s of silence.
+  - The watchdog never repairs that rate at all.
+- **Public G1 bag.** A 6.5 s BeyondMimic Unitree G1 bag (/joint_states and /odom at 500 Hz, /tf at 1 kHz) was looped for 120 s under the healer.
+  - It caused 1 unnecessary restart, at the first loop seam while the envelope was still learning, and none in the next 113 s.
+
 ### Learned diagnosis: tested, not adopted
 
 The question was whether a model beats the deterministic rules at diagnosis on held-out faults. The models output
@@ -112,13 +143,22 @@ rules for exits and a learned detector for slow symptoms, is untested.
   - QoS mismatch
   - missing device
 
-  They are not real drivers, planners or perception stacks.
+  They are not real drivers, planners or perception stacks. The humanoid study used real stock ROS 2 nodes, but no
+  real drivers or hardware, and the camera is `cam2image`.
 - **DDS disruption is only partly covered.** It is represented by endpoint loss and QoS mismatch. There are no
   network partitions, discovery storms or RMW failures.
-- **One machine, two topologies, 3 reps.** The effect rests on 2 scenario blocks, and the result is not significant.
+- **One machine, three topologies, 3 reps.** No restoration result is significant. The humanoid blackout result
+  is not significant after Holm correction.
 - **No hardware.** Nothing here ran on a robot. Actuation was never enabled.
-- **The healer must own the processes.** It launches the nodes itself, so it does not attach to nodes started
-  elsewhere, and it cannot repair the composable nodes inside a shared container one at a time.
+- **Attach mode has limits.** HELIX no longer has to launch its nodes: `attach=` adopts processes that `ros2 launch`
+  started, with launch `respawn` on or off. In the end-to-end test, both crashes were repaired with no
+  duplicate process, no orphan and no survivor ([details](docs/v3/results/heldout_humanoid.md#attach-mode-with-ros2-launch)).
+  The limits:
+  - an adopted process is not the healer's child, so its exit status is unknown;
+  - at launch shutdown the healer restarts nodes for about 50 ms before it sees launch exit and releases them;
+  - it cannot repair composable nodes inside a shared container one at a time;
+  - the attach test is a single run.
+- **The common-mode hold is unit-tested only.** It holds for 2 s when unrelated nodes go stale together. No scenario has exercised it.
 
 ## Quick start
 
@@ -161,6 +201,15 @@ Each policy and scenario runs in its own ROS domain on a 4-core slice, with loca
 python3 eval/heal/run_episodes.py --set manip --reps 3 --out eval/heal/out/heldout_manip   # about 21 min
 python3 eval/heal/score.py eval/heal/out/heldout_manip --csv eval/heal/out/heldout_manip.csv
 python3 eval/heal/learned.py --train eval/heal/out/dev_nav --test eval/heal/out/heldout_manip [--llm qwen3:8b]
+```
+
+The humanoid study needs `ros2_control`, `robot_state_publisher` and `image_tools`:
+
+```bash
+python3 eval/heal/run_episodes.py --set humanoid_heldout --reps 3 --out eval/heal/out/heldout_humanoid   # about 26 min
+python3 eval/heal/score.py eval/heal/out/heldout_humanoid --csv eval/heal/out/heldout_humanoid.csv
+python3 eval/heal/paired_blackout.py eval/heal/out/heldout_humanoid.csv
+python3 eval/heal/humanoid/attach_test.py --mode respawn --out /tmp/attach_respawn
 ```
 
 `--set nav` reproduces the development numbers in [docs/v3/results/dev_nav.md](docs/v3/results/dev_nav.md). The

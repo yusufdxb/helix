@@ -212,10 +212,13 @@ class Healer : public rclcpp::Node {
 
   std::vector<std::string> resolve_argv(const hh::NodeSpec& ns) {
     std::vector<std::string> a = resolve_exe(ns.argv);
+    // Name the node after the spec entry unless the command names it, or is a ros2 CLI verb other
+    // than `run` (bag, launch, topic...), whose own options would swallow the remap.
     bool named = false;
     for (const auto& s : a)
       if (s.find("__node:=") != std::string::npos) named = true;
-    if (!named) a.insert(a.end(), {"--ros-args", "-r", "__node:=" + ns.name});
+    const bool cli = !a.empty() && std::filesystem::path(a[0]).filename() == "ros2" && (a.size() < 2 || a[1] != "run");
+    if (!named && !cli) a.insert(a.end(), {"--ros-args", "-r", "__node:=" + ns.name});
     return a;
   }
 
