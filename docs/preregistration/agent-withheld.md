@@ -263,3 +263,13 @@ changed, is excluded.
     on concurrent requests;
   - the `AGENT_WITHHELD` and `AGENT_PLUMBING` sets, with their expect sets, were coded
     after registration, before any healer ran on them.
+
+**Host change (still before the freeze and before any screen result was read).** The
+LLM moves from the laptop to a private single-slot Ollama server on the evaluation
+workstation's own desktop GPU, which became free. The screen is rerun there for all four
+models, so the latency tie-break is measured on the host the withheld run uses. Both
+laptop screens (one complete for qwen2.5:1.5b, one cut off by a job time limit) are
+excluded from selection. The laptop bullet under "LLM host" above no longer applies; the
+Orin is still not measured. A shared Ollama service on the same GPU belongs to another
+user. It is not touched, and any memory contention with it is reported from the GPU log.
+Server CPU for the private server is attributable and comes from the harness.
