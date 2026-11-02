@@ -156,6 +156,58 @@ jobs:
           print('PASS: ros2_pulse received ROS 2 bag replay traffic and counted it within 15% of independent callbacks.')
           PY
 
+
+      - name: Force a ROS bag pause and verify receive-side gap reporting
+        run: |
+          set -euo pipefail
+          set +u; source /opt/ros/humble/setup.bash; set -u
+          set +u; source /tmp/pulse_ws/install/setup.bash; set -u
+          export ROS_TOPIC_STATS_OUTPUT_FILE=/tmp/ros2_pulse_stall.jsonl
+          export ROS_TOPIC_STATISTICS_PUBLISH_PERIOD=2
+          export ROS_TOPIC_STATS_FORMAT=jsonl
+          export ROS_TOPIC_STATS_JITTER=1
+          probe="$(ros2 pkg prefix ros2_pulse)/lib/libros2_pulse.so"
+          LD_PRELOAD="$probe" python3 -u /tmp/helix_pulse_listener.py >/tmp/ros2_pulse_stall_listener.log 2>&1 &
+          listener_pid=$!
+          sleep 3
+          ros2 bag play hardware_eval_20261006/bags/loaded_standing_observe \
+            --topics /helix/heartbeat /helix/metrics /helix/node_health \
+            -r 10 >/tmp/ros2_pulse_stall_player.log 2>&1 &
+          player_pid=$!
+          sleep 7
+          echo "Pausing bag player PID $player_pid for 4.5s"
+          kill -STOP "$player_pid"
+          sleep 4.5
+          kill -CONT "$player_pid"
+          echo "Resumed bag player"
+          sleep 9
+          kill -INT "$player_pid" || true
+          set +e
+          wait "$player_pid"
+          player_rc=$?
+          set -e
+          echo "player exit=$player_rc"
+          wait "$listener_pid"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          records = [json.loads(x) for x in Path('/tmp/ros2_pulse_stall.jsonl').read_text().splitlines() if x.strip()]
+          results = {}
+          for name in ['/helix/heartbeat', '/helix/metrics', '/helix/node_health']:
+              timeline = [(w, t) for w in records for t in w.get('topics', []) if t.get('topic') == name]
+              positive = [float(t.get('recv_inter_hz',0)) for w,t in timeline if t.get('recv_inter_hz',0)>0]
+              zero = sum(1 for w,t in timeline if 'recv_inter_hz' in t and float(t['recv_inter_hz'])==0)
+              largest = max([float(t.get('recv_max_dt_ms',0)) for w,t in timeline] or [0])
+              results[name] = {'active_windows': len(positive),'zero_rate_windows':zero,'max_receive_gap_ms':round(largest,1)}
+          print('STALLED_REPLAY=' + json.dumps(results,indent=2))
+          Path('/tmp/ros2_pulse_stall_report.json').write_text(json.dumps(results,indent=2))
+          for name in ('/helix/heartbeat','/helix/metrics'):
+              assert results[name]['active_windows']>=3, (name,'no active playback')
+              assert results[name]['zero_rate_windows']>=1, (name,'no zero-rate window during pause')
+              assert results[name]['max_receive_gap_ms']>=3000, (name,'missed injected pause')
+          print('PASS: zero-rate windows and >=3s receive gaps detected after 4.5s deliberate playback stall.')
+          PY
+
       - name: Upload replay evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -168,3 +220,7 @@ jobs:
             /tmp/ros2_pulse_listener.log
             /tmp/ros2_pulse_bag_play.log
             /tmp/ros2_pulse_report.json
+            /tmp/ros2_pulse_stall.jsonl
+            /tmp/ros2_pulse_stall_listener.log
+            /tmp/ros2_pulse_stall_player.log
+            /tmp/ros2_pulse_stall_report.json
