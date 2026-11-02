@@ -12,7 +12,8 @@ The controllers are loaded by the stock spawner, run as a `then` helper after ev
 (re)start of controller_manager, which is how a launch file would do it.
 
 Usage: make_stack.py OUT_DIR [--rate 250]. Writes g1.urdf, controllers.yaml, rsp.yaml and
-humanoid.spec with absolute paths into OUT_DIR.
+humanoid.spec with absolute paths into OUT_DIR, plus dev_rate.yaml for the plumbing-check
+node (humanoid/dev_rate.py), which only the agent_plumbing set adds to the spec.
 """
 import argparse
 import os
@@ -135,6 +136,8 @@ node camera_backup autostart=0
 out camera_backup /image 15
 exec camera_backup @image_tools/cam2image --ros-args -p burger_mode:=true -p frequency:=15.0
 """)
+    with open(f"{out}/dev_rate.yaml", "w") as f:
+        f.write("/**:\n  ros__parameters:\n    rate: 50.0\n")
     print(out)
 
 

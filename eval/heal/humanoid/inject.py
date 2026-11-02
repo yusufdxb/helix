@@ -22,6 +22,12 @@ the stock ros2 CLI. Fault strings:
   flaky:NODE:SIG:LO:HI:QUIET rare: SIG at random U(LO, HI) s intervals, seeded per
                              (scenario, rep) so every arm sees the same schedule; no
                              crash in the last QUIET s.
+  param:NODE:NAME:VALUE      `ros2 param set /NODE NAME VALUE` on the live node: runtime
+                             parameter corruption, the process keeps running.
+  deploy:NODE:FILE:OP[:ARGS] a config deploy: the episode stack's FILE is rewritten
+                             atomically, then NODE gets SIGTERM as an operator restart
+                             would send. OP is corrupt_urdf (robot_description cut to half,
+                             so the URDF no longer parses) or set:KEY:VALUE (one YAML key).
 """
 
 from __future__ import annotations
@@ -29,6 +35,7 @@ from __future__ import annotations
 import errno
 import os
 import random
+import re
 import select
 import signal
 import subprocess
@@ -148,6 +155,7 @@ class Injector(threading.Thread):
         self.parts = fault.split(":") if fault else []
         self.kind = self.parts[0] if self.parts else ""
         self.fifo = None
+        self.stack = logs.parent / "stack"  # the episode's generated stack (configs live here)
         if self.kind == "stall":
             self.fifo = StallFifo(logs / f"{self.parts[1]}.log", logs / f"{self.parts[1]}.drained.log")
         self.injected_at: float | None = None
@@ -275,6 +283,43 @@ class Injector(threading.Thread):
             if pid and self._signal(pid, SIGS[sig], "flaky_" + sig):
                 self.hits += 1
             t += self.rng.uniform(float(lo), float(hi))
+
+    def _f_param(self, node: str, name: str, value: str) -> None:
+        if not self._find(node):
+            self.injected_at = time.time()
+            return
+        r = subprocess.run(["ros2", "param", "set", "--no-daemon", "--spin-time", "3", "/" + node, name, value],
+                           env=self.env, capture_output=True, text=True, timeout=20)
+        self.injected_at = time.time()  # the set returns once the node applied it (CLI startup takes ~6 s)
+        self._log(f"param_rc{r.returncode}", 0)
+        if r.returncode == 0 and "Set parameter successful" in r.stdout:
+            self.hits = 1
+        else:
+            self.error = (r.stdout + r.stderr).strip()[-300:]
+
+    def _f_deploy(self, node: str, fname: str, op: str, *args: str) -> None:
+        path = self.stack / fname
+        text = path.read_text()
+        if op == "corrupt_urdf":
+            m = re.search(r'^(\s*robot_description: )"(.*)"$', text, re.M)
+            if not m:
+                raise ValueError(f"{fname}: no robot_description")
+            body = m.group(2)[: len(m.group(2)) // 2].rstrip("\\")  # never end inside an escape
+            new = text[: m.start()] + m.group(1) + '"' + body + '"' + text[m.end():]
+        elif op == "set" and len(args) == 2:
+            new, n = re.subn(rf"^(\s*{re.escape(args[0])}:\s*).*$", lambda m: m.group(1) + args[1], text, flags=re.M)
+            if n != 1:
+                raise ValueError(f"{fname}: key {args[0]} matched {n} times")
+        else:
+            raise ValueError(f"deploy: unknown op {op}{args}")
+        pid = self._find(node)
+        tmp = path.with_suffix(path.suffix + ".deploy")
+        tmp.write_text(new)
+        os.replace(tmp, path)
+        self.injected_at = time.time()
+        self._log("deploy_" + op, 0)
+        if pid and self._signal(pid, signal.SIGTERM, "deploy_TERM"):
+            self.hits = 1
 
     def close(self) -> None:
         if self.fifo:

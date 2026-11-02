@@ -121,10 +121,13 @@ struct TopicState {
   rclcpp::GenericSubscription::SharedPtr sub;
 };
 
-// Adaptive envelope of one (producer, topic). Reset when the producer's process changes.
+// Adaptive envelope of one (producer, topic). Reset when the producer's process changes or an
+// in-place repair (ParamRestore, LifecycleReset) succeeds: the deficit run up by the fault would
+// otherwise keep a repaired node symptomatic for seconds after its rate recovered.
 struct EnvSlot {
   hh::Envelope e;
   double start_t = -1e18;
+  int repairs = 0;
 };
 
 struct Managed {
@@ -135,6 +138,7 @@ struct Managed {
   bool started = false;
   bool retired = false;
   double start_t = 0;
+  int repairs = 0;  // successful in-place repairs of this process, see EnvSlot
   double watch_t = 0;  // when the healer began observing this process (adoption time for attach=)
   double death_t = 0;
   int quick_deaths = 0;
@@ -368,7 +372,8 @@ class Healer : public rclcpp::Node {
         const auto& m = nodes_.at(name);
         if (!m.started || !m.alive) continue;
         auto& slot = env_slot(name, topic);
-        if (slot.start_t != m.start_t) slot.e.reset_process(), slot.start_t = m.start_t;
+        if (slot.start_t != m.start_t || slot.repairs != m.repairs)
+          slot.e.reset_process(), slot.start_t = m.start_t, slot.repairs = m.repairs;
         slot.e.arrival(t, m.learn_ok);
       }
     }
@@ -412,7 +417,7 @@ class Healer : public rclcpp::Node {
     ob.own_endpoint = own_.count({m.spec.name, o.topic}) > 0;
     if (p.adaptive > 0 && m.alive) {
       auto& slot = env_slot(m.spec.name, o.topic);
-      if (slot.start_t == m.start_t && slot.e.ready()) {
+      if (slot.start_t == m.start_t && slot.repairs == m.repairs && slot.e.ready()) {
         ob.stale_limit_s = slot.e.stale_limit();
         ob.deficit = slot.e.deficit(t);
         ob.deficit_limit = slot.e.deficit_limit();
@@ -736,7 +741,7 @@ class Healer : public rclcpp::Node {
                   d.action);
         break;
       case hh::Action::LifecycleReset:
-        start_job(node, [this, node] { return lifecycle_reset(node); }, true, d.action);
+        start_job(node, [this, node] { return lifecycle_reset(node) && repaired_in_place(node); }, true, d.action);
         break;
       case hh::Action::Fallback:
         start_job(node, [this, node] { return fallback(node); }, true, d.action);
@@ -835,7 +840,7 @@ class Healer : public rclcpp::Node {
         case hh::Action::Restart:
           return restart(node, d.delay_s, d.fault);
         case hh::Action::LifecycleReset:
-          return lifecycle_reset(node);
+          return lifecycle_reset(node) && repaired_in_place(node);
         case hh::Action::ParamRestore: {
           if (!pc || restore.empty() || !pc->service_is_ready()) return false;
           auto f = pc->set_parameters(restore);
@@ -843,7 +848,7 @@ class Healer : public rclcpp::Node {
           for (const auto& r : f.get())
             if (!r.successful) return false;
           emit_simple(node, "param_restore", names_of(restore));
-          return true;
+          return repaired_in_place(node);
         }
         case hh::Action::RestartLKG: {
           {
@@ -860,6 +865,12 @@ class Healer : public rclcpp::Node {
           return false;
       }
     }, true, d.action);
+  }
+
+  bool repaired_in_place(const std::string& node) {
+    std::lock_guard lk(mu_);
+    ++nodes_.at(node).repairs;
+    return true;
   }
 
   static std::string names_of(const std::vector<rclcpp::Parameter>& ps) {

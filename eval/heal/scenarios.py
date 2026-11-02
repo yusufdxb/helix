@@ -22,6 +22,9 @@ class Scenario:
     # Nodes that legitimately need their own repair as a consequence of the root
     # fault (a downstream node that latches and never recovers by itself).
     collateral: tuple[str, ...] = ()
+    # Agent sets only: the action name (policy.cpp to_string) of the scenario's correct
+    # repair class. The oracle arm ranks it first; "correct repair" means it verified.
+    repair: str = ""
 
 
 # Development topology: src/helix_healer/config/nav.spec. All tuning happened on this set.
@@ -107,4 +110,44 @@ HUMANOID_HELDOUT = [
     Scenario("nearmiss_rsp", "duty:rsp:0.8:0.2", "", ()),
 ]
 
-SETS = {"nav": NAV, "manip": MANIP, "humanoid": HUMANOID, "humanoid_heldout": HUMANOID_HELDOUT}
+# Withheld agent families, same humanoid stack, written 2026-11-02 before any of them ran
+# against a healer; see docs/preregistration/agent-withheld.md. Only the injector premises
+# were checked, with no healer running. W1 corrupts a parameter on the live node, W2 deploys
+# a bad config and restarts the node, safe_deploy_rsp deploys a valid config (keeping it is
+# right, reverting it is unsafe). Expect sets use v3's unchanged diagnosis vocabulary; v3 has
+# no config label, so a deploy reads as the crash its restart causes, then whatever follows.
+# rsp is downstream of controller_manager, so it is collateral when the controller dies.
+AGENT_WITHHELD = [
+    Scenario("nominal", "", "", ()),
+    Scenario("w1_param_degrade", "param:rsp:publish_frequency:5.0", "rsp", ("degraded", "hang"),
+             repair="param_restore"),
+    Scenario("w1_param_stale", "param:rsp:publish_frequency:0.5", "rsp", ("hang", "degraded"),
+             repair="param_restore"),
+    Scenario("w2_rsp_bad_urdf", "deploy:rsp:rsp.yaml:corrupt_urdf", "rsp", ("crash", "crash_loop"),
+             repair="restart_lkg"),
+    Scenario("w2_cm_rate", "deploy:controller_manager:controllers.yaml:set:update_rate:20", "controller_manager",
+             ("crash", "degraded"), collateral=("rsp",), repair="restart_lkg"),
+    Scenario("w2_cm_bad_urdf", "deploy:controller_manager:controllers.yaml:corrupt_urdf", "controller_manager",
+             ("crash", "crash_loop"), collateral=("rsp",), repair="restart_lkg"),
+    Scenario("safe_deploy_rsp", "deploy:rsp:rsp.yaml:set:publish_frequency:120.0", "rsp", ("crash",),
+             repair="restart"),
+]
+
+# Plumbing check for the agent's new repairs, run before the freeze in place of the withheld
+# families. The node is humanoid/dev_rate.py (synthetic, added to the humanoid spec only for
+# this set). Its episodes verify that ParamRestore, RestartLKG and rollback execute; they are
+# never training, history or prompt data.
+AGENT_PLUMBING = [
+    Scenario("p_param", "param:dev_rate:rate:2.0", "dev_rate", ("degraded", "hang"), repair="param_restore"),
+    Scenario("p_deploy_bad", "deploy:dev_rate:dev_rate.yaml:set:rate:abc", "dev_rate", ("crash", "crash_loop"),
+             repair="restart_lkg"),
+    Scenario("p_deploy_slow", "deploy:dev_rate:dev_rate.yaml:set:rate:5.0", "dev_rate", ("crash", "degraded"),
+             repair="restart_lkg"),
+    Scenario("p_safe_deploy", "deploy:dev_rate:dev_rate.yaml:set:rate:60.0", "dev_rate", ("crash",), repair="restart"),
+]
+
+SETS = {"nav": NAV, "manip": MANIP, "humanoid": HUMANOID, "humanoid_heldout": HUMANOID_HELDOUT,
+        "agent_withheld": AGENT_WITHHELD, "agent_plumbing": AGENT_PLUMBING}
+
+# Real-stack sets: generated humanoid stack, faults injected by humanoid/inject.py.
+REAL_SETS = {"humanoid", "humanoid_heldout", "agent_withheld", "agent_plumbing"}

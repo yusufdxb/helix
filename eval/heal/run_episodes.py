@@ -20,11 +20,12 @@ import signal
 import subprocess
 import sys
 import time
+import zlib
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from scenarios import SETS  # noqa: E402
+from scenarios import REAL_SETS, SETS  # noqa: E402
 from humanoid.inject import Injector  # noqa: E402
 from provenance import stamp  # noqa: E402
 
@@ -34,10 +35,34 @@ PROBE = Path(__file__).resolve().parent / "probe.py"
 SPECS = {"nav": ROOT / "src/helix_healer/config/nav.spec", "manip": ROOT / "src/helix_healer/config/manip.spec"}
 MAKE_STACK = Path(__file__).resolve().parent / "humanoid/make_stack.py"
 PROBE_CORES = "20-23"
-TYPES = {"/joint_states": "sensor_msgs/msg/JointState", "/tf": "tf2_msgs/msg/TFMessage", "/image": "sensor_msgs/msg/Image"}
+TYPES = {"/joint_states": "sensor_msgs/msg/JointState", "/tf": "tf2_msgs/msg/TFMessage", "/image": "sensor_msgs/msg/Image",
+         "/dev_rate": "std_msgs/msg/String"}
+DEV_RATE = Path(__file__).resolve().parent / "humanoid/dev_rate.py"
 # Same policy as `helix`, with the v3 release settings: 20 Hz tick, backoff before the first
 # restart, fixed staleness rule. Isolates what the latency work bought.
 V3_PARAMS = "healer tick_hz=20 fast_repair=0 adaptive=0\n"
+
+
+# Agent arms (policy agent_<ranker>): ranker inputs set once per run by main().
+AGENT = {"history": "", "mlp": "", "llm": ""}
+
+
+def agent_params(ep: dict, ranker: str) -> list[str]:
+    """Healer -p args for one agent arm. Seeds are fixed per (scenario, rep), so every arm
+    sees the same schedule and agent_random is reproducible."""
+    seed = zlib.crc32(f"{ep['scenario']}/{ep['rep']}".encode())
+    if ranker == "oracle":
+        arg = f"{ep['root']}:{ep['repair']}" if ep["root"] and ep.get("repair") else ""
+    elif ranker in AGENT:
+        arg = AGENT[ranker]
+        if not arg:
+            raise SystemExit(f"agent_{ranker} needs --agent-{ranker}")
+    elif ranker in ("rule", "random"):
+        arg = ""
+    else:
+        raise SystemExit(f"unknown agent arm agent_{ranker}")
+    out = ["-p", f"agent_ranker:={ranker}", "-p", f"agent_seed:={seed}"]
+    return out + ["-p", f"agent_arg:={arg}"] if arg else out  # an empty `name:=` does not parse
 
 
 def spec_outputs(text: str) -> dict[str, list[tuple[str, float]]]:
@@ -98,15 +123,22 @@ def run_episode(ep: dict, slot: int, warm: float, post: float) -> dict:
     d = Path(ep["dir"])
     (d / "ff").mkdir(parents=True, exist_ok=True)
     (d / "logs").mkdir(exist_ok=True)
-    real = ep["set"].startswith("humanoid")
+    real = ep["set"] in REAL_SETS
     if real:
         subprocess.run([sys.executable, str(MAKE_STACK), str(d / "stack")], check=True, capture_output=True)
         text = (d / "stack/humanoid.spec").read_text()
+        if ep["set"] == "agent_plumbing":
+            text += (f"\nnode dev_rate\nout dev_rate /dev_rate 50\n"
+                     f"exec dev_rate {sys.executable} {DEV_RATE} --ros-args --params-file {d / 'stack/dev_rate.yaml'}\n")
     else:
         text = with_fault_files(Path(SPECS[ep["set"]]).read_text(), d / "ff")
     policy = ep["policy"]
+    agent = []
     if policy == "helix_v3params":
         policy, text = "helix", text + V3_PARAMS
+    elif policy.startswith("agent_"):
+        agent = agent_params(ep, policy[len("agent_"):])
+        policy = "agent"
     (d / "spec").write_text(text)
     env = dict(os.environ, ROS_DOMAIN_ID=str(30 + slot), RMW_IMPLEMENTATION="rmw_cyclonedds_cpp", HELIX_EPISODE=str(d),
                ROS_LOCALHOST_ONLY="1")
@@ -120,7 +152,7 @@ def run_episode(ep: dict, slot: int, warm: float, post: float) -> dict:
                    seed=f"{ep['scenario']}/{ep['rep']}")
     healer = subprocess.Popen(
         ["taskset", "-c", cores, str(HEALER), "--ros-args", "-p", f"spec:={d / 'spec'}", "-p", f"policy:={policy}",
-         "-p", f"event_log:={d / 'events.jsonl'}", "-p", f"snapshot_log:={d / 'snap.jsonl'}", "-p", f"log_dir:={d / 'logs'}"],
+         "-p", f"event_log:={d / 'events.jsonl'}", "-p", f"snapshot_log:={d / 'snap.jsonl'}", "-p", f"log_dir:={d / 'logs'}", *agent],
         stdout=open(d / "healer.out", "w"), stderr=subprocess.STDOUT, env=env)
     probe = subprocess.Popen(
         ["taskset", "-c", PROBE_CORES, sys.executable, str(PROBE), "--topics", ",".join(topics), "--inject", "" if real else ep["inject"],
@@ -163,6 +195,9 @@ def main() -> None:
     ap.add_argument("--warm", type=float, default=7.0)
     ap.add_argument("--post", type=float, default=25.0)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--agent-history", default="", help="warm-start outcome log; copied into OUT, arms append there")
+    ap.add_argument("--agent-mlp", default="", help="MLP weights file for agent_mlp")
+    ap.add_argument("--agent-llm", default="", help="model name for agent_llm")
     ap.add_argument("--allow-dirty", action="store_true", help="run an untraceable build (recorded in build.json)")
     a = ap.parse_args()
     if not HEALER.exists():
@@ -171,12 +206,19 @@ def main() -> None:
     if out.exists() and any(out.iterdir()):
         sys.exit(f"{out} is not empty; use a fresh directory")
     stamp(out, a.allow_dirty)
+    if "agent_history" in a.policies.split(","):
+        hist = out / "history.log"  # shared by every agent_history episode of this run
+        hist.write_text(Path(a.agent_history).read_text() if a.agent_history else "")
+        AGENT["history"] = str(hist)
+    AGENT["mlp"] = str(Path(a.agent_mlp).resolve()) if a.agent_mlp else ""
+    AGENT["llm"] = a.agent_llm
+    (out / "agent.json").write_text(json.dumps(dict(AGENT, history_warm=a.agent_history), indent=1))
     pick = set(filter(None, a.scenarios.split(",")))
     scen = [s for s in SETS[a.set] if not pick or s.name in pick]
     eps = []
     for rep, s, pol in itertools.product(range(a.reps), scen, a.policies.split(",")):
         eps.append(dict(set=a.set, scenario=s.name, inject=s.inject, root=s.root, expect=list(s.expect),
-                        restorable=s.restorable, collateral=list(s.collateral), policy=pol, rep=rep, dir=str(out / f"{s.name}__{pol}__{rep}")))
+                        restorable=s.restorable, collateral=list(s.collateral), repair=s.repair, policy=pol, rep=rep, dir=str(out / f"{s.name}__{pol}__{rep}")))
     print(f"{len(eps)} episodes, {a.slots} slots, ~{len(eps) * (a.warm + a.post + 3) / a.slots / 60:.1f} min", flush=True)
     free = list(range(a.slots))
     done = 0
