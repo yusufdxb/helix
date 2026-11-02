@@ -8,7 +8,7 @@ on:
 
 jobs:
   core:
-    name: Monitor core (no ROS) + gtest
+    name: Monitor core, ROS 2 node, gtest
     runs-on: ubuntu-22.04
     container:
       image: ros:humble-ros-base
@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update -q
-          apt-get install -y python3-colcon-common-extensions ros-humble-ament-cmake-gtest git
+          apt-get install -y python3-colcon-common-extensions ros-humble-ament-cmake-gtest ros-humble-rosidl-generator-dds-idl git
       - name: Unitree message packages (for the ROS node)
         run: |
           git clone --depth 1 https://github.com/unitreerobotics/unitree_ros2.git /tmp/unitree_ros2
