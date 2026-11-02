@@ -44,13 +44,13 @@ FAULTS = ["death", "drop_50pct", "drop_25pct", "transient_1s"]
 def finite(v):
     return v is not None and math.isfinite(v)
 
-def baseline_events(series, healthy_median):
+def baseline_events(series, healthy_median, ratio=0.6):
     """Fixed expected rate + a 2 s debounced watchdog, and a latched episode.
     This is a transparent ROS diagnostics + rule-action reference, not a ROS
     package, not a claim about a specific upstream software_watchdogs build.
     Looks only for missing or low rate; no high-rate anomaly detection.
     """
-    threshold = healthy_median * 0.6
+    threshold = healthy_median * ratio
     bad_since = None
     bad_samples = 0
     latched = False
@@ -91,8 +91,8 @@ def first_hit_helix(series, metric, params, onset):
     ys = [f["t"] - onset for f in xs if onset <= f["t"] <= onset + HORIZON_S]
     return min(ys) if ys else None
 
-def first_hit_baseline(series, median, onset):
-    xs = baseline_events(series, median)
+def first_hit_baseline(series, median, onset, ratio=0.6):
+    xs = baseline_events(series, median, ratio)
     ys = [t - onset for t in xs if onset <= t <= onset + HORIZON_S]
     return min(ys) if ys else None
 
@@ -187,7 +187,7 @@ def main():
     assert all(v > 0 for v in calibrations.values()), calibrations
     trials = []
     summary = {name: {f: [] for f in FAULTS}
-               for name in ("fixed_band_watchdog", *PARAMS)}
+               for name in ("fixed_band_watchdog_60", "fixed_band_watchdog_80", "fixed_band_watchdog_90", *PARAMS)}
     for metric, clean in series_map.items():
         for onset in ONSET_TIMES:
             assert any(onset + HORIZON_S < t for t,_ in clean), (metric,onset)
@@ -195,8 +195,9 @@ def main():
             tail = [(t,v) for t,v in clean if onset <= t <= onset+HORIZON_S]
             for f in FAULTS:
                 trial = pre + [(t, inject(v,t-onset,f)) for t,v in tail]
-                hits = {"fixed_band_watchdog": first_hit_baseline(trial,
-                         calibrations[metric],onset)}
+                hits = {"fixed_band_watchdog_60": first_hit_baseline(trial,calibrations[metric],onset,0.6),
+                        "fixed_band_watchdog_80": first_hit_baseline(trial,calibrations[metric],onset,0.8),
+                        "fixed_band_watchdog_90": first_hit_baseline(trial,calibrations[metric],onset,0.9)}
                 for name,params in PARAMS.items():
                     hits[name] = first_hit_helix(trial,metric,params,onset)
                 for name,lat in hits.items():
@@ -207,8 +208,9 @@ def main():
     for name in summary:
         starts=[]
         for metric, xs in series_map.items():
-            if name == "fixed_band_watchdog":
-                starts.extend((metric,t) for t in baseline_events(xs,calibrations[metric]))
+            if name.startswith("fixed_band_watchdog_"):
+                ratio = int(name.rsplit("_",1)[1])/100.0
+                starts.extend((metric,t) for t in baseline_events(xs,calibrations[metric],ratio))
             else:
                 starts.extend((metric,ev["t"]) for ev in
                      helix_faults(xs,metric,PARAMS[name]) if ev["t"]>=180)
@@ -228,7 +230,7 @@ def main():
     report={
         "data":"RECORDED real GO2 /helix/metrics from 2026-10-06; synthetic faults added offline",
         "replay_scope":"Actual shipped HELIX detector methods, diagnosis state machine and SafetyEnvelope executed as pure classes; no ROS graph, no hardware commands",
-        "baseline":"Independent fixed expected-rate watchdog: first-180s median, 60% low-rate bound, >=3 samples and >=2s persisted; stops latch until healthy inputs",
+        "baseline":"Independent expected-rate watchdog calibrated on t=60..180s, low-rate bounds 60%, 80%, 90% of reference; >=3 samples and >=2s persisted; stops latch until healthy inputs",
         "scope_notes":"One loaded, standing GO2 session, not walking; 8 injection times per sensor; overlapping trials are not statistically independent; no physical recovery measured; fixed-band baseline is reference implementation, not ros2_pulse built-in policy",
         "recording_duration_s":payload["duration_s"],
         "recorded_samples":payload["n_samples"],
