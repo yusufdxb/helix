@@ -35,6 +35,29 @@ jobs:
           colcon test --packages-select helix_monitor
           colcon test-result --verbose
 
+  healer:
+    name: Self-healing supervisor (helix_healer, helix_demo), gtest
+    runs-on: ubuntu-22.04
+    container:
+      image: ros:humble-ros-base
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+          apt-get update -q
+          apt-get install -y python3-colcon-common-extensions ros-humble-ament-cmake-gtest ros-humble-rmw-cyclonedds-cpp ros-humble-rosidl-generator-dds-idl
+      - name: Build
+        run: |
+          . /opt/ros/humble/setup.sh
+          colcon build --packages-up-to helix_healer helix_demo --cmake-args -DCMAKE_BUILD_TYPE=Release
+          test -x install/helix_healer/lib/helix_healer/helix_healer_node
+          test -x install/helix_demo/lib/helix_demo/demo_node
+      - name: Test
+        run: |
+          . /opt/ros/humble/setup.sh
+          colcon test --packages-select helix_healer
+          colcon test-result --verbose
+
   lint:
     name: Lint eval (ruff)
     runs-on: ubuntu-22.04

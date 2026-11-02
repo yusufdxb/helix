@@ -126,7 +126,7 @@ def main() -> None:
     eps = []
     for rep, s, pol in itertools.product(range(a.reps), scen, a.policies.split(",")):
         eps.append(dict(set=a.set, scenario=s.name, inject=s.inject, root=s.root, expect=list(s.expect),
-                        restorable=s.restorable, policy=pol, rep=rep, dir=str(out / f"{s.name}__{pol}__{rep}")))
+                        restorable=s.restorable, collateral=list(s.collateral), policy=pol, rep=rep, dir=str(out / f"{s.name}__{pol}__{rep}")))
     print(f"{len(eps)} episodes, {a.slots} slots, ~{len(eps) * (a.warm + a.post + 3) / a.slots / 60:.1f} min", flush=True)
     free = list(range(a.slots))
     done = 0

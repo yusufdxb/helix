@@ -9,7 +9,8 @@ Nominal rate of a topic = the lowest declared rate among its providers, so a
 working fallback counts as restored.
 
 Decisions = healer events of kind act or given_up (what the healer chose to do).
-  unnecessary  a decision on a node other than the injected root or its fallback
+  unnecessary  a decision on a node other than the injected root, its fallback,
+               or a node the scenario marks as collateral (it latches and needs repair)
                (every decision in the nominal scenario is unnecessary)
   futile       verify_failed on the root (a repair was tried and did not work)
   diagnosis    the label of the last root decision is in the scenario's expect set
@@ -106,7 +107,7 @@ def score_episode(d: Path) -> dict | None:
     pre_ok = all(ok for t, ok in series if t < t_inj)
 
     root = meta["root"]
-    roots = {root, fb.get(root, "")} - {""}
+    roots = ({root, fb.get(root, "")} | set(meta.get("collateral", []))) - {""}
     decisions = [e for e in events if e["kind"] in ("act", "given_up")]
     unnecessary = [e for e in decisions if e["node"] not in roots]
     root_dec = [e for e in decisions if e["node"] == root]
@@ -143,7 +144,7 @@ def summarize(rows: list[dict]) -> str:
     by = defaultdict(list)
     for r in rows:
         by[r["policy"]].append(r)
-    lines = ["policy    n  restored  safe  failed  diag_ok  unneeded  futile  burning  lat_med_s  outage_mean_s  cpu%  rss_mb"]
+    lines = ["policy    n  restored  safe  failed  diag_ok  decisions  unneeded  futile  burning  lat_med_s  outage_mean_s  cpu%  rss_mb"]
     for pol in ("none", "respawn", "watchdog", "helix"):
         rs = by.get(pol)
         if not rs:
@@ -154,7 +155,7 @@ def summarize(rows: list[dict]) -> str:
         n_out = {k: sum(1 for r in rs if r["outcome"] == k) for k in ("RESTORED", "SAFE", "FAILED")}
         lines.append(
             f"{pol:<9}{len(rs):>3}{n_out['RESTORED']:>10}{n_out['SAFE']:>6}{n_out['FAILED']:>8}"
-            f"{len(diag):>5}/{len(faulty):<3}{sum(r['unnecessary'] for r in rs):>9}{sum(r['futile'] for r in rs):>8}{sum(r['left_burning'] for r in rs):>9}"
+            f"{len(diag):>5}/{len(faulty):<3}{sum(r['decisions'] for r in rs):>11}{sum(r['unnecessary'] for r in rs):>9}{sum(r['futile'] for r in rs):>8}{sum(r['left_burning'] for r in rs):>9}"
             f"{(statistics.median(lat) if lat else float('nan')):>11.2f}"
             f"{statistics.mean(r['outage_s'] for r in faulty) if faulty else float('nan'):>15.2f}"
             f"{100 * statistics.mean(r['healer_cpu'] for r in rs):>6.1f}{statistics.mean(r['healer_rss_mb'] for r in rs):>8.1f}")
@@ -183,6 +184,31 @@ def per_scenario(rows: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def primary_test(rows: list[dict], bad: list[dict], a: str = "helix", b: str = "watchdog") -> str:
+    """Pre-registered primary test: per fault scenario, RESTORED count of `a` minus `b`
+    (episodes flagged pre_ok=False or inject_subs=0 drop both arms of the (scenario, rep)
+    pair), exact one-sided sign-flip permutation over scenario blocks."""
+    drop = {(r["scenario"], r["rep"]) for r in bad}
+    diff: dict[str, int] = defaultdict(int)
+    unn = {a: 0, b: 0}
+    for r in rows:
+        if r["policy"] in unn:
+            unn[r["policy"]] += r["unnecessary"]
+        if not r["root"] or r["policy"] not in (a, b) or (r["scenario"], r["rep"]) in drop:
+            continue
+        diff[r["scenario"]] += (1 if r["policy"] == a else -1) * (r["outcome"] == "RESTORED")
+    d = [v for v in diff.values() if v != 0]
+    obs = sum(diff.values())
+    k = len(d)
+    ge = sum(1 for m in range(2 ** k) if sum(v if (m >> i) & 1 else -v for i, v in enumerate(d)) >= obs)
+    p = ge / 2 ** k if k else 1.0
+    kill = obs < 3 or unn[a] > unn[b]
+    return (f"PRIMARY {a} - {b}: RESTORED diff {obs:+d} over {len(diff)} fault scenarios "
+            f"({k} non-tied blocks, p-value floor {2.0 ** -k if k else 1.0:.2g}); exact sign-flip p = {p:.4g}; "
+            f"unnecessary {a} {unn[a]} vs {b} {unn[b]}; dropped pairs {len(drop)}\n"
+            f"KILL CRITERION (diff < 3 or more unnecessary): {'MET, claim dead' if kill else 'not met, claim survives'}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("dirs", nargs="+")
@@ -197,6 +223,8 @@ def main() -> None:
     print(per_scenario(rows))
     print()
     print(summarize(rows))
+    print()
+    print(primary_test(rows, bad))
     if missing:
         print(f"\nincomplete episodes: {missing}")
     for r in bad:

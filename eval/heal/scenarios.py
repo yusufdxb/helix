@@ -19,6 +19,9 @@ class Scenario:
     root: str  # "" = nominal
     expect: tuple[str, ...]
     restorable: bool = True
+    # Nodes that legitimately need their own repair as a consequence of the root
+    # fault (a downstream node that latches and never recovers by itself).
+    collateral: tuple[str, ...] = ()
 
 
 # Development topology: src/helix_healer/config/nav.spec. All tuning happened on this set.
@@ -38,4 +41,27 @@ NAV = [
     Scenario("qos_mismatch", "localizer:qos_mismatch", "localizer", ("qos_mismatch",), restorable=False),
 ]
 
-SETS = {"nav": NAV}
+# Held-out topology: src/helix_healer/config/manip.spec. Written before any DEV
+# result was seen; run once, after pre-registration, with no tuning in between.
+# Different node names, rates, depth, fault parameters, plus two fault patterns
+# DEV never had: a latching downstream node and a crash loop with no backup.
+MANIP = [
+    Scenario("nominal", "", "", ()),
+    Scenario("crash_segv", "joints:segv", "joints", ("crash",)),
+    Scenario("crash_exit", "tracker:exit:1", "tracker", ("crash",)),
+    Scenario("crash_loop_backup", "camera:device_missing", "camera", ("crash_loop",), collateral=("detector",)),
+    Scenario("crash_loop_nobackup", "arm_controller:device_missing", "arm_controller", ("crash_loop",),
+             restorable=False),
+    Scenario("hang", "tracker:hang", "tracker", ("hang",)),
+    Scenario("hang_lifecycle", "arm_planner:hang", "arm_planner", ("hang",)),
+    Scenario("hang_latch", "camera:hang", "camera", ("hang",), collateral=("detector",)),
+    Scenario("degrade", "joints:degrade:0.4", "joints", ("degraded",)),
+    Scenario("degrade_lifecycle", "camera:degrade:0.25", "camera", ("degraded",)),
+    Scenario("endpoint_loss", "gripper:endpoint_loss", "gripper", ("endpoint_loss",)),
+    Scenario("endpoint_loss_lifecycle", "arm_planner:endpoint_loss", "arm_planner", ("endpoint_loss",)),
+    Scenario("cpu_runaway", "arm_controller:cpu_hog:3", "arm_controller", ("cpu_runaway",)),
+    Scenario("leak", "detector:leak:40", "detector", ("memory_leak",)),
+    Scenario("qos_mismatch", "detector:qos_mismatch", "detector", ("qos_mismatch",), restorable=False),
+]
+
+SETS = {"nav": NAV, "manip": MANIP}
