@@ -13,7 +13,7 @@ exec cam @helix_demo/demo_node --ros-args -p rate_hz:=30.0
 node cam_b autostart=0
 out cam_b /image
 exec cam_b @helix_demo/demo_node
-node det critical=0
+node det critical=0 ros_node=/perception/detector
 in det /image
 exec det /bin/true
 )");
@@ -30,6 +30,8 @@ exec det /bin/true
   EXPECT_EQ(cam->argv.size(), 4u);
   EXPECT_DOUBLE_EQ(s.find("cam_b")->outputs[0].hz, 0);
   EXPECT_FALSE(s.find("det")->critical);
+  EXPECT_EQ(s.find("det")->ros_node, "/perception/detector");
+  EXPECT_TRUE(cam->ros_node.empty());
   EXPECT_EQ(s.find("det")->inputs.at(0), "/image");
 }
 

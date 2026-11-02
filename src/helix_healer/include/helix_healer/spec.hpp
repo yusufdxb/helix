@@ -7,6 +7,7 @@
 //   exec    NAME ARGV...                  command line; "@pkg/exe" resolves to <prefix>/lib/pkg/exe
 //
 // node keys: restart=1 critical=1 lifecycle=0 autostart=1 fallback=OTHER cpu_max=CORES rss_max_mb=MB
+//            ros_node=/FQN attach=PATTERN
 #pragma once
 
 #include <string>
@@ -88,6 +89,9 @@ struct NodeSpec {
   bool lifecycle = false;
   bool autostart = true;
   std::string fallback;
+  // ros_node=NAME: the node's fully qualified name in the ROS graph when it differs from the
+  // spec name (the agent reads and restores its parameters there). Default: "/" + name.
+  std::string ros_node;
   double cpu_max = 0.9;     // cores
   double rss_max_mb = 512;  // MB
 };

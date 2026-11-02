@@ -122,7 +122,7 @@ out controller_manager /joint_states {a.rate}
 exec controller_manager /opt/ros/humble/lib/controller_manager/ros2_control_node --ros-args --params-file {out}/controllers.yaml -r controller_manager:__node:=controller_manager
 then controller_manager @controller_manager/spawner joint_state_broadcaster forward_position_controller -c /controller_manager
 
-node rsp
+node rsp ros_node=/robot_state_publisher
 in rsp /joint_states
 out rsp /tf 83
 exec rsp /opt/ros/humble/lib/robot_state_publisher/robot_state_publisher --ros-args --params-file {out}/rsp.yaml

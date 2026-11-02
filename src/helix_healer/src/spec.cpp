@@ -102,6 +102,7 @@ Spec parse_spec(const std::string& text) {
         else if (k == "cpu_max") n.cpu_max = num(no, v);
         else if (k == "rss_max_mb") n.rss_max_mb = num(no, v);
         else if (k == "attach") n.attach = v;
+        else if (k == "ros_node") n.ros_node = v;
         else fail(no, "unknown node key '" + k + "'");
       }
       spec.nodes.push_back(std::move(n));

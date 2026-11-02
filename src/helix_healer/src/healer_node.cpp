@@ -14,10 +14,12 @@
 #include <lifecycle_msgs/msg/transition.hpp>
 #include <lifecycle_msgs/srv/change_state.hpp>
 #include <lifecycle_msgs/srv/get_state.hpp>
+#include <rcl_interfaces/msg/parameter_event.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 
 #include <signal.h>
+#include <sys/stat.h>
 
 #include <algorithm>
 #include <atomic>
@@ -36,6 +38,7 @@
 #include <thread>
 #include <vector>
 
+#include "helix_healer/agent.hpp"
 #include "helix_healer/policy.hpp"
 #include "helix_healer/process.hpp"
 #include "helix_healer/spec.hpp"
@@ -69,6 +72,46 @@ double slope(const std::deque<std::pair<double, double>>& h) {
   for (auto& [t, v] : h) num += (t - mt) * (v - mv), den += (t - mt) * (t - mt);
   return den > 1e-9 ? num / den : 0;
 }
+
+// FNV-1a 64 of a file's bytes, cached by (mtime, size). A missing file hashes to a fixed marker.
+uint64_t file_hash(const std::string& path) {
+  struct Entry { int64_t mtime = 0, size = -1; uint64_t h = 0; };
+  static std::mutex mu;
+  static std::map<std::string, Entry> cache;
+  struct stat st {};
+  if (::stat(path.c_str(), &st) != 0) return 0x6d697373696e67ULL;
+  const int64_t mt = static_cast<int64_t>(st.st_mtim.tv_sec) * 1000000000LL + st.st_mtim.tv_nsec;
+  {
+    std::lock_guard lk(mu);
+    auto it = cache.find(path);
+    if (it != cache.end() && it->second.mtime == mt && it->second.size == st.st_size) return it->second.h;
+  }
+  uint64_t h = 1469598103934665603ULL;
+  std::ifstream in(path, std::ios::binary);
+  char buf[8192];
+  while (in.read(buf, sizeof buf) || in.gcount() > 0) {
+    for (std::streamsize i = 0; i < in.gcount(); ++i) h = (h ^ static_cast<unsigned char>(buf[i])) * 1099511628211ULL;
+  }
+  std::lock_guard lk(mu);
+  cache[path] = {mt, static_cast<int64_t>(st.st_size), h};
+  return h;
+}
+
+// ERROR/FATAL lines in the last `bytes` of a log file.
+int log_errors(const std::string& path, std::streamoff bytes = 8192) {
+  std::ifstream in(path, std::ios::binary | std::ios::ate);
+  if (!in) return 0;
+  const std::streamoff size = in.tellg();
+  in.seekg(std::max<std::streamoff>(0, size - bytes));
+  std::string line;
+  int n = 0;
+  while (std::getline(in, line))
+    if (line.find("[ERROR]") != std::string::npos || line.find("[FATAL]") != std::string::npos) ++n;
+  return n;
+}
+
+using ParamMap = std::map<std::string, rcl_interfaces::msg::ParameterValue>;
+constexpr double kLkgHoldS = 5.0;  // health required past a snapshot before it becomes last-known-good
 
 struct TopicState {
   std::deque<double> arrivals;
@@ -113,7 +156,42 @@ struct Managed {
   std::vector<std::string> env;
   std::string cwd;
   std::vector<std::vector<std::string>> then;  // resolved helper commands
+  // agent policy: last-known-good (LKG) parameters and config files
+  std::shared_ptr<rclcpp::AsyncParametersClient> params;
+  ParamMap cur_params;   // live values, from fetches and /parameter_events
+  ParamMap lkg_params;   // promoted after kLkgHoldS of health past the fetch
+  ParamMap cand_params;  // fetched while healthy, waiting for promotion
+  double cand_t = -1, last_fetch = -1, healthy_since = -1;
+  pid_t cand_pid = -1;
+  uint64_t cand_gen = 0;
+  bool cand_busy = false;
+  double param_change_t = -1;   // last changed/deleted parameter event
+  std::vector<size_t> cfg_idx;  // argv entries naming config files (.yaml .yml .urdf .xml)
+  uint64_t spawn_hash = 0;      // hash of the config files the current process was started with
+  uint64_t lkg_hash = 0;        // 0 = no LKG copies yet
+  uint64_t reject_hash = 0;     // disk config rejected by a RestartLKG
+  bool pinned = false;          // running on the LKG copies until the disk config changes again
+  std::vector<std::string> lkg_argv;
 };
+
+uint64_t config_hash(const Managed& m) {
+  uint64_t h = 1469598103934665603ULL;
+  for (size_t i : m.cfg_idx) {
+    const uint64_t f = file_hash(m.argv[i]);
+    for (int b = 0; b < 8; ++b) h = (h ^ ((f >> (8 * b)) & 0xff)) * 1099511628211ULL;
+  }
+  return h ? h : 1;
+}
+
+// LKG parameters that the live node currently holds with a different value.
+std::vector<std::string> param_diff(const Managed& m) {
+  std::vector<std::string> out;
+  for (const auto& [k, v] : m.lkg_params) {
+    auto it = m.cur_params.find(k);
+    if (it != m.cur_params.end() && !(it->second == v)) out.push_back(k);
+  }
+  return out;
+}
 
 struct Result {
   std::string node;
@@ -135,6 +213,11 @@ class Healer : public rclcpp::Node {
     if (spec_path.empty()) throw std::runtime_error("parameter 'spec' is required");
     spec_ = hh::load_spec(spec_path);
     policy_ = std::make_unique<hh::Policy>(hh::policy_kind(policy_name), spec_);
+    agent_ = policy_->kind() == hh::PolicyKind::Agent;
+    const auto ranker_name = declare_parameter<std::string>("agent_ranker", "rule");
+    const auto ranker_arg = declare_parameter<std::string>("agent_arg", "");
+    const auto ranker_seed = declare_parameter<int64_t>("agent_seed", 0);
+    if (agent_) ranker_ = hh::make_ranker(ranker_name, ranker_arg, static_cast<uint64_t>(ranker_seed));
     if (!log_dir_.empty()) std::filesystem::create_directories(log_dir_);
     if (!event_log.empty()) {
       events_.open(event_log, std::ios::out | std::ios::trunc);
@@ -163,7 +246,23 @@ class Healer : public rclcpp::Node {
         m.get = create_client<lifecycle_msgs::srv::GetState>("/" + ns.name + "/get_state");
       }
       for (const auto& o : ns.outputs) topics_[o.topic];
+      if (agent_) {
+        m.params = std::make_shared<rclcpp::AsyncParametersClient>(this, ns.ros_node.empty() ? "/" + ns.name : ns.ros_node);
+        if (!ns.ros_node.empty()) ros_alias_[ns.ros_node] = ns.name;
+        for (size_t i = 1; i < m.argv.size(); ++i) {
+          const std::filesystem::path f(m.argv[i]);
+          const auto ext = f.extension().string();
+          if ((ext == ".yaml" || ext == ".yml" || ext == ".urdf" || ext == ".xml") && std::filesystem::is_regular_file(f))
+            m.cfg_idx.push_back(i);
+        }
+      }
       nodes_.emplace(ns.name, std::move(m));
+    }
+    if (agent_) {
+      param_sub_ = create_subscription<rcl_interfaces::msg::ParameterEvent>(
+          "/parameter_events", rclcpp::ParameterEventsQoS(),
+          [this](rcl_interfaces::msg::ParameterEvent::ConstSharedPtr ev) { on_param_event(*ev); });
+      if (log_dir_.empty()) RCLCPP_WARN(get_logger(), "agent: log_dir is empty, so no config LKG copies (no restart_lkg)");
     }
     // Declared inputs give upstream edges before the graph shows them.
     for (auto& [name, m] : nodes_)
@@ -182,7 +281,8 @@ class Healer : public rclcpp::Node {
     graph_ = create_wall_timer(500ms, [this] { refresh_graph(); });
     res_ = create_wall_timer(std::chrono::duration<double>(p.resource_period_s), [this] { sample_resources(); });
     diag_ = create_wall_timer(1s, [this] { publish_diagnostics(); });
-    RCLCPP_INFO(get_logger(), "helix_healer: policy=%s, %zu managed nodes", policy_name.c_str(), nodes_.size());
+    RCLCPP_INFO(get_logger(), "helix_healer: policy=%s%s%s, %zu managed nodes", policy_name.c_str(),
+                agent_ ? " ranker=" : "", agent_ ? ranker_->name() : "", nodes_.size());
   }
 
   ~Healer() override {
@@ -399,6 +499,13 @@ class Healer : public rclcpp::Node {
       n.qos_incompatible = m.qos_incompat;
       n.upstream.assign(m.upstream.begin(), m.upstream.end());
       for (const auto& o : m.spec.outputs) n.outputs.push_back(topic_obs(o, m, t));
+      if (agent_) {
+        n.ev.param_diff = static_cast<int>(param_diff(m).size());
+        n.ev.has_lkg_config = m.lkg_hash != 0 && !m.lkg_argv.empty();
+        n.ev.config_changed = n.ev.has_lkg_config && config_hash(m) != m.lkg_hash;
+        n.ev.config_ran = n.ev.has_lkg_config && m.spawn_hash != m.lkg_hash;
+        n.ev.config_pinned = m.pinned;
+      }
       s.nodes.push_back(std::move(n));
     }
     return s;
@@ -527,12 +634,14 @@ class Healer : public rclcpp::Node {
     const auto snap = snapshot(t);
     auto out = policy_->step(snap);
     for (const auto& e : out.events) emit(e);
-    for (const auto& d : out.decisions) dispatch(d);
+    if (agent_) for (const auto& e : out.events) verdict(e);
+    for (const auto& d : out.decisions) dispatch(d, snap);
     {
       std::lock_guard lk(mu_);
       for (auto& [name, m] : nodes_)
         m.learn_ok = m.alive && t - std::max(m.start_t, m.watch_t) >= spec_.p.startup_grace_s && policy_->healthy(name);
     }
+    if (agent_) maintain_lkg(t);
     if (snaps_.is_open() && (t - last_snap_ >= 0.25 || !out.decisions.empty())) {
       last_snap_ = t;
       write_snapshot(snap, out);
@@ -593,18 +702,24 @@ class Healer : public rclcpp::Node {
 
   // ---------- repairs ----------
   void start_job(const std::string& node, std::function<bool()> fn, bool report, hh::Action a = hh::Action::None) {
+    launch(node, [fn = std::move(fn)](hh::Action&) { return fn(); }, report, a);
+  }
+
+  // fn may replace the reported action (the agent reports the ranked choice, not the default).
+  void launch(const std::string& node, std::function<bool(hh::Action&)> fn, bool report, hh::Action a) {
     auto done = std::make_shared<std::atomic<bool>>(false);
     Job j{node, std::jthread([this, node, fn = std::move(fn), report, a, done] {
             bool ok = false;
             std::string err;
+            hh::Action act = a;
             try {
-              ok = fn();
+              ok = fn(act);
             } catch (const std::exception& e) {
               err = e.what();
             }
             if (report) {
               std::lock_guard lk(res_mu_);
-              results_.push_back({node, a, ok, err});
+              results_.push_back({node, act, ok, err});
             }
             done->store(true);
           }),
@@ -612,8 +727,9 @@ class Healer : public rclcpp::Node {
     jobs_.push_back(std::move(j));
   }
 
-  void dispatch(const hh::Decision& d) {
+  void dispatch(const hh::Decision& d, const hh::Snapshot& snap) {
     const std::string node = d.node;
+    if (!d.candidates.empty()) return dispatch_agent(d, snap);
     switch (d.action) {
       case hh::Action::Restart:
         start_job(node, [this, node, delay = d.delay_s, f = d.fault] { return restart(node, delay, f); }, true,
@@ -632,8 +748,292 @@ class Healer : public rclcpp::Node {
         results_.push_back({node, d.action, true, ""});
         break;
       }
+      case hh::Action::ParamRestore:
+      case hh::Action::RestartLKG:  // only reachable through candidates
       case hh::Action::None:
         break;
+    }
+  }
+
+  // ---------- agent: incident dispatch, verdicts, last-known-good ----------
+  struct Pending {
+    hh::AgentEvidence e;
+    hh::Action action = hh::Action::None;
+    std::vector<rclcpp::Parameter> prev;  // values a ParamRestore overwrote, for rollback
+    pid_t pid = -1;
+  };
+
+  static void invalidate(Managed& m) {
+    m.cand_t = -1;
+    m.cand_params.clear();
+    m.cand_busy = false;
+    ++m.cand_gen;
+  }
+
+  void dispatch_agent(const hh::Decision& d, const hh::Snapshot& snap) {
+    const std::string node = d.node;
+    hh::AgentEvidence e;
+    e.fault = d.fault;
+    e.incident_action = d.incident_action;
+    e.lifecycle = nodes_.at(node).spec.lifecycle;
+    for (const auto& n : snap.nodes) {
+      if (n.name != node) continue;
+      e.alive = n.alive;
+      e.quick_deaths = n.quick_deaths;
+      e.param_diff = n.ev.param_diff;
+      e.config_changed = n.ev.config_changed;
+      e.config_ran = n.ev.config_ran;
+    }
+    if (!log_dir_.empty()) e.log_errors = log_errors(log_dir_ + "/" + node + ".log");
+    std::vector<rclcpp::Parameter> restore, prev;
+    std::shared_ptr<rclcpp::AsyncParametersClient> pc;
+    pid_t pid;
+    {
+      std::lock_guard lk(mu_);
+      auto& m = nodes_.at(node);
+      pc = m.params;
+      pid = m.pid;
+      for (const auto& k : param_diff(m)) {
+        restore.emplace_back(k, rclcpp::ParameterValue(m.lkg_params.at(k)));
+        prev.emplace_back(k, rclcpp::ParameterValue(m.cur_params.at(k)));
+      }
+    }
+    launch(node, [this, d, node, e, restore, prev, pc, pid](hh::Action& chosen) -> bool {
+      const auto t0 = std::chrono::steady_clock::now();
+      std::vector<hh::Action> order;
+      std::string note;
+      try {
+        std::lock_guard lk(ranker_mu_);
+        order = ranker_->rank(node, e, d.candidates);
+      } catch (const std::exception& ex) {
+        note = std::string(" ranker_error=") + ex.what();
+      }
+      // A ranker may only reorder: anything else falls back to the rule order.
+      auto sorted = [](std::vector<hh::Action> v) { std::sort(v.begin(), v.end()); return v; };
+      if (order.empty() || sorted(order) != sorted(d.candidates)) {
+        if (note.empty() && !order.empty()) note = " ranker_invalid";
+        order = d.candidates;
+      }
+      chosen = order.front();
+      const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+      auto names = [](const std::vector<hh::Action>& v) {
+        std::string s;
+        for (auto a : v) s += (s.empty() ? "" : ",") + std::string(hh::to_string(a));
+        return s;
+      };
+      char buf[32];
+      snprintf(buf, sizeof buf, "%.3f", ms);
+      emit({now(), node, "act", d.fault, chosen, d.incident_action,
+            std::string("ranker=") + ranker_->name() + " ms=" + buf + " cands=" + names(d.candidates) +
+                " order=" + names(order) + " sig=" + hh::signature(e) + note});
+      {
+        std::lock_guard lk(pend_mu_);
+        pending_[node] = Pending{e, chosen, chosen == hh::Action::ParamRestore ? prev : std::vector<rclcpp::Parameter>{},
+                                 pid};
+      }
+      switch (chosen) {
+        case hh::Action::Restart:
+          return restart(node, d.delay_s, d.fault);
+        case hh::Action::LifecycleReset:
+          return lifecycle_reset(node);
+        case hh::Action::ParamRestore: {
+          if (!pc || restore.empty() || !pc->service_is_ready()) return false;
+          auto f = pc->set_parameters(restore);
+          if (f.wait_for(2s) != std::future_status::ready) return false;
+          for (const auto& r : f.get())
+            if (!r.successful) return false;
+          emit_simple(node, "param_restore", names_of(restore));
+          return true;
+        }
+        case hh::Action::RestartLKG: {
+          {
+            std::lock_guard lk(mu_);
+            auto& m = nodes_.at(node);
+            if (m.lkg_hash == 0 || m.lkg_argv.empty()) return false;
+            m.pinned = true;
+            m.reject_hash = config_hash(m);
+          }
+          emit_simple(node, "pin", "restart on last-known-good config copies");
+          return restart(node, d.delay_s, d.fault);
+        }
+        default:
+          return false;
+      }
+    }, true, d.action);
+  }
+
+  static std::string names_of(const std::vector<rclcpp::Parameter>& ps) {
+    std::string s;
+    for (const auto& p : ps) s += (s.empty() ? "" : ",") + p.get_name();
+    return s;
+  }
+
+  // Outcome of an agent action: feed the ranker (repair history) and undo a failed ParamRestore.
+  void verdict(const hh::Event& ev) {
+    if (ev.kind != "verified" && ev.kind != "verify_failed" && ev.kind != "action_failed") return;
+    Pending p;
+    {
+      std::lock_guard lk(pend_mu_);
+      auto it = pending_.find(ev.node);
+      if (it == pending_.end()) return;
+      p = std::move(it->second);
+      pending_.erase(it);
+    }
+    const bool ok = ev.kind == "verified";
+    {
+      std::lock_guard lk(ranker_mu_);
+      ranker_->record(ev.node, p.e, p.action, ok);
+    }
+    if (ok || p.action != hh::Action::ParamRestore || p.prev.empty()) return;
+    std::shared_ptr<rclcpp::AsyncParametersClient> pc;
+    {
+      std::lock_guard lk(mu_);
+      auto& m = nodes_.at(ev.node);
+      if (m.pid != p.pid || !m.alive) return;  // a different process now: nothing to undo
+      pc = m.params;
+    }
+    if (!pc || !pc->service_is_ready()) return;
+    pc->set_parameters(p.prev);  // fire and forget; the outcome shows in the next parameter event
+    emit_simple(ev.node, "rollback", names_of(p.prev));
+  }
+
+  void on_param_event(const rcl_interfaces::msg::ParameterEvent& ev) {
+    std::string name = ev.node;
+    if (auto a = ros_alias_.find(name); a != ros_alias_.end()) name = a->second;
+    else if (!name.empty() && name[0] == '/') name.erase(0, 1);
+    std::lock_guard lk(mu_);
+    auto it = nodes_.find(name);
+    if (it == nodes_.end()) return;
+    auto& m = it->second;
+    for (const auto& p : ev.new_parameters) m.cur_params[p.name] = p.value;
+    for (const auto& p : ev.changed_parameters) m.cur_params[p.name] = p.value;
+    for (const auto& p : ev.deleted_parameters) m.cur_params.erase(p.name);
+    if (!ev.changed_parameters.empty() || !ev.deleted_parameters.empty()) {
+      m.param_change_t = now();
+      invalidate(m);
+    }
+  }
+
+  // Parameters: fetch a candidate while healthy, promote it after kLkgHoldS more of health with no
+  // change in between. Config files: copy the files the running process was started with once it
+  // has been healthy for kLkgHoldS. The user's files are only ever read.
+  void maintain_lkg(double t) {
+    std::vector<std::string> fetch;
+    std::vector<std::pair<std::string, std::string>> promoted;
+    struct Copy {
+      std::string node;
+      std::vector<std::string> argv;
+      std::vector<size_t> idx;
+      uint64_t hash;
+    };
+    std::vector<Copy> copies;
+    {
+      std::lock_guard lk(mu_);
+      for (auto& [name, m] : nodes_) {
+        if (!m.learn_ok || !m.alive || m.retired) {
+          m.healthy_since = -1;
+          if (m.cand_t >= 0 || m.cand_busy) invalidate(m);
+          continue;
+        }
+        if (m.healthy_since < 0) m.healthy_since = t;
+        if (m.params) {
+          if (m.cand_busy && t - m.last_fetch > kLkgHoldS) invalidate(m);  // lost reply
+          if (m.cand_t >= 0 && t - m.cand_t >= kLkgHoldS && m.cand_pid == m.pid) {
+            if (m.cand_params != m.lkg_params) {
+              m.lkg_params = m.cand_params;
+              promoted.push_back({name, "params=" + std::to_string(m.lkg_params.size())});
+            }
+            m.cand_t = -1;
+            m.cand_params.clear();
+          } else if (!m.cand_busy && m.cand_t < 0 && t - m.last_fetch >= kLkgHoldS &&
+                     (m.param_change_t < 0 || t - m.param_change_t >= kLkgHoldS) && m.params->service_is_ready()) {
+            m.cand_busy = true;
+            m.last_fetch = t;
+            fetch.push_back(name);
+          }
+        }
+        if (!m.cfg_idx.empty() && !m.pinned && !log_dir_.empty() && m.spawn_hash != 0 && m.spawn_hash != m.lkg_hash &&
+            t - m.healthy_since >= kLkgHoldS && config_hash(m) == m.spawn_hash)
+          copies.push_back({name, m.argv, m.cfg_idx, m.spawn_hash});
+      }
+    }
+    for (const auto& [n, d] : promoted) emit_simple(n, "lkg", d);
+    for (const auto& n : fetch) fetch_params(n);
+    for (const auto& c : copies) {
+      std::vector<std::string> argv = c.argv;
+      try {
+        const auto dir = std::filesystem::path(log_dir_) / "lkg" / c.node;
+        std::filesystem::create_directories(dir);
+        for (size_t i : c.idx) {
+          const auto dst = dir / (std::to_string(i) + "_" + std::filesystem::path(c.argv[i]).filename().string());
+          const auto tmp = dst.string() + ".tmp";
+          std::filesystem::copy_file(c.argv[i], tmp, std::filesystem::copy_options::overwrite_existing);
+          std::filesystem::rename(tmp, dst);
+          argv[i] = dst.string();
+        }
+      } catch (const std::exception& ex) {
+        emit_simple(c.node, "lkg_error", ex.what());
+        continue;
+      }
+      bool ok = false;
+      {
+        std::lock_guard lk(mu_);
+        auto& m = nodes_.at(c.node);
+        // The source must not have changed while it was copied.
+        if (m.spawn_hash == c.hash && config_hash(m) == c.hash) {
+          m.lkg_argv = std::move(argv);
+          m.lkg_hash = c.hash;
+          ok = true;
+        }
+      }
+      if (ok) emit_simple(c.node, "lkg_config", std::to_string(c.idx.size()) + " file(s)");
+    }
+  }
+
+  void fetch_params(const std::string& name) {
+    std::shared_ptr<rclcpp::AsyncParametersClient> c;
+    uint64_t gen;
+    pid_t pid;
+    {
+      std::lock_guard lk(mu_);
+      auto& m = nodes_.at(name);
+      c = m.params;
+      gen = m.cand_gen;
+      pid = m.pid;
+    }
+    auto fail = [this, name, gen] {
+      std::lock_guard lk(mu_);
+      auto& m = nodes_.at(name);
+      if (m.cand_gen == gen) m.cand_busy = false;
+    };
+    try {
+      c->list_parameters({}, 0, [this, c, name, gen, pid, fail](std::shared_future<rcl_interfaces::msg::ListParametersResult> f) {
+        try {
+          const auto names = f.get().names;
+          c->get_parameters(names, [this, name, gen, pid, fail](std::shared_future<std::vector<rclcpp::Parameter>> g) {
+            try {
+              const auto ps = g.get();
+              std::lock_guard lk(mu_);
+              auto& m = nodes_.at(name);
+              if (m.cand_gen != gen) return;  // a parameter changed or the process was replaced meanwhile
+              m.cand_busy = false;
+              if (m.pid != pid || !m.learn_ok) return;
+              ParamMap pm;
+              for (const auto& p : ps) pm[p.get_name()] = p.get_value_message();
+              for (const auto& [k, v] : pm) m.cur_params[k] = v;
+              m.cand_params = std::move(pm);
+              m.cand_t = now();
+              m.cand_pid = pid;
+            } catch (const std::exception&) {
+              fail();
+            }
+          });
+        } catch (const std::exception&) {
+          fail();
+        }
+      });
+    } catch (const std::exception&) {
+      fail();
     }
   }
 
@@ -692,7 +1092,19 @@ class Healer : public rclcpp::Node {
         o.detach = true;
       }
       if (m.argv.empty()) return false;  // attach node never seen running
-      pid = sup_.spawn(m.argv, log, o);
+      const std::vector<std::string>* argv = &m.argv;
+      if (agent_) {
+        if (!m.cfg_idx.empty()) {
+          const uint64_t disk = config_hash(m);
+          if (m.pinned && disk != m.reject_hash) m.pinned = false;  // a newer deploy replaces the rejected one
+          if (m.pinned && !m.lkg_argv.empty()) argv = &m.lkg_argv;
+          m.spawn_hash = m.pinned ? m.lkg_hash : disk;
+        }
+        m.cur_params.clear();
+        invalidate(m);
+        m.healthy_since = -1;
+      }
+      pid = sup_.spawn(*argv, log, o);
       helpers = m.then;
       m.pid = pid;
       m.alive = pid > 0;
@@ -866,6 +1278,14 @@ class Healer : public rclcpp::Node {
   std::vector<Result> results_;
   std::vector<Job> jobs_;
   std::atomic<bool> stopping_{false};
+
+  // agent policy
+  bool agent_ = false;
+  std::unique_ptr<hh::Ranker> ranker_;
+  std::mutex ranker_mu_, pend_mu_;
+  std::map<std::string, Pending> pending_;
+  std::map<std::string, std::string> ros_alias_;  // ROS fully qualified name -> spec name
+  rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr param_sub_;
 
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr mode_pub_;
   rclcpp::Publisher<helix_msgs::msg::HealEvent>::SharedPtr ev_pub_;
