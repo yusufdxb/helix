@@ -6,6 +6,10 @@ a fixed time by an independent probe. Episodes run in parallel slots.
 
   python3 eval/heal/run_episodes.py --set nav --policies none,respawn,watchdog,helix \
       --reps 3 --out eval/heal/out/dev
+
+The humanoid set is different: the stack is stock ROS 2 software generated per episode by
+humanoid/make_stack.py, and faults act on the real processes from a thread in this runner
+(humanoid/inject.py), so the probe only observes.
 """
 
 import argparse
@@ -21,12 +25,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from scenarios import SETS  # noqa: E402
+from humanoid.inject import Injector  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 HEALER = ROOT / "install/helix_healer/lib/helix_healer/helix_healer_node"
 PROBE = Path(__file__).resolve().parent / "probe.py"
 SPECS = {"nav": ROOT / "src/helix_healer/config/nav.spec", "manip": ROOT / "src/helix_healer/config/manip.spec"}
+MAKE_STACK = Path(__file__).resolve().parent / "humanoid/make_stack.py"
 PROBE_CORES = "20-23"
+TYPES = {"/joint_states": "sensor_msgs/msg/JointState", "/tf": "tf2_msgs/msg/TFMessage", "/image": "sensor_msgs/msg/Image"}
+# Same policy as `helix`, with the v3 release settings: 20 Hz tick, backoff before the first
+# restart, fixed staleness rule. Isolates what the latency work bought.
+V3_PARAMS = "healer tick_hz=20 fast_repair=0 adaptive=0\n"
 
 
 def spec_outputs(text: str) -> dict[str, list[tuple[str, float]]]:
@@ -66,26 +76,56 @@ def proc_rss_mb(pid: int) -> float:
     return float("nan")
 
 
+def reap(tag: str) -> int:
+    """Kill whatever this episode left running (found by its HELIX_EPISODE tag) and count it."""
+    me, n = os.getpid(), 0
+    needle = f"HELIX_EPISODE={tag}".encode()
+    for p in os.listdir("/proc"):
+        if not p.isdigit() or int(p) == me:
+            continue
+        try:
+            if needle in Path(f"/proc/{p}/environ").read_bytes().split(b"\0"):
+                os.kill(int(p), signal.SIGCONT)
+                os.kill(int(p), signal.SIGKILL)
+                n += 1
+        except OSError:
+            pass
+    return n
+
+
 def run_episode(ep: dict, slot: int, warm: float, post: float) -> dict:
     d = Path(ep["dir"])
     (d / "ff").mkdir(parents=True, exist_ok=True)
     (d / "logs").mkdir(exist_ok=True)
-    text = Path(SPECS[ep["set"]]).read_text()
-    (d / "spec").write_text(with_fault_files(text, d / "ff"))
-    env = dict(os.environ, ROS_DOMAIN_ID=str(30 + slot), RMW_IMPLEMENTATION="rmw_cyclonedds_cpp",
+    real = ep["set"] == "humanoid"
+    if real:
+        subprocess.run([sys.executable, str(MAKE_STACK), str(d / "stack")], check=True, capture_output=True)
+        text = (d / "stack/humanoid.spec").read_text()
+    else:
+        text = with_fault_files(Path(SPECS[ep["set"]]).read_text(), d / "ff")
+    policy = ep["policy"]
+    if policy == "helix_v3params":
+        policy, text = "helix", text + V3_PARAMS
+    (d / "spec").write_text(text)
+    env = dict(os.environ, ROS_DOMAIN_ID=str(30 + slot), RMW_IMPLEMENTATION="rmw_cyclonedds_cpp", HELIX_EPISODE=str(d),
                ROS_LOCALHOST_ONLY="1")
     cores = f"{4 * slot}-{4 * slot + 3}"
     t_start = time.time()
     t_inject, t_end = t_start + warm, t_start + warm + post
     topics = sorted({t for outs in spec_outputs(text).values() for t, _ in outs})
+    if real:
+        topics = [f"{t}={TYPES[t]}" for t in topics]
+    inj = Injector(ep["inject"] if real else "", str(30 + slot), env, t_inject, t_end, d / "logs",
+                   seed=f"{ep['scenario']}/{ep['rep']}")
     healer = subprocess.Popen(
-        ["taskset", "-c", cores, str(HEALER), "--ros-args", "-p", f"spec:={d / 'spec'}", "-p", f"policy:={ep['policy']}",
+        ["taskset", "-c", cores, str(HEALER), "--ros-args", "-p", f"spec:={d / 'spec'}", "-p", f"policy:={policy}",
          "-p", f"event_log:={d / 'events.jsonl'}", "-p", f"snapshot_log:={d / 'snap.jsonl'}", "-p", f"log_dir:={d / 'logs'}"],
         stdout=open(d / "healer.out", "w"), stderr=subprocess.STDOUT, env=env)
     probe = subprocess.Popen(
-        ["taskset", "-c", PROBE_CORES, sys.executable, str(PROBE), "--topics", ",".join(topics), "--inject", ep["inject"],
+        ["taskset", "-c", PROBE_CORES, sys.executable, str(PROBE), "--topics", ",".join(topics), "--inject", "" if real else ep["inject"],
          "--t-inject", str(t_inject), "--t-end", str(t_end), "--out", str(d / "probe.json")],
         stdout=open(d / "probe.out", "w"), stderr=subprocess.STDOUT, env=env)
+    inj.start()
     # Healer overhead over a fault-free window: [warm-4, warm].
     time.sleep(max(0.0, t_inject - 4 - time.time()))
     c0, w0 = proc_cpu_s(healer.pid), time.time()
@@ -99,7 +139,14 @@ def run_episode(ep: dict, slot: int, warm: float, post: float) -> dict:
     except subprocess.TimeoutExpired:
         healer.kill()
         healer.wait()
-    meta = dict(ep, slot=slot, t_start=t_start, healer_cpu_frac=(c1 - c0) / (w1 - w0), healer_rss_mb=rss,
+    inj.join(timeout=5)
+    inj.close()
+    stray = reap(str(d))
+    if real:
+        pr = json.loads((d / "probe.json").read_text())
+        pr.update(t_inject=inj.injected_at, inject_subs=inj.hits, injector=inj.record())
+        (d / "probe.json").write_text(json.dumps(pr))
+    meta = dict(ep, slot=slot, stray=stray, t_start=t_start, healer_cpu_frac=(c1 - c0) / (w1 - w0), healer_rss_mb=rss,
                 healer_rc=healer.returncode, probe_rc=probe.returncode)
     (d / "meta.json").write_text(json.dumps(meta))
     return meta
@@ -144,7 +191,8 @@ def main() -> None:
             print(f"[{done}/{len(eps)}] {meta['scenario']} {meta['policy']} rep{meta['rep']} rc={meta['healer_rc']}",
                   flush=True)
     left = subprocess.run(["pgrep", "-c", "-f", "helix_demo/demo_node"], capture_output=True, text=True).stdout.strip()
-    print(f"stray demo_node processes after run: {left or 0}")
+    print(f"stray demo_node processes after run: {left or 0}; episode processes reaped after healer exit: "
+          f"{sum(json.loads((Path(e['dir']) / 'meta.json').read_text())['stray'] for e in eps)}")
 
 
 if __name__ == "__main__":

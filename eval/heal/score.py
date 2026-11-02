@@ -72,6 +72,22 @@ def ok_series(arrivals: dict[str, list[float]], nominal: dict[str, float], t0: f
     return out
 
 
+def max_gaps(arrivals: dict[str, list[float]], topics, t0: float, t1: float, tail_from: float) -> tuple[float, float]:
+    """(blackout, tail_gap): the longest inter-arrival gap in [t0, t1] and in [tail_from, t1],
+    over all topics, open edges included. A fast crash loop can pass the 1 s window rate test
+    while still blacking a topic out for hundreds of ms; this is the complement."""
+    black = tail = 0.0
+    for topic in topics:
+        a = sorted(x for x in arrivals.get(topic, []) if t0 <= x <= t1)
+        pts = [t0] + a + [t1]
+        for x, y in zip(pts, pts[1:]):
+            black = max(black, y - x)
+        ta = [tail_from] + [x for x in a if x >= tail_from] + [t1]
+        for x, y in zip(ta, ta[1:]):
+            tail = max(tail, y - x)
+    return round(black, 4), round(tail, 4)
+
+
 def score_episode(d: Path) -> dict | None:
     try:
         meta = json.loads((d / "meta.json").read_text())
@@ -105,6 +121,7 @@ def score_episode(d: Path) -> dict | None:
         latency = 0.0 if last_bad is None else last_bad + STEP - t_inj
     outage = sum(STEP for _, ok in post if not ok)
     pre_ok = all(ok for t, ok in series if t < t_inj)
+    blackout, tail_gap = max_gaps(probe["arrivals"], nominal, t_inj, t_end, t_end - TAIL)
 
     root = meta["root"]
     roots = ({root, fb.get(root, "")} | set(meta.get("collateral", []))) - {""}
@@ -135,7 +152,7 @@ def score_episode(d: Path) -> dict | None:
         diag_correct=(diag in meta["expect"]) if root else None,
         act_latency_s=detect_latency, inject_subs=probe["inject_subs"],
         healer_cpu=meta["healer_cpu_frac"], healer_rss_mb=meta["healer_rss_mb"],
-        left_burning=left,
+        left_burning=left, blackout_s=blackout, tail_gap_s=tail_gap,
         actions=";".join(f"{e['node']}:{e['fault']}>{e['action']}" for e in decisions),
     )
 
@@ -144,8 +161,9 @@ def summarize(rows: list[dict]) -> str:
     by = defaultdict(list)
     for r in rows:
         by[r["policy"]].append(r)
-    lines = ["policy    n  restored  safe  failed  diag_ok  decisions  unneeded  futile  burning  lat_med_s  outage_mean_s  cpu%  rss_mb"]
-    for pol in ("none", "respawn", "watchdog", "helix"):
+    lines = ["policy            n  restored  safe  failed  diag_ok  decisions  unneeded  futile  burning  lat_med_s  outage_mean_s  blackout_med_s  tailgap_max_s  cpu%  rss_mb"]
+    known = ("none", "respawn", "watchdog", "helix", "helix_v3params")
+    for pol in list(known) + sorted(set(by) - set(known)):
         rs = by.get(pol)
         if not rs:
             continue
@@ -154,10 +172,12 @@ def summarize(rows: list[dict]) -> str:
         diag = [r for r in faulty if r["diag_correct"]]
         n_out = {k: sum(1 for r in rs if r["outcome"] == k) for k in ("RESTORED", "SAFE", "FAILED")}
         lines.append(
-            f"{pol:<9}{len(rs):>3}{n_out['RESTORED']:>10}{n_out['SAFE']:>6}{n_out['FAILED']:>8}"
+            f"{pol:<17}{len(rs):>3}{n_out['RESTORED']:>10}{n_out['SAFE']:>6}{n_out['FAILED']:>8}"
             f"{len(diag):>5}/{len(faulty):<3}{sum(r['decisions'] for r in rs):>11}{sum(r['unnecessary'] for r in rs):>9}{sum(r['futile'] for r in rs):>8}{sum(r['left_burning'] for r in rs):>9}"
             f"{(statistics.median(lat) if lat else float('nan')):>11.2f}"
             f"{statistics.mean(r['outage_s'] for r in faulty) if faulty else float('nan'):>15.2f}"
+            f"{statistics.median(r['blackout_s'] for r in faulty) if faulty else float('nan'):>16.3f}"
+            f"{max((r['tail_gap_s'] for r in rs if r['outcome'] == 'RESTORED'), default=float('nan')):>15.3f}"
             f"{100 * statistics.mean(r['healer_cpu'] for r in rs):>6.1f}{statistics.mean(r['healer_rss_mb'] for r in rs):>8.1f}")
     return "\n".join(lines)
 

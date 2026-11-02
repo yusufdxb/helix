@@ -16,6 +16,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 
+#include <signal.h>
+
 #include <atomic>
 #include <chrono>
 #include <cmath>
@@ -89,6 +91,7 @@ struct Managed {
   double start_t = 0;
   double death_t = 0;
   int quick_deaths = 0;
+  double dump_t = -1;  // first tick a core dump of the current process was seen
   std::set<std::string> upstream;  // sticky: an edge seen once stays
   bool qos_incompat = false;
   double cpu = 0;
@@ -441,6 +444,35 @@ class Healer : public rclcpp::Node {
     }
   }
 
+  // A crashed process that is still writing its core dump: seen at once, killed after core_wait_s.
+  void reap_core_dumps(double t) {
+    std::vector<std::pair<std::string, pid_t>> live;
+    {
+      std::lock_guard lk(mu_);
+      for (auto& [name, m] : nodes_)
+        if (m.alive && m.pid > 0) live.emplace_back(name, m.pid);
+    }
+    for (const auto& [name, pid] : live) {
+      const bool dumping = hh::core_dumping(pid);  // outside the lock
+      bool first = false, kill_now = false;
+      {
+        std::lock_guard lk(mu_);
+        auto& m = nodes_.at(name);
+        if (m.pid != pid || !m.alive) continue;
+        if (!dumping) {
+          m.dump_t = -1;
+          continue;
+        }
+        first = m.dump_t < 0;
+        if (first) m.dump_t = t;
+        kill_now = t - m.dump_t >= spec_.p.core_wait_s;
+      }
+      if (first) emit_simple(name, "core_dump", "pid " + std::to_string(pid));
+      // The exit is reaped on a later tick through the normal path and counts as a crash there.
+      if (kill_now) ::kill(pid, SIGKILL);
+    }
+  }
+
   // ---------- main loop ----------
   void tick() {
     const double t = now();
@@ -460,6 +492,7 @@ class Healer : public rclcpp::Node {
       }
       if (!who.empty()) emit_simple(who, "exit", ex.describe());
     }
+    reap_core_dumps(t);
     // Finished jobs feed back into the policy on this thread.
     std::vector<Result> results;
     {

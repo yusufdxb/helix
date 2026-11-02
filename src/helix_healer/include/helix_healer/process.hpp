@@ -83,5 +83,7 @@ struct ProcSample {
   double rss_mb = 0;
 };
 ProcSample read_proc(pid_t pid);
+// True while the process is writing a core dump (/proc/PID/status CoreDumping: 1, Linux >= 4.15).
+bool core_dumping(pid_t pid);
 
 }  // namespace helix_healer

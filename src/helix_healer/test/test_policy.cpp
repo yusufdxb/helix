@@ -95,6 +95,30 @@ TEST(Policy, CrashIsRestartedImmediatelyAndVerified) {
   EXPECT_EQ(tr.count("b", Action::Restart), 0);  // b's stale output is a's fault, not b's
 }
 
+TEST(Policy, VerificationWaitsForAFreshMessage) {
+  // a is respawned but the new process never publishes /a: alive is not fixed.
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World&, double) {});
+  double up_at = -1;
+  run(p, w, 1, 4, tr, [&](World& w, double t) {
+    if (up_at < 0 && !tr.decisions.empty()) up_at = t;
+    w.a.alive = up_at >= 0;
+    w.a.down_s = up_at >= 0 ? 0 : t - 1;
+    w.a.up_s = up_at >= 0 ? t - up_at : 0;
+    w.a.outputs[0].age_s = t - 0.98;  // last message just before the crash
+  });
+  EXPECT_FALSE(tr.has("a", "verified"));
+  EXPECT_TRUE(tr.has("a", "verify_failed"));
+  for (const auto& e : tr.events)
+    if (e.kind == "verify_failed") {
+      EXPECT_EQ(e.detail, "still_silent");
+      EXPECT_LE(e.t - up_at, 1.2);  // startup grace 1 s, not the 2 s verify window
+      break;  // the policy then repairs again; only the first verdict is under test
+    }
+}
+
 TEST(Policy, CrashLoopGoesToFallback) {
   Policy p(PolicyKind::Helix, parse_spec(kSpec));
   World w;

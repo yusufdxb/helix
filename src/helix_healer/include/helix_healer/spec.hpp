@@ -41,6 +41,12 @@ struct HealerParams {
   // cannot be served by a blocked executor), no delay before the first restart, and post-repair
   // rates measured only over the new process's messages. fast_repair=0 restores v3 timing.
   double fast_repair = 1;
+  // A process writing a core dump has already crashed, but the kernel keeps it alive until the dump
+  // ends, and a piped core_pattern helper (apport, systemd-coredump) can take hundreds of ms. Every
+  // policy sees the crash as soon as /proc reports CoreDumping, and after core_wait_s of dumping the
+  // healer SIGKILLs the process so the exit is immediate. That truncates the core file: raise
+  // core_wait_s to keep complete cores at the cost of repair latency.
+  double core_wait_s = 0;
   // Adaptive timing envelope (helix policy only; the watchdog keeps the fixed stale timeout).
   // Per (node, output) it learns the inter-message gap online while the node is healthy, then
   // judges staleness against max(adaptive_floor_s, adaptive_stale_mult * decaying max gap) and

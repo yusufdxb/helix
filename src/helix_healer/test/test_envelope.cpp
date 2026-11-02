@@ -221,3 +221,40 @@ TEST(FastRepair, OffKeepsTheV3Backoff) {
   ASSERT_GE(t, 0);
   EXPECT_EQ(d.delay_s, 0.5);
 }
+
+namespace {
+
+// Two crashes of `a`: the first at 0.5 s, the second `second_qd` quick deaths later at 2.5 s
+// (after the first repair was verified). Returns the delay of the second restart, -1 if none.
+double second_restart_delay(const std::string& spec, int second_qd) {
+  Policy p(PolicyKind::Helix, parse_spec(spec));
+  NodeObs a = healthy("a", "/a"), b = healthy("b", "/b");
+  b.upstream = {"a"};
+  int n = 0;
+  double up_at = -1;
+  for (double t = 0; t < 4; t += 0.01) {
+    const bool dead = (t >= 0.5 && up_at < 0) || (t >= 2.5 && n < 2);
+    a.alive = !dead;
+    a.quick_deaths = dead && t >= 2.5 ? second_qd : 0;
+    a.down_s = dead ? 0.01 : 0;
+    a.outputs[0].age_s = dead ? 0.5 : 0.02;
+    for (auto& d : p.step({t, {a, b}}).decisions) {
+      if (d.node != "a") continue;
+      if (++n == 2) return d.delay_s;
+      up_at = t;
+      p.on_result(d.node, d.action, true, t);
+    }
+  }
+  return -1;
+}
+
+}  // namespace
+
+TEST(FastRepair, OnlyAYoungDeathWithoutABackupWaits) {
+  const std::string backed = std::string(kSpec) + "node a_b autostart=0\nout a_b /a 20\nexec a_b x\n";
+  std::string with_backup = backed;
+  with_backup.replace(with_backup.find("node a\n"), 7, "node a fallback=a_b\n");
+  EXPECT_EQ(second_restart_delay(kSpec, 1), 1.0);         // young death, no backup: backoff(1)
+  EXPECT_EQ(second_restart_delay(kSpec, 0), 0.0);         // ran past loop_s: no reason to wait
+  EXPECT_EQ(second_restart_delay(with_backup, 1), 0.0);   // the crash-loop detector bounds it
+}

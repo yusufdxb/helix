@@ -40,6 +40,7 @@ void set_param(HealerParams& p, int no, const std::string& k, const std::string&
       {"leak_min_growth_mb", &p.leak_min_growth_mb}, {"victim_grace_s", &p.victim_grace_s},
       {"lifecycle_timeout_s", &p.lifecycle_timeout_s}, {"term_grace_s", &p.term_grace_s},
       {"learn_s", &p.learn_s}, {"resource_period_s", &p.resource_period_s}, {"fast_repair", &p.fast_repair},
+      {"core_wait_s", &p.core_wait_s},
       {"adaptive", &p.adaptive}, {"adaptive_floor_s", &p.adaptive_floor_s},
       {"adaptive_stale_mult", &p.adaptive_stale_mult}, {"adaptive_min_gaps", &p.adaptive_min_gaps},
       {"adaptive_min_s", &p.adaptive_min_s}, {"adaptive_tau_s", &p.adaptive_tau_s},

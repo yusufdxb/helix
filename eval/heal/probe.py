@@ -12,12 +12,13 @@ import time
 
 import rclpy
 from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
+from rosidl_runtime_py.utilities import get_message
 from std_msgs.msg import String
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--topics", required=True, help="comma separated")
+    ap.add_argument("--topics", required=True, help="comma separated TOPIC or TOPIC=pkg/msg/Type")
     ap.add_argument("--inject", default="", help="node:fault[:arg], empty = nominal")
     ap.add_argument("--t-inject", type=float, required=True, help="wall time")
     ap.add_argument("--t-end", type=float, required=True, help="wall time")
@@ -26,11 +27,14 @@ def main() -> None:
 
     rclpy.init()
     node = rclpy.create_node("helix_eval_probe")
-    arrivals: dict[str, list[float]] = {t: [] for t in a.topics.split(",") if t}
+    types = dict((t.split("=", 1) + ["std_msgs/msg/String"])[:2] for t in a.topics.split(",") if t)
+    arrivals: dict[str, list[float]] = {t: [] for t in types}
     modes: list[tuple[float, str]] = []
     data_qos = QoSProfile(depth=50, reliability=ReliabilityPolicy.BEST_EFFORT)
     for topic in arrivals:
-        node.create_subscription(String, topic, lambda _m, t=topic: arrivals[t].append(time.time()), data_qos)
+        # raw=True: only the arrival time matters, so nothing is deserialized.
+        node.create_subscription(get_message(types[topic]), topic, lambda _m, t=topic: arrivals[t].append(time.time()),
+                                 data_qos, raw=True)
     mode_qos = QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE,
                           durability=DurabilityPolicy.TRANSIENT_LOCAL)
     node.create_subscription(String, "/helix/mode", lambda m: modes.append((time.time(), m.data)), mode_qos)

@@ -64,4 +64,28 @@ MANIP = [
     Scenario("qos_mismatch", "detector:qos_mismatch", "detector", ("qos_mismatch",), restorable=False),
 ]
 
-SETS = {"nav": NAV, "manip": MANIP}
+# Real ROS 2 humanoid stack (eval/heal/humanoid/make_stack.py): stock ros2_control with mock
+# hardware, robot_state_publisher, image_tools cam2image. Faults act on the real processes
+# (eval/heal/humanoid/inject.py); nothing in these nodes was written for HELIX. Labels were
+# fixed before any humanoid episode ran. A duty-cycled process stalls for 0.14 s at a time,
+# longer than the learned stale limit at 30 Hz and above, so hang is an accepted label there.
+HUMANOID = [
+    Scenario("nominal", "", "", ()),
+    Scenario("crash_cm", "kill:controller_manager:SEGV", "controller_manager", ("crash",)),
+    Scenario("crash_rsp", "kill:rsp:ABRT", "rsp", ("crash",)),
+    Scenario("crash_camera", "kill:camera:SEGV", "camera", ("crash",)),
+    Scenario("hang_rsp", "stop:rsp", "rsp", ("hang",)),
+    Scenario("hang_cm", "stop:controller_manager", "controller_manager", ("hang",)),
+    Scenario("stall_camera", "stall:camera", "camera", ("hang",)),
+    Scenario("degrade_camera", "duty:camera:0.3:0.2", "camera", ("degraded", "hang")),
+    Scenario("degrade_cm", "duty:controller_manager:0.3:0.2", "controller_manager", ("degraded", "hang")),
+    Scenario("deactivate_jsb", "ctl:controller_manager:joint_state_broadcaster:inactive", "controller_manager",
+             ("hang", "endpoint_loss")),
+    Scenario("crashloop_camera", "loop:camera:SEGV:0.3", "camera", ("crash_loop",)),
+    Scenario("flaky_camera", "flaky:camera:SEGV:4:10:10", "camera", ("crash", "crash_loop")),
+    # Near miss: 80% duty keeps every gap under the learned limit and the rate above the
+    # degraded ratio. The right answer is no action; any decision counts as unnecessary.
+    Scenario("nearmiss_camera", "duty:camera:0.8:0.2", "", ()),
+]
+
+SETS = {"nav": NAV, "manip": MANIP, "humanoid": HUMANOID}

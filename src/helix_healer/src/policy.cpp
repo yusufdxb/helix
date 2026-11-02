@@ -261,7 +261,13 @@ Decision Policy::decide(const NodeObs& n, Fault f, State& st, double t, StepOut&
     else if (ns.lifecycle && (f == Fault::Degraded || f == Fault::EndpointLoss)) d.action = Action::LifecycleReset;
     else {
       d.action = Action::Restart;
-      d.delay_s = ((n.alive || p.fast_repair > 0) && used == 0) ? 0.0 : backoff(used);
+      // Back off only after a young death on a node with no backup. A process that ran past
+      // loop_s, or one that is alive and judged sick, says nothing about the next start; and
+      // with a backup the crash-loop detector ends a fast loop within loop_deaths starts, so
+      // waiting would only lengthen the outage.
+      const bool young = !n.alive && n.quick_deaths > 0;
+      if (p.fast_repair > 0) d.delay_s = (used > 0 && young && ns.fallback.empty()) ? backoff(used) : 0.0;
+      else d.delay_s = (n.alive && used == 0) ? 0.0 : backoff(used);
     }
   }
 
@@ -287,15 +293,23 @@ StepOut Policy::step(const Snapshot& s) {
     State& st = st_[n.name];
     if (st.phase == Phase::Retired || st.phase == Phase::Acting) continue;
     if (st.phase == Phase::Verifying) {
+      // Verified means the repaired node has published on every judged output since the repair,
+      // not merely that it is alive: a respawned process that never gets to publish is not fixed.
       bool symptom = output_symptom(n, nullptr, nullptr, nullptr);
-      if (n.alive && !symptom) {
+      bool fresh = true;
+      for (const auto& o : n.outputs)
+        if (o.expected_hz > 0 && t - o.age_s <= st.verify_from) fresh = false;
+      if (n.alive && !symptom && fresh) {
         st.phase = Phase::Normal;
         out.events.push_back({t, n.name, "verified", st.last_fault, st.last_action, 0, ""});
         continue;
       }
-      if (n.alive && t < st.verify_deadline) continue;
+      // Still silent after the startup grace: the repair did not take, so judge the node again now
+      // instead of waiting out the whole verification window.
+      const bool failed_early = n.alive && symptom && t - st.verify_from >= p.startup_grace_s;
+      if (n.alive && t < st.verify_deadline && !failed_early) continue;
       st.phase = Phase::Normal;
-      out.events.push_back({t, n.name, "verify_failed", st.last_fault, st.last_action, 0, n.alive ? "timeout" : "died"});
+      out.events.push_back({t, n.name, "verify_failed", st.last_fault, st.last_action, 0, !n.alive ? "died" : failed_early ? "still_silent" : "timeout"});
       if (n.alive && st.last_action == Action::LifecycleReset) st.escalate = true;
     }
     if (st.escalate) {
@@ -352,6 +366,7 @@ void Policy::on_result(const std::string& node, Action a, bool ok, double t) {
       State& b = st_[ns->fallback];
       b.phase = ok ? Phase::Verifying : Phase::Normal;
       b.verify_deadline = t + p.verify_s;
+      b.verify_from = t;
       b.last_fault = st.last_fault;
       b.last_action = Action::Fallback;
     }
@@ -364,6 +379,7 @@ void Policy::on_result(const std::string& node, Action a, bool ok, double t) {
   if (ok) {
     st.phase = Phase::Verifying;
     st.verify_deadline = t + p.verify_s;
+    st.verify_from = t;
   } else {
     st.phase = Phase::Normal;
     pending_events_.push_back({t, node, "action_failed", st.last_fault, a, 0, ""});

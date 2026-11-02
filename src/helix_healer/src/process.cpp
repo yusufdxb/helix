@@ -252,6 +252,14 @@ ProcSample read_proc(pid_t pid) {
   return s;
 }
 
+bool core_dumping(pid_t pid) {
+  const std::string st = slurp("/proc/" + std::to_string(pid) + "/status");
+  const auto k = st.find("CoreDumping:");
+  if (k == std::string::npos) return false;
+  const auto v = st.find_first_not_of(" \t", k + 12);
+  return v != std::string::npos && st[v] == '1';
+}
+
 ProcInfo find_process(const std::string& pattern) {
   struct Hit {
     pid_t pid, ppid;

@@ -64,6 +64,11 @@ TEST(Process, ReadsProcSelf) {
   EXPECT_GE(ps.cpu_s, 0.0);
 }
 
+TEST(Process, CoreDumpingIsFalseForALiveOrMissingProcess) {
+  EXPECT_FALSE(core_dumping(getpid()));
+  EXPECT_FALSE(core_dumping(999999999));
+}
+
 TEST(Process, ChildOutlivesTheThreadThatAskedForIt) {
   Supervisor sup;
   pid_t pid = -1;

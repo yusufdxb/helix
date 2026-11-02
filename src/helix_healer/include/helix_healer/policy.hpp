@@ -112,6 +112,7 @@ class Policy {
     Fault last_fault = Fault::None;
     Action last_action = Action::None;
     double verify_deadline = 0;
+    double verify_from = 0;      // a repair counts only once every judged output has published after this
     bool escalate = false;
   };
 
