@@ -58,7 +58,7 @@ def urdf(rate):
     chain("torso_link", [f"left_{j}_joint" for j in SIDE_ARM], "0 0.15 0.3")
     chain("torso_link", [f"right_{j}_joint" for j in SIDE_ARM], "0 -0.15 0.3")
     s = ['<?xml version="1.0"?>', '<robot name="g1_like">']
-    s += [f'  <link name="{l}"/>' for l in links]
+    s += [f'  <link name="{name}"/>' for name in links]
     for n, p, c, xyz in js:
         s.append(f'  <joint name="{n}" type="revolute"><parent link="{p}"/><child link="{c}"/>'
                  f'<origin xyz="{xyz}" rpy="0 0 0"/><axis xyz="{axis(n)}"/>'
