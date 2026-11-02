@@ -218,7 +218,10 @@ Decision Policy::decide(const NodeObs& n, Fault f, State& st, double t, StepOut&
     else if (!ns.restart) give_up("restart=0");
     else if (f == Fault::CrashLoop) give_up("crash_loop");
     else if (used >= p.max_attempts) give_up("budget");
-    else if (ns.lifecycle && (f == Fault::Hang || f == Fault::Degraded || f == Fault::EndpointLoss)) d.action = Action::LifecycleReset;
+    // A lifecycle reset re-runs the node's own cleanup/configure code, which fixes
+    // corrupted state and lost endpoints. It cannot unblock a stuck executor (a
+    // hung node does not even answer the lifecycle services), so a hang restarts.
+    else if (ns.lifecycle && (f == Fault::Degraded || f == Fault::EndpointLoss)) d.action = Action::LifecycleReset;
     else {
       d.action = Action::Restart;
       d.delay_s = (n.alive && used == 0) ? 0.0 : backoff(used);

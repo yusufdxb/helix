@@ -139,12 +139,27 @@ TEST(Policy, FailedLifecycleResetEscalatesToRestart) {
   World w;
   Trace tr;
   run(
-      p, w, 0, 1, tr, [](World& w, double t) { w.c.outputs[0].age_s = 0.3 + t; },
+      p, w, 0, 1, tr,
+      [](World& w, double t) {
+        w.c.outputs[0].age_s = 0.3 + t;
+        w.c.outputs[0].own_endpoint = false;
+      },
       [](const Decision& d) { return d.action != Action::LifecycleReset; });
   ASSERT_GE(tr.decisions.size(), 2u);
   EXPECT_EQ(tr.decisions[0].action, Action::LifecycleReset);
   EXPECT_EQ(tr.decisions[1].action, Action::Restart);
   EXPECT_TRUE(tr.has("c", "escalate"));
+}
+
+TEST(Policy, HangOnLifecycleNodeRestartsDirectly) {
+  // A stuck executor cannot answer lifecycle services, so a reset would only cost a timeout.
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World& w, double t) { w.c.outputs[0].age_s = 0.3 + t; });
+  ASSERT_FALSE(tr.decisions.empty());
+  EXPECT_EQ(tr.decisions[0].fault, Fault::Hang);
+  EXPECT_EQ(tr.decisions[0].action, Action::Restart);
 }
 
 TEST(Policy, DownstreamOfStaleUpstreamIsAVictim) {

@@ -557,7 +557,18 @@ class Healer : public rclcpp::Node {
       if (stopping_ || std::chrono::steady_clock::now() > end) return false;
       std::this_thread::sleep_for(20ms);
     }
-    uint8_t s = get_state(m, spec_.p.lifecycle_timeout_s);
+    // After a SIGKILL the dead process's services can still look ready and a
+    // request sent before the new server is matched is lost, so retry until
+    // the deadline instead of trusting one call.
+    uint8_t s = 0;
+    int tries = 0;
+    while (true) {
+      ++tries;
+      s = get_state(m, std::min(0.5, spec_.p.lifecycle_timeout_s));
+      if (s != 0 || stopping_ || std::chrono::steady_clock::now() > end) break;
+      std::this_thread::sleep_for(50ms);
+    }
+    if (tries > 1) RCLCPP_INFO(get_logger(), "%s get_state answered after %d tries (state %u)", node.c_str(), tries, s);
     if (s == State::PRIMARY_STATE_UNCONFIGURED) {
       if (!transition(m, Transition::TRANSITION_CONFIGURE)) return false;
       s = State::PRIMARY_STATE_INACTIVE;
