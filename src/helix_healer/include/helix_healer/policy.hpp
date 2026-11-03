@@ -102,6 +102,12 @@ class Policy {
   // ok=false for a failed lifecycle reset escalates to a restart on the next step.
   void on_result(const std::string& node, Action a, bool ok, double t);
   PolicyKind kind() const { return kind_; }
+  // Agent policy only: build repair candidates the transactional way (TXN baseline), from the
+  // config and parameter evidence alone, ignoring the fault class. Detection is unchanged.
+  // strikes: crashes on an uncommitted config before TXN reverts it first (1 = revert at once;
+  // 2 = restart once on the new config to test it, revert if it dies on it again).
+  void set_txn(bool on, int strikes = 1) { txn_ = on; txn_strikes_ = strikes < 1 ? 1 : strikes; }
+  bool txn() const { return txn_; }
   // Observable state for /diagnostics.
   std::string phase(const std::string& node) const;
   // True while the node is in normal operation with no pending or recent fault. The healer
@@ -143,6 +149,7 @@ class Policy {
     double incident_t = -1;      // time of its last action
     int incident_actions = 0;
     std::vector<Action> tried;   // actions already run in this incident
+    int cfg_strikes = 0;         // TXN: consecutive decisions on a process that ran an uncommitted config
   };
 
   void observe(const NodeObs& n, const Snapshot& s, State& st);
@@ -161,6 +168,8 @@ class Policy {
   int budget_used(State& st, double t);
 
   PolicyKind kind_;
+  bool txn_ = false;
+  int txn_strikes_ = 1;
   Spec spec_;
   std::map<std::string, State> st_;
   std::vector<Event> pending_events_;

@@ -104,17 +104,25 @@ def agent_params(ep: dict, ranker: str) -> list[str]:
     """Healer -p args for one agent arm. Seeds are fixed per (scenario, rep), so every arm
     sees the same schedule and agent_random is reproducible."""
     seed = zlib.crc32(f"{ep['scenario']}/{ep['rep']}".encode())
+    # agent_<ranker>@<H>: the same ranker with agent_lkg_hold_s = H (health needed before a
+    # config or parameter snapshot becomes last-known-good). No suffix keeps the healer default.
+    ranker, _, hold = ranker.partition("@")
+    hold_args = ["-p", f"agent_lkg_hold_s:={float(hold)}"] if hold else []
     if ranker == "oracle":
-        arg = f"{ep['root']}:{ep['repair']}" if ep["root"] and ep.get("repair") else ""
+        # Multi-root scenarios join roots and repairs with "+", in the same order.
+        roots, repairs = ep["root"].split("+"), ep.get("repair", "").split("+")
+        if ep["root"] and ep.get("repair") and len(roots) != len(repairs):
+            raise SystemExit(f"{ep['scenario']}: {len(roots)} roots but {len(repairs)} repairs")
+        arg = ",".join(f"{r}:{a}" for r, a in zip(roots, repairs)) if ep["root"] and ep.get("repair") else ""
     elif ranker in AGENT:
         arg = AGENT[ranker]
         if not arg:
             raise SystemExit(f"agent_{ranker} needs --agent-{ranker}")
-    elif ranker in ("rule", "random"):
+    elif ranker in ("rule", "random", "txn", "txn2"):
         arg = ""
     else:
         raise SystemExit(f"unknown agent arm agent_{ranker}")
-    out = ["-p", f"agent_ranker:={ranker}", "-p", f"agent_seed:={seed}"]
+    out = ["-p", f"agent_ranker:={ranker}", "-p", f"agent_seed:={seed}", *hold_args]
     return out + ["-p", f"agent_arg:={arg}"] if arg else out  # an empty `name:=` does not parse
 
 
@@ -233,7 +241,7 @@ def run_episode(ep: dict, slot: int, warm: float, post: float) -> dict:
         pr.update(t_inject=inj.injected_at, inject_subs=inj.hits, injector=inj.record())
         (d / "probe.json").write_text(json.dumps(pr))
     meta = dict(ep, slot=slot, stray=stray, t_start=t_start, healer_cpu_frac=(c1 - c0) / (w1 - w0), healer_rss_mb=rss,
-                healer_rc=healer.returncode, probe_rc=probe.returncode)
+                healer_rc=healer.returncode, probe_rc=probe.returncode, agent_args=agent)
     (d / "meta.json").write_text(json.dumps(meta))
     return meta
 

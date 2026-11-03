@@ -214,6 +214,101 @@ TEST(Agent, HelixIgnoresTheNewEvidence) {
   EXPECT_EQ(tr.d[0].action, Action::Restart);
 }
 
+// TXN baseline: candidates come from config/param evidence only, never from the fault class.
+TEST(Txn, BuildsTheSameConfigOrderAsTheRule) {
+  Policy p(PolicyKind::Agent, parse_spec(kSpec));
+  p.set_txn(true);
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World&, double) {}, [](Action) { return true; });
+  run(
+      p, w, 1, 2, tr,
+      [](World& w, double) {
+        w.a.alive = false;
+        w.a.down_s = 0.1;
+        w.a.ev.has_lkg_config = w.a.ev.config_changed = w.a.ev.config_ran = true;
+      },
+      [](Action) { return true; });
+  ASSERT_FALSE(tr.d.empty());
+  EXPECT_EQ(tr.d[0].candidates, (std::vector<Action>{Action::RestartLKG, Action::Restart}));
+}
+
+TEST(Txn, DoesNotGiveUpOnQosAndNeverOffersLifecycle) {
+  Policy p(PolicyKind::Agent, parse_spec(kSpec));
+  p.set_txn(true);
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World&, double) {}, [](Action) { return true; });
+  run(
+      p, w, 1, 3, tr,
+      [](World& w, double t) {
+        w.a.outputs[0].age_s = t;
+        w.a.qos_incompatible = true;
+        w.c.outputs[0].rate_hz = 2;  // lifecycle node degraded: the rule would offer LifecycleReset
+      },
+      [](Action) { return true; });
+  bool saw_a = false, saw_c = false;
+  for (const auto& d : tr.d) {
+    for (Action a : d.candidates) EXPECT_NE(a, Action::LifecycleReset);
+    if (d.node == "a" && !d.candidates.empty()) saw_a = d.candidates[0] == Action::Restart;
+    if (d.node == "c" && !d.candidates.empty()) saw_c = d.candidates[0] == Action::Restart;
+  }
+  EXPECT_TRUE(saw_a);
+  EXPECT_TRUE(saw_c);
+}
+
+TEST(Txn, ParamDiffStillRestoresParametersFirst) {
+  Policy p(PolicyKind::Agent, parse_spec(kSpec));
+  p.set_txn(true);
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World&, double) {}, [](Action) { return true; });
+  run(
+      p, w, 1, 3, tr,
+      [&](World& w, double) {
+        w.a.outputs[0].rate_hz = tr.d.empty() ? 2 : 20;
+        w.a.ev.param_diff = tr.d.empty() ? 1 : 0;
+      },
+      [](Action) { return true; });
+  ASSERT_FALSE(tr.d.empty());
+  EXPECT_EQ(tr.d[0].candidates, (std::vector<Action>{Action::ParamRestore, Action::Restart}));
+}
+
+TEST(Txn, RankerIsIdentityAndNamed) {
+  auto r = make_ranker("txn", "", 0);
+  EXPECT_EQ(std::string(r->name()), "txn");
+  std::vector<Action> c = {Action::Restart, Action::RestartLKG};
+  AgentEvidence e;
+  EXPECT_EQ(r->rank("n", e, c), c);
+}
+
+// txn2: the first death on an uncommitted config gets one more restart on that config (the
+// experiment); a second death on it reverts first. Strikes reset once the config is not the one
+// the process ran.
+TEST(Txn, TwoStrikeRestartsOnceThenReverts) {
+  Policy p(PolicyKind::Agent, parse_spec(kSpec));
+  p.set_txn(true, 2);
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World&, double) {}, [](Action) { return true; });
+  run(
+      p, w, 1, 30, tr,
+      [](World& w, double) {
+        w.a.alive = false;
+        w.a.down_s = 0.1;
+        w.a.ev.has_lkg_config = w.a.ev.config_changed = w.a.ev.config_ran = true;
+      },
+      [](Action) { return true; });
+  std::vector<std::vector<Action>> a;
+  for (const auto& d : tr.d)
+    if (d.node == "a" && !d.candidates.empty()) a.push_back(d.candidates);
+  ASSERT_GE(a.size(), 2u);
+  EXPECT_EQ(a[0], (std::vector<Action>{Action::Restart, Action::RestartLKG}));
+  EXPECT_EQ(a[1].front(), Action::RestartLKG);
+  auto r = make_ranker("txn2", "", 0);
+  EXPECT_EQ(std::string(r->name()), "txn2");
+}
+
 TEST(Ranker, ActionNamesRoundTrip) {
   for (Action a : repair_actions()) EXPECT_EQ(action_from(to_string(a)), a);
   EXPECT_EQ(action_from("rm -rf"), Action::None);

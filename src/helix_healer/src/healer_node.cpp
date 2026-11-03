@@ -236,7 +236,14 @@ class Healer : public rclcpp::Node {
     const auto ranker_name = declare_parameter<std::string>("agent_ranker", "rule");
     const auto ranker_arg = declare_parameter<std::string>("agent_arg", "");
     const auto ranker_seed = declare_parameter<int64_t>("agent_seed", 0);
-    if (agent_) ranker_ = hh::make_ranker(ranker_name, ranker_arg, static_cast<uint64_t>(ranker_seed));
+    // Health a config or parameter snapshot needs before it becomes last-known-good (the commit
+    // window). The default is the v3 agent's value; the TXN study varies it.
+    lkg_hold_s_ = declare_parameter<double>("agent_lkg_hold_s", kLkgHoldS);
+    if (!(lkg_hold_s_ > 0)) throw std::runtime_error("agent_lkg_hold_s must be > 0");
+    if (agent_) {
+      ranker_ = hh::make_ranker(ranker_name, ranker_arg, static_cast<uint64_t>(ranker_seed));
+      policy_->set_txn(ranker_name == "txn" || ranker_name == "txn2", ranker_name == "txn2" ? 2 : 1);
+    }
     if (!log_dir_.empty()) std::filesystem::create_directories(log_dir_);
     if (!event_log.empty()) {
       events_.open(event_log, std::ios::out | std::ios::trunc);
@@ -950,9 +957,9 @@ class Healer : public rclcpp::Node {
     }
   }
 
-  // Parameters: fetch a candidate while healthy, promote it after kLkgHoldS more of health with no
+  // Parameters: fetch a candidate while healthy, promote it after agent_lkg_hold_s more of health with no
   // change in between. Config files: copy the files the running process was started with once it
-  // has been healthy for kLkgHoldS. The user's files are only ever read.
+  // has been healthy for agent_lkg_hold_s. The user's files are only ever read.
   void maintain_lkg(double t) {
     std::vector<std::string> fetch;
     std::vector<std::pair<std::string, std::string>> promoted;
@@ -973,23 +980,23 @@ class Healer : public rclcpp::Node {
         }
         if (m.healthy_since < 0) m.healthy_since = t;
         if (m.params) {
-          if (m.cand_busy && t - m.last_fetch > kLkgHoldS) invalidate(m);  // lost reply
-          if (m.cand_t >= 0 && t - m.cand_t >= kLkgHoldS && m.cand_pid == m.pid) {
+          if (m.cand_busy && t - m.last_fetch > lkg_hold_s_) invalidate(m);  // lost reply
+          if (m.cand_t >= 0 && t - m.cand_t >= lkg_hold_s_ && m.cand_pid == m.pid) {
             if (m.cand_params != m.lkg_params) {
               m.lkg_params = m.cand_params;
               promoted.push_back({name, "params=" + std::to_string(m.lkg_params.size())});
             }
             m.cand_t = -1;
             m.cand_params.clear();
-          } else if (!m.cand_busy && m.cand_t < 0 && t - m.last_fetch >= kLkgHoldS &&
-                     (m.param_change_t < 0 || t - m.param_change_t >= kLkgHoldS) && m.params->service_is_ready()) {
+          } else if (!m.cand_busy && m.cand_t < 0 && t - m.last_fetch >= lkg_hold_s_ &&
+                     (m.param_change_t < 0 || t - m.param_change_t >= lkg_hold_s_) && m.params->service_is_ready()) {
             m.cand_busy = true;
             m.last_fetch = t;
             fetch.push_back(name);
           }
         }
         if (!m.cfg_idx.empty() && !m.pinned && !log_dir_.empty() && m.spawn_hash != 0 && m.spawn_hash != m.lkg_hash &&
-            t - m.healthy_since >= kLkgHoldS && config_hash(m) == m.spawn_hash)
+            t - m.healthy_since >= lkg_hold_s_ && config_hash(m) == m.spawn_hash)
           copies.push_back({name, m.argv, m.cfg_idx, m.spawn_hash});
       }
     }
@@ -1317,6 +1324,7 @@ class Healer : public rclcpp::Node {
 
   // agent policy
   bool agent_ = false;
+  double lkg_hold_s_ = kLkgHoldS;
   std::unique_ptr<hh::Ranker> ranker_;
   std::mutex ranker_mu_, pend_mu_;
   std::map<std::string, Pending> pending_;

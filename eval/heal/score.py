@@ -124,12 +124,16 @@ def score_episode(d: Path) -> dict | None:
     blackout, tail_gap = max_gaps(probe["arrivals"], nominal, t_inj, t_end, t_end - TAIL)
 
     root = meta["root"]
-    roots = ({root, fb.get(root, "")} | set(meta.get("collateral", []))) - {""}
+    rset = set(root.split("+")) - {""}  # multi-root scenarios join roots with "+"
+    roots = (rset | {fb.get(r, "") for r in rset} | set(meta.get("collateral", []))) - {""}
     decisions = [e for e in events if e["kind"] in ("act", "given_up")]
     unnecessary = [e for e in decisions if e["node"] not in roots]
-    root_dec = [e for e in decisions if e["node"] == root]
-    futile = sum(1 for e in events if e["kind"] == "verify_failed" and e["node"] == root)
-    diag = root_dec[-1]["fault"] if root_dec else ""
+    root_dec = [e for e in decisions if e["node"] in rset]
+    futile = sum(1 for e in events if e["kind"] == "verify_failed" and e["node"] in rset)
+    # Diagnosis: the last decision label on every root must be in expect.
+    last = {e["node"]: e["fault"] for e in root_dec}
+    diag = "+".join(last.get(r, "") for r in root.split("+")) if root else ""
+    diag_ok = all(last.get(r, "") in meta["expect"] for r in rset) if root else None
     first_root_t = min((e["t"] for e in root_dec), default=None)
     # Event t is healer-relative; convert with t0_wall when present.
     detect_latency = None
@@ -139,17 +143,18 @@ def score_episode(d: Path) -> dict | None:
     if (d / "snap.jsonl").exists() and root:
         lines = (d / "snap.jsonl").read_text().splitlines()
         first = {n["name"]: n for n in json.loads(lines[0])["nodes"]} if lines else {}
-        last = {n["name"]: n for n in json.loads(lines[-1])["nodes"]} if lines else {}
-        n = last.get(root)
-        if n and n.get("alive", True):
-            base = first.get(root, {}).get("rss", n["rss"])
-            left = n["cpu"] >= 1.0 or n["rss"] - base >= 200
+        end = {n["name"]: n for n in json.loads(lines[-1])["nodes"]} if lines else {}
+        for r in rset:
+            n = end.get(r)
+            if n and n.get("alive", True):
+                base = first.get(r, {}).get("rss", n["rss"])
+                left = left or n["cpu"] >= 1.0 or n["rss"] - base >= 200
     return dict(
         scenario=meta["scenario"], policy=meta["policy"], rep=meta["rep"], root=root,
         restorable=meta["restorable"], outcome=outcome, pre_ok=pre_ok,
         latency_s=latency, outage_s=round(outage, 2), decisions=len(decisions),
         unnecessary=len(unnecessary), futile=futile, diagnosis=diag,
-        diag_correct=(diag in meta["expect"]) if root else None,
+        diag_correct=diag_ok,
         act_latency_s=detect_latency, inject_subs=probe["inject_subs"],
         healer_cpu=meta["healer_cpu_frac"], healer_rss_mb=meta["healer_rss_mb"],
         left_burning=left, blackout_s=blackout, tail_gap_s=tail_gap,

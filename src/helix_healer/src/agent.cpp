@@ -172,12 +172,13 @@ std::vector<Action> MlpRanker::rank(const std::string&, const AgentEvidence& e, 
 
 std::unique_ptr<Ranker> make_ranker(const std::string& name, const std::string& arg, uint64_t seed) {
   if (name.empty() || name == "rule") return std::make_unique<RuleRanker>();
+  if (name == "txn" || name == "txn2") return std::make_unique<TxnRanker>(name);
   if (name == "random") return std::make_unique<RandomRanker>(seed);
   if (name == "oracle") return std::make_unique<OracleRanker>(arg);
   if (name == "history") return std::make_unique<HistoryRanker>(arg);
   if (name == "mlp") return std::make_unique<MlpRanker>(arg);
   if (name == "llm") return std::make_unique<LlmRanker>(arg);
-  throw std::runtime_error("unknown agent ranker '" + name + "' (rule|random|oracle|history|mlp|llm)");
+  throw std::runtime_error("unknown agent ranker '" + name + "' (rule|txn|txn2|random|oracle|history|mlp|llm)");
 }
 
 }  // namespace helix_healer

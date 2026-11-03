@@ -56,6 +56,19 @@ class RuleRanker : public Ranker {
   std::vector<Action> rank(const std::string&, const AgentEvidence&, const std::vector<Action>& c) override { return c; }
 };
 
+// TXN baseline: the policy builds its candidates the transactional way (Policy::set_txn), and
+// this ranker keeps that order. Separate from RuleRanker so the arm ("txn" or "txn2") is named
+// in the event log.
+class TxnRanker : public Ranker {
+ public:
+  explicit TxnRanker(std::string name = "txn") : name_(std::move(name)) {}
+  const char* name() const override { return name_.c_str(); }
+  std::vector<Action> rank(const std::string&, const AgentEvidence&, const std::vector<Action>& c) override { return c; }
+
+ private:
+  std::string name_;
+};
+
 // Sham: uniformly random order, seeded.
 class RandomRanker : public Ranker {
  public:

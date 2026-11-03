@@ -30,6 +30,25 @@ the stock ros2 CLI. Fault strings:
                              atomically, then NODE gets SIGTERM as an operator restart
                              would send. OP is corrupt_urdf (robot_description cut to half,
                              so the URDF no longer parses) or set:KEY:VALUE (one YAML key).
+  deploylatent:NODE:FILE:OP[:ARGS]
+                             the same rewrite with no SIGTERM: a bad config that sits on disk
+                             until something else restarts NODE.
+  postkill:NODE:SIG:D        follow-up: the first NODE process that did not exist at injection
+                             gets SIG D s after it is first seen (an unrelated crash of the
+                             freshly started process). One shot.
+  markerkill:NODE:KEY:VALUE:SIG:D
+                             follow-up: every NODE process started after injection whose
+                             --params-file content (read when the process is first seen) has
+                             the line `KEY: VALUE` gets SIG D s after it is first seen. Emulates
+                             a config value that crashes the node only after D s of running
+                             (a delayed config fault); a process started from a copy without
+                             the value (the LKG copy) is spared. Records whether a marked
+                             process is still alive at the episode end (marker_live_end).
+
+Faults compose with "+": each part runs in its own thread, and a part may carry an "@S" suffix
+that delays it S s after t_inject (kill:rsp:SEGV@2). hits counts the initial parts and is 0
+unless every initial part reached its target; follow-up parts (postkill, markerkill) only act
+on processes the healer starts, so they report followup_hits instead.
 """
 
 from __future__ import annotations
@@ -51,6 +70,9 @@ SIGS = {"SEGV": signal.SIGSEGV, "ABRT": signal.SIGABRT, "KILL": signal.SIGKILL, 
         "BUS": signal.SIGBUS, "FPE": signal.SIGFPE}
 
 
+FOLLOWUP = ("postkill", "markerkill")
+
+
 def _cmdline(pid: int) -> list[str]:
     try:
         return Path(f"/proc/{pid}/cmdline").read_bytes().split(b"\0")
@@ -66,6 +88,20 @@ def _domain(pid: int) -> str | None:
     except OSError:
         pass
     return None
+
+
+def _read(path: str) -> str:
+    try:
+        return Path(path).read_text()
+    except OSError:
+        return ""
+
+
+def _params_files(pid: int) -> list[str]:
+    """The --params-file paths (and __params:= files) on a process's command line."""
+    argv = [a.decode(errors="replace") for a in _cmdline(pid)]
+    out = [argv[i + 1] for i, a in enumerate(argv[:-1]) if a == "--params-file"]
+    return out + [a.split(":=", 1)[1] for a in argv if a.startswith("__params:=")]
 
 
 def alive(pid: int) -> bool:
@@ -160,6 +196,15 @@ class Injector(threading.Thread):
         self.kind = self.parts[0] if self.parts else ""
         self.fifo = None
         self.stack = logs.parent / "stack"  # the episode's generated stack (configs live here)
+        self.subs: list[Injector] = []
+        if "+" in fault:
+            for i, part in enumerate(fault.split("+")):
+                off = 0.0
+                if "@" in part:
+                    part, o = part.rsplit("@", 1)
+                    off = float(o)
+                self.subs.append(Injector(part, domain, env, t_inject + off, t_end, logs, f"{seed}#{i}"))
+            self.parts, self.kind = [], "compose"
         if self.kind == "stall":
             self.fifo = StallFifo(logs / f"{self.parts[1]}.log", logs / f"{self.parts[1]}.drained.log")
         self.injected_at: float | None = None
@@ -167,6 +212,8 @@ class Injector(threading.Thread):
         self.events: list[tuple[float, str, int]] = []
         self.stopped: set[int] = set()
         self.error = ""
+        self.followup_hits = 0
+        self.marker_live_end: bool | None = None
 
     def _log(self, what: str, pid: int) -> None:
         self.events.append((time.time(), what, pid))
@@ -189,7 +236,9 @@ class Injector(threading.Thread):
 
     def run(self) -> None:
         try:
-            if self.kind == "param":
+            if self.kind == "compose":
+                self._compose()
+            elif self.kind == "param":
                 self._f_param(*self.parts[1:])  # starts its helper now; the helper waits for t_inject
             elif self.kind:
                 self._wait_until(self.t_inject)
@@ -201,6 +250,22 @@ class Injector(threading.Thread):
                 self._signal(pid, signal.SIGCONT, "cleanup_cont")
             if self.fifo:
                 self.fifo.resume()
+
+    def _compose(self) -> None:
+        for sub in self.subs:
+            sub.start()
+        for sub in self.subs:
+            sub.join(timeout=max(1.0, self.t_end - time.time() + 30))
+        first = [x for x in self.subs if x.kind not in FOLLOWUP]
+        follow = [x for x in self.subs if x.kind in FOLLOWUP]
+        at = [x.injected_at for x in first if x.injected_at is not None]
+        self.injected_at = min(at) if at else None
+        self.hits = sum(x.hits for x in first) if all(x.hits for x in first) else 0
+        self.followup_hits = sum(x.hits for x in follow)
+        marks = [x.marker_live_end for x in self.subs if x.marker_live_end is not None]
+        self.marker_live_end = any(marks) if marks else None
+        self.error = "; ".join(f"{x.fault}: {x.error}" for x in self.subs if x.error)
+        self.events = sorted(e for x in self.subs for e in x.events)
 
     def _find(self, node: str) -> int | None:
         pids = find_pids(node, self.domain)
@@ -307,7 +372,7 @@ class Injector(threading.Thread):
         else:
             self.error = (res.get("reason") or (r.stdout + r.stderr).strip()[-300:])
 
-    def _f_deploy(self, node: str, fname: str, op: str, *args: str) -> None:
+    def _write_deploy(self, fname: str, op: str, args: tuple[str, ...]) -> None:
         path = self.stack / fname
         text = path.read_text()
         if op == "corrupt_urdf":
@@ -322,19 +387,72 @@ class Injector(threading.Thread):
                 raise ValueError(f"{fname}: key {args[0]} matched {n} times")
         else:
             raise ValueError(f"deploy: unknown op {op}{args}")
-        pid = self._find(node)
         tmp = path.with_suffix(path.suffix + ".deploy")
         tmp.write_text(new)
         os.replace(tmp, path)
         self.injected_at = time.time()
         self._log("deploy_" + op, 0)
+
+    def _f_deploy(self, node: str, fname: str, op: str, *args: str) -> None:
+        pid = self._find(node)
+        self._write_deploy(fname, op, args)
         if pid and self._signal(pid, signal.SIGTERM, "deploy_TERM"):
             self.hits = 1
 
+    def _f_deploylatent(self, node: str, fname: str, op: str, *args: str) -> None:
+        self._write_deploy(fname, op, args)
+        self.hits = 1  # the bad file is in place; nothing is restarted
+
+    def _new_pids(self, node: str, old: set[int], seen: dict[int, float]) -> list[int]:
+        now = time.time()
+        pids = [p for p in find_pids(node, self.domain) if p not in old]
+        for p in pids:
+            seen.setdefault(p, now)
+        return pids
+
+    def _f_postkill(self, node: str, sig: str, delay: str) -> None:
+        old = set(find_pids(node, self.domain))
+        self.injected_at = time.time()
+        seen: dict[int, float] = {}
+        while time.time() < self.t_end:
+            pids = self._new_pids(node, old, seen)
+            if pids:
+                pid = min(pids, key=lambda p: seen[p])
+                self._wait_until(seen[pid] + float(delay))
+                if self._signal(pid, SIGS[sig], "postkill_" + sig):
+                    self.hits = 1
+                return
+            time.sleep(0.02)
+
+    def _f_markerkill(self, node: str, key: str, value: str, sig: str, delay: str) -> None:
+        old = set(find_pids(node, self.domain))
+        self.injected_at = time.time()
+        pat = re.compile(rf"^\s*{re.escape(key)}:\s*{re.escape(value)}\s*$", re.M)
+        seen: dict[int, float] = {}
+        marked: dict[int, bool] = {}
+        while time.time() < self.t_end:
+            now = time.time()
+            for pid in self._new_pids(node, old, seen):
+                if pid not in marked:
+                    marked[pid] = any(pat.search(_read(f)) for f in _params_files(pid))
+                    self._log(f"marker{int(marked[pid])}", pid)
+                if marked[pid] and now - seen[pid] >= float(delay) and self._signal(pid, SIGS[sig], "markerkill_" + sig):
+                    self.hits += 1
+                    seen[pid] = float("inf")
+            time.sleep(0.02)
+        self.marker_live_end = any(marked.get(p, False) for p in find_pids(node, self.domain))
+
     def close(self) -> None:
+        for sub in self.subs:
+            sub.close()
         if self.fifo:
             self.fifo.close()
 
     def record(self) -> dict:
-        return dict(fault=self.fault, injected_at=self.injected_at, hits=self.hits, error=self.error,
-                    events=[(round(t, 4), w, p) for t, w, p in self.events])
+        r = dict(fault=self.fault, injected_at=self.injected_at, hits=self.hits, error=self.error,
+                 events=[(round(t, 4), w, p) for t, w, p in self.events])
+        if self.subs or self.kind in FOLLOWUP:
+            r.update(followup_hits=self.followup_hits if self.subs else self.hits, marker_live_end=self.marker_live_end)
+        if self.subs:
+            r["parts"] = [dict(fault=x.fault, injected_at=x.injected_at, hits=x.hits) for x in self.subs]
+        return r

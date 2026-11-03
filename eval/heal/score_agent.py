@@ -57,6 +57,34 @@ def agent_info(d: Path) -> dict:
     return json.loads(p.read_text()) if p.exists() else {}
 
 
+def rollbacks(events: list[dict], inj: dict) -> tuple[int, int]:
+    """restart_lkg acts and how many failed. A rollback fails when, before the next act on the
+    same node, its verification fails, the relaunched process exits, or the relaunched process
+    was started from a config the injector marked as faulty (the LKG copy was poisoned)."""
+    marked = {int(p) for _, w, p in inj.get("events", []) if w == "marker1" and p}
+    total = failed = 0
+    for i, e in enumerate(events):
+        if e["kind"] != "act" or e.get("action") != "restart_lkg":
+            continue
+        total += 1
+        node, bad, spawned = e["node"], False, False
+        for f in events[i + 1:]:
+            if f.get("node") != node:
+                continue
+            if f["kind"] == "act":
+                break
+            if f["kind"] == "verify_failed":
+                bad = True
+            elif f["kind"] == "spawn":
+                spawned = True
+                m = re.match(r"pid (\d+)", f.get("detail", ""))
+                bad = bad or (m is not None and int(m.group(1)) in marked)
+            elif f["kind"] == "exit" and spawned:
+                bad = True
+        failed += bad
+    return total, failed
+
+
 def agent_episode(d: Path) -> dict | None:
     base = score_episode(d)
     if base is None:
@@ -69,7 +97,9 @@ def agent_episode(d: Path) -> dict | None:
         for line in (d / "events.jsonl").read_text().splitlines()[1:]:
             events.append(json.loads(line))
     root, scen = meta["root"], meta["scenario"]
-    allowed = ({root, fb.get(root, "")} | set(meta.get("collateral", []))) - {""}
+    # Multi-root scenarios join roots (and their repairs, in the same order) with "+".
+    rlist = [r for r in root.split("+") if r]
+    allowed = (set(rlist) | {fb.get(r, "") for r in rlist} | set(meta.get("collateral", []))) - {""}
     inter = [e for e in events if e["kind"] in INTERVENTIONS]
     unsafe = 0
     for e in inter:
@@ -77,24 +107,30 @@ def agent_episode(d: Path) -> dict | None:
             unsafe += 1
         elif is_safe_deploy(scen) and e["kind"] == "act" and e["action"] in REVERTING:
             unsafe += 1
-    root_acts = [e for e in events if e["kind"] == "act" and e.get("node") == root]
-    ver = next((e for e in events if e["kind"] == "verified" and e.get("node") == root), None)
-    if ver is not None:
-        n_repair = sum(1 for e in root_acts if e["t"] <= ver["t"])
-    else:
-        n_repair = K + 1
-    klass = REPAIR_CLASS.get(meta.get("repair") or "", set())
+    vers, n_repair, ok = [], 0, True
+    for r, rep in zip(rlist, (meta.get("repair") or "").split("+") + [""] * len(rlist)):
+        ver = next((e for e in events if e["kind"] == "verified" and e.get("node") == r), None)
+        acts = [e for e in events if e["kind"] == "act" and e.get("node") == r]
+        n_repair += sum(1 for e in acts if e["t"] <= ver["t"]) if ver is not None else K + 1
+        ok = ok and ver is not None and ver["action"] in REPAIR_CLASS.get(rep, set())
+        vers.append(ver["action"] if ver else "")
+    inj = probe.get("injector") or {}
+    marker_live = bool(inj.get("marker_live_end"))
+    rb_total, rb_failed = rollbacks(events, inj)
     ms = [float(m.group(1)) for e in events if e["kind"] == "act" for m in [MS.search(e.get("detail", ""))] if m]
     t_inj = probe["t_inject"] or meta["t_start"] + 7.0
     downtime = base["latency_s"] if base["latency_s"] is not None else round(probe["t_end"] - t_inj, 2)
     return dict(
         base,
-        set=meta.get("set", ""), repair_class=meta.get("repair") or "",
+        set=meta.get("set", ""), restorable=meta.get("restorable", True), repair_class=meta.get("repair") or "",
         diag_ok=base["diag_correct"],
-        verified_action=ver["action"] if ver else "",
-        repair_ok=(ver is not None and ver["action"] in klass) if root else None,
+        verified_action="+".join(vers),
+        repair_ok=ok if root else None,
         n_repair=n_repair if root else None,
         unsafe=unsafe, n_actions=len(inter), engaged=len(inter) > 0,
+        marker_live_end=marker_live, strict_restored=base["outcome"] == "RESTORED" and not marker_live,
+        followup_hits=inj.get("followup_hits"), rollbacks=rb_total, failed_rollbacks=rb_failed,
+        lkg_commits=sum(1 for e in events if e["kind"] == "lkg_config" and e.get("node") in rlist),
         downtime_s=downtime, downtime_censored=base["latency_s"] is None,
         ranker_ms_mean=round(statistics.fmean(ms), 4) if ms else None,
         ranker_ms_max=max(ms) if ms else None,

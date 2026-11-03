@@ -364,9 +364,31 @@ void Policy::decide_agent(const NodeObs& n, Fault f, State& st, double t, Decisi
     d.detail = why;
     st.incident_open = false;
   };
-  if (f == Fault::QosMismatch) return give_up("qos_mismatch: no repair action changes a QoS contract");
   auto tried = [&](Action a) { return std::find(st.tried.begin(), st.tried.end(), a) != st.tried.end(); };
   const auto& ev = n.ev;
+  if (txn_) {
+    // TXN baseline: a transactional supervisor that never reads the fault class. Undo
+    // uncommitted live parameter changes, roll back a config the failed process ran before it was
+    // committed, else restart; if restarts do not take and the disk config is uncommitted, roll
+    // it back. No lifecycle reset, no crash-loop or QoS special cases.
+    std::vector<Action> c;
+    const bool lkg = ns.restart && ev.has_lkg_config && ev.config_changed && !ev.config_pinned && !tried(Action::RestartLKG);
+    if (n.alive && ev.param_diff > 0 && !tried(Action::ParamRestore)) c.push_back(Action::ParamRestore);
+    st.cfg_strikes = ev.config_ran ? st.cfg_strikes + 1 : 0;
+    const bool revert_first = ev.config_ran && st.cfg_strikes >= txn_strikes_;
+    if (lkg && revert_first) c.push_back(Action::RestartLKG);
+    if (ns.restart) c.push_back(Action::Restart);
+    if (lkg && !revert_first) c.push_back(Action::RestartLKG);
+    if (st.incident_actions >= kAgentK) return give_up("agent_budget");
+    if (used >= p.max_attempts) return give_up("budget");
+    if (c.empty()) return give_up(!ns.restart ? "restart=0" : "no_candidates");
+    d.candidates = std::move(c);
+    d.action = d.candidates.front();
+    d.incident_action = ++st.incident_actions;
+    st.incident_t = t;
+    return;
+  }
+  if (f == Fault::QosMismatch) return give_up("qos_mismatch: no repair action changes a QoS contract");
   // Feasible repairs in rule order: undo a live parameter change first, then roll back a config
   // the running process actually loaded, then the v3 order (lifecycle reset first for a degraded or
   // endpoint-loss lifecycle node, else restart). A config changed on disk but not yet loaded by a
