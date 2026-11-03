@@ -154,6 +154,21 @@ void Policy::observe(const NodeObs& n, const Snapshot& s, State& st) {
   }
 }
 
+// Every judged output is fresh and back near its expected rate: what remains of a deficit alarm is
+// history from an outage, not a present slowdown.
+bool Policy::draining(const NodeObs& n) const {
+  const auto& p = spec_.p;
+  if (!n.alive) return false;
+  bool any = false;
+  for (const auto& o : n.outputs) {
+    if (o.expected_hz <= 0) continue;
+    any = true;
+    const double limit = o.stale_limit_s > 0 ? o.stale_limit_s : stale_limit(p, o.expected_hz);
+    if (o.age_s > limit || o.rate_hz < kRecoveredRatio * o.expected_hz) return false;
+  }
+  return any;
+}
+
 bool Policy::upstream_sick(const NodeObs& n, const State& self, double t) const {
   const double grace = spec_.p.victim_grace_s;
   for (const auto& u : n.upstream) {
@@ -165,6 +180,9 @@ bool Policy::upstream_sick(const NodeObs& n, const State& self, double t) const 
     if (us.sick && us.onset != State::kNoOnset && (self.onset == State::kNoOnset || us.onset <= self.onset)) return true;
     // Upstream just recovered: give us time to follow before blaming us.
     if (!us.sick && us.healthy_since > 0 && t - us.healthy_since < grace) return true;
+    // ...and, for a bounded while longer, while our only symptom is the schedule deficit run up
+    // during its outage and our live rate is already back: that deficit drains on its own.
+    if (!us.sick && us.healthy_since > 0 && t - us.healthy_since < kRecoverMult * grace && draining(n)) return true;
   }
   return false;
 }
@@ -304,6 +322,18 @@ Decision Policy::decide(const NodeObs& n, Fault f, State& st, double t, StepOut&
       d.action = Action::Restart;
       d.delay_s = (n.alive || (p.fast_repair > 0 && used == 0)) ? 0.0 : p.backoff_s;
     }
+  } else if (kind_ == PolicyKind::Agent && n.ev.deploy_pending && ns.restart && f != Fault::QosMismatch) {
+    // A deploy stopped the node to roll out a new config: starting it on that config finishes the
+    // deploy. It is not a repair, so it neither opens an incident nor spends the repair budget.
+    // Once the new process runs, spawn hash and disk agree and every later fault is judged normally.
+    d.action = Action::Restart;
+    d.delay_s = 0.0;
+    d.detail = "deploy_rollout";
+    st.last_fault = f;
+    st.last_action = d.action;
+    st.phase = Phase::Acting;
+    out.events.push_back({t, n.name, "act", f, d.action, used, d.detail});
+    return d;
   } else if (kind_ == PolicyKind::Agent) {
     decide_agent(n, f, st, t, d, used);
     if (d.action == Action::Fallback || d.action == Action::Report) {

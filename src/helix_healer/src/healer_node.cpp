@@ -188,6 +188,7 @@ struct Managed {
   double param_change_t = -1;   // last changed/deleted parameter event
   std::vector<size_t> cfg_idx;  // argv entries naming config files (.yaml .yml .urdf .xml)
   uint64_t spawn_hash = 0;      // hash of the config files the current process was started with
+  uint64_t lkg_params_hash = 0;  // spawn_hash the LKG parameters were captured under
   uint64_t lkg_hash = 0;        // 0 = no LKG copies yet
   uint64_t reject_hash = 0;     // disk config rejected by a RestartLKG
   bool pinned = false;          // running on the LKG copies until the disk config changes again
@@ -255,9 +256,12 @@ uint64_t files_hash(const std::vector<std::string>& argv, const std::vector<size
 
 uint64_t config_hash(const Managed& m) { return files_hash(m.argv, m.cfg_idx); }
 
-// LKG parameters that the live node currently holds with a different value.
+// LKG parameters that the live node currently holds with a different value. A snapshot is a
+// baseline only for the config it was captured under: after a deploy the new file sets the
+// parameters, and restoring the old values would silently revert the deploy.
 std::vector<std::string> param_diff(const Managed& m) {
   std::vector<std::string> out;
+  if (!m.cfg_idx.empty() && m.lkg_params_hash != m.spawn_hash) return out;
   for (const auto& [k, v] : m.lkg_params) {
     auto it = m.cur_params.find(k);
     if (it != m.cur_params.end() && !(it->second == v)) out.push_back(k);
@@ -602,6 +606,10 @@ class Healer : public rclcpp::Node {
         n.ev.config_changed = n.ev.has_lkg_config && config_hash(m) != m.lkg_hash;
         n.ev.config_ran = n.ev.has_lkg_config && m.spawn_hash != m.lkg_hash;
         n.ev.config_pinned = m.pinned;
+        if (!m.cfg_idx.empty() && m.spawn_hash != 0) {
+          const uint64_t disk = config_hash(m);
+          n.ev.deploy_pending = disk != m.spawn_hash && !(m.pinned && disk == m.reject_hash);
+        }
         if (policy_->gen()) {
           const auto* g = find_gen(m, m.spawn_hash);
           n.ev.run_hash = m.spawn_hash;
@@ -1097,7 +1105,9 @@ class Healer : public rclcpp::Node {
         if (m.params) {
           if (m.cand_busy && t - m.last_fetch > lkg_hold_s_) invalidate(m);  // lost reply
           if (m.cand_t >= 0 && t - m.cand_t >= lkg_hold_s_ && m.cand_pid == m.pid) {
-            if (m.cand_params != m.lkg_params) {
+            const bool rebase = m.lkg_params_hash != m.spawn_hash;
+            m.lkg_params_hash = m.spawn_hash;
+            if (m.cand_params != m.lkg_params || rebase) {
               m.lkg_params = m.cand_params;
               promoted.push_back({name, "params=" + std::to_string(m.lkg_params.size())});
             }

@@ -87,6 +87,50 @@ TEST(Agent, ParamDiffPutsParamRestoreFirstAndOpensAnIncident) {
   EXPECT_EQ(tr.kinds("a", "act"), 0);  // the healer logs "act" after ranking
 }
 
+// A deploy stopped a to roll out a new file: restarting it is the deploy's own restart. It opens no
+// incident and spends no budget, so a later real fault on the new config is attempt 1.
+TEST(Agent, DeployRolloutRestartUsesNoBudgetOrIncident) {
+  Policy p(PolicyKind::Agent, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World&, double) {}, [](Action) { return true; });
+  for (int k = 0; k < 6; ++k) {  // more rollouts than max_attempts=5
+    const double t0 = 1 + 3 * k;
+    run(
+        p, w, t0, t0 + 3, tr,
+        [&, t0](World& w, double t) {
+          const bool down = t < t0 + 0.5 && tr.d.size() == static_cast<std::size_t>(k);
+          w.a.alive = !down;
+          w.a.down_s = down ? t - t0 + 0.05 : 0;
+          w.a.ev.deploy_pending = down;
+          w.a.ev.has_lkg_config = w.a.ev.config_changed = true;
+        },
+        [](Action) { return true; });
+  }
+  ASSERT_EQ(tr.d.size(), 6u);
+  for (const auto& d : tr.d) {
+    EXPECT_EQ(d.action, Action::Restart);
+    EXPECT_TRUE(d.candidates.empty());
+    EXPECT_EQ(d.detail, "deploy_rollout");
+  }
+  EXPECT_EQ(tr.kinds("a", "incident"), 0);
+  // A real crash of the new config afterwards is judged normally, as the first attempt.
+  run(
+      p, w, 20, 21, tr,
+      [&](World& w, double t) {
+        const bool down = tr.d.size() == 6u;
+        w.a.alive = !down;
+        w.a.down_s = down ? t - 20 + 0.05 : 0;
+        w.a.ev.deploy_pending = false;
+        w.a.ev.config_ran = true;
+      },
+      [](Action) { return true; });
+  ASSERT_EQ(tr.d.size(), 7u);
+  EXPECT_EQ(tr.d[6].attempt, 1);
+  EXPECT_FALSE(tr.d[6].candidates.empty());
+  EXPECT_EQ(tr.kinds("a", "incident"), 1);
+}
+
 TEST(Agent, ConfigTheProcessLoadedIsRolledBackBeforeAPlainRestart) {
   Policy p(PolicyKind::Agent, parse_spec(kSpec));
   World w;

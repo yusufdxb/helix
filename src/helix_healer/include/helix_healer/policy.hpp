@@ -60,6 +60,11 @@ struct NodeObs {
     bool config_ran = false;      // the current (or last) process was started with non-LKG config
     bool config_pinned = false;   // already running on the LKG copies after a rollback
     bool has_lkg_config = false;  // LKG copies exist, so RestartLKG is possible
+    // The config on disk differs from the one the current process was started with (and is not
+    // the rejected config a rollback pinned away from): a deploy is rolling out. Restarting the
+    // node onto it is the deploy's own restart, not a repair, so it opens no incident and uses no
+    // repair budget.
+    bool deploy_pending = false;
     // GEN (versioned snapshots, Policy::set_gen) only:
     uint64_t run_hash = 0;        // config the current (or last) process was started with
     bool probation = false;       // that config has not yet run healthy for agent_gen_probation_s
@@ -175,6 +180,11 @@ class Policy {
 
   void observe(const NodeObs& n, const Snapshot& s, State& st);
   bool upstream_sick(const NodeObs& n, const State& self, double t) const;
+  bool draining(const NodeObs& n) const;
+  // Recovery grace after an upstream comes back: victim_grace_s always, up to kRecoverMult times
+  // that while the node's outputs run at >= kRecoveredRatio of expected and only a deficit remains.
+  static constexpr double kRecoverMult = 4.0;
+  static constexpr double kRecoveredRatio = 0.8;
   bool resource_root_elsewhere(const std::string& self, double t) const;
   bool input_silent_longer(const NodeObs& n, const Snapshot& s) const;
   bool linked(const std::string& a, const std::string& b, const Snapshot& s) const;

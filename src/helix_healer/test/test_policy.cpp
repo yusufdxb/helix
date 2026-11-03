@@ -379,3 +379,37 @@ TEST(Policy, NoneNeverActs) {
   run(p, w, 0, 3, tr, [](World& w, double) { w.a.alive = false; });
   EXPECT_TRUE(tr.decisions.empty());
 }
+
+namespace {
+// a hangs over [1, 2.5) and recovers by itself at 2.5; b stops with it. From 2.5 b publishes at
+// `rate` while a deficit run up during the outage (50 periods, over its limit of 4) drains at
+// `drain` periods/s. Returns the number of restarts of b.
+int downstream_after_recovery(double rate, double drain) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  run(
+      p, w, 0, 12, tr,
+      [&](World& w, double t) {
+        const bool out = t >= 1 && t < 2.5;
+        w.a.outputs[0].age_s = out ? 0.02 + (t - 1) : 0.02;
+        w.b.outputs[0].age_s = out ? std::max(0.02, t - 1.1) : 0.02;
+        w.b.outputs[0].deficit_limit = 4;
+        w.b.outputs[0].stale_limit_s = 0.15;
+        w.b.outputs[0].deficit = t < 2.5 ? 0 : std::max(0.0, 50 - drain * (t - 2.5));
+        w.b.outputs[0].rate_hz = t < 2.5 ? 20 : rate;
+      },
+      [](const Decision&) { return false; });  // a's restart "fails": it recovers on its own
+  return tr.count("b", Action::Restart);
+}
+}  // namespace
+
+// The deficit b ran up while its upstream was out drains for 50/15 = 3.3 s after a recovers,
+// longer than victim_grace_s = 1. b's rate is back, so it is not blamed meanwhile.
+TEST(Policy, DrainingDeficitAfterUpstreamRecoveryIsNotBlamed) { EXPECT_EQ(downstream_after_recovery(20, 15), 0); }
+
+// Control: the same deficit with b still at half rate is a real slowdown of b, blamed after the grace.
+TEST(Policy, SlowDownstreamAfterUpstreamRecoveryIsStillBlamed) { EXPECT_GE(downstream_after_recovery(10, 15), 1); }
+
+// Bound: a deficit that has not drained 4 x victim_grace_s after recovery is blamed even at full rate.
+TEST(Policy, DrainGraceIsBounded) { EXPECT_GE(downstream_after_recovery(20, 0), 1); }
