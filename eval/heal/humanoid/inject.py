@@ -50,7 +50,9 @@ the stock ros2 CLI. Fault strings:
 
 Faults compose with "+": each part runs in its own thread, and a part may carry an "@S" suffix
 that delays it S s after t_inject (kill:rsp:SEGV@2). hits counts the initial parts and is 0
-unless every initial part reached its target; follow-up parts (postkill, markerkill) only act
+unless every undelayed initial part reached its target (a delayed part that finds no process,
+because the arm left the node down, is listed in delayed_missed and does not void the
+injection); follow-up parts (postkill, markerkill) only act
 on processes the healer starts, so they report followup_hits instead.
 """
 
@@ -189,6 +191,18 @@ class StallFifo:
         self.sink.close()
 
 
+def compose_hits(first: list) -> int:
+    """hits of a composite: the sum over its initial parts, or 0 when an undelayed part missed.
+
+    A delayed part ("@S", S > 0) acts on the state the arm left behind, so whether it finds a
+    live process depends on the arm (without a healer, the node a first deploy stopped is still
+    down at +S). It is counted when it reaches a process but cannot void the injection.
+    """
+    if not all(x.hits for x in first if getattr(x, "delay", 0.0) <= 0):
+        return 0
+    return sum(x.hits for x in first)
+
+
 class Injector(threading.Thread):
     def __init__(self, fault: str, domain: str, env: dict, t_inject: float, t_end: float, logs: Path, seed: str) -> None:
         super().__init__(daemon=True)
@@ -200,13 +214,16 @@ class Injector(threading.Thread):
         self.fifo = None
         self.stack = logs.parent / "stack"  # the episode's generated stack (configs live here)
         self.subs: list[Injector] = []
+        self.delay = 0.0  # offset of this part inside a composite ("@S")
         if "+" in fault:
             for i, part in enumerate(fault.split("+")):
                 off = 0.0
                 if "@" in part:
                     part, o = part.rsplit("@", 1)
                     off = float(o)
-                self.subs.append(Injector(part, domain, env, t_inject + off, t_end, logs, f"{seed}#{i}"))
+                sub = Injector(part, domain, env, t_inject + off, t_end, logs, f"{seed}#{i}")
+                sub.delay = off
+                self.subs.append(sub)
             self.parts, self.kind = [], "compose"
         if self.kind == "stall":
             self.fifo = StallFifo(logs / f"{self.parts[1]}.log", logs / f"{self.parts[1]}.drained.log")
@@ -218,6 +235,7 @@ class Injector(threading.Thread):
         self.followup_hits = 0
         self.marker_live_end: bool | None = None
         self.want_live_end: bool | None = None
+        self.delayed_missed: list[str] = []
 
     def _log(self, what: str, pid: int) -> None:
         self.events.append((time.time(), what, pid))
@@ -264,7 +282,8 @@ class Injector(threading.Thread):
         follow = [x for x in self.subs if x.kind in FOLLOWUP]
         at = [x.injected_at for x in first if x.injected_at is not None]
         self.injected_at = min(at) if at else None
-        self.hits = sum(x.hits for x in first) if all(x.hits for x in first) else 0
+        self.hits = compose_hits(first)
+        self.delayed_missed = [x.fault for x in first if x.delay > 0 and not x.hits]
         self.followup_hits = sum(x.hits for x in follow)
         marks = [x.marker_live_end for x in self.subs if x.marker_live_end is not None]
         self.marker_live_end = any(marks) if marks else None
@@ -479,5 +498,6 @@ class Injector(threading.Thread):
             r.update(followup_hits=self.followup_hits if self.subs else self.hits, marker_live_end=self.marker_live_end,
                      want_live_end=self.want_live_end)
         if self.subs:
-            r["parts"] = [dict(fault=x.fault, injected_at=x.injected_at, hits=x.hits) for x in self.subs]
+            r["parts"] = [dict(fault=x.fault, injected_at=x.injected_at, hits=x.hits, delay=x.delay) for x in self.subs]
+            r["delayed_missed"] = self.delayed_missed
         return r

@@ -59,12 +59,13 @@ jobs:
           colcon test-result --verbose
 
   lint:
-    name: Lint eval (ruff)
+    name: Lint and test eval (ruff, pytest)
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
-      - run: pip install ruff
+      - run: pip install ruff pytest
       - run: ruff check eval/ --select E,F,W --ignore E501
+      - run: python -m pytest -q eval/heal/tests
