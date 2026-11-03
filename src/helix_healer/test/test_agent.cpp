@@ -496,6 +496,83 @@ TEST(LlmRanker, UnreachableServerThrowsSoTheHealerFallsBack) {
   EXPECT_THROW(LlmRanker(""), std::runtime_error);
 }
 
+// dtx: deployment-aware recovery. The config's behavioral verdict decides rollback; crash timing
+// alone never steps a generation back, and a verified config is never reverted.
+namespace {
+std::vector<std::vector<Action>> dtx_run(int verdict, bool prev, bool committed) {
+  Policy p(PolicyKind::Agent, parse_spec(kSpec));
+  p.set_txn(true, 2);
+  p.set_dtx(true);
+  EXPECT_TRUE(p.gen());
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World&, double) {}, [](Action) { return true; });
+  run(
+      p, w, 1, 30, tr,
+      [&](World& w, double) {
+        w.a.alive = false;
+        w.a.down_s = 0.1;
+        w.a.ev.has_lkg_config = true;
+        w.a.ev.config_changed = w.a.ev.config_ran = !committed;
+        w.a.ev.probation = true;
+        w.a.ev.has_prev_gen = prev;
+        w.a.ev.run_hash = 42;
+        w.a.ev.verdict = verdict;
+      },
+      [](Action) { return true; });
+  std::vector<std::vector<Action>> a;
+  for (const auto& d : tr.d)
+    if (d.node == "a" && !d.candidates.empty()) a.push_back(d.candidates);
+  return a;
+}
+}  // namespace
+
+TEST(Dtx, FailedCommittedGenerationStepsBackOnFirstFailure) {
+  auto a = dtx_run(-1, true, true);
+  ASSERT_GE(a.size(), 1u);
+  EXPECT_EQ(a[0].front(), Action::RestartLKG);
+}
+
+TEST(Dtx, FailedUncommittedConfigRevertsOnFirstFailure) {
+  auto a = dtx_run(-1, false, false);
+  ASSERT_GE(a.size(), 1u);
+  EXPECT_EQ(a[0].front(), Action::RestartLKG);
+}
+
+TEST(Dtx, VerifiedConfigIsNeverReverted) {
+  for (bool committed : {true, false}) {
+    auto a = dtx_run(1, true, committed);
+    ASSERT_GE(a.size(), 2u);
+    for (const auto& c : a) EXPECT_EQ(c, (std::vector<Action>{Action::Restart}));
+  }
+}
+
+TEST(Dtx, NoVerdictNeverStepsBackAGeneration) {
+  // gen would step back on the second strike here (Gen.PoisonedCommitStepsBackOnSecondStrike).
+  auto a = dtx_run(0, true, true);
+  ASSERT_GE(a.size(), 2u);
+  for (const auto& c : a) EXPECT_EQ(c, (std::vector<Action>{Action::Restart}));
+}
+
+TEST(Dtx, NoVerdictUncommittedBehavesLikeTxn2) {
+  auto a = dtx_run(0, false, false);
+  ASSERT_GE(a.size(), 2u);
+  EXPECT_EQ(a[0], (std::vector<Action>{Action::Restart, Action::RestartLKG}));
+  EXPECT_EQ(a[1].front(), Action::RestartLKG);
+  auto r = make_ranker("dtx", "", 0);
+  EXPECT_EQ(std::string(r->name()), "dtx");
+}
+
+TEST(Dtx, VerdictNeedsMinimumAndMajority) {
+  EXPECT_EQ(helix_healer::deploy_verdict(0, 0, 3), 0);
+  EXPECT_EQ(helix_healer::deploy_verdict(2, 0, 3), 0);
+  EXPECT_EQ(helix_healer::deploy_verdict(3, 0, 3), 1);
+  EXPECT_EQ(helix_healer::deploy_verdict(0, 3, 3), -1);
+  EXPECT_EQ(helix_healer::deploy_verdict(3, 3, 3), 1);   // a tie keeps a config that has verified
+  EXPECT_EQ(helix_healer::deploy_verdict(3, 4, 3), -1);
+  EXPECT_EQ(helix_healer::deploy_verdict(1, 2, 3), 0);
+}
+
 TEST(Gen, AckHashIsStandardFnv1a64) {
   // Acks are written by tools outside the healer, so the healer must use the published FNV-1a 64
   // parameters. Test vectors from the FNV reference (draft-eastlake-fnv).

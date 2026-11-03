@@ -376,7 +376,18 @@ void Policy::decide_agent(const NodeObs& n, Fault f, State& st, double t, Decisi
     bool lkg = ns.restart && ev.has_lkg_config && ev.config_changed && !ev.config_pinned && !tried(Action::RestartLKG);
     if (n.alive && ev.param_diff > 0 && !tried(Action::ParamRestore)) c.push_back(Action::ParamRestore);
     bool revert_first;
-    if (gen_) {
+    if (dtx_) {
+      // DTX: the config's behavior decides, not the crash count. Negative evidence plus a failure
+      // reverts at once: an uncommitted config to the LKG, a committed generation one step back.
+      // A verified config is never reverted. No verdict: TXN's two strikes on an uncommitted
+      // config, and no generation step-back (crash timing alone does not show a bad deploy).
+      st.cfg_strikes = ev.config_ran ? st.cfg_strikes + 1 : 0;
+      const bool bad = ev.verdict < 0, good = ev.verdict > 0;
+      const bool step_back = ns.restart && ev.has_prev_gen && bad && !tried(Action::RestartLKG);
+      lkg = lkg && !good;
+      revert_first = (lkg && ev.config_ran && (bad || st.cfg_strikes >= txn_strikes_)) || step_back;
+      lkg = lkg || step_back;
+    } else if (gen_) {
       // GEN: a strike is a decision on a process whose config is still on probation; strikes
       // belong to one config hash. An uncommitted config that keeps failing is rolled back as in
       // TXN. A committed generation that keeps failing during probation is stepped back one

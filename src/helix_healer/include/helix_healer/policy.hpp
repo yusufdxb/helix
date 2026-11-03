@@ -64,6 +64,9 @@ struct NodeObs {
     uint64_t run_hash = 0;        // config the current (or last) process was started with
     bool probation = false;       // that config has not yet run healthy for agent_gen_probation_s
     bool has_prev_gen = false;    // it is a committed generation with an older usable one behind it
+    // DTX (Policy::set_dtx) only: behavioral verification of that config, from deploy_verdict().
+    // +1 its declared outputs met their rate contract, -1 they did not, 0 not enough evidence.
+    int verdict = 0;
   } ev;
 };
 
@@ -119,6 +122,12 @@ class Policy {
   // (the healer picks the target, Policy only decides that RestartLKG is warranted).
   void set_gen(bool on) { gen_ = on; }
   bool gen() const { return gen_; }
+  // DTX (deployment-aware transactional recovery) on top of GEN: rollback is decided by the
+  // config's behavioral verdict (ev.verdict), not by crash timing. A verified config (+1) is never
+  // reverted; a failed one (-1) is reverted or stepped back on its first failure; with no verdict
+  // (0) an uncommitted config is reverted as in TXN and a committed generation is not stepped back.
+  void set_dtx(bool on) { dtx_ = on; if (on) gen_ = true; }
+  bool dtx() const { return dtx_; }
   // Observable state for /diagnostics.
   std::string phase(const std::string& node) const;
   // True while the node is in normal operation with no pending or recent fault. The healer
@@ -183,10 +192,21 @@ class Policy {
   bool txn_ = false;
   int txn_strikes_ = 1;
   bool gen_ = false;
+  bool dtx_ = false;
   Spec spec_;
   std::map<std::string, State> st_;
   std::vector<Event> pending_events_;
 };
+
+// dtx: verdict on one config from its verification samples. A sample is one look at the node, at
+// least the verification window after its start and with every managed upstream stable, that
+// checks each declared output rate against its contract. Needs min_samples of one kind and a
+// majority; otherwise 0 (no evidence either way).
+constexpr int deploy_verdict(int good, int bad, int min_samples) {
+  if (good >= min_samples && good >= bad) return 1;
+  if (bad >= min_samples && bad > good) return -1;
+  return 0;
+}
 
 // gen ranker, deploy acknowledgement. A deploy tool or operator that has accepted a config writes
 // the FNV-1a 64 hash of each accepted file's bytes, one 16-digit hex number per line, to

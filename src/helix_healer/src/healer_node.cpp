@@ -204,6 +204,21 @@ struct Managed {
   };
   std::vector<Gen> gens;
   uint64_t next_gen = 0;
+  // dtx ranker: behavioral verification per config hash (committed or not). This is also the
+  // node's deployment history: every config it ran and what its outputs showed.
+  struct Verify {
+    int good = 0, bad = 0, verdict = 0;
+    double first_t = -1;  // first sample
+    bool final = false;   // frozen when the generation was trusted
+    std::string last;     // rates of the last sample, for the event
+  };
+  std::map<uint64_t, Verify> verify;
+  double verify_t = -1e18;  // last sample
+  double up_bad_t = -1e18;  // last time a managed upstream was not healthy
+  int verdict_of(uint64_t h) const {
+    auto it = verify.find(h);
+    return it == verify.end() ? 0 : it->second.verdict;
+  }
 };
 
 constexpr size_t kMaxGens = 3;
@@ -214,10 +229,11 @@ Managed::Gen* find_gen(Managed& m, uint64_t hash) {
   return nullptr;
 }
 
-// Newest non-rejected generation older than the one with id `below` (0 = no bound).
+// Newest non-rejected generation older than the one with id `below` (0 = no bound). A generation
+// whose config failed verification (dtx) is never a rollback target either.
 const Managed::Gen* prev_gen(const Managed& m, uint64_t below) {
   for (auto it = m.gens.rbegin(); it != m.gens.rend(); ++it)
-    if (!it->rejected && (below == 0 || it->id < below)) return &*it;
+    if (!it->rejected && m.verdict_of(it->hash) >= 0 && (below == 0 || it->id < below)) return &*it;
   return nullptr;
 }
 
@@ -279,10 +295,19 @@ class Healer : public rclcpp::Node {
     if (!(lkg_hold_s_ > 0)) throw std::runtime_error("agent_lkg_hold_s must be > 0");
     if (agent_) {
       ranker_ = hh::make_ranker(ranker_name, ranker_arg, static_cast<uint64_t>(ranker_seed));
-      const bool two = ranker_name == "txn2" || ranker_name == "gen";
+      const bool two = ranker_name == "txn2" || ranker_name == "gen" || ranker_name == "dtx";
       policy_->set_txn(ranker_name == "txn" || two, two ? 2 : 1);
       policy_->set_gen(ranker_name == "gen");
+      policy_->set_dtx(ranker_name == "dtx");
     }
+    // dtx ranker: a verification sample passes when every declared output rate over the window is at
+    // least ratio x its contract (spec hz). Samples start one window after spawn and need every
+    // managed upstream stable for one window; min samples of one kind decide the verdict.
+    dtx_ratio_ = declare_parameter<double>("agent_dtx_ratio", 0.85);
+    dtx_window_s_ = declare_parameter<double>("agent_dtx_window_s", 3.0);
+    dtx_min_ = static_cast<int>(declare_parameter<int64_t>("agent_dtx_min_samples", 3));
+    if (!(dtx_ratio_ > 0) || !(dtx_window_s_ > 0) || dtx_window_s_ > 10.0 || dtx_min_ < 1)
+      throw std::runtime_error("agent_dtx_ratio > 0, 0 < agent_dtx_window_s <= 10, agent_dtx_min_samples >= 1");
     // gen ranker: health a committed generation needs before it is trusted (no longer on probation).
     gen_probation_s_ = declare_parameter<double>("agent_gen_probation_s", 30.0);
     if (!(gen_probation_s_ > 0)) throw std::runtime_error("agent_gen_probation_s must be > 0");
@@ -582,6 +607,7 @@ class Healer : public rclcpp::Node {
           n.ev.run_hash = m.spawn_hash;
           n.ev.probation = !(g && g->trusted);
           n.ev.has_prev_gen = g && !g->rejected && (m.pinned || config_hash(m) == m.spawn_hash) && prev_gen(m, g->id);
+          n.ev.verdict = m.verdict_of(m.spawn_hash);
         }
       }
       s.nodes.push_back(std::move(n));
@@ -1033,11 +1059,13 @@ class Healer : public rclcpp::Node {
       uint64_t gen = 0;  // gen ranker: the generation id being committed
     };
     std::vector<Copy> copies;
-    std::vector<std::pair<std::string, std::string>> trusted, acks_seen;
+    std::vector<std::pair<std::string, std::string>> trusted, acks_seen, verdicts;
     const bool gen = agent_ && policy_->gen();
+    const bool dtx = agent_ && policy_->dtx();
     {
       std::lock_guard lk(mu_);
       for (auto& [name, m] : nodes_) {
+        if (dtx) sample_deploy(name, m, t, verdicts);
         if (gen && !gen_ack_dir_.empty() && !m.gens.empty()) {
           // Deploy acknowledgement: evidence from outside the healer that this exact config is intended
           // and accepted. It trusts the generation whether or not the node is healthy right now.
@@ -1094,11 +1122,15 @@ class Healer : public rclcpp::Node {
             continue;
           }
           auto* g = find_gen(m, m.spawn_hash);
-          if (g && !g->trusted && !g->rejected && t - m.healthy_since >= gen_probation_s_) {
+          // dtx: probation alone does not trust a generation; its outputs must also have verified.
+          const int vd = m.verdict_of(m.spawn_hash);
+          if (g && !g->trusted && !g->rejected && t - m.healthy_since >= gen_probation_s_ && (!dtx || vd > 0)) {
             g->trusted = true;
-            trusted.push_back({name, "g" + std::to_string(g->id)});
+            if (dtx) m.verify[g->hash].final = true;
+            trusted.push_back({name, "g" + std::to_string(g->id) + (dtx ? " verified" : "")});
           }
-          if (!g && !m.cfg_idx.empty() && !m.pinned && !log_dir_.empty() && m.spawn_hash != 0 &&
+          // dtx: a config that failed verification is never committed as a generation.
+          if (!g && !(dtx && vd < 0) && !m.cfg_idx.empty() && !m.pinned && !log_dir_.empty() && m.spawn_hash != 0 &&
               t - m.healthy_since >= lkg_hold_s_ && config_hash(m) == m.spawn_hash)
             copies.push_back({name, m.argv, m.cfg_idx, m.spawn_hash, ++m.next_gen});
           continue;
@@ -1107,6 +1139,10 @@ class Healer : public rclcpp::Node {
             t - m.healthy_since >= lkg_hold_s_ && config_hash(m) == m.spawn_hash)
           copies.push_back({name, m.argv, m.cfg_idx, m.spawn_hash});
       }
+    }
+    for (const auto& [n, d] : verdicts) {
+      emit_simple(n, "deploy_verdict", d);
+      append_history(n, d, t);
     }
     for (const auto& [n, d] : acks_seen) emit_simple(n, "lkg_ack", d);
     for (const auto& [n, d] : trusted) emit_simple(n, "lkg_trust", d);
@@ -1144,6 +1180,62 @@ class Healer : public rclcpp::Node {
       }
       if (ok) emit_simple(c.node, "lkg_config", std::to_string(c.idx.size()) + " file(s)");
     }
+  }
+
+  // dtx ranker: one verification sample per second for the config the node runs now. Called with mu_
+  // held, on the executor thread (topics_ is read here). Skips while the process is younger than the
+  // window, while any managed upstream is unhealthy or was within the window (its outage would read
+  // as this node's), and for nodes without config files or declared output rates.
+  void sample_deploy(const std::string& name, Managed& m, double t,
+                     std::vector<std::pair<std::string, std::string>>& verdicts) {
+    for (const auto& u : m.upstream) {
+      auto it = nodes_.find(u);
+      if (it != nodes_.end() && !(it->second.learn_ok && it->second.alive)) m.up_bad_t = t;
+    }
+    if (!m.alive || m.retired || m.spawn_hash == 0 || m.cfg_idx.empty()) return;
+    if (t - m.start_t < dtx_window_s_ || t - m.up_bad_t < dtx_window_s_ || t - m.verify_t < 1.0) return;
+    auto& v = m.verify[m.spawn_hash];
+    if (v.final) return;
+    m.verify_t = t;
+    bool judged = false, ok = true;
+    std::ostringstream d;
+    d.setf(std::ios::fixed);
+    d.precision(1);
+    for (const auto& o : m.spec.outputs) {
+      if (!(o.hz > 0)) continue;
+      int c = 0;
+      auto ts = topics_.find(o.topic);
+      if (ts != topics_.end())
+        for (auto it = ts->second.arrivals.rbegin(); it != ts->second.arrivals.rend() && t - *it <= dtx_window_s_; ++it) ++c;
+      const double hz = c / dtx_window_s_;
+      judged = true;
+      ok = ok && hz >= dtx_ratio_ * o.hz;
+      d << (d.tellp() > 0 ? " " : "") << o.topic << '=' << hz << '/' << o.hz;
+    }
+    if (!judged) return;
+    if (v.first_t < 0) v.first_t = t;
+    (ok ? v.good : v.bad)++;
+    v.last = d.str();
+    const int nv = helix_healer::deploy_verdict(v.good, v.bad, dtx_min_);
+    if (nv == v.verdict) return;
+    v.verdict = nv;
+    std::ostringstream e;
+    const auto* g = find_gen(m, m.spawn_hash);
+    e << (g ? "g" + std::to_string(g->id) : std::string("uncommitted")) << ' ' << std::hex << std::setw(16)
+      << std::setfill('0') << m.spawn_hash << std::dec << ' '
+      << (nv > 0 ? "verified" : nv < 0 ? "failed" : "undecided") << " good=" << v.good << " bad=" << v.bad << ' '
+      << v.last;
+    verdicts.push_back({name, e.str()});
+  }
+
+  // dtx ranker: deployment history, one line per verdict change, in <log_dir>/lkg/<node>/history.log.
+  void append_history(const std::string& node, const std::string& line, double t) {
+    if (log_dir_.empty()) return;
+    std::error_code ec;
+    const auto dir = std::filesystem::path(log_dir_) / "lkg" / node;
+    std::filesystem::create_directories(dir, ec);
+    std::ofstream f(dir / "history.log", std::ios::app);
+    f << std::fixed << std::setprecision(3) << t << ' ' << line << '\n';
   }
 
   // gen ranker: copy the config files into a fresh generation directory, check that the copies hash to
@@ -1500,6 +1592,8 @@ class Healer : public rclcpp::Node {
   // agent policy
   bool agent_ = false;
   double lkg_hold_s_ = kLkgHoldS;
+  double dtx_ratio_ = 0.85, dtx_window_s_ = 3.0;
+  int dtx_min_ = 3;
   double gen_probation_s_ = 30.0;
   std::string gen_ack_dir_;
   struct AckFile { int64_t mtime = 0, size = -1; std::vector<uint64_t> hashes; };

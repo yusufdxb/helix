@@ -172,7 +172,7 @@ std::vector<Action> MlpRanker::rank(const std::string&, const AgentEvidence& e, 
 
 std::unique_ptr<Ranker> make_ranker(const std::string& name, const std::string& arg, uint64_t seed) {
   if (name.empty() || name == "rule") return std::make_unique<RuleRanker>();
-  if (name == "txn" || name == "txn2" || name == "gen") return std::make_unique<TxnRanker>(name);
+  if (name == "txn" || name == "txn2" || name == "gen" || name == "dtx") return std::make_unique<TxnRanker>(name);
   if (name == "random") return std::make_unique<RandomRanker>(seed);
   if (name == "oracle") return std::make_unique<OracleRanker>(arg);
   if (name == "history") return std::make_unique<HistoryRanker>(arg);
