@@ -33,6 +33,7 @@
 #include <memory>
 #include <mutex>
 #include <set>
+#include <iomanip>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -86,11 +87,11 @@ uint64_t file_hash(const std::string& path) {
     auto it = cache.find(path);
     if (it != cache.end() && it->second.mtime == mt && it->second.size == st.st_size) return it->second.h;
   }
-  uint64_t h = 1469598103934665603ULL;
+  uint64_t h = helix_healer::kFnv64Offset;
   std::ifstream in(path, std::ios::binary);
   char buf[8192];
   while (in.read(buf, sizeof buf) || in.gcount() > 0) {
-    for (std::streamsize i = 0; i < in.gcount(); ++i) h = (h ^ static_cast<unsigned char>(buf[i])) * 1099511628211ULL;
+    h = helix_healer::fnv1a64(reinterpret_cast<const unsigned char*>(buf), static_cast<size_t>(in.gcount()), h);
   }
   std::lock_guard lk(mu);
   cache[path] = {mt, static_cast<int64_t>(st.st_size), h};
@@ -228,10 +229,10 @@ void sync_lkg(Managed& m) {
 }
 
 uint64_t files_hash(const std::vector<std::string>& argv, const std::vector<size_t>& idx) {
-  uint64_t h = 1469598103934665603ULL;
+  uint64_t h = helix_healer::kFnv64Offset;
   for (size_t i : idx) {
     const uint64_t f = file_hash(argv[i]);
-    for (int b = 0; b < 8; ++b) h = (h ^ ((f >> (8 * b)) & 0xff)) * 1099511628211ULL;
+    for (int b = 0; b < 8; ++b) h = (h ^ ((f >> (8 * b)) & 0xff)) * helix_healer::kFnv64Prime;
   }
   return h ? h : 1;
 }
@@ -350,8 +351,9 @@ class Healer : public rclcpp::Node {
     graph_ = create_wall_timer(500ms, [this] { refresh_graph(); });
     res_ = create_wall_timer(std::chrono::duration<double>(p.resource_period_s), [this] { sample_resources(); });
     diag_ = create_wall_timer(1s, [this] { publish_diagnostics(); });
-    RCLCPP_INFO(get_logger(), "helix_healer: policy=%s%s%s, %zu managed nodes", policy_name.c_str(),
-                agent_ ? " ranker=" : "", agent_ ? ranker_->name() : "", nodes_.size());
+    RCLCPP_INFO(get_logger(), "helix_healer: policy=%s%s%s, %zu managed nodes%s%s", policy_name.c_str(),
+                agent_ ? " ranker=" : "", agent_ ? ranker_->name() : "", nodes_.size(),
+                gen_ack_dir_.empty() ? "" : ", acks from ", gen_ack_dir_.c_str());
   }
 
   ~Healer() override {
@@ -1031,7 +1033,7 @@ class Healer : public rclcpp::Node {
       uint64_t gen = 0;  // gen ranker: the generation id being committed
     };
     std::vector<Copy> copies;
-    std::vector<std::pair<std::string, std::string>> trusted;
+    std::vector<std::pair<std::string, std::string>> trusted, acks_seen;
     const bool gen = agent_ && policy_->gen();
     {
       std::lock_guard lk(mu_);
@@ -1039,7 +1041,19 @@ class Healer : public rclcpp::Node {
         if (gen && !gen_ack_dir_.empty() && !m.gens.empty()) {
           // Deploy acknowledgement: evidence from outside the healer that this exact config is intended
           // and accepted. It trusts the generation whether or not the node is healthy right now.
-          const auto& ack = acked(name);
+          bool fresh = false;
+          const auto& ack = acked(name, &fresh);
+          if (fresh) {
+            // Record what the ack holds against what each generation would need, so an ack that
+            // matches nothing is visible instead of silently ignored.
+            std::ostringstream d;
+            d << ack.size() << " hash(es)";
+            for (const auto& g : m.gens) {
+              d << "; g" << g.id << (g.trusted ? " trusted" : "") << (g.rejected ? " rejected" : "") << " needs";
+              for (uint64_t f : g.files) d << ' ' << std::hex << std::setw(16) << std::setfill('0') << f << std::dec;
+            }
+            acks_seen.push_back({name, d.str()});
+          }
           for (auto& g : m.gens)
             if (!g.trusted && !g.rejected && helix_healer::ack_covers(ack, g.files)) {
               g.trusted = true;
@@ -1094,6 +1108,7 @@ class Healer : public rclcpp::Node {
           copies.push_back({name, m.argv, m.cfg_idx, m.spawn_hash});
       }
     }
+    for (const auto& [n, d] : acks_seen) emit_simple(n, "lkg_ack", d);
     for (const auto& [n, d] : trusted) emit_simple(n, "lkg_trust", d);
     for (const auto& c : copies)
       if (c.gen) commit_gen(c.node, c.argv, c.idx, c.hash, c.gen);
@@ -1490,8 +1505,9 @@ class Healer : public rclcpp::Node {
   struct AckFile { int64_t mtime = 0, size = -1; std::vector<uint64_t> hashes; };
   std::map<std::string, AckFile> acks_;  // by node, re-read only when the file changes
 
-  // Hashes acknowledged for `node` (empty when there is no ack file). Called under mu_.
-  const std::vector<uint64_t>& acked(const std::string& node) {
+  // Hashes acknowledged for `node` (empty when there is no ack file). Called under mu_. *fresh is set
+  // when the file was (re)read on this call.
+  const std::vector<uint64_t>& acked(const std::string& node, bool* fresh = nullptr) {
     auto& a = acks_[node];
     const std::string path = gen_ack_dir_ + "/" + node + ".ack";
     struct stat st {};
@@ -1505,6 +1521,7 @@ class Healer : public rclcpp::Node {
       std::stringstream ss;
       ss << in.rdbuf();
       a = {mt, static_cast<int64_t>(st.st_size), helix_healer::parse_ack(ss.str())};
+      if (fresh) *fresh = true;
     }
     return a.hashes;
   }

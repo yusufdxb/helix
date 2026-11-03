@@ -496,6 +496,18 @@ TEST(LlmRanker, UnreachableServerThrowsSoTheHealerFallsBack) {
   EXPECT_THROW(LlmRanker(""), std::runtime_error);
 }
 
+TEST(Gen, AckHashIsStandardFnv1a64) {
+  // Acks are written by tools outside the healer, so the healer must use the published FNV-1a 64
+  // parameters. Test vectors from the FNV reference (draft-eastlake-fnv).
+  const auto h = [](const std::string& s) {
+    return fnv1a64(reinterpret_cast<const unsigned char*>(s.data()), s.size());
+  };
+  EXPECT_EQ(h(""), 0xcbf29ce484222325ULL);
+  EXPECT_EQ(h("a"), 0xaf63dc4c8601ec8cULL);
+  EXPECT_EQ(h("foobar"), 0x85944171f73967e8ULL);
+  EXPECT_EQ(fnv1a64(reinterpret_cast<const unsigned char*>("bar"), 3, h("foo")), h("foobar"));
+}
+
 TEST(Gen, AckParsesHexLinesOnly) {
   const auto a = parse_ack("# accepted by deploy\naf63dc4c8601ec8c\n  00000000000000FF \r\nnot-a-hash\n123\n\n");
   EXPECT_EQ(a, (std::vector<uint64_t>{0xaf63dc4c8601ec8cULL, 0xffULL}));

@@ -3,6 +3,7 @@
 // the closed Action enum below; it never runs commands.
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <map>
@@ -192,6 +193,14 @@ class Policy {
 // <agent_gen_ack_dir>/<node>.ack. A generation whose every config file is acknowledged is trusted
 // at once, so gen never steps back from it. Blank lines, '#' comments and malformed lines are ignored.
 std::vector<uint64_t> parse_ack(const std::string& text);
+// FNV-1a 64 (offset basis 0xcbf29ce484222325, prime 0x100000001b3), the hash acks are written in.
+// Pass the previous result as `h` to continue a hash over several buffers.
+constexpr uint64_t kFnv64Offset = 0xcbf29ce484222325ULL;
+constexpr uint64_t kFnv64Prime = 0x100000001b3ULL;
+constexpr uint64_t fnv1a64(const unsigned char* p, size_t n, uint64_t h = kFnv64Offset) {
+  for (size_t i = 0; i < n; ++i) h = (h ^ p[i]) * kFnv64Prime;
+  return h;
+}
 // True when `files` is non-empty and every hash in it is in `acked`.
 bool ack_covers(const std::vector<uint64_t>& acked, const std::vector<uint64_t>& files);
 
