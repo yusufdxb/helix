@@ -147,14 +147,25 @@ Cause, reproduced offline against the built policy library: at 5 Hz the output a
 from 0 to about 0.2 s every period. The adaptive stale limit is 0.1 s. The diagnosis
 therefore flips between Hang (age above the limit) and Degraded (schedule deficit) about
 every 0.1 s. Each flip resets the pending-fault timer, and the 0.1 s adaptive confirmation
-never elapses. A scratch probe with gap 0.200 s and limit 0.100 s produced no decision in
-30 s, as did a gap of 0.198 s. A gap of 0.21 s confirmed in 0.41 s, and a limit of 0.098 s
-confirmed after 16.2 s. That knife edge matches the 3.3 to 7.9 s detection latency in the
+never elapses. A scratch probe stepping the policy every 0.01 s with gap 0.200 s and limit
+0.100 s produced no decision in 30 s, as did a gap of 0.198 s. A gap of 0.21 s confirmed in
+0.41 s, and a limit of 0.098 s confirmed after 16.2 s. The outcome also depends on the step:
+at 0.02 and 0.05 s steps the first Degraded run at a 0.200 s gap lasts exactly the 0.1 s
+window and confirms. That knife edge matches the 3.3 to 7.9 s detection latency in the
 other reps. The bug is in the shared detector, so it affects every policy that uses it.
 It was not fixed during the study, and every number above comes from the pre-fix
 detector at `6319f97`. The fix (keep the pending timer when the diagnosis moves between
 the output symptoms Hang, EndpointLoss and Degraded) and a regression test land in a
-separate post-study commit.
+separate post-study commit (`401b4b1`; the test fails before the fix and passes after).
+
+Post-study check, not registered and not part of any contrast: rule@5 on
+`c1_rsp_param_camera_crash`, 5 reps, on the fixed build. All 5 reps restored with
+param_restore+restart, action latency was about 0.17 s (1.02 s in every Run A rep), and the
+probe measured 0.0 s of downtime in every rep. The same arm and scenario in Run A had 3.2 to
+7.8 s in four reps and one 35 s censored failure. With n = 5 this shows the miss is gone in
+this scenario; it is not a re-estimate of any study number. The regression test uses a
+0.18 s gap and a 0.09 s limit, where neither symptom run reaches the window at any step
+size tried, so it fails on the pre-fix code regardless of step.
 
 ## Post-run audit
 
