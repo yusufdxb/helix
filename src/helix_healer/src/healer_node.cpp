@@ -199,6 +199,7 @@ struct Managed {
     std::string dir;
     bool trusted = false;   // a process running it stayed healthy (with its upstream) for the probation window
     bool rejected = false;  // stepped back from after recurring failures; never a rollback target again
+    std::vector<uint64_t> files;  // FNV-1a 64 of each committed config file (matched against acks)
   };
   std::vector<Gen> gens;
   uint64_t next_gen = 0;
@@ -284,6 +285,8 @@ class Healer : public rclcpp::Node {
     // gen ranker: health a committed generation needs before it is trusted (no longer on probation).
     gen_probation_s_ = declare_parameter<double>("agent_gen_probation_s", 30.0);
     if (!(gen_probation_s_ > 0)) throw std::runtime_error("agent_gen_probation_s must be > 0");
+    // gen ranker: directory of deploy acknowledgements (<node>.ack); empty = no acks are read.
+    gen_ack_dir_ = declare_parameter<std::string>("agent_gen_ack_dir", "");
     if (!log_dir_.empty()) std::filesystem::create_directories(log_dir_);
     if (!event_log.empty()) {
       events_.open(event_log, std::ios::out | std::ios::trunc);
@@ -1033,6 +1036,16 @@ class Healer : public rclcpp::Node {
     {
       std::lock_guard lk(mu_);
       for (auto& [name, m] : nodes_) {
+        if (gen && !gen_ack_dir_.empty() && !m.gens.empty()) {
+          // Deploy acknowledgement: evidence from outside the healer that this exact config is intended
+          // and accepted. It trusts the generation whether or not the node is healthy right now.
+          const auto& ack = acked(name);
+          for (auto& g : m.gens)
+            if (!g.trusted && !g.rejected && helix_healer::ack_covers(ack, g.files)) {
+              g.trusted = true;
+              trusted.push_back({name, "g" + std::to_string(g.id) + " ack"});
+            }
+        }
         if (!m.learn_ok || !m.alive || m.retired) {
           m.healthy_since = -1;
           if (m.cand_t >= 0 || m.cand_busy) invalidate(m);
@@ -1128,6 +1141,7 @@ class Healer : public rclcpp::Node {
     const auto dir = base / ("g" + std::to_string(id));
     const auto tmp = base / ("g" + std::to_string(id) + ".tmp");
     std::vector<std::string> argv = src;
+    std::vector<uint64_t> fh;
     std::error_code ec;
     try {
       fs::remove_all(tmp, ec);
@@ -1146,6 +1160,7 @@ class Healer : public rclcpp::Node {
       }
       fs::remove_all(dir, ec);
       fs::rename(tmp, dir);
+      for (size_t i : idx) fh.push_back(file_hash(argv[i]));
     } catch (const std::exception& ex) {
       fs::remove_all(tmp, ec);
       emit_simple(node, "lkg_error", ex.what());
@@ -1158,7 +1173,7 @@ class Healer : public rclcpp::Node {
       auto& m = nodes_.at(node);
       // The process must still run this config and the source must not have changed while copying.
       if (m.spawn_hash == hash && config_hash(m) == hash && !find_gen(m, hash)) {
-        m.gens.push_back({id, hash, argv, dir.string(), false, false});
+        m.gens.push_back({id, hash, argv, dir.string(), false, false, fh});
         while (m.gens.size() > kMaxGens) {
           auto victim = m.gens.begin();
           for (auto it = m.gens.begin(); it != m.gens.end(); ++it)
@@ -1471,6 +1486,28 @@ class Healer : public rclcpp::Node {
   bool agent_ = false;
   double lkg_hold_s_ = kLkgHoldS;
   double gen_probation_s_ = 30.0;
+  std::string gen_ack_dir_;
+  struct AckFile { int64_t mtime = 0, size = -1; std::vector<uint64_t> hashes; };
+  std::map<std::string, AckFile> acks_;  // by node, re-read only when the file changes
+
+  // Hashes acknowledged for `node` (empty when there is no ack file). Called under mu_.
+  const std::vector<uint64_t>& acked(const std::string& node) {
+    auto& a = acks_[node];
+    const std::string path = gen_ack_dir_ + "/" + node + ".ack";
+    struct stat st {};
+    if (::stat(path.c_str(), &st) != 0) {
+      a = AckFile{};
+      return a.hashes;
+    }
+    const int64_t mt = static_cast<int64_t>(st.st_mtim.tv_sec) * 1000000000LL + st.st_mtim.tv_nsec;
+    if (a.mtime != mt || a.size != st.st_size) {
+      std::ifstream in(path);
+      std::stringstream ss;
+      ss << in.rdbuf();
+      a = {mt, static_cast<int64_t>(st.st_size), helix_healer::parse_ack(ss.str())};
+    }
+    return a.hashes;
+  }
   std::unique_ptr<hh::Ranker> ranker_;
   std::mutex ranker_mu_, pend_mu_;
   std::map<std::string, Pending> pending_;

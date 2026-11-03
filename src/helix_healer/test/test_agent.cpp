@@ -495,3 +495,18 @@ TEST(LlmRanker, UnreachableServerThrowsSoTheHealerFallsBack) {
   EXPECT_THROW(r.rank("n", e, {Action::Restart}), std::runtime_error);
   EXPECT_THROW(LlmRanker(""), std::runtime_error);
 }
+
+TEST(Gen, AckParsesHexLinesOnly) {
+  const auto a = parse_ack("# accepted by deploy\naf63dc4c8601ec8c\n  00000000000000FF \r\nnot-a-hash\n123\n\n");
+  EXPECT_EQ(a, (std::vector<uint64_t>{0xaf63dc4c8601ec8cULL, 0xffULL}));
+  EXPECT_TRUE(parse_ack("").empty());
+}
+
+TEST(Gen, AckMustCoverEveryFile) {
+  const std::vector<uint64_t> ack{1, 2};
+  EXPECT_TRUE(ack_covers(ack, {1}));
+  EXPECT_TRUE(ack_covers(ack, {2, 1}));
+  EXPECT_FALSE(ack_covers(ack, {1, 3}));  // one file of the generation was not accepted
+  EXPECT_FALSE(ack_covers(ack, {}));      // a generation without config files is never acked
+  EXPECT_FALSE(ack_covers({}, {1}));
+}

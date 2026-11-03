@@ -1,6 +1,7 @@
 #include "helix_healer/policy.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <stdexcept>
 
@@ -551,6 +552,32 @@ void Policy::on_result(const std::string& node, Action a, bool ok, double t) {
     pending_events_.push_back({t, node, "action_failed", st.last_fault, a, 0, ""});
     if (a == Action::LifecycleReset && kind_ != PolicyKind::Agent) st.escalate = true;
   }
+}
+
+std::vector<uint64_t> parse_ack(const std::string& text) {
+  std::vector<uint64_t> out;
+  size_t pos = 0;
+  while (pos <= text.size()) {
+    size_t end = text.find('\n', pos);
+    if (end == std::string::npos) end = text.size();
+    std::string line = text.substr(pos, end - pos);
+    pos = end + 1;
+    const auto b = line.find_first_not_of(" \t\r");
+    const auto e = line.find_last_not_of(" \t\r");
+    if (b == std::string::npos) continue;
+    line = line.substr(b, e - b + 1);
+    if (line.size() != 16 || !std::all_of(line.begin(), line.end(), [](char c) { return std::isxdigit(static_cast<unsigned char>(c)); }))
+      continue;
+    out.push_back(std::stoull(line, nullptr, 16));
+  }
+  return out;
+}
+
+bool ack_covers(const std::vector<uint64_t>& acked, const std::vector<uint64_t>& files) {
+  if (files.empty()) return false;
+  for (uint64_t f : files)
+    if (std::find(acked.begin(), acked.end(), f) == acked.end()) return false;
+  return true;
 }
 
 }  // namespace helix_healer

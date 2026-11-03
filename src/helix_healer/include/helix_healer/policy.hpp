@@ -3,6 +3,7 @@
 // the closed Action enum below; it never runs commands.
 #pragma once
 
+#include <cstdint>
 #include <deque>
 #include <map>
 #include <string>
@@ -185,5 +186,13 @@ class Policy {
   std::map<std::string, State> st_;
   std::vector<Event> pending_events_;
 };
+
+// gen ranker, deploy acknowledgement. A deploy tool or operator that has accepted a config writes
+// the FNV-1a 64 hash of each accepted file's bytes, one 16-digit hex number per line, to
+// <agent_gen_ack_dir>/<node>.ack. A generation whose every config file is acknowledged is trusted
+// at once, so gen never steps back from it. Blank lines, '#' comments and malformed lines are ignored.
+std::vector<uint64_t> parse_ack(const std::string& text);
+// True when `files` is non-empty and every hash in it is in `acked`.
+bool ack_covers(const std::vector<uint64_t>& acked, const std::vector<uint64_t>& files);
 
 }  // namespace helix_healer
