@@ -118,7 +118,7 @@ def agent_params(ep: dict, ranker: str) -> list[str]:
         arg = AGENT[ranker]
         if not arg:
             raise SystemExit(f"agent_{ranker} needs --agent-{ranker}")
-    elif ranker in ("rule", "random", "txn", "txn2", "gen"):
+    elif ranker in ("rule", "random", "txn", "txn2", "gen", "dtx"):
         arg = ""
     elif ranker == "genack":
         # gen plus deploy acknowledgements: the healer reads <episode>/stack/ack/<node>.ack, which

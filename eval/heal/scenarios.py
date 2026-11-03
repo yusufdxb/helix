@@ -229,8 +229,40 @@ GEN2 = [
     Scenario("c2_safe_deploy_twice_late_ack", GEN[4].inject + _ACK, "rsp", _RSP_CRASH, repair="restart"),
     Scenario("c3_late_cfg_late_falseack", _BAD_LATE + _ACK, "rsp", _RSP_CRASH, repair="restart_lkg"),
 ]
+# DTX set (docs/preregistration/dtx-recovery.md): deployment-aware recovery from behavioural
+# verification (healer agent_ranker dtx). The regression is real stock-node behaviour: rsp
+# publish_frequency 60 publishes /tf at about 55 Hz, under the 0.85 x 83 Hz spec contract the
+# dtx verification checks, but above the 0.5 x rate the fault detector flags, so the detector
+# alone never sees it. The crash that follows it is injected (markerkill), conditioned on the
+# config value; the stock node does not crash on 60 by itself.
+#   reg_late: 60 deployed, crashes 22 s after each start. Repair: back to the original config.
+#   reg_chain_late: valid 120 deploy, the 60 regression deployed at +18 s, crash 22 s after each 60
+#      start. Repair: back to the 120 generation (120 must be live at the end).
+#   reg_simul_late: reg_late on rsp plus a camera crash 1 s in.
+#   c2_safe_deploy_twice_late: valid 120 deploy, two unrelated crashes 22 s after each start (GEN[4]).
+#   valid_upstream_dip: valid 120 deploy, controller_manager frozen (SIGSTOP) 4 s in so /tf stops
+#      while the deploy is being verified, then two unrelated rsp crashes. Repair: restart both;
+#      reverting the 120 deploy is unsafe (120 must be live at the end).
+#   c3_late_cfg_late (GEN[2]): the 101 config whose /tf rate is normal (about 83 Hz). No
+#      behavioural signal separates it from a valid deploy: the registered cost of dtx.
+_REG = "deploy:rsp:rsp.yaml:set:publish_frequency:60.0"
+_REG_KILL = "+markerkill:rsp:publish_frequency:60.0:SEGV:22"
+_W120 = "+markerwatch:rsp:publish_frequency:120.0"
+DTX = [
+    Scenario("nominal", "", "", ()),
+    Scenario("reg_late", _REG + _REG_KILL, "rsp", _RSP_CRASH, repair="restart_lkg"),
+    Scenario("reg_chain_late", "deploy:rsp:rsp.yaml:set:publish_frequency:120.0+" + _REG + "@18" + _REG_KILL + _W120,
+             "rsp", _RSP_CRASH, repair="restart_lkg"),
+    Scenario("reg_simul_late", _REG + _REG_KILL + "+kill:camera:SEGV@1", "rsp+camera", _RSP_CRASH,
+             repair="restart_lkg+restart"),
+    GEN[4],  # c2_safe_deploy_twice_late
+    Scenario("valid_upstream_dip",
+             "deploy:rsp:rsp.yaml:set:publish_frequency:120.0+stop:controller_manager@4+postkill:rsp:SEGV:22:2" + _W120,
+             "controller_manager+rsp", ("crash", "crash_loop", "hang"), repair="restart+restart"),
+    GEN[2],  # c3_late_cfg_late (silent 101)
+]
 SETS = {"nav": NAV, "manip": MANIP, "humanoid": HUMANOID, "humanoid_heldout": HUMANOID_HELDOUT,
-        "agent_withheld": AGENT_WITHHELD, "agent_plumbing": AGENT_PLUMBING, "txn": TXN, "gen": GEN, "gen2": GEN2}
+        "agent_withheld": AGENT_WITHHELD, "agent_plumbing": AGENT_PLUMBING, "txn": TXN, "gen": GEN, "gen2": GEN2, "dtx": DTX}
 
 # Real-stack sets: generated humanoid stack, faults injected by humanoid/inject.py.
-REAL_SETS = {"humanoid", "humanoid_heldout", "agent_withheld", "agent_plumbing", "txn", "gen", "gen2"}
+REAL_SETS = {"humanoid", "humanoid_heldout", "agent_withheld", "agent_plumbing", "txn", "gen", "gen2", "dtx"}
