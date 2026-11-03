@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <cmath>
 #include <functional>
 
 #include "helix_healer/policy.hpp"
@@ -143,6 +144,28 @@ TEST(Policy, HangNeedsConfirmationThenRestarts) {
   run(p, w, 0.28, 1.0, tr, [](World& w, double t) { w.a.outputs[0].age_s = 0.25 + t; });
   ASSERT_EQ(tr.count("a", Action::Restart), 1);
   EXPECT_EQ(tr.decisions[0].fault, Fault::Hang);
+}
+
+TEST(Policy, FlickeringSlowOutputStillConfirms) {
+  // A slowed output whose age crosses the stale limit every period: the diagnosis alternates
+  // Hang and Degraded, each run shorter than the confirmation. It is one symptom and must confirm.
+  Policy p(PolicyKind::Helix,
+           parse_spec("healer confirm_s=0.3 verify_s=5 startup_grace_s=3\nnode a\nout a /a 83\nexec a x\n"));
+  NodeObs a = healthy("a", "/a");
+  TopicObs& o = a.outputs[0];
+  o.expected_hz = 83;
+  o.rate_hz = 1 / 0.18;
+  o.stale_limit_s = 0.09;
+  o.deficit = 100;
+  o.deficit_limit = 4;
+  std::vector<Decision> ds;
+  for (double t = 0; t < 10 && ds.empty(); t += 0.02) {
+    a.outputs[0].age_s = std::fmod(t, 0.18);
+    for (auto& d : p.step({t, {a}}).decisions) ds.push_back(d);
+  }
+  ASSERT_EQ(ds.size(), 1u);
+  EXPECT_EQ(ds[0].node, "a");
+  EXPECT_EQ(ds[0].action, Action::Restart);
 }
 
 TEST(Policy, MissingOwnEndpointIsEndpointLoss) {

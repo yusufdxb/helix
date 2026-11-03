@@ -465,8 +465,11 @@ StepOut Policy::step(const Snapshot& s) {
 
     const Fault f = diagnoses() ? diagnose(n, s) : baseline_fault(n, st, t);
     if (f != st.pending) {
+      // A slowed output whose age crosses the stale limit every period flickers between
+      // Hang and Degraded. That is one output symptom, so its confirmation timer keeps running.
+      auto output_symptom = [](Fault x) { return x == Fault::Hang || x == Fault::EndpointLoss || x == Fault::Degraded; };
+      if (!(output_symptom(f) && output_symptom(st.pending))) st.pending_since = t;
       st.pending = f;
-      st.pending_since = t;
       st.victim_reported = false;
     }
     if (f == Fault::None) continue;
