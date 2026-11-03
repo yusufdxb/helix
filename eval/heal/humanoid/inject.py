@@ -33,9 +33,9 @@ the stock ros2 CLI. Fault strings:
   deploylatent:NODE:FILE:OP[:ARGS]
                              the same rewrite with no SIGTERM: a bad config that sits on disk
                              until something else restarts NODE.
-  postkill:NODE:SIG:D        follow-up: the first NODE process that did not exist at injection
-                             gets SIG D s after it is first seen (an unrelated crash of the
-                             freshly started process). One shot.
+  postkill:NODE:SIG:D[:N]    follow-up: the first N (default 1) NODE processes that did not
+                             exist at injection each get SIG D s after they are first seen (an
+                             unrelated crash of the freshly started process), one after another.
   markerkill:NODE:KEY:VALUE:SIG:D
                              follow-up: every NODE process started after injection whose
                              --params-file content (read when the process is first seen) has
@@ -44,6 +44,9 @@ the stock ros2 CLI. Fault strings:
                              (a delayed config fault); a process started from a copy without
                              the value (the LKG copy) is spared. Records whether a marked
                              process is still alive at the episode end (marker_live_end).
+  markerwatch:NODE:KEY:VALUE follow-up that never signals: records whether a NODE process started
+                             after injection with `KEY: VALUE` in its --params-file is alive at
+                             the episode end (want_live_end), i.e. the wanted config survived.
 
 Faults compose with "+": each part runs in its own thread, and a part may carry an "@S" suffix
 that delays it S s after t_inject (kill:rsp:SEGV@2). hits counts the initial parts and is 0
@@ -70,7 +73,7 @@ SIGS = {"SEGV": signal.SIGSEGV, "ABRT": signal.SIGABRT, "KILL": signal.SIGKILL, 
         "BUS": signal.SIGBUS, "FPE": signal.SIGFPE}
 
 
-FOLLOWUP = ("postkill", "markerkill")
+FOLLOWUP = ("postkill", "markerkill", "markerwatch")
 
 
 def _cmdline(pid: int) -> list[str]:
@@ -214,6 +217,7 @@ class Injector(threading.Thread):
         self.error = ""
         self.followup_hits = 0
         self.marker_live_end: bool | None = None
+        self.want_live_end: bool | None = None
 
     def _log(self, what: str, pid: int) -> None:
         self.events.append((time.time(), what, pid))
@@ -264,6 +268,8 @@ class Injector(threading.Thread):
         self.followup_hits = sum(x.hits for x in follow)
         marks = [x.marker_live_end for x in self.subs if x.marker_live_end is not None]
         self.marker_live_end = any(marks) if marks else None
+        wants = [x.want_live_end for x in self.subs if x.want_live_end is not None]
+        self.want_live_end = all(wants) if wants else None
         self.error = "; ".join(f"{x.fault}: {x.error}" for x in self.subs if x.error)
         self.events = sorted(e for x in self.subs for e in x.events)
 
@@ -410,19 +416,37 @@ class Injector(threading.Thread):
             seen.setdefault(p, now)
         return pids
 
-    def _f_postkill(self, node: str, sig: str, delay: str) -> None:
+    def _f_postkill(self, node: str, sig: str, delay: str, n: str = "1") -> None:
         old = set(find_pids(node, self.domain))
         self.injected_at = time.time()
         seen: dict[int, float] = {}
-        while time.time() < self.t_end:
-            pids = self._new_pids(node, old, seen)
+        done: set[int] = set()
+        while time.time() < self.t_end and len(done) < int(n):
+            pids = [p for p in self._new_pids(node, old, seen) if p not in done]
             if pids:
                 pid = min(pids, key=lambda p: seen[p])
-                self._wait_until(seen[pid] + float(delay))
+                self._wait_until(min(seen[pid] + float(delay), self.t_end))
+                if time.time() >= self.t_end:
+                    return
+                done.add(pid)
                 if self._signal(pid, SIGS[sig], "postkill_" + sig):
-                    self.hits = 1
-                return
+                    self.hits += 1
+                continue
             time.sleep(0.02)
+
+    def _f_markerwatch(self, node: str, key: str, value: str) -> None:
+        old = set(find_pids(node, self.domain))
+        self.injected_at = time.time()
+        pat = re.compile(rf"^\s*{re.escape(key)}:\s*{re.escape(value)}\s*$", re.M)
+        seen: dict[int, float] = {}
+        marked: dict[int, bool] = {}
+        while time.time() < self.t_end:
+            for pid in self._new_pids(node, old, seen):
+                if pid not in marked:
+                    marked[pid] = any(pat.search(_read(f)) for f in _params_files(pid))
+                    self._log(f"want{int(marked[pid])}", pid)
+            time.sleep(0.05)
+        self.want_live_end = any(marked.get(p, False) for p in find_pids(node, self.domain))
 
     def _f_markerkill(self, node: str, key: str, value: str, sig: str, delay: str) -> None:
         old = set(find_pids(node, self.domain))
@@ -452,7 +476,8 @@ class Injector(threading.Thread):
         r = dict(fault=self.fault, injected_at=self.injected_at, hits=self.hits, error=self.error,
                  events=[(round(t, 4), w, p) for t, w, p in self.events])
         if self.subs or self.kind in FOLLOWUP:
-            r.update(followup_hits=self.followup_hits if self.subs else self.hits, marker_live_end=self.marker_live_end)
+            r.update(followup_hits=self.followup_hits if self.subs else self.hits, marker_live_end=self.marker_live_end,
+                     want_live_end=self.want_live_end)
         if self.subs:
             r["parts"] = [dict(fault=x.fault, injected_at=x.injected_at, hits=x.hits) for x in self.subs]
         return r

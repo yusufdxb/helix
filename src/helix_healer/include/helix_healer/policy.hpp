@@ -58,6 +58,10 @@ struct NodeObs {
     bool config_ran = false;      // the current (or last) process was started with non-LKG config
     bool config_pinned = false;   // already running on the LKG copies after a rollback
     bool has_lkg_config = false;  // LKG copies exist, so RestartLKG is possible
+    // GEN (versioned snapshots, Policy::set_gen) only:
+    uint64_t run_hash = 0;        // config the current (or last) process was started with
+    bool probation = false;       // that config has not yet run healthy for agent_gen_probation_s
+    bool has_prev_gen = false;    // it is a committed generation with an older usable one behind it
   } ev;
 };
 
@@ -108,6 +112,11 @@ class Policy {
   // 2 = restart once on the new config to test it, revert if it dies on it again).
   void set_txn(bool on, int strikes = 1) { txn_ = on; txn_strikes_ = strikes < 1 ? 1 : strikes; }
   bool txn() const { return txn_; }
+  // GEN on top of TXN: strikes count per config hash while that config is on probation, and a
+  // committed generation that keeps failing during probation is rolled back one generation
+  // (the healer picks the target, Policy only decides that RestartLKG is warranted).
+  void set_gen(bool on) { gen_ = on; }
+  bool gen() const { return gen_; }
   // Observable state for /diagnostics.
   std::string phase(const std::string& node) const;
   // True while the node is in normal operation with no pending or recent fault. The healer
@@ -150,6 +159,7 @@ class Policy {
     int incident_actions = 0;
     std::vector<Action> tried;   // actions already run in this incident
     int cfg_strikes = 0;         // TXN: consecutive decisions on a process that ran an uncommitted config
+    uint64_t strike_hash = 0;    // GEN: the config cfg_strikes counts against
   };
 
   void observe(const NodeObs& n, const Snapshot& s, State& st);
@@ -170,6 +180,7 @@ class Policy {
   PolicyKind kind_;
   bool txn_ = false;
   int txn_strikes_ = 1;
+  bool gen_ = false;
   Spec spec_;
   std::map<std::string, State> st_;
   std::vector<Event> pending_events_;

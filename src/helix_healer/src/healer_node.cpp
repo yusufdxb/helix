@@ -191,16 +191,51 @@ struct Managed {
   uint64_t reject_hash = 0;     // disk config rejected by a RestartLKG
   bool pinned = false;          // running on the LKG copies until the disk config changes again
   std::vector<std::string> lkg_argv;
+  // gen ranker: versioned config snapshots, oldest first. lkg_hash/lkg_argv mirror the newest
+  // generation that is not rejected, so spawn and pin work unchanged.
+  struct Gen {
+    uint64_t id = 0, hash = 0;
+    std::vector<std::string> argv;
+    std::string dir;
+    bool trusted = false;   // a process running it stayed healthy (with its upstream) for the probation window
+    bool rejected = false;  // stepped back from after recurring failures; never a rollback target again
+  };
+  std::vector<Gen> gens;
+  uint64_t next_gen = 0;
 };
 
-uint64_t config_hash(const Managed& m) {
+constexpr size_t kMaxGens = 3;
+
+Managed::Gen* find_gen(Managed& m, uint64_t hash) {
+  for (auto& g : m.gens)
+    if (g.hash == hash) return &g;
+  return nullptr;
+}
+
+// Newest non-rejected generation older than the one with id `below` (0 = no bound).
+const Managed::Gen* prev_gen(const Managed& m, uint64_t below) {
+  for (auto it = m.gens.rbegin(); it != m.gens.rend(); ++it)
+    if (!it->rejected && (below == 0 || it->id < below)) return &*it;
+  return nullptr;
+}
+
+void sync_lkg(Managed& m) {
+  if (const auto* g = prev_gen(m, 0)) {
+    m.lkg_hash = g->hash;
+    m.lkg_argv = g->argv;
+  }
+}
+
+uint64_t files_hash(const std::vector<std::string>& argv, const std::vector<size_t>& idx) {
   uint64_t h = 1469598103934665603ULL;
-  for (size_t i : m.cfg_idx) {
-    const uint64_t f = file_hash(m.argv[i]);
+  for (size_t i : idx) {
+    const uint64_t f = file_hash(argv[i]);
     for (int b = 0; b < 8; ++b) h = (h ^ ((f >> (8 * b)) & 0xff)) * 1099511628211ULL;
   }
   return h ? h : 1;
 }
+
+uint64_t config_hash(const Managed& m) { return files_hash(m.argv, m.cfg_idx); }
 
 // LKG parameters that the live node currently holds with a different value.
 std::vector<std::string> param_diff(const Managed& m) {
@@ -242,8 +277,13 @@ class Healer : public rclcpp::Node {
     if (!(lkg_hold_s_ > 0)) throw std::runtime_error("agent_lkg_hold_s must be > 0");
     if (agent_) {
       ranker_ = hh::make_ranker(ranker_name, ranker_arg, static_cast<uint64_t>(ranker_seed));
-      policy_->set_txn(ranker_name == "txn" || ranker_name == "txn2", ranker_name == "txn2" ? 2 : 1);
+      const bool two = ranker_name == "txn2" || ranker_name == "gen";
+      policy_->set_txn(ranker_name == "txn" || two, two ? 2 : 1);
+      policy_->set_gen(ranker_name == "gen");
     }
+    // gen ranker: health a committed generation needs before it is trusted (no longer on probation).
+    gen_probation_s_ = declare_parameter<double>("agent_gen_probation_s", 30.0);
+    if (!(gen_probation_s_ > 0)) throw std::runtime_error("agent_gen_probation_s must be > 0");
     if (!log_dir_.empty()) std::filesystem::create_directories(log_dir_);
     if (!event_log.empty()) {
       events_.open(event_log, std::ios::out | std::ios::trunc);
@@ -532,6 +572,12 @@ class Healer : public rclcpp::Node {
         n.ev.config_changed = n.ev.has_lkg_config && config_hash(m) != m.lkg_hash;
         n.ev.config_ran = n.ev.has_lkg_config && m.spawn_hash != m.lkg_hash;
         n.ev.config_pinned = m.pinned;
+        if (policy_->gen()) {
+          const auto* g = find_gen(m, m.spawn_hash);
+          n.ev.run_hash = m.spawn_hash;
+          n.ev.probation = !(g && g->trusted);
+          n.ev.has_prev_gen = g && !g->rejected && (m.pinned || config_hash(m) == m.spawn_hash) && prev_gen(m, g->id);
+        }
       }
       s.nodes.push_back(std::move(n));
     }
@@ -883,14 +929,25 @@ class Healer : public rclcpp::Node {
           return repaired_in_place(node);
         }
         case hh::Action::RestartLKG: {
+          std::string what = "restart on last-known-good config copies";
           {
             std::lock_guard lk(mu_);
             auto& m = nodes_.at(node);
+            if (policy_->gen()) {
+              // Step back a generation: the running committed generation keeps failing on probation.
+              auto* g = find_gen(m, m.spawn_hash);
+              const auto* p = g && !g->rejected ? prev_gen(m, g->id) : nullptr;
+              if (p && (m.pinned || config_hash(m) == m.spawn_hash)) {
+                g->rejected = true;
+                what = "step back g" + std::to_string(g->id) + " -> g" + std::to_string(p->id);
+                sync_lkg(m);
+              }
+            }
             if (m.lkg_hash == 0 || m.lkg_argv.empty()) return false;
             m.pinned = true;
             m.reject_hash = config_hash(m);
           }
-          emit_simple(node, "pin", "restart on last-known-good config copies");
+          emit_simple(node, "pin", what);
           return restart(node, d.delay_s, d.fault);
         }
         default:
@@ -968,8 +1025,11 @@ class Healer : public rclcpp::Node {
       std::vector<std::string> argv;
       std::vector<size_t> idx;
       uint64_t hash;
+      uint64_t gen = 0;  // gen ranker: the generation id being committed
     };
     std::vector<Copy> copies;
+    std::vector<std::pair<std::string, std::string>> trusted;
+    const bool gen = agent_ && policy_->gen();
     {
       std::lock_guard lk(mu_);
       for (auto& [name, m] : nodes_) {
@@ -995,11 +1055,36 @@ class Healer : public rclcpp::Node {
             fetch.push_back(name);
           }
         }
+        if (gen) {
+          // Health evidence for a generation: the node and every managed upstream node are healthy now.
+          bool up_ok = true;
+          for (const auto& u : m.upstream) {
+            auto it = nodes_.find(u);
+            if (it != nodes_.end() && !(it->second.learn_ok && it->second.alive)) up_ok = false;
+          }
+          if (!up_ok) {
+            m.healthy_since = t;  // the window restarts once the upstream is healthy again
+            continue;
+          }
+          auto* g = find_gen(m, m.spawn_hash);
+          if (g && !g->trusted && !g->rejected && t - m.healthy_since >= gen_probation_s_) {
+            g->trusted = true;
+            trusted.push_back({name, "g" + std::to_string(g->id)});
+          }
+          if (!g && !m.cfg_idx.empty() && !m.pinned && !log_dir_.empty() && m.spawn_hash != 0 &&
+              t - m.healthy_since >= lkg_hold_s_ && config_hash(m) == m.spawn_hash)
+            copies.push_back({name, m.argv, m.cfg_idx, m.spawn_hash, ++m.next_gen});
+          continue;
+        }
         if (!m.cfg_idx.empty() && !m.pinned && !log_dir_.empty() && m.spawn_hash != 0 && m.spawn_hash != m.lkg_hash &&
             t - m.healthy_since >= lkg_hold_s_ && config_hash(m) == m.spawn_hash)
           copies.push_back({name, m.argv, m.cfg_idx, m.spawn_hash});
       }
     }
+    for (const auto& [n, d] : trusted) emit_simple(n, "lkg_trust", d);
+    for (const auto& c : copies)
+      if (c.gen) commit_gen(c.node, c.argv, c.idx, c.hash, c.gen);
+    if (gen) copies.clear();
     for (const auto& [n, d] : promoted) emit_simple(n, "lkg", d);
     for (const auto& n : fetch) fetch_params(n);
     for (const auto& c : copies) {
@@ -1031,6 +1116,66 @@ class Healer : public rclcpp::Node {
       }
       if (ok) emit_simple(c.node, "lkg_config", std::to_string(c.idx.size()) + " file(s)");
     }
+  }
+
+  // gen ranker: copy the config files into a fresh generation directory, check that the copies hash to
+  // the config the healthy process was started with, then publish the directory with one rename and
+  // add it to the ring. Any mismatch or error discards the attempt; the ring is left unchanged.
+  void commit_gen(const std::string& node, const std::vector<std::string>& src, const std::vector<size_t>& idx,
+                  uint64_t hash, uint64_t id) {
+    namespace fs = std::filesystem;
+    const auto base = fs::path(log_dir_) / "lkg" / node;
+    const auto dir = base / ("g" + std::to_string(id));
+    const auto tmp = base / ("g" + std::to_string(id) + ".tmp");
+    std::vector<std::string> argv = src;
+    std::error_code ec;
+    try {
+      fs::remove_all(tmp, ec);
+      fs::create_directories(tmp);
+      std::vector<std::string> staged = src;
+      for (size_t i : idx) {
+        const auto name = std::to_string(i) + "_" + fs::path(src[i]).filename().string();
+        fs::copy_file(src[i], tmp / name, fs::copy_options::overwrite_existing);
+        staged[i] = (tmp / name).string();
+        argv[i] = (dir / name).string();
+      }
+      if (files_hash(staged, idx) != hash) {
+        fs::remove_all(tmp, ec);
+        emit_simple(node, "lkg_error", "g" + std::to_string(id) + " copy does not match the running config");
+        return;
+      }
+      fs::remove_all(dir, ec);
+      fs::rename(tmp, dir);
+    } catch (const std::exception& ex) {
+      fs::remove_all(tmp, ec);
+      emit_simple(node, "lkg_error", ex.what());
+      return;
+    }
+    std::string evicted;
+    bool ok = false;
+    {
+      std::lock_guard lk(mu_);
+      auto& m = nodes_.at(node);
+      // The process must still run this config and the source must not have changed while copying.
+      if (m.spawn_hash == hash && config_hash(m) == hash && !find_gen(m, hash)) {
+        m.gens.push_back({id, hash, argv, dir.string(), false, false});
+        while (m.gens.size() > kMaxGens) {
+          auto victim = m.gens.begin();
+          for (auto it = m.gens.begin(); it != m.gens.end(); ++it)
+            if (it->rejected) { victim = it; break; }
+          evicted = victim->dir;
+          m.gens.erase(victim);
+        }
+        sync_lkg(m);
+        ok = true;
+      }
+    }
+    if (!ok) {
+      fs::remove_all(dir, ec);
+      return;
+    }
+    if (!evicted.empty()) fs::remove_all(evicted, ec);
+    emit_simple(node, "lkg_config", "g" + std::to_string(id) + " " + std::to_string(idx.size()) + " file(s)");
   }
 
   void fetch_params(const std::string& name) {
@@ -1325,6 +1470,7 @@ class Healer : public rclcpp::Node {
   // agent policy
   bool agent_ = false;
   double lkg_hold_s_ = kLkgHoldS;
+  double gen_probation_s_ = 30.0;
   std::unique_ptr<hh::Ranker> ranker_;
   std::mutex ranker_mu_, pend_mu_;
   std::map<std::string, Pending> pending_;

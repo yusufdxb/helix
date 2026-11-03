@@ -118,7 +118,7 @@ def agent_params(ep: dict, ranker: str) -> list[str]:
         arg = AGENT[ranker]
         if not arg:
             raise SystemExit(f"agent_{ranker} needs --agent-{ranker}")
-    elif ranker in ("rule", "random", "txn", "txn2"):
+    elif ranker in ("rule", "random", "txn", "txn2", "gen"):
         arg = ""
     else:
         raise SystemExit(f"unknown agent arm agent_{ranker}")

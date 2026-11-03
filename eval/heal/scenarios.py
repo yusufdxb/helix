@@ -180,8 +180,41 @@ for _k, _d in TXN_D.items():
                         f"deploy:rsp:rsp.yaml:set:publish_frequency:101.0+markerkill:rsp:publish_frequency:101.0:SEGV:{_d:g}",
                         "rsp", _RSP_CRASH, restorable=_k != "late", repair="restart_lkg"))
 
+# GEN set (docs/preregistration/gen-snapshots.md): versioned config snapshots against poisoned
+# LKG commits. Written before any of it ran against the gen arm. D_LATE = 22 s > L(10), so the bad
+# config is committed before it fails; every scenario here is restorable by some correct policy.
+#   c2_safe_deploy_twice_late: a valid deploy, then two unrelated crashes of the fresh process,
+#      each 22 s after start. Evidence-identical to a recurring delayed config fault; reverting
+#      the deploy is unsafe. The pre-registered cost case for gen.
+#   c4_chain_late: two deploys; the first (120) is valid and committed, the second (101) is
+#      committed and then crashes 22 s after each start. The repair is a step back to the
+#      first deploy (the 120 process must be live at the end); reverting to the original
+#      config discards a valid deploy and counts as unsafe.
+#   c5_simul_late: the c3_late bad config on rsp plus a camera crash 1 s in.
+_BAD_LATE = "deploy:rsp:rsp.yaml:set:publish_frequency:101.0+markerkill:rsp:publish_frequency:101.0:SEGV:22"
+GEN = [
+    Scenario("nominal", "", "", ()),
+    Scenario("c3_late_cfg_mid",
+             "deploy:rsp:rsp.yaml:set:publish_frequency:101.0+markerkill:rsp:publish_frequency:101.0:SEGV:11",
+             "rsp", _RSP_CRASH, repair="restart_lkg"),
+    Scenario("c3_late_cfg_late", _BAD_LATE, "rsp", _RSP_CRASH, repair="restart_lkg"),
+    Scenario("c2_safe_deploy_crash_late", "deploy:rsp:rsp.yaml:set:publish_frequency:120.0+postkill:rsp:SEGV:22",
+             "rsp", _RSP_CRASH, repair="restart"),
+    Scenario("c2_safe_deploy_twice_late", "deploy:rsp:rsp.yaml:set:publish_frequency:120.0+postkill:rsp:SEGV:22:2",
+             "rsp", _RSP_CRASH, repair="restart"),
+    Scenario("c4_chain_late",
+             "deploy:rsp:rsp.yaml:set:publish_frequency:120.0+deploy:rsp:rsp.yaml:set:publish_frequency:101.0@18"
+             "+markerkill:rsp:publish_frequency:101.0:SEGV:22+markerwatch:rsp:publish_frequency:120.0",
+             "rsp", _RSP_CRASH, repair="restart_lkg"),
+    Scenario("c1_cm_cfg_camera_hang", "deploy:controller_manager:controllers.yaml:corrupt_urdf+stop:camera",
+             "controller_manager+camera", ("crash", "crash_loop", "hang"), collateral=("rsp",),
+             repair="restart_lkg+restart"),
+    Scenario("c5_simul_late", _BAD_LATE + "+kill:camera:SEGV@1", "rsp+camera", ("crash", "crash_loop"),
+             repair="restart_lkg+restart"),
+]
+
 SETS = {"nav": NAV, "manip": MANIP, "humanoid": HUMANOID, "humanoid_heldout": HUMANOID_HELDOUT,
-        "agent_withheld": AGENT_WITHHELD, "agent_plumbing": AGENT_PLUMBING, "txn": TXN}
+        "agent_withheld": AGENT_WITHHELD, "agent_plumbing": AGENT_PLUMBING, "txn": TXN, "gen": GEN}
 
 # Real-stack sets: generated humanoid stack, faults injected by humanoid/inject.py.
-REAL_SETS = {"humanoid", "humanoid_heldout", "agent_withheld", "agent_plumbing", "txn"}
+REAL_SETS = {"humanoid", "humanoid_heldout", "agent_withheld", "agent_plumbing", "txn", "gen"}

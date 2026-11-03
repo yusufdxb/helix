@@ -372,10 +372,25 @@ void Policy::decide_agent(const NodeObs& n, Fault f, State& st, double t, Decisi
     // committed, else restart; if restarts do not take and the disk config is uncommitted, roll
     // it back. No lifecycle reset, no crash-loop or QoS special cases.
     std::vector<Action> c;
-    const bool lkg = ns.restart && ev.has_lkg_config && ev.config_changed && !ev.config_pinned && !tried(Action::RestartLKG);
+    bool lkg = ns.restart && ev.has_lkg_config && ev.config_changed && !ev.config_pinned && !tried(Action::RestartLKG);
     if (n.alive && ev.param_diff > 0 && !tried(Action::ParamRestore)) c.push_back(Action::ParamRestore);
-    st.cfg_strikes = ev.config_ran ? st.cfg_strikes + 1 : 0;
-    const bool revert_first = ev.config_ran && st.cfg_strikes >= txn_strikes_;
+    bool revert_first;
+    if (gen_) {
+      // GEN: a strike is a decision on a process whose config is still on probation; strikes
+      // belong to one config hash. An uncommitted config that keeps failing is rolled back as in
+      // TXN. A committed generation that keeps failing during probation is stepped back one
+      // generation, but only on recurrence (never as a fallback after a failed restart).
+      const bool same = st.strike_hash == ev.run_hash;
+      st.cfg_strikes = ev.probation ? (same ? st.cfg_strikes + 1 : 1) : 0;
+      st.strike_hash = ev.probation ? ev.run_hash : 0;
+      const bool recur = ev.probation && st.cfg_strikes >= txn_strikes_;
+      const bool step_back = ns.restart && ev.has_prev_gen && recur && !tried(Action::RestartLKG);
+      revert_first = (lkg && ev.config_ran && recur) || step_back;
+      lkg = lkg || step_back;
+    } else {
+      st.cfg_strikes = ev.config_ran ? st.cfg_strikes + 1 : 0;
+      revert_first = ev.config_ran && st.cfg_strikes >= txn_strikes_;
+    }
     if (lkg && revert_first) c.push_back(Action::RestartLKG);
     if (ns.restart) c.push_back(Action::Restart);
     if (lkg && !revert_first) c.push_back(Action::RestartLKG);

@@ -57,7 +57,8 @@ class RuleRanker : public Ranker {
 };
 
 // TXN baseline: the policy builds its candidates the transactional way (Policy::set_txn), and
-// this ranker keeps that order. Separate from RuleRanker so the arm ("txn" or "txn2") is named
+// this ranker keeps that order. Separate from RuleRanker so the arm ("txn", "txn2" or "gen", the
+// versioned-snapshot variant, Policy::set_gen) is named
 // in the event log.
 class TxnRanker : public Ranker {
  public:

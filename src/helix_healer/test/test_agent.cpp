@@ -309,6 +309,70 @@ TEST(Txn, TwoStrikeRestartsOnceThenReverts) {
   EXPECT_EQ(std::string(r->name()), "txn2");
 }
 
+// gen: versioned snapshots. A death of a committed generation that is still on probation counts a
+// strike for that config hash; the second strike steps back to the previous generation. A trusted
+// generation never steps back, and strikes do not carry across config hashes.
+namespace {
+std::vector<std::vector<Action>> gen_run(bool probation, bool prev, bool committed, bool hash_changes) {
+  Policy p(PolicyKind::Agent, parse_spec(kSpec));
+  p.set_txn(true, 2);
+  p.set_gen(true);
+  World w;
+  Trace tr;
+  run(p, w, 0, 1, tr, [](World&, double) {}, [](Action) { return true; });
+  run(
+      p, w, 1, 30, tr,
+      [&](World& w, double) {
+        w.a.alive = false;
+        w.a.down_s = 0.1;
+        w.a.ev.has_lkg_config = true;
+        w.a.ev.config_changed = w.a.ev.config_ran = !committed;
+        w.a.ev.probation = probation;
+        w.a.ev.has_prev_gen = prev;
+        w.a.ev.run_hash = hash_changes ? 100 + tr.d.size() : 42;
+      },
+      [](Action) { return true; });
+  std::vector<std::vector<Action>> a;
+  for (const auto& d : tr.d)
+    if (d.node == "a" && !d.candidates.empty()) a.push_back(d.candidates);
+  return a;
+}
+}  // namespace
+
+TEST(Gen, PoisonedCommitStepsBackOnSecondStrike) {
+  auto a = gen_run(true, true, true, false);
+  ASSERT_GE(a.size(), 2u);
+  EXPECT_EQ(a[0], (std::vector<Action>{Action::Restart}));
+  EXPECT_EQ(a[1].front(), Action::RestartLKG);
+}
+
+TEST(Gen, TrustedGenerationNeverStepsBack) {
+  auto a = gen_run(false, true, true, false);
+  ASSERT_GE(a.size(), 2u);
+  for (const auto& c : a) EXPECT_EQ(c, (std::vector<Action>{Action::Restart}));
+}
+
+TEST(Gen, StrikesDoNotCarryAcrossConfigs) {
+  auto a = gen_run(true, true, true, true);
+  ASSERT_GE(a.size(), 2u);
+  for (const auto& c : a) EXPECT_EQ(c.front(), Action::Restart);
+}
+
+TEST(Gen, NoPreviousGenerationMeansNoStepBack) {
+  auto a = gen_run(true, false, true, false);
+  ASSERT_GE(a.size(), 2u);
+  for (const auto& c : a) EXPECT_EQ(c, (std::vector<Action>{Action::Restart}));
+}
+
+TEST(Gen, UncommittedConfigBehavesLikeTxn2) {
+  auto a = gen_run(true, false, false, false);
+  ASSERT_GE(a.size(), 2u);
+  EXPECT_EQ(a[0], (std::vector<Action>{Action::Restart, Action::RestartLKG}));
+  EXPECT_EQ(a[1].front(), Action::RestartLKG);
+  auto r = make_ranker("gen", "", 0);
+  EXPECT_EQ(std::string(r->name()), "gen");
+}
+
 TEST(Ranker, ActionNamesRoundTrip) {
   for (Action a : repair_actions()) EXPECT_EQ(action_from(to_string(a)), a);
   EXPECT_EQ(action_from("rm -rf"), Action::None);
