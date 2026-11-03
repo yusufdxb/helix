@@ -314,6 +314,8 @@ class Healer : public rclcpp::Node {
       throw std::runtime_error("agent_dtx_ratio > 0, 0 < agent_dtx_window_s <= 10, agent_dtx_min_samples >= 1");
     // gen ranker: health a committed generation needs before it is trusted (no longer on probation).
     gen_probation_s_ = declare_parameter<double>("agent_gen_probation_s", 30.0);
+    // observe_only: no node may be acted on, whatever its spec says (act=0 for every node).
+    observe_only_ = declare_parameter<bool>("observe_only", false);
     if (!(gen_probation_s_ > 0)) throw std::runtime_error("agent_gen_probation_s must be > 0");
     // gen ranker: directory of deploy acknowledgements (<node>.ack); empty = no acks are read.
     gen_ack_dir_ = declare_parameter<std::string>("agent_gen_ack_dir", "");
@@ -370,6 +372,10 @@ class Healer : public rclcpp::Node {
           for (const auto& o : om.spec.outputs)
             if (o.topic == in && other != name) m.upstream.insert(other);
 
+    // A node HELIX may not act on cannot be launched by HELIX either: it must be adopted (attach=).
+    for (auto& [name, m] : nodes_)
+      if (!may_act(name) && m.spec.autostart && m.spec.attach.empty())
+        throw std::runtime_error("node '" + name + "' is observe-only (act=0 or observe_only) but has no attach=");
     for (auto& [name, m] : nodes_)
       if (m.spec.autostart && m.spec.attach.empty())
         start_job(name, [this, name] { return spawn_and_bring_up(name, true); }, false);
@@ -538,11 +544,16 @@ class Healer : public rclcpp::Node {
     return env_.emplace(std::make_pair(node, topic), EnvSlot{hh::Envelope(ep)}).first->second;
   }
 
-  // attach mode: adopt each attach= node's process once it exists.
+  // attach mode: adopt each attach= node's process once it exists. A node HELIX may not act on
+  // is also adopted again after it died, because its launcher is the only thing that can restart
+  // it (an acting node is re-adopted in spawn_and_bring_up instead).
   void try_attach() {
     for (auto& [name, m] : nodes_) {
-      if (m.spec.attach.empty() || m.started || !m.spec.autostart) continue;
-      if (adopt_running(name)) emit_simple(name, "attach", "pid " + std::to_string(m.pid) + " " + join(m.argv));
+      if (m.spec.attach.empty() || !m.spec.autostart) continue;
+      const bool again = m.started && m.adopted && !m.alive && !may_act(name);
+      if (m.started && !again) continue;
+      if (adopt_running(name))
+        emit_simple(name, "attach", "pid " + std::to_string(m.pid) + (again ? " (restarted elsewhere) " : " ") + join(m.argv));
     }
   }
 
@@ -702,7 +713,7 @@ class Healer : public rclcpp::Node {
       }
       if (first) emit_simple(name, "core_dump", "pid " + std::to_string(pid));
       // The exit is reaped on a later tick through the normal path and counts as a crash there.
-      if (kill_now) ::kill(pid, SIGKILL);
+      if (kill_now && may_act(name)) ::kill(pid, SIGKILL);
     }
   }
 
@@ -745,6 +756,9 @@ class Healer : public rclcpp::Node {
     release_orphans();
     const auto snap = snapshot(t);
     auto out = policy_->step(snap);
+    // A decision on a node HELIX may not act on is logged as what HELIX would have done, never as "act".
+    for (auto& e : out.events)
+      if ((e.kind == "act" || e.kind == "given_up") && !may_act(e.node)) e.kind = "would_" + e.kind;
     for (const auto& e : out.events) emit(e);
     if (agent_) for (const auto& e : out.events) verdict(e);
     for (const auto& d : out.decisions) dispatch(d, snap);
@@ -839,9 +853,34 @@ class Healer : public rclcpp::Node {
     jobs_.push_back(std::move(j));
   }
 
+  bool may_act(const std::string& node) const { return !observe_only_ && nodes_.at(node).spec.act; }
+
+  // Observe-only: record what HELIX would do, touch nothing. The policy gets a no-op success, so
+  // the node is watched (Verifying) instead of retired; "verified" after "observe" therefore means
+  // the node recovered without HELIX. The same decision repeats at most every verify_s, so an
+  // identical line is logged at most once per 30 s per node.
+  void observe(const std::string& node, hh::Fault f, hh::Action a, const std::string& detail) {
+    const double t = now();
+    const std::string text = std::string(hh::to_string(f)) + "/" + hh::to_string(a) + " " + detail;
+    {
+      std::lock_guard lk(obs_mu_);
+      auto& [last_t, last_text] = last_obs_[node];
+      if (last_text == text && t - last_t < 30.0) return;
+      last_t = t;
+      last_text = text;
+    }
+    emit({t, node, "observe", f, a, 0, "would " + std::string(hh::to_string(a)) + (detail.empty() ? "" : " " + detail)});
+  }
+
   void dispatch(const hh::Decision& d, const hh::Snapshot& snap) {
     const std::string node = d.node;
     if (!d.candidates.empty()) return dispatch_agent(d, snap);
+    if (!may_act(node)) {
+      observe(node, d.fault, d.action, d.detail);
+      std::lock_guard rl(res_mu_);
+      results_.push_back({node, hh::Action::None, true, ""});  // no-op: Verifying, not Retired
+      return;
+    }
     switch (d.action) {
       case hh::Action::Restart:
         start_job(node, [this, node, delay = d.delay_s, f = d.fault] { return restart(node, delay, f); }, true,
@@ -944,6 +983,11 @@ class Healer : public rclcpp::Node {
         char fb[16];
         snprintf(fb, sizeof fb, "%.4g", f);
         x += (x.empty() ? "" : ",") + std::string(fb);
+      }
+      if (!may_act(node)) {
+        observe(node, d.fault, chosen, "ranker=" + std::string(ranker_->name()) + " cands=" + names(d.candidates) + note);
+        chosen = hh::Action::None;  // reported as a no-op: the node stays under observation (Verifying)
+        return true;
       }
       emit({now(), node, "act", d.fault, chosen, d.incident_action,
             std::string("ranker=") + ranker_->name() + " ms=" + buf + " cands=" + names(d.candidates) +
@@ -1605,6 +1649,9 @@ class Healer : public rclcpp::Node {
   double dtx_ratio_ = 0.85, dtx_window_s_ = 3.0;
   int dtx_min_ = 3;
   double gen_probation_s_ = 30.0;
+  bool observe_only_ = false;
+  std::mutex obs_mu_;
+  std::map<std::string, std::pair<double, std::string>> last_obs_;
   std::string gen_ack_dir_;
   struct AckFile { int64_t mtime = 0, size = -1; std::vector<uint64_t> hashes; };
   std::map<std::string, AckFile> acks_;  // by node, re-read only when the file changes

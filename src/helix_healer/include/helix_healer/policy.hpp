@@ -171,6 +171,7 @@ class Policy {
     bool escalate = false;
     // Agent incident: one root-cause episode on this node, closed by a verified repair.
     bool incident_open = false;
+    bool noop = false;  // the last decision was answered with a no-op (observe mode)
     double incident_t = -1;      // time of its last action
     int incident_actions = 0;
     std::vector<Action> tried;   // actions already run in this incident

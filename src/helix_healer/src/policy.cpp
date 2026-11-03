@@ -492,6 +492,7 @@ StepOut Policy::step(const Snapshot& s) {
         if (o.expected_hz > 0 && t - o.age_s <= st.verify_from) fresh = false;
       if (n.alive && !symptom && fresh) {
         st.phase = Phase::Normal;
+        st.noop = false;
         out.events.push_back({t, n.name, "verified", st.last_fault, st.last_action, 0, ""});
         st.incident_open = false;
         continue;
@@ -499,8 +500,11 @@ StepOut Policy::step(const Snapshot& s) {
       // Still silent after the startup grace: the repair did not take, so judge the node again now
       // instead of waiting out the whole verification window.
       const bool failed_early = n.alive && symptom && t - st.verify_from >= p.startup_grace_s;
-      if (n.alive && t < st.verify_deadline && !failed_early) continue;
+      // After a no-op (observe mode) nothing was done, so a node that is still dead is expected:
+      // wait out the window instead of judging it again on the next tick.
+      if ((n.alive || st.noop) && t < st.verify_deadline && !failed_early) continue;
       st.phase = Phase::Normal;
+      st.noop = false;
       out.events.push_back({t, n.name, "verify_failed", st.last_fault, st.last_action, 0, !n.alive ? "died" : failed_early ? "still_silent" : "timeout"});
       // The agent picks its next repair itself instead of escalating to a restart.
       if (kind_ != PolicyKind::Agent && n.alive && st.last_action == Action::LifecycleReset) st.escalate = true;
@@ -584,6 +588,7 @@ void Policy::on_result(const std::string& node, Action a, bool ok, double t) {
     st.last_action = a;  // the ranked choice, which may differ from the rule default
     st.tried.push_back(a);
   }
+  st.noop = a == Action::None;
   if (ok) {
     st.phase = Phase::Verifying;
     st.verify_deadline = t + p.verify_s;

@@ -88,6 +88,10 @@ struct NodeSpec {
   bool critical = true;
   bool lifecycle = false;
   bool autostart = true;
+  // act=0: observe only. HELIX diagnoses the node and logs what it would do ("observe" events)
+  // but never restarts, resets, re-parameterizes, signals or replaces it, and never publishes
+  // SAFE_STOP for it. Required for anything on a motion path; see docs/go2/observe.md.
+  bool act = true;
   std::string fallback;
   // ros_node=NAME: the node's fully qualified name in the ROS graph when it differs from the
   // spec name (the agent reads and restores its parameters there). Default: "/" + name.

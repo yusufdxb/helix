@@ -35,6 +35,14 @@ exec det /bin/true
   EXPECT_EQ(s.find("det")->inputs.at(0), "/image");
 }
 
+TEST(Spec, ActDefaultsOnAndParsesObserveOnly) {
+  const auto s = parse_spec("node a\nexec a x\nnode b act=0 attach=go2_bridge\nexec b x\n");
+  EXPECT_TRUE(s.find("a")->act);
+  EXPECT_FALSE(s.find("b")->act);
+  EXPECT_EQ(s.find("b")->attach, "go2_bridge");
+  EXPECT_THROW(parse_spec("node a act=maybe\nexec a x\n"), std::runtime_error);
+}
+
 TEST(Spec, RejectsBadInput) {
   EXPECT_THROW(parse_spec("frobnicate x"), std::runtime_error);
   EXPECT_THROW(parse_spec("node a\n"), std::runtime_error);                       // no exec

@@ -98,6 +98,7 @@ Spec parse_spec(const std::string& text) {
         else if (k == "critical") n.critical = flag(no, v);
         else if (k == "lifecycle") n.lifecycle = flag(no, v);
         else if (k == "autostart") n.autostart = flag(no, v);
+        else if (k == "act") n.act = flag(no, v);
         else if (k == "fallback") n.fallback = v;
         else if (k == "cpu_max") n.cpu_max = num(no, v);
         else if (k == "rss_max_mb") n.rss_max_mb = num(no, v);

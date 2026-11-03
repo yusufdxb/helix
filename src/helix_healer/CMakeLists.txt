@@ -41,6 +41,7 @@ ament_target_dependencies(helix_healer_node rclcpp ament_index_cpp lifecycle_msg
 install(TARGETS helix_healer_node DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY config launch DESTINATION share/${PROJECT_NAME})
+install(PROGRAMS scripts/attach_check.py DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

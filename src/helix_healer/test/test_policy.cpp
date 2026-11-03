@@ -413,3 +413,46 @@ TEST(Policy, SlowDownstreamAfterUpstreamRecoveryIsStillBlamed) { EXPECT_GE(downs
 
 // Bound: a deficit that has not drained 4 x victim_grace_s after recovery is blamed even at full rate.
 TEST(Policy, DrainGraceIsBounded) { EXPECT_GE(downstream_after_recovery(20, 0), 1); }
+
+// Observe-only (act=0 / observe_only): the healer reports every decision, including the give-up
+// Fallback, as a successful no-op (Action::None). The node must stay watched, never retired, decisions
+// must not repeat faster than the verification window, and an outside recovery reads as verified.
+TEST(Policy, ObserveNoOpKeepsNodeWatchedAndSeesOutsideRecovery) {
+  Policy p(PolicyKind::Helix, parse_spec(kSpec));
+  World w;
+  Trace tr;
+  int decided = 0;
+  auto observe = [&](double t0, double t1, const std::function<void(World&, double)>& world) {
+    for (double t = t0; t < t1; t += 0.05) {
+      world(w, t);
+      auto out = p.step(w.at(t));
+      for (auto& e : out.events) tr.events.push_back(e);
+      for (auto& d : out.decisions) {
+        tr.decisions.push_back(d);
+        ++decided;
+        p.on_result(d.node, Action::None, true, t);
+      }
+    }
+  };
+  observe(0, 1, [](World&, double) {});
+  observe(1, 11, [](World& w, double t) {  // a is dead for 10 s; nothing restarts it
+    w.a.alive = false;
+    w.a.down_s = t - 1;
+    w.a.up_s = 0;
+    w.a.outputs[0].age_s = t - 0.98;
+  });
+  EXPECT_GE(decided, 1);
+  EXPECT_LE(decided, 6);  // at most one per verify_s (2 s) after the first
+  EXPECT_NE(p.phase("a"), "retired");
+  EXPECT_FALSE(tr.has("a", "fallback"));
+  EXPECT_FALSE(tr.has("a", "verified"));
+  const double back = 11;
+  observe(11, 14, [&](World& w, double t) {  // an outside respawn (launcher, operator) brings it back
+    w.a.alive = true;
+    w.a.down_s = 0;
+    w.a.up_s = t - back;
+    w.a.outputs[0].age_s = 0.02;
+  });
+  EXPECT_TRUE(tr.has("a", "verified"));
+  EXPECT_NE(p.phase("a"), "retired");
+}

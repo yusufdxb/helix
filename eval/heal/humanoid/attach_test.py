@@ -14,7 +14,11 @@ controller_manager (whose controllers must be re-spawned). Reported:
   orphans     processes of the stack still alive after launch shut down
   survivors   processes still alive after the healer was stopped too
 
-Usage: attach_test.py --mode {norespawn,respawn} --out DIR [--domain 90]
+With --observe the healer runs with observe_only:=true: it must diagnose both crashes,
+emit `observe` events, and take no action (no `act` events); launch's respawn (if any) is
+the only repairer.
+
+Usage: attach_test.py --mode {norespawn,respawn} --out DIR [--domain 90] [--observe]
 """
 
 import argparse
@@ -96,6 +100,7 @@ def main() -> None:
     ap.add_argument("--mode", choices=("norespawn", "respawn"), required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--domain", default="90")
+    ap.add_argument("--observe", action="store_true", help="healer in observe_only mode")
     ap.add_argument("--allow-dirty", action="store_true", help="run an untraceable build (recorded)")
     a = ap.parse_args()
     out = Path(a.out).resolve()
@@ -115,7 +120,8 @@ def main() -> None:
     time.sleep(8)
     t_h = time.time()
     healer = subprocess.Popen([str(HEALER), "--ros-args", "-p", f"spec:={out / 'spec'}", "-p", "policy:=helix",
-                               "-p", f"event_log:={out / 'events.jsonl'}", "-p", f"log_dir:={out / 'logs'}"],
+                               "-p", f"event_log:={out / 'events.jsonl'}", "-p", f"log_dir:={out / 'logs'}"]
+                              + (["-p", "observe_only:=true"] if a.observe else []),
                               env=env, start_new_session=True, stdout=open(out / "healer.log", "w"),
                               stderr=subprocess.STDOUT)
     procs.append(healer)
@@ -124,7 +130,7 @@ def main() -> None:
                               "/tf=tf2_msgs/msg/TFMessage,/joint_states=sensor_msgs/msg/JointState,"
                               "/image=sensor_msgs/msg/Image", "--inject", "", "--t-inject", str(t1),
                               "--t-end", str(t_end), "--out", str(out / "probe.json")], env=env)
-    res = {"mode": a.mode, "before": None}
+    res = {"mode": a.mode, "observe": a.observe, "before": None}
     time.sleep(max(0, t1 - 0.5 - time.time()))
     res["before"] = counts(a.domain)
     injs = [Injector("kill:rsp:SEGV", a.domain, env, t1, t_end, out / "logs", "a"),

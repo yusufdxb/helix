@@ -7,6 +7,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -16,6 +17,8 @@ def generate_launch_description():
         DeclareLaunchArgument("policy", default_value="helix"),
         DeclareLaunchArgument("event_log", default_value=""),
         DeclareLaunchArgument("log_dir", default_value=""),
+        # true: HELIX diagnoses and logs "observe" events but acts on no node (docs/go2/observe.md).
+        DeclareLaunchArgument("observe_only", default_value="false"),
         Node(
             package="helix_healer",
             executable="helix_healer_node",
@@ -26,6 +29,7 @@ def generate_launch_description():
                 "policy": LaunchConfiguration("policy"),
                 "event_log": LaunchConfiguration("event_log"),
                 "log_dir": LaunchConfiguration("log_dir"),
+                "observe_only": ParameterValue(LaunchConfiguration("observe_only"), value_type=bool),
             }],
         ),
     ])
