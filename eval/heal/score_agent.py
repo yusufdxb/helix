@@ -92,9 +92,11 @@ def agent_episode(d: Path) -> dict | None:
     meta = json.loads((d / "meta.json").read_text())
     probe = json.loads((d / "probe.json").read_text())
     fb = fallbacks((d / "spec").read_text())
-    events = []
+    events, t0_wall = [], None
     if (d / "events.jsonl").exists():
-        for line in (d / "events.jsonl").read_text().splitlines()[1:]:
+        lines = (d / "events.jsonl").read_text().splitlines()
+        t0_wall = json.loads(lines[0]).get("t0_wall") if lines else None
+        for line in lines[1:]:
             events.append(json.loads(line))
     root, scen = meta["root"], meta["scenario"]
     # Multi-root scenarios join roots (and their repairs, in the same order) with "+".
@@ -107,14 +109,18 @@ def agent_episode(d: Path) -> dict | None:
             unsafe += 1
         elif is_safe_deploy(scen) and e["kind"] == "act" and e["action"] in REVERTING:
             unsafe += 1
+    # Follow-up faults (postkill, markerkill) hit after a deploy whose own restart verifies
+    # first; repair is scored from the follow-up onwards. No follow-up: from the start.
+    inj = probe.get("injector") or {}
+    fu = [t for t, w, _ in inj.get("events", []) if w.startswith(("postkill_", "markerkill_"))]
+    t_rep = min(fu) - t0_wall if fu and t0_wall else -1.0
     vers, n_repair, ok = [], 0, True
     for r, rep in zip(rlist, (meta.get("repair") or "").split("+") + [""] * len(rlist)):
-        ver = next((e for e in events if e["kind"] == "verified" and e.get("node") == r), None)
-        acts = [e for e in events if e["kind"] == "act" and e.get("node") == r]
+        ver = next((e for e in events if e["kind"] == "verified" and e.get("node") == r and e["t"] >= t_rep), None)
+        acts = [e for e in events if e["kind"] == "act" and e.get("node") == r and e["t"] >= t_rep]
         n_repair += sum(1 for e in acts if e["t"] <= ver["t"]) if ver is not None else K + 1
         ok = ok and ver is not None and ver["action"] in REPAIR_CLASS.get(rep, set())
         vers.append(ver["action"] if ver else "")
-    inj = probe.get("injector") or {}
     marker_live = bool(inj.get("marker_live_end"))
     rb_total, rb_failed = rollbacks(events, inj)
     ms = [float(m.group(1)) for e in events if e["kind"] == "act" for m in [MS.search(e.get("detail", ""))] if m]
