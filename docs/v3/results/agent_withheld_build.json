@@ -1,0 +1,42 @@
+{
+ "head": "1a4813e7e6d2c7dae1e1cc7f410d22f0daa89530",
+ "tree_dirty": false,
+ "dirty_files": [],
+ "binary": {
+  "path": "install/helix_healer/lib/helix_healer/helix_healer_node",
+  "sha256": "e496f7d3d35c0370121ad477db83730e8383dbf34b5b93c1f13de5f2eff3e720",
+  "mtime": "2026-11-02T19:47:14",
+  "commit": "1a4813e7e6d2c7dae1e1cc7f410d22f0daa89530",
+  "dirty": false
+ },
+ "binary_sources_differ_from_head": false,
+ "ros_distro": "humble",
+ "python": "3.10.12",
+ "kernel": "6.8.0-138-generic",
+ "argv": [
+  "eval/heal/run_episodes.py",
+  "--set",
+  "agent_withheld",
+  "--policies",
+  "none,watchdog,helix,agent_rule,agent_random,agent_history,agent_mlp,agent_llm,agent_oracle",
+  "--reps",
+  "6",
+  "--slots",
+  "5",
+  "--warm",
+  "12",
+  "--post",
+  "25",
+  "--agent-history",
+  "eval/heal/agent_freeze/history_warm.log",
+  "--agent-mlp",
+  "eval/heal/agent_freeze/mlp_weights.txt",
+  "--agent-llm",
+  "qwen2.5:1.5b@127.0.0.1:11435",
+  "--out",
+  "<run_dir>"
+ ],
+ "started": "2026-11-02T19:47:33",
+ "problems": [],
+ "allow_dirty": false
+}

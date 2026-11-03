@@ -1,0 +1,12 @@
+{
+ "history": "<run_dir>/history.log",
+ "mlp": "eval/heal/agent_freeze/mlp_weights.txt",
+ "llm": "qwen2.5:1.5b@127.0.0.1:11435",
+ "history_warm": "eval/heal/agent_freeze/history_warm.log",
+ "llm_load_s": 1.08,
+ "llm_gpu_mb": 1290,
+ "llm_size_mb": 1290,
+ "llm_ctx": 4096,
+ "ollama_cpu_attributable": true,
+ "ollama_cpu_s": 15.43
+}

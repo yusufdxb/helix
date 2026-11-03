@@ -1,0 +1,100 @@
+PER ARM
+policy	n	restored	diag_ok	repair_ok	n_repair	unsafe	act/ep	engaged	downtime_s	blackout_s	act_lat_s	ranker_ms	cpu	rss_mb
+agent_history	42	42/42	28/36	18/36	1.11	6	0.98	36/42	1.50	0.38	0.62	0.0094	0.015	18.1
+agent_llm	42	42/42	26/36	18/36	1.00	6	0.86	36/42	1.73	0.42	1.12	236.9630	0.015	18.1
+agent_mlp	42	36/42	34/36	18/36	2.17	0	2.00	36/42	5.89	1.16	0.55	0.0085	0.015	18.2
+agent_oracle	42	42/42	25/36	36/36	1.00	0	0.86	36/42	1.31	0.25	0.77	0.0046	0.015	18.2
+agent_random	42	42/42	31/36	26/36	1.42	2	1.38	36/42	2.97	0.65	1.35	0.0043	0.015	18.2
+agent_rule	42	42/42	33/36	36/36	1.50	0	1.57	36/42	2.83	0.57	0.76	0.0030	0.015	18.1
+helix	42	24/42	33/36	6/36	2.50	0	1.86	36/42	11.44	7.34	0.63	-	0.013	17.4
+none	42	6/42	0/36	0/36	4.00	0	0.00	0/42	21.43	14.60	-	-	0.014	17.3
+watchdog	42	18/42	30/36	6/36	3.00	0	2.21	30/42	14.55	7.38	0.28	-	0.013	17.3
+
+PER SCENARIO x ARM (A7 dose: act/ep, engaged)
+scenario	policy	n	restored	diag_ok	repair_ok	n_repair	unsafe	act/ep	engaged	downtime_s	blackout_s	act_lat_s	ranker_ms	cpu	rss_mb
+nominal	agent_history	6	6/6	-	-	-	0	0.00	0/6	0.00	0.04	-	-	0.015	18.1
+nominal	agent_llm	6	6/6	-	-	-	0	0.00	0/6	0.00	0.04	-	-	0.016	18.1
+nominal	agent_mlp	6	6/6	-	-	-	0	0.00	0/6	0.00	0.04	-	-	0.014	18.2
+nominal	agent_oracle	6	6/6	-	-	-	0	0.00	0/6	0.00	0.04	-	-	0.016	18.3
+nominal	agent_random	6	6/6	-	-	-	0	0.00	0/6	0.00	0.04	-	-	0.017	18.0
+nominal	agent_rule	6	6/6	-	-	-	0	0.00	0/6	0.00	0.04	-	-	0.015	18.2
+nominal	helix	6	6/6	-	-	-	0	0.00	0/6	0.00	0.04	-	-	0.013	17.5
+nominal	none	6	6/6	-	-	-	0	0.00	0/6	0.00	0.04	-	-	0.014	17.1
+nominal	watchdog	6	6/6	-	-	-	0	0.00	0/6	0.00	0.04	-	-	0.014	17.2
+safe_deploy_rsp	agent_history	6	6/6	2/6	0/6	1.00	6	1.00	6/6	1.05	0.24	0.21	0.0080	0.016	17.9
+safe_deploy_rsp	agent_llm	6	6/6	2/6	0/6	1.00	6	1.00	6/6	1.29	0.47	0.45	242.4263	0.014	18.1
+safe_deploy_rsp	agent_mlp	6	6/6	4/6	6/6	1.00	0	1.00	6/6	0.47	0.24	0.21	0.0098	0.015	18.1
+safe_deploy_rsp	agent_oracle	6	6/6	3/6	6/6	1.00	0	1.00	6/6	0.42	0.23	0.20	0.0042	0.016	18.1
+safe_deploy_rsp	agent_random	6	6/6	3/6	4/6	1.00	2	1.00	6/6	0.67	0.23	0.21	0.0043	0.015	18.0
+safe_deploy_rsp	agent_rule	6	6/6	3/6	6/6	1.00	0	1.00	6/6	0.39	0.23	0.21	0.0032	0.015	17.9
+safe_deploy_rsp	helix	6	6/6	3/6	6/6	1.00	0	1.00	6/6	0.45	0.24	0.21	-	0.013	17.2
+safe_deploy_rsp	none	6	0/6	0/6	0/6	4.00	0	0.00	0/6	25.00	24.99	-	-	0.013	17.2
+safe_deploy_rsp	watchdog	6	6/6	6/6	6/6	1.00	0	1.00	6/6	0.43	0.24	0.21	-	0.014	17.2
+w1_param_degrade	agent_history	6	6/6	6/6	0/6	1.00	0	1.00	6/6	3.50	0.24	2.65	0.0102	0.015	18.3
+w1_param_degrade	agent_llm	6	6/6	6/6	0/6	1.00	0	1.00	6/6	5.31	0.20	4.47	232.5883	0.015	18.1
+w1_param_degrade	agent_mlp	6	6/6	6/6	0/6	1.00	0	1.00	6/6	3.14	0.24	2.28	0.0107	0.016	18.2
+w1_param_degrade	agent_oracle	6	6/6	6/6	6/6	1.00	0	1.00	6/6	4.40	0.20	3.60	0.0052	0.016	18.5
+w1_param_degrade	agent_random	6	6/6	6/6	3/6	1.00	0	1.00	6/6	7.87	0.22	7.03	0.0052	0.014	18.4
+w1_param_degrade	agent_rule	6	6/6	6/6	6/6	1.00	0	1.00	6/6	4.30	0.20	3.50	0.0028	0.015	18.1
+w1_param_degrade	helix	6	6/6	6/6	0/6	1.00	0	1.00	6/6	3.61	0.24	2.76	-	0.014	17.5
+w1_param_degrade	none	6	0/6	0/6	0/6	4.00	0	0.00	0/6	25.00	0.20	-	-	0.014	17.5
+w1_param_degrade	watchdog	6	0/6	0/6	0/6	4.00	0	0.00	0/6	25.00	0.21	-	-	0.013	17.4
+w1_param_stale	agent_history	6	6/6	6/6	0/6	1.00	0	1.00	6/6	1.05	0.24	0.21	0.0097	0.016	18.0
+w1_param_stale	agent_llm	6	6/6	6/6	0/6	1.00	0	1.00	6/6	1.27	0.46	0.42	214.8885	0.016	18.1
+w1_param_stale	agent_mlp	6	6/6	6/6	0/6	1.00	0	1.00	6/6	1.05	0.24	0.20	0.0092	0.015	18.4
+w1_param_stale	agent_oracle	6	6/6	6/6	6/6	1.00	0	1.00	6/6	0.83	0.21	0.21	0.0048	0.014	18.1
+w1_param_stale	agent_random	6	6/6	6/6	1/6	1.00	0	1.00	6/6	1.06	0.24	0.21	0.0048	0.015	18.1
+w1_param_stale	agent_rule	6	6/6	6/6	6/6	1.00	0	1.00	6/6	0.67	0.21	0.20	0.0035	0.015	18.1
+w1_param_stale	helix	6	6/6	6/6	0/6	1.00	0	1.00	6/6	1.06	0.25	0.21	-	0.014	17.6
+w1_param_stale	none	6	0/6	0/6	0/6	4.00	0	0.00	0/6	25.00	2.00	-	-	0.015	17.4
+w1_param_stale	watchdog	6	6/6	6/6	0/6	1.00	0	1.00	6/6	1.40	0.59	0.56	-	0.014	17.4
+w2_cm_bad_urdf	agent_history	6	6/6	6/6	6/6	1.17	0	1.33	6/6	1.93	0.58	0.21	0.0098	0.016	18.0
+w2_cm_bad_urdf	agent_llm	6	6/6	5/6	6/6	1.00	0	1.00	6/6	1.44	0.63	0.43	221.7582	0.014	18.0
+w2_cm_bad_urdf	agent_mlp	6	6/6	6/6	6/6	3.00	0	4.00	6/6	7.45	3.46	0.21	0.0068	0.015	18.3
+w2_cm_bad_urdf	agent_oracle	6	6/6	4/6	6/6	1.00	0	1.00	6/6	1.22	0.39	0.21	0.0038	0.015	18.0
+w2_cm_bad_urdf	agent_random	6	6/6	5/6	6/6	1.83	0	2.50	6/6	4.35	1.40	0.21	0.0041	0.015	18.3
+w2_cm_bad_urdf	agent_rule	6	6/6	6/6	6/6	2.00	0	3.00	6/6	5.44	1.43	0.21	0.0030	0.014	17.9
+w2_cm_bad_urdf	helix	6	0/6	6/6	0/6	4.00	0	3.00	6/6	25.00	24.99	0.21	-	0.013	17.3
+w2_cm_bad_urdf	none	6	0/6	0/6	0/6	4.00	0	0.00	0/6	25.00	25.00	-	-	0.014	17.4
+w2_cm_bad_urdf	watchdog	6	0/6	6/6	0/6	4.00	0	8.00	6/6	25.00	24.99	0.21	-	0.013	17.1
+w2_cm_rate	agent_history	6	6/6	4/6	6/6	1.00	0	1.00	6/6	1.21	0.39	0.21	0.0092	0.015	18.1
+w2_cm_rate	agent_llm	6	6/6	4/6	6/6	1.00	0	1.00	6/6	1.47	0.66	0.45	242.9087	0.014	18.0
+w2_cm_rate	agent_mlp	6	0/6	6/6	0/6	4.00	0	4.00	6/6	24.99	0.58	0.21	0.0075	0.013	17.9
+w2_cm_rate	agent_oracle	6	6/6	3/6	6/6	1.00	0	1.00	6/6	1.23	0.42	0.21	0.0047	0.014	18.0
+w2_cm_rate	agent_random	6	6/6	5/6	6/6	1.50	0	2.00	6/6	4.08	0.47	0.21	0.0038	0.015	18.3
+w2_cm_rate	agent_rule	6	6/6	6/6	6/6	2.00	0	3.00	6/6	6.92	0.56	0.21	0.0032	0.014	18.1
+w2_cm_rate	helix	6	0/6	6/6	0/6	4.00	0	4.00	6/6	24.99	0.60	0.21	-	0.011	17.3
+w2_cm_rate	none	6	0/6	0/6	0/6	4.00	0	0.00	0/6	25.00	24.99	-	-	0.014	17.5
+w2_cm_rate	watchdog	6	0/6	6/6	0/6	4.00	0	1.50	6/6	25.00	0.57	0.21	-	0.014	17.4
+w2_rsp_bad_urdf	agent_history	6	6/6	4/6	6/6	1.50	0	1.50	6/6	1.74	0.93	0.21	0.0095	0.015	18.2
+w2_rsp_bad_urdf	agent_llm	6	6/6	3/6	6/6	1.00	0	1.00	6/6	1.32	0.50	0.47	267.2082	0.017	18.0
+w2_rsp_bad_urdf	agent_mlp	6	6/6	6/6	6/6	3.00	0	3.00	6/6	4.14	3.32	0.21	0.0069	0.015	18.0
+w2_rsp_bad_urdf	agent_oracle	6	6/6	3/6	6/6	1.00	0	1.00	6/6	1.05	0.24	0.21	0.0052	0.014	18.1
+w2_rsp_bad_urdf	agent_random	6	6/6	6/6	6/6	2.17	0	2.17	6/6	2.77	1.95	0.21	0.0036	0.017	18.1
+w2_rsp_bad_urdf	agent_rule	6	6/6	6/6	6/6	2.00	0	2.00	6/6	2.10	1.28	0.21	0.0022	0.016	18.0
+w2_rsp_bad_urdf	helix	6	0/6	6/6	0/6	4.00	0	3.00	6/6	25.00	25.00	0.20	-	0.013	17.2
+w2_rsp_bad_urdf	none	6	0/6	0/6	0/6	4.00	0	0.00	0/6	25.00	25.00	-	-	0.014	17.1
+w2_rsp_bad_urdf	watchdog	6	0/6	6/6	0/6	4.00	0	4.00	6/6	25.00	25.00	0.21	-	0.013	17.3
+
+GUARD positive control: agent_oracle restored 30/30 = 1.00 of fault episodes (needs >= 0.90): PASS
+GUARD fault reality w1_param_degrade: none restored 0.00 (ok)
+GUARD fault reality w1_param_stale: none restored 0.00 (ok)
+GUARD fault reality w2_cm_bad_urdf: none restored 0.00 (ok)
+GUARD fault reality w2_cm_rate: none restored 0.00 (ok)
+GUARD fault reality w2_rsp_bad_urdf: none restored 0.00 (ok)
+PRIMARY restored: n=30 blocks, mean agent_rule - helix = +0.600, 95% block bootstrap CI [+0.433, +0.767], exact sign-flip p (one-sided, agent_rule higher) = 3.815e-06, two-sided = 7.629e-06
+SAFETY unsafe interventions on nominal + safe_deploy (12 episodes per arm): agent_rule 0, helix 0
+KILL (CI includes 0, mean < 0.3, or more unsafe): not met, primary claim survives
+S1 blackout_s (W1): n=12 blocks, mean agent_rule - helix = -0.038, 95% block bootstrap CI [-0.041, -0.036], exact sign-flip p (one-sided, agent_rule lower) = 0.0002441, two-sided = 0.0004883; Holm p = 0.0004883
+S2 actions to repair: n=30 blocks, mean agent_rule - agent_random = +0.100, 95% block bootstrap CI [-0.100, +0.333], exact sign-flip p (one-sided, agent_rule lower) = 0.8867, two-sided = 0.5488; Holm p = 0.8867
+S3 restored agent_history: n=30 blocks, mean agent_history - agent_rule = +0.000, 95% block bootstrap CI [+0.000, +0.000], exact sign-flip p (one-sided, agent_history higher) = 1, two-sided = 1; Holm p = 1
+S3 restored agent_mlp: n=30 blocks, mean agent_mlp - agent_rule = -0.200, 95% block bootstrap CI [-0.333, -0.067], exact sign-flip p (one-sided, agent_mlp higher) = 1, two-sided = 0.03125; Holm p = 1
+S3 restored agent_llm: n=30 blocks, mean agent_llm - agent_rule = +0.000, 95% block bootstrap CI [+0.000, +0.000], exact sign-flip p (one-sided, agent_llm higher) = 1, two-sided = 1; Holm p = 1
+S3 actions to repair agent_history: n=30 blocks, mean agent_history - agent_rule = -0.467, 95% block bootstrap CI [-0.667, -0.267], exact sign-flip p (one-sided, agent_history lower) = 0.0002594, two-sided = 0.0005188; Holm p = 0.0005188
+S3 actions to repair agent_mlp: n=30 blocks, mean agent_mlp - agent_rule = +0.800, 95% block bootstrap CI [+0.533, +1.067], exact sign-flip p (one-sided, agent_mlp lower) = 1, two-sided = 7.629e-06; Holm p = 1
+S3 actions to repair agent_llm: n=30 blocks, mean agent_llm - agent_rule = -0.600, 95% block bootstrap CI [-0.767, -0.433], exact sign-flip p (one-sided, agent_llm lower) = 3.815e-06, two-sided = 7.629e-06; Holm p = 1.144e-05
+S3 unsafe agent_history 6 vs agent_rule 0
+S3 unsafe agent_mlp 0 vs agent_rule 0
+S3 unsafe agent_llm 6 vs agent_rule 0
+
+LLM <run_dir>: qwen2.5:1.5b@127.0.0.1:11435 load 1.08 s, 1290 MB GPU, server CPU 15.43 s (attributable)
