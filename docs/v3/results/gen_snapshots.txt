@@ -1,0 +1,66 @@
+PER ARM (fault scenarios)
+policy	n	correct	strict	restored	repair_ok	unsafe	rollbacks	failed_rb	lkg_commits	act/ep	engaged	downtime_s	cens	ranker_ms	cpu	rss_mb
+agent_gen@10	28	24/28	28/28	28/28	12/28	4	24	0	1.86	3.43	28/28	1.46	0	0.0027	0.014	18.6
+agent_rule@5	28	12/28	12/28	24/28	12/28	0	4	0	2.00	3.86	28/28	13.31	4	0.0028	0.015	18.3
+agent_txn2@10	28	16/28	16/28	28/28	12/28	0	8	0	1.86	3.86	28/28	2.70	0	0.0027	0.014	18.6
+none	28	0/28	0/28	0/28	0/28	0	0	0	0.00	0.00	0/28	84.97	28	-	0.013	17.3
+
+PER SCENARIO x ARM
+scenario	policy	n	correct	strict	restored	repair_ok	unsafe	rollbacks	failed_rb	lkg_commits	act/ep	engaged	downtime_s	cens	ranker_ms	cpu	rss_mb
+c1_cm_cfg_camera_hang	agent_gen@10	4	4/4	4/4	4/4	4/4	0	4	0	1.00	5.00	4/4	8.29	0	0.0032	0.014	18.6
+c1_cm_cfg_camera_hang	agent_rule@5	4	4/4	4/4	4/4	4/4	0	4	0	1.00	4.00	4/4	6.25	0	0.0038	0.015	18.4
+c1_cm_cfg_camera_hang	agent_txn2@10	4	4/4	4/4	4/4	4/4	0	4	0	1.00	5.00	4/4	8.25	0	0.0034	0.013	18.7
+c1_cm_cfg_camera_hang	none	4	0/4	0/4	0/4	0/4	0	0	0	0.00	0.00	0/4	84.95	4	-	0.013	17.2
+c2_safe_deploy_crash_late	agent_gen@10	4	4/4	4/4	4/4	4/4	0	0	0	2.00	2.00	4/4	0.06	0	0.0026	0.013	18.7
+c2_safe_deploy_crash_late	agent_rule@5	4	4/4	4/4	4/4	4/4	0	0	0	2.00	2.00	4/4	0.06	0	0.0025	0.015	18.4
+c2_safe_deploy_crash_late	agent_txn2@10	4	4/4	4/4	4/4	4/4	0	0	0	2.00	2.00	4/4	0.06	0	0.0025	0.013	18.7
+c2_safe_deploy_crash_late	none	4	0/4	0/4	0/4	0/4	0	0	0	0.00	0.00	0/4	84.94	4	-	0.011	17.2
+c2_safe_deploy_twice_late	agent_gen@10	4	0/4	4/4	4/4	4/4	4	4	0	2.00	3.00	4/4	0.00	0	0.0027	0.016	18.6
+c2_safe_deploy_twice_late	agent_rule@5	4	4/4	4/4	4/4	4/4	0	0	0	2.00	3.00	4/4	0.06	0	0.0029	0.014	18.1
+c2_safe_deploy_twice_late	agent_txn2@10	4	4/4	4/4	4/4	4/4	0	0	0	2.00	3.00	4/4	0.00	0	0.0025	0.014	18.6
+c2_safe_deploy_twice_late	none	4	0/4	0/4	0/4	0/4	0	0	0	0.00	0.00	0/4	84.99	4	-	0.013	17.4
+c3_late_cfg_late	agent_gen@10	4	4/4	4/4	4/4	0/4	0	4	0	2.00	3.00	4/4	0.50	0	0.0023	0.013	18.7
+c3_late_cfg_late	agent_rule@5	4	0/4	0/4	4/4	0/4	0	0	0	2.00	4.00	4/4	1.05	0	0.0026	0.015	18.5
+c3_late_cfg_late	agent_txn2@10	4	0/4	0/4	4/4	0/4	0	0	0	2.00	4.00	4/4	0.25	0	0.0031	0.014	18.3
+c3_late_cfg_late	none	4	0/4	0/4	0/4	0/4	0	0	0	0.00	0.00	0/4	84.96	4	-	0.013	17.4
+c3_late_cfg_mid	agent_gen@10	4	4/4	4/4	4/4	0/4	0	4	0	1.00	3.00	4/4	0.52	0	0.0028	0.016	18.3
+c3_late_cfg_mid	agent_rule@5	4	0/4	0/4	0/4	0/4	0	0	0	2.00	4.00	4/4	84.97	4	0.0023	0.015	18.1
+c3_late_cfg_mid	agent_txn2@10	4	4/4	4/4	4/4	0/4	0	4	0	1.00	3.00	4/4	0.26	0	0.0026	0.016	18.6
+c3_late_cfg_mid	none	4	0/4	0/4	0/4	0/4	0	0	0	0.00	0.00	0/4	84.98	4	-	0.012	17.3
+c4_chain_late	agent_gen@10	4	4/4	4/4	4/4	0/4	0	4	0	3.00	4.00	4/4	0.07	0	0.0028	0.014	18.7
+c4_chain_late	agent_rule@5	4	0/4	0/4	4/4	0/4	0	0	0	3.00	5.00	4/4	0.06	0	0.0029	0.014	18.4
+c4_chain_late	agent_txn2@10	4	0/4	0/4	4/4	0/4	0	0	0	3.00	5.00	4/4	9.57	0	0.0024	0.013	18.6
+c4_chain_late	none	4	0/4	0/4	0/4	0/4	0	0	0	0.00	0.00	0/4	84.95	4	-	0.013	17.3
+c5_simul_late	agent_gen@10	4	4/4	4/4	4/4	0/4	0	4	0	2.00	4.00	4/4	0.77	0	0.0027	0.014	18.6
+c5_simul_late	agent_rule@5	4	0/4	0/4	4/4	0/4	0	0	0	2.00	5.00	4/4	0.75	0	0.0025	0.014	18.2
+c5_simul_late	agent_txn2@10	4	0/4	0/4	4/4	0/4	0	0	0	2.00	5.00	4/4	0.51	0	0.0021	0.015	18.6
+c5_simul_late	none	4	0/4	0/4	0/4	0/4	0	0	0	0.00	0.00	0/4	84.98	4	-	0.013	17.4
+nominal	agent_gen@10	4	4/4	4/4	4/4	-	0	0	0	0.00	0.00	0/4	0.00	0	-	0.015	18.7
+nominal	agent_rule@5	4	4/4	4/4	4/4	-	0	0	0	0.00	0.00	0/4	0.00	0	-	0.015	18.0
+nominal	agent_txn2@10	4	4/4	4/4	4/4	-	0	0	0	0.00	0.00	0/4	0.00	0	-	0.014	18.7
+nominal	none	4	4/4	4/4	4/4	-	0	0	0	0.00	0.00	0/4	0.00	0	-	0.013	17.3
+
+dropped blocks (pre_ok=False or inject_subs=0): [('c4_chain_late', 0), ('c4_chain_late', 1), ('c4_chain_late', 2), ('c4_chain_late', 3)]
+GUARD none restores c1_cm_cfg_camera_hang: 0/4
+GUARD none restores c2_safe_deploy_crash_late: 0/4
+GUARD none restores c2_safe_deploy_twice_late: 0/4
+GUARD none restores c3_late_cfg_late: 0/4
+GUARD none restores c3_late_cfg_mid: 0/4
+GUARD none restores c4_chain_late: 0/4
+GUARD none restores c5_simul_late: 0/4
+PRIMARY correct: n=24 blocks, mean agent_gen@10 - agent_txn2@10 = +0.167, 95% block bootstrap CI [-0.125, +0.417], exact sign-flip p (one-sided, agent_gen@10 higher) = 0.1938, two-sided = 0.3877
+  scenario c1_cm_cfg_camera_hang: agent_gen@10 better in 0/4, agent_txn2@10 better in 0/4
+  scenario c2_safe_deploy_crash_late: agent_gen@10 better in 0/4, agent_txn2@10 better in 0/4
+  scenario c2_safe_deploy_twice_late: agent_gen@10 better in 0/4, agent_txn2@10 better in 4/4
+  scenario c3_late_cfg_late: agent_gen@10 better in 4/4, agent_txn2@10 better in 0/4
+  scenario c3_late_cfg_mid: agent_gen@10 better in 0/4, agent_txn2@10 better in 0/4
+  scenario c4_chain_late: agent_gen@10 better in 0/0, agent_txn2@10 better in 0/0
+  scenario c5_simul_late: agent_gen@10 better in 4/4, agent_txn2@10 better in 0/4
+SECONDARY gen vs rule@5 (correct): n=24 blocks, mean agent_gen@10 - agent_rule@5 = +0.333, 95% block bootstrap CI [+0.042, +0.625], exact sign-flip p (one-sided, agent_gen@10 higher) = 0.03841, two-sided = 0.07681, Holm p = 0.1152
+SECONDARY txn2 vs rule@5 (correct, replication): n=24 blocks, mean agent_txn2@10 - agent_rule@5 = +0.167, 95% block bootstrap CI [+0.042, +0.333], exact sign-flip p (one-sided, agent_txn2@10 higher) = 0.0625, two-sided = 0.125, Holm p = 0.125
+SECONDARY gen vs txn2 (downtime_s): n=24 blocks, mean agent_gen@10 - agent_txn2@10 = +0.135, 95% block bootstrap CI [-0.037, +0.319], exact sign-flip p (one-sided, agent_gen@10 lower) = 0.9287, two-sided = 0.1562, Holm p = 0.9287
+SAFETY unsafe per arm: agent_gen@10=4, agent_rule@5=0, agent_txn2@10=0, none=0
+SAFETY failed rollbacks per arm: agent_gen@10=0, agent_rule@5=0, agent_txn2@10=0, none=0
+SAFETY interventions in nominal per arm: agent_gen@10=0, agent_rule@5=0, agent_txn2@10=0, none=0
+KILL (primary CI includes 0, or gen < 3/4 on c3_late_cfg_late/c4_chain_late): MET, gen claim dead
+DEFAULT: unchanged (rule@5); gen stays opt-in
