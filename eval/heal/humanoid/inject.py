@@ -47,6 +47,11 @@ the stock ros2 CLI. Fault strings:
   markerwatch:NODE:KEY:VALUE follow-up that never signals: records whether a NODE process started
                              after injection with `KEY: VALUE` in its --params-file is alive at
                              the episode end (want_live_end), i.e. the wanted config survived.
+  ack:NODE:FILE[,FILE...]    follow-up that never signals: appends the FNV-1a 64 hash (16 hex) of
+                             each stack FILE as it is now to stack/ack/NODE.ack, the
+                             acknowledgement a deploy tool writes after its own acceptance check
+                             (healer param agent_gen_ack_dir). It acks whatever is on disk at that
+                             moment, valid or not.
 
 Faults compose with "+": each part runs in its own thread, and a part may carry an "@S" suffix
 that delays it S s after t_inject (kill:rsp:SEGV@2). hits counts the initial parts and is 0
@@ -75,7 +80,15 @@ SIGS = {"SEGV": signal.SIGSEGV, "ABRT": signal.SIGABRT, "KILL": signal.SIGKILL, 
         "BUS": signal.SIGBUS, "FPE": signal.SIGFPE}
 
 
-FOLLOWUP = ("postkill", "markerkill", "markerwatch")
+FOLLOWUP = ("postkill", "markerkill", "markerwatch", "ack")
+
+
+def fnv1a64(data: bytes) -> int:
+    """FNV-1a 64, the healer's file_hash."""
+    h = 0xCBF29CE484222325
+    for b in data:
+        h = ((h ^ b) * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
+    return h
 
 
 def _cmdline(pid: int) -> list[str]:
@@ -466,6 +479,18 @@ class Injector(threading.Thread):
                     self._log(f"want{int(marked[pid])}", pid)
             time.sleep(0.05)
         self.want_live_end = any(marked.get(p, False) for p in find_pids(node, self.domain))
+
+    def _f_ack(self, node: str, files: str) -> None:
+        ack = self.stack / "ack" / f"{node}.ack"
+        ack.parent.mkdir(parents=True, exist_ok=True)
+        old = ack.read_text() if ack.exists() else ""
+        lines = [f"{fnv1a64((self.stack / f).read_bytes()):016x}" for f in files.split(",")]
+        tmp = ack.with_suffix(".ack.tmp")
+        tmp.write_text(old + "".join(x + "\n" for x in lines))
+        os.replace(tmp, ack)
+        self.injected_at = time.time()
+        self._log("ack_" + ",".join(lines), 0)
+        self.hits = 1
 
     def _f_markerkill(self, node: str, key: str, value: str, sig: str, delay: str) -> None:
         old = set(find_pids(node, self.domain))

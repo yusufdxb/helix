@@ -213,8 +213,24 @@ GEN = [
              repair="restart_lkg+restart"),
 ]
 
+# GEN2 set (docs/preregistration/gen-ack-confirm.md): confirmatory gen vs txn2 on the poisoned-LKG
+# cases (c4 now counted, the injector no longer voids a delayed deploy that finds rsp down) and
+# deploy acknowledgement (`ack` part, healer agent_gen_ack_dir; only the genack arm reads it).
+#   c2_safe_deploy_twice_late_ack: the c2 cost case, with the valid 120 deploy acked 15 s in.
+#   c3_late_cfg_late_falseack: the c3_late bad 101 deploy acked 15 s in (an acceptance check that
+#      passes before the delayed fault shows). The registered cost of trusting an ack.
+_ACK = "+ack:rsp:rsp.yaml@15"
+GEN2 = [
+    Scenario("nominal", "", "", ()),
+    GEN[2],  # c3_late_cfg_late
+    GEN[5],  # c4_chain_late
+    GEN[7],  # c5_simul_late
+    GEN[4],  # c2_safe_deploy_twice_late (no ack)
+    Scenario("c2_safe_deploy_twice_late_ack", GEN[4].inject + _ACK, "rsp", _RSP_CRASH, repair="restart"),
+    Scenario("c3_late_cfg_late_falseack", _BAD_LATE + _ACK, "rsp", _RSP_CRASH, repair="restart_lkg"),
+]
 SETS = {"nav": NAV, "manip": MANIP, "humanoid": HUMANOID, "humanoid_heldout": HUMANOID_HELDOUT,
-        "agent_withheld": AGENT_WITHHELD, "agent_plumbing": AGENT_PLUMBING, "txn": TXN, "gen": GEN}
+        "agent_withheld": AGENT_WITHHELD, "agent_plumbing": AGENT_PLUMBING, "txn": TXN, "gen": GEN, "gen2": GEN2}
 
 # Real-stack sets: generated humanoid stack, faults injected by humanoid/inject.py.
-REAL_SETS = {"humanoid", "humanoid_heldout", "agent_withheld", "agent_plumbing", "txn", "gen"}
+REAL_SETS = {"humanoid", "humanoid_heldout", "agent_withheld", "agent_plumbing", "txn", "gen", "gen2"}

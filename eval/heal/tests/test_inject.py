@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "humanoid"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import inject  # noqa: E402
 from inject import Injector  # noqa: E402
 
@@ -62,3 +63,31 @@ def test_compose_hits_without_delay_attribute():
     assert inject.compose_hits([P(1), P(2)]) == 3
     assert inject.compose_hits([P(1), P(0)]) == 0
     assert inject.compose_hits([P(1), P(0, 18.0)]) == 1
+
+
+def test_fnv1a64_matches_healer_file_hash():
+    # same vectors as Gen.AckParsesHexLinesOnly in test_agent.cpp
+    assert inject.fnv1a64(b"") == 0xCBF29CE484222325
+    assert inject.fnv1a64(b"a") == 0xAF63DC4C8601EC8C
+
+
+def test_ack_appends_hash_of_file_on_disk_and_is_followup(tmp_path, monkeypatch):
+    fault = "deploy:rsp:rsp.yaml:set:publish_frequency:120.0+ack:rsp:rsp.yaml@0.2"
+    inj, text = _run(tmp_path, monkeypatch, fault, [100])
+    ack = tmp_path / "stack/ack/rsp.ack"
+    want = f"{inject.fnv1a64(text.encode()):016x}\n"
+    assert "publish_frequency: 120.0" in text
+    assert ack.read_text() == want
+    assert inj.hits == 1 and inj.followup_hits == 1  # the ack never counts as an injection
+    sub = Injector("ack:rsp:rsp.yaml", "0", {}, 0, 0, tmp_path / "logs", "t")
+    sub.run()
+    assert ack.read_text() == want * 2  # appends, never rewrites earlier acks
+
+
+def test_genack_arm_is_gen_plus_episode_ack_dir():
+    import run_episodes
+    ep = dict(scenario="s", rep=0, dir="/x/ep", root="rsp", repair="restart")
+    a = run_episodes.agent_params(ep, "genack@10")
+    assert a[a.index("-p") + 1] == "agent_ranker:=gen"
+    assert "agent_gen_ack_dir:=/x/ep/stack/ack" in a and "agent_lkg_hold_s:=10.0" in a
+    assert not any("agent_gen_ack_dir" in x for x in run_episodes.agent_params(ep, "gen@10"))
