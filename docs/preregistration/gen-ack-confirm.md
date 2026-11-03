@@ -1,5 +1,14 @@
 # Pre-registration: confirm `gen` on poisoned LKG, and test hash-bound deploy acknowledgement
 
+> **WITHDRAWN 2026-11-03, not run to completion, no data.** The run was started at
+> `cf6a038` and stopped by SIGINT after its first batch of 5 parallel episodes, at the
+> project owner's direction: an acknowledgement records who authorized a deploy, not
+> whether the deployed config is healthy, and a confirmatory run before better health
+> evidence would reproduce the gen study's ambiguity. No episode was scored or inspected;
+> the partial output is kept outside the repository, unscored. Claims A and B are neither
+> supported nor falsified. The ack mechanism (`04969af`, `663eed4`) stays in the code as
+> deploy provenance only. The successor study is `docs/preregistration/dtx-recovery.md`.
+
 The commit that adds this file is both the registration and the freeze. The healer
 binary, the `gen2` scenario set, the injector (`eval/heal/humanoid/inject.py`) and the
 scorers (`eval/heal/score_agent.py`, `score_gen.py`, `score_gen2.py`) do not change after

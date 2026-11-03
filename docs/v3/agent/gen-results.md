@@ -102,8 +102,14 @@ Orin was not measured.
    1 or 2). The drop rule removes a block when any arm has no injection subscribers, so c4
    left the paired analysis. The `none` injector still logged `deploy_set` and
    `deploy_TERM`, so the deploys did happen and the zero looks like a probe counting
-   artefact, but the cause is not determined. The rule was applied as registered; nothing
-   was rerun. This is the reason the registered primary has n = 24 instead of 28.
+   artefact. The rule was applied as registered; nothing was rerun. This is the reason the
+   registered primary has n = 24 instead of 28.
+   *Cause, determined after this run (`d25b13a`):* in `none` the first c4 deploy SIGTERMs
+   rsp and nothing restarts it, so the `@18` deploy finds no process (`hits = 0`), and the
+   composite rule voided the whole injection. A delayed part that finds no process is now
+   listed in `delayed_missed` instead. Verified in a scratch 4-episode run at `d25b13a`:
+   `none` c4 `inject_subs = 1` in both reps, txn2 `2` in both. This does not change the
+   registered numbers above.
 2. The c4 second deploy is at +18 s. This was set before the freeze and is in the
    registered scenario table; listed here because it changed after the smoke run.
 3. Smoke: one dirty-build rep of gen and txn2 on c3_late, c4, c2_twice was seen before the
@@ -134,10 +140,11 @@ against 0 for both comparators.
 
 ## Follow-ups
 
-1. Find why the `none` arm reports `inject_subs = 0` in c4 and fix the probe, then
-   pre-register a confirmatory run before any c4 claim is made.
-2. Deploy-legitimacy evidence for the cost case (an explicit deploy intent or operator
-   acknowledgement that marks a generation trusted), pre-registered against c2_twice.
+1. Done: c4 probe fixed in `d25b13a` (see Deviation 1).
+2. Superseded. A deploy acknowledgement (`04969af`, withdrawn study
+   `docs/preregistration/gen-ack-confirm.md`) only says who authorized a config; an
+   authorized config can still be bad. The next phase uses behavioral health evidence
+   instead: `docs/preregistration/dtx-recovery.md`.
 3. rule@5's c3_late_cfg_mid failure shows H = 5 poisons the LKG for 11 s delays; this is
    one more data point for the txn2@10 proposal, not a new decision.
 
