@@ -4,6 +4,12 @@ Registration: `docs/preregistration/agent-withheld.md` (with the host-change ame
 Freeze: commit `1a4813e`, artifacts in `eval/heal/agent_freeze/`.
 Raw per-episode data and scorer output: `docs/v3/results/agent_withheld*.{csv,txt,json}`.
 
+> **Attribution follow-up ([`txn-results.md`](txn-results.md)).** A transactional
+> restart-and-rollback baseline with no repair selection reproduces 100% of the
+> `agent_rule` gain below (+0.500 [+0.292, +0.708] on the same scenario families; selection
+> +0.000, Holm p = 1). The gain comes from adding last-known-good rollback, not from
+> choosing among repairs.
+
 Run: 7 scenarios x 9 arms x 6 reps = 378 episodes, 378/378 exited rc=0, 0 stray processes after the run.
 Build identity (`agent_withheld_build.json`): head `1a4813e`, clean tree, binary sha256 `e496f7d3...`, binary sources match head, no provenance problems, `--allow-dirty` not used.
 

@@ -1,0 +1,43 @@
+PER ARM (fault scenarios)
+policy	n	correct	strict	restored	repair_ok	unsafe	rollbacks	failed_rb	lkg_commits	act/ep	engaged	downtime_s	cens	ranker_ms	cpu	rss_mb
+agent_rule@5	24	24/24	24/24	24/24	24/24	0	12	0	1.17	1.83	24/24	2.98	0	0.0031	0.014	18.2
+agent_txn@5	24	24/24	24/24	24/24	24/24	0	12	0	1.17	1.83	24/24	3.17	0	0.0030	0.015	18.2
+helix	24	12/24	12/24	12/24	4/24	0	0	0	0.00	2.17	24/24	13.32	12	-	0.013	17.3
+
+PER SCENARIO x ARM
+scenario	policy	n	correct	strict	restored	repair_ok	unsafe	rollbacks	failed_rb	lkg_commits	act/ep	engaged	downtime_s	cens	ranker_ms	cpu	rss_mb
+nominal	agent_rule@5	4	4/4	4/4	4/4	-	0	0	0	0.00	0.00	0/4	0.00	0	-	0.014	18.0
+nominal	agent_txn@5	4	4/4	4/4	4/4	-	0	0	0	0.00	0.00	0/4	0.00	0	-	0.015	18.1
+nominal	helix	4	4/4	4/4	4/4	-	0	0	0	0.00	0.00	0/4	0.00	0	-	0.011	17.1
+safe_deploy_rsp	agent_rule@5	4	4/4	4/4	4/4	4/4	0	0	0	2.00	1.00	4/4	0.42	0	0.0020	0.014	18.1
+safe_deploy_rsp	agent_txn@5	4	4/4	4/4	4/4	4/4	0	0	0	2.00	1.00	4/4	0.41	0	0.0025	0.014	18.0
+safe_deploy_rsp	helix	4	4/4	4/4	4/4	4/4	0	0	0	0.00	1.00	4/4	0.42	0	-	0.013	17.5
+w1_param_degrade	agent_rule@5	4	4/4	4/4	4/4	4/4	0	0	0	1.00	1.00	4/4	2.26	0	0.0047	0.014	18.2
+w1_param_degrade	agent_txn@5	4	4/4	4/4	4/4	4/4	0	0	0	1.00	1.00	4/4	3.14	0	0.0040	0.016	18.2
+w1_param_degrade	helix	4	4/4	4/4	4/4	0/4	0	0	0	0.00	1.00	4/4	3.46	0	-	0.013	17.5
+w1_param_stale	agent_rule@5	4	4/4	4/4	4/4	4/4	0	0	0	1.00	1.00	4/4	0.75	0	0.0027	0.015	18.3
+w1_param_stale	agent_txn@5	4	4/4	4/4	4/4	4/4	0	0	0	1.00	1.00	4/4	1.04	0	0.0030	0.015	18.2
+w1_param_stale	helix	4	4/4	4/4	4/4	0/4	0	0	0	0.00	1.00	4/4	1.05	0	-	0.013	17.3
+w2_cm_bad_urdf	agent_rule@5	4	4/4	4/4	4/4	4/4	0	4	0	1.00	3.00	4/4	5.40	0	0.0027	0.015	18.0
+w2_cm_bad_urdf	agent_txn@5	4	4/4	4/4	4/4	4/4	0	4	0	1.00	3.00	4/4	5.42	0	0.0032	0.015	18.0
+w2_cm_bad_urdf	helix	4	0/4	0/4	0/4	0/4	0	0	0	0.00	3.00	4/4	24.99	4	-	0.011	17.4
+w2_cm_rate	agent_rule@5	4	4/4	4/4	4/4	4/4	0	4	0	1.00	3.00	4/4	6.95	0	0.0033	0.013	18.2
+w2_cm_rate	agent_txn@5	4	4/4	4/4	4/4	4/4	0	4	0	1.00	3.00	4/4	6.94	0	0.0027	0.016	18.2
+w2_cm_rate	helix	4	0/4	0/4	0/4	0/4	0	0	0	0.00	4.00	4/4	25.00	4	-	0.013	17.2
+w2_rsp_bad_urdf	agent_rule@5	4	4/4	4/4	4/4	4/4	0	4	0	1.00	2.00	4/4	2.10	0	0.0031	0.015	18.2
+w2_rsp_bad_urdf	agent_txn@5	4	4/4	4/4	4/4	4/4	0	4	0	1.00	2.00	4/4	2.10	0	0.0026	0.014	18.5
+w2_rsp_bad_urdf	helix	4	0/4	0/4	0/4	0/4	0	0	0	0.00	3.00	4/4	25.00	4	-	0.013	17.2
+
+ATTRIB rollback (txn@5 - helix) correct01: n=24 blocks, mean agent_txn@5 - helix = +0.500, 95% block bootstrap CI [+0.292, +0.708], exact sign-flip p (one-sided, agent_txn@5 higher) = 0.0002441, two-sided = 0.0004883; Holm p = 0.0009766
+ATTRIB rollback (txn@5 - helix) restored01: n=24 blocks, mean agent_txn@5 - helix = +0.500, 95% block bootstrap CI [+0.292, +0.708], exact sign-flip p (one-sided, agent_txn@5 higher) = 0.0002441, two-sided = 0.0004883; Holm p = 0.0009766
+ATTRIB selection (rule@5 - txn@5) correct01: n=24 blocks, mean agent_rule@5 - agent_txn@5 = +0.000, 95% block bootstrap CI [+0.000, +0.000], exact sign-flip p (one-sided, agent_rule@5 higher) = 1, two-sided = 1; Holm p = 1
+ATTRIB selection (rule@5 - txn@5) restored01: n=24 blocks, mean agent_rule@5 - agent_txn@5 = +0.000, 95% block bootstrap CI [+0.000, +0.000], exact sign-flip p (one-sided, agent_rule@5 higher) = 1, two-sided = 1; Holm p = 1
+TOTAL rule@5 - helix correct01: n=24 blocks, mean agent_rule@5 - helix = +0.500, 95% block bootstrap CI [+0.292, +0.708], exact sign-flip p (one-sided, agent_rule@5 higher) = 0.0002441, two-sided = 0.0004883
+  share of the rule - helix gain on correct01 reproduced by plain rollback: 1.00
+TOTAL rule@5 - helix restored01: n=24 blocks, mean agent_rule@5 - helix = +0.500, 95% block bootstrap CI [+0.292, +0.708], exact sign-flip p (one-sided, agent_rule@5 higher) = 0.0002441, two-sided = 0.0004883
+  share of the rule - helix gain on restored01 reproduced by plain rollback: 1.00
+
+SAFETY / DOSE per arm (unsafe on all episodes, failed rollbacks, act/ep)
+agent_rule@5: unsafe 0 failed_rb 0 act/ep 1.57
+agent_txn@5: unsafe 0 failed_rb 0 act/ep 1.57
+helix: unsafe 0 failed_rb 0 act/ep 1.86

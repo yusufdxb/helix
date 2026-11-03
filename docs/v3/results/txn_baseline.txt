@@ -1,0 +1,135 @@
+PER ARM (fault scenarios)
+policy	n	correct	strict	restored	repair_ok	unsafe	rollbacks	failed_rb	lkg_commits	act/ep	engaged	downtime_s	cens	ranker_ms	cpu	rss_mb
+agent_oracle@10	45	45/45	45/45	45/45	45/45	0	25	0	1.33	1.67	45/45	1.82	0	0.0042	0.014	18.7
+agent_rule@10	45	30/45	40/45	45/45	30/45	10	30	0	1.22	2.27	45/45	2.02	0	0.0027	0.014	18.7
+agent_rule@5	45	29/45	34/45	39/45	29/45	5	20	0	1.44	2.42	45/45	6.68	6	0.0028	0.014	18.3
+agent_txn2@10	45	40/45	40/45	45/45	30/45	0	20	0	1.44	2.67	45/45	2.60	0	0.0027	0.014	18.7
+agent_txn@10	45	30/45	40/45	45/45	30/45	10	30	0	1.22	2.22	45/45	1.96	0	0.0028	0.014	18.6
+agent_txn@5	45	30/45	35/45	40/45	30/45	5	20	0	1.44	2.44	45/45	5.97	5	0.0026	0.014	18.3
+none	45	0/45	0/45	0/45	0/45	0	0	0	0.00	0.00	0/45	34.98	45	-	0.012	17.4
+
+PER SCENARIO x ARM
+scenario	policy	n	correct	strict	restored	repair_ok	unsafe	rollbacks	failed_rb	lkg_commits	act/ep	engaged	downtime_s	cens	ranker_ms	cpu	rss_mb
+c1_cm_cfg_camera_hang	agent_oracle@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	3.00	5/5	5.00	0	0.0039	0.015	18.6
+c1_cm_cfg_camera_hang	agent_rule@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	4.00	5/5	6.27	0	0.0034	0.014	18.7
+c1_cm_cfg_camera_hang	agent_rule@5	5	5/5	5/5	5/5	5/5	0	5	0	1.00	4.00	5/5	6.25	0	0.0041	0.014	18.0
+c1_cm_cfg_camera_hang	agent_txn2@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	5.00	5/5	8.27	0	0.0034	0.014	18.5
+c1_cm_cfg_camera_hang	agent_txn@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	4.00	5/5	6.23	0	0.0037	0.014	18.7
+c1_cm_cfg_camera_hang	agent_txn@5	5	5/5	5/5	5/5	5/5	0	5	0	1.00	4.00	5/5	6.25	0	0.0039	0.013	18.2
+c1_cm_cfg_camera_hang	none	5	0/5	0/5	0/5	0/5	0	0	0	0.00	0.00	0/5	34.99	5	-	0.011	17.2
+c1_latent_cfg_crash	agent_oracle@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	1.00	5/5	0.00	0	0.0044	0.013	18.7
+c1_latent_cfg_crash	agent_rule@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	2.00	5/5	3.90	0	0.0031	0.014	18.7
+c1_latent_cfg_crash	agent_rule@5	5	5/5	5/5	5/5	5/5	0	5	0	1.00	2.00	5/5	3.90	0	0.0026	0.015	18.3
+c1_latent_cfg_crash	agent_txn2@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	3.00	5/5	5.95	0	0.0024	0.013	18.7
+c1_latent_cfg_crash	agent_txn@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	2.00	5/5	3.90	0	0.0029	0.014	18.7
+c1_latent_cfg_crash	agent_txn@5	5	5/5	5/5	5/5	5/5	0	5	0	1.00	2.00	5/5	3.90	0	0.0026	0.013	18.4
+c1_latent_cfg_crash	none	5	0/5	0/5	0/5	0/5	0	0	0	0.00	0.00	0/5	35.00	5	-	0.012	17.6
+c1_rsp_param_camera_crash	agent_oracle@10	5	5/5	5/5	5/5	5/5	0	0	0	1.00	2.00	5/5	7.00	0	0.0047	0.014	18.8
+c1_rsp_param_camera_crash	agent_rule@10	5	5/5	5/5	5/5	5/5	0	0	0	1.00	2.40	5/5	3.66	0	0.0027	0.014	18.8
+c1_rsp_param_camera_crash	agent_rule@5	5	4/5	4/5	4/5	4/5	0	0	0	1.00	1.80	5/5	11.69	1	0.0024	0.013	18.5
+c1_rsp_param_camera_crash	agent_txn2@10	5	5/5	5/5	5/5	5/5	0	0	0	1.00	2.00	5/5	4.79	0	0.0027	0.014	18.8
+c1_rsp_param_camera_crash	agent_txn@10	5	5/5	5/5	5/5	5/5	0	0	0	1.00	2.00	5/5	3.23	0	0.0024	0.013	18.4
+c1_rsp_param_camera_crash	agent_txn@5	5	5/5	5/5	5/5	5/5	0	0	0	1.00	2.00	5/5	5.33	0	0.0027	0.014	18.4
+c1_rsp_param_camera_crash	none	5	0/5	0/5	0/5	0/5	0	0	0	0.00	0.00	0/5	35.00	5	-	0.011	17.5
+c2_safe_deploy_crash_early	agent_oracle@10	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.41	0	0.0041	0.014	18.5
+c2_safe_deploy_crash_early	agent_rule@10	5	0/5	5/5	5/5	0/5	5	5	0	1.00	2.00	5/5	0.43	0	0.0026	0.014	18.7
+c2_safe_deploy_crash_early	agent_rule@5	5	0/5	5/5	5/5	0/5	5	5	0	1.00	2.00	5/5	0.39	0	0.0032	0.013	18.3
+c2_safe_deploy_crash_early	agent_txn2@10	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.39	0	0.0030	0.014	18.7
+c2_safe_deploy_crash_early	agent_txn@10	5	0/5	5/5	5/5	0/5	5	5	0	1.00	2.00	5/5	0.41	0	0.0030	0.013	18.7
+c2_safe_deploy_crash_early	agent_txn@5	5	0/5	5/5	5/5	0/5	5	5	0	1.00	2.00	5/5	0.36	0	0.0023	0.014	18.2
+c2_safe_deploy_crash_early	none	5	0/5	0/5	0/5	0/5	0	0	0	0.00	0.00	0/5	34.99	5	-	0.011	17.3
+c2_safe_deploy_crash_late	agent_oracle@10	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.41	0	0.0044	0.013	18.7
+c2_safe_deploy_crash_late	agent_rule@10	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.42	0	0.0024	0.014	18.6
+c2_safe_deploy_crash_late	agent_rule@5	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.43	0	0.0022	0.014	18.1
+c2_safe_deploy_crash_late	agent_txn2@10	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.41	0	0.0026	0.014	18.7
+c2_safe_deploy_crash_late	agent_txn@10	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.34	0	0.0030	0.012	18.4
+c2_safe_deploy_crash_late	agent_txn@5	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.41	0	0.0022	0.013	18.3
+c2_safe_deploy_crash_late	none	5	0/5	0/5	0/5	0/5	0	0	0	0.00	0.00	0/5	34.97	5	-	0.011	17.3
+c2_safe_deploy_crash_mid	agent_oracle@10	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.37	0	0.0042	0.013	18.7
+c2_safe_deploy_crash_mid	agent_rule@10	5	0/5	5/5	5/5	0/5	5	5	0	1.00	2.00	5/5	0.36	0	0.0025	0.012	18.7
+c2_safe_deploy_crash_mid	agent_rule@5	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.39	0	0.0027	0.014	18.1
+c2_safe_deploy_crash_mid	agent_txn2@10	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.41	0	0.0025	0.014	18.6
+c2_safe_deploy_crash_mid	agent_txn@10	5	0/5	5/5	5/5	0/5	5	5	0	1.00	2.00	5/5	0.41	0	0.0023	0.015	18.6
+c2_safe_deploy_crash_mid	agent_txn@5	5	5/5	5/5	5/5	5/5	0	0	0	2.00	2.00	5/5	0.38	0	0.0024	0.014	18.4
+c2_safe_deploy_crash_mid	none	5	0/5	0/5	0/5	0/5	0	0	0	0.00	0.00	0/5	34.98	5	-	0.012	17.3
+c3_late_cfg_early	agent_oracle@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	1.00	5/5	1.05	0	0.0040	0.015	18.8
+c3_late_cfg_early	agent_rule@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	2.00	5/5	1.05	0	0.0026	0.013	18.7
+c3_late_cfg_early	agent_rule@5	5	5/5	5/5	5/5	5/5	0	5	0	1.00	2.00	5/5	1.05	0	0.0027	0.014	18.4
+c3_late_cfg_early	agent_txn2@10	5	5/5	5/5	5/5	0/5	0	5	0	1.00	3.00	5/5	1.05	0	0.0026	0.012	18.7
+c3_late_cfg_early	agent_txn@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	2.00	5/5	1.05	0	0.0027	0.014	18.7
+c3_late_cfg_early	agent_txn@5	5	5/5	5/5	5/5	5/5	0	5	0	1.00	2.00	5/5	1.05	0	0.0027	0.014	18.2
+c3_late_cfg_early	none	5	0/5	0/5	0/5	0/5	0	0	0	0.00	0.00	0/5	34.97	5	-	0.012	17.4
+c3_late_cfg_late	agent_oracle@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	1.00	5/5	1.05	0	0.0042	0.014	18.5
+c3_late_cfg_late	agent_rule@10	5	0/5	0/5	5/5	0/5	0	0	0	2.00	2.00	5/5	1.05	0	0.0024	0.013	18.5
+c3_late_cfg_late	agent_rule@5	5	0/5	0/5	5/5	0/5	0	0	0	2.00	2.00	5/5	1.05	0	0.0024	0.014	18.1
+c3_late_cfg_late	agent_txn2@10	5	0/5	0/5	5/5	0/5	0	0	0	2.00	2.00	5/5	1.05	0	0.0026	0.014	18.7
+c3_late_cfg_late	agent_txn@10	5	0/5	0/5	5/5	0/5	0	0	0	2.00	2.00	5/5	1.05	0	0.0020	0.015	18.7
+c3_late_cfg_late	agent_txn@5	5	0/5	0/5	5/5	0/5	0	0	0	2.00	2.00	5/5	1.05	0	0.0019	0.015	18.3
+c3_late_cfg_late	none	5	0/5	0/5	0/5	0/5	0	0	0	0.00	0.00	0/5	34.96	5	-	0.012	17.5
+c3_late_cfg_mid	agent_oracle@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	1.00	5/5	1.05	0	0.0042	0.014	18.6
+c3_late_cfg_mid	agent_rule@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	2.00	5/5	1.05	0	0.0023	0.014	18.7
+c3_late_cfg_mid	agent_rule@5	5	0/5	0/5	0/5	0/5	0	0	0	2.00	4.00	5/5	34.97	5	0.0026	0.012	18.5
+c3_late_cfg_mid	agent_txn2@10	5	5/5	5/5	5/5	0/5	0	5	0	1.00	3.00	5/5	1.05	0	0.0022	0.014	18.7
+c3_late_cfg_mid	agent_txn@10	5	5/5	5/5	5/5	5/5	0	5	0	1.00	2.00	5/5	1.05	0	0.0029	0.014	18.6
+c3_late_cfg_mid	agent_txn@5	5	0/5	0/5	0/5	0/5	0	0	0	2.00	4.00	5/5	34.99	5	0.0024	0.014	18.4
+c3_late_cfg_mid	none	5	0/5	0/5	0/5	0/5	0	0	0	0.00	0.00	0/5	34.99	5	-	0.013	17.5
+nominal	agent_oracle@10	5	5/5	5/5	5/5	-	0	0	0	0.00	0.00	0/5	0.00	0	-	0.015	18.5
+nominal	agent_rule@10	5	5/5	5/5	5/5	-	0	0	0	0.00	0.00	0/5	0.00	0	-	0.012	18.7
+nominal	agent_rule@5	5	5/5	5/5	5/5	-	0	0	0	0.00	0.00	0/5	0.00	0	-	0.013	18.1
+nominal	agent_txn2@10	5	5/5	5/5	5/5	-	0	0	0	0.00	0.00	0/5	0.00	0	-	0.016	18.6
+nominal	agent_txn@10	5	5/5	5/5	5/5	-	0	0	0	0.00	0.00	0/5	0.00	0	-	0.015	18.7
+nominal	agent_txn@5	5	5/5	5/5	5/5	-	0	0	0	0.00	0.00	0/5	0.00	0	-	0.015	18.1
+nominal	none	5	5/5	5/5	5/5	-	0	0	0	0.00	0.00	0/5	0.00	0	-	0.013	17.6
+
+GUARD oracle correct on restorable fault episodes 40/40 = 1.000 (PASS, need >= 0.90)
+GUARD none restores c1_cm_cfg_camera_hang: 0/5
+GUARD none restores c1_latent_cfg_crash: 0/5
+GUARD none restores c1_rsp_param_camera_crash: 0/5
+GUARD none restores c2_safe_deploy_crash_early: 0/5
+GUARD none restores c2_safe_deploy_crash_late: 0/5
+GUARD none restores c2_safe_deploy_crash_mid: 0/5
+GUARD none restores c3_late_cfg_early: 0/5
+GUARD none restores c3_late_cfg_late: 0/5
+GUARD none restores c3_late_cfg_mid: 0/5
+PRIMARY correct: n=45 blocks, mean agent_rule@5 - agent_txn@10 = -0.022, 95% block bootstrap CI [-0.156, +0.111], exact sign-flip p (one-sided, agent_rule@5 higher) = 0.7256, two-sided = 1
+  scenario c1_cm_cfg_camera_hang: agent_rule@5 better in 0/5, agent_txn@10 better in 0/5
+  scenario c1_latent_cfg_crash: agent_rule@5 better in 0/5, agent_txn@10 better in 0/5
+  scenario c1_rsp_param_camera_crash: agent_rule@5 better in 0/5, agent_txn@10 better in 1/5
+  scenario c2_safe_deploy_crash_early: agent_rule@5 better in 0/5, agent_txn@10 better in 0/5
+  scenario c2_safe_deploy_crash_late: agent_rule@5 better in 0/5, agent_txn@10 better in 0/5
+  scenario c2_safe_deploy_crash_mid: agent_rule@5 better in 5/5, agent_txn@10 better in 0/5
+  scenario c3_late_cfg_early: agent_rule@5 better in 0/5, agent_txn@10 better in 0/5
+  scenario c3_late_cfg_late: agent_rule@5 better in 0/5, agent_txn@10 better in 0/5
+  scenario c3_late_cfg_mid: agent_rule@5 better in 0/5, agent_txn@10 better in 5/5
+  scenarios favouring agent_rule@5: ['c2_safe_deploy_crash_mid']; favouring agent_txn@10: ['c3_late_cfg_mid']
+PRIMARY verdict: trade-off: each arm wins scenarios the other loses, so neither selection nor plain rollback dominates (see per-scenario lines)
+  family C1 correct: n=15 blocks, mean agent_rule@5 - agent_txn@10 = -0.067, 95% block bootstrap CI [-0.200, +0.000], exact sign-flip p (one-sided, agent_rule@5 higher) = 1, two-sided = 1 (descriptive)
+  family C2 correct: n=15 blocks, mean agent_rule@5 - agent_txn@10 = +0.333, 95% block bootstrap CI [+0.133, +0.600], exact sign-flip p (one-sided, agent_rule@5 higher) = 0.03125, two-sided = 0.0625 (descriptive)
+  family C3 correct: n=15 blocks, mean agent_rule@5 - agent_txn@10 = -0.333, 95% block bootstrap CI [-0.600, -0.133], exact sign-flip p (one-sided, agent_rule@5 higher) = 1, two-sided = 0.0625 (descriptive)
+SECONDARY selection at H=10 (rule vs txn) correct: n=45 blocks, mean agent_rule@10 - agent_txn@10 = +0.000, 95% block bootstrap CI [+0.000, +0.000], exact sign-flip p (one-sided, agent_rule@10 higher) = 1, two-sided = 1; Holm p = 1
+SECONDARY selection at H=5 (rule vs txn) correct: n=45 blocks, mean agent_rule@5 - agent_txn@5 = -0.022, 95% block bootstrap CI [-0.067, +0.000], exact sign-flip p (one-sided, agent_rule@5 higher) = 1, two-sided = 1; Holm p = 1
+SECONDARY window, rule (H=10 vs 5) correct: n=45 blocks, mean agent_rule@10 - agent_rule@5 = +0.022, 95% block bootstrap CI [-0.111, +0.156], exact sign-flip p (one-sided, agent_rule@10 higher) = 0.5, two-sided = 1; Holm p = 1
+SECONDARY window, txn (H=5 vs 10) correct: n=45 blocks, mean agent_txn@5 - agent_txn@10 = +0.000, 95% block bootstrap CI [-0.133, +0.133], exact sign-flip p (one-sided, agent_txn@5 higher) = 0.623, two-sided = 1; Holm p = 1
+SECONDARY two-strike (txn2 vs txn) correct: n=45 blocks, mean agent_txn2@10 - agent_txn@10 = +0.222, 95% block bootstrap CI [+0.111, +0.356], exact sign-flip p (one-sided, agent_txn2@10 higher) = 0.0009766, two-sided = 0.001953; Holm p = 0.004883
+EXPLORATORY downtime_s: n=45 blocks, mean agent_rule@5 - agent_txn@10 = +4.717, 95% block bootstrap CI [+1.673, +8.357], exact sign-flip p (one-sided, agent_rule@5 lower) = 0.9989, two-sided = 0.002318
+EXPLORATORY failed_rollbacks: n=45 blocks, mean agent_rule@5 - agent_txn@10 = +0.000, 95% block bootstrap CI [+0.000, +0.000], exact sign-flip p (one-sided, agent_rule@5 lower) = 1, two-sided = 1
+
+SAFETY / DOSE per arm x family (unsafe, failed rollbacks, act/ep)
+agent_oracle@10: nominal: unsafe 0 failed_rb 0 act/ep 0.00; C1: unsafe 0 failed_rb 0 act/ep 2.00; C2: unsafe 0 failed_rb 0 act/ep 2.00; C3: unsafe 0 failed_rb 0 act/ep 1.00
+agent_rule@10: nominal: unsafe 0 failed_rb 0 act/ep 0.00; C1: unsafe 0 failed_rb 0 act/ep 2.80; C2: unsafe 10 failed_rb 0 act/ep 2.00; C3: unsafe 0 failed_rb 0 act/ep 2.00
+agent_rule@5: nominal: unsafe 0 failed_rb 0 act/ep 0.00; C1: unsafe 0 failed_rb 0 act/ep 2.60; C2: unsafe 5 failed_rb 0 act/ep 2.00; C3: unsafe 0 failed_rb 0 act/ep 2.67
+agent_txn2@10: nominal: unsafe 0 failed_rb 0 act/ep 0.00; C1: unsafe 0 failed_rb 0 act/ep 3.33; C2: unsafe 0 failed_rb 0 act/ep 2.00; C3: unsafe 0 failed_rb 0 act/ep 2.67
+agent_txn@10: nominal: unsafe 0 failed_rb 0 act/ep 0.00; C1: unsafe 0 failed_rb 0 act/ep 2.67; C2: unsafe 10 failed_rb 0 act/ep 2.00; C3: unsafe 0 failed_rb 0 act/ep 2.00
+agent_txn@5: nominal: unsafe 0 failed_rb 0 act/ep 0.00; C1: unsafe 0 failed_rb 0 act/ep 2.67; C2: unsafe 5 failed_rb 0 act/ep 2.00; C3: unsafe 0 failed_rb 0 act/ep 2.67
+none: nominal: unsafe 0 failed_rb 0 act/ep 0.00; C1: unsafe 0 failed_rb 0 act/ep 0.00; C2: unsafe 0 failed_rb 0 act/ep 0.00; C3: unsafe 0 failed_rb 0 act/ep 0.00
+
+ORACLE GAP per scenario (oracle correct - best deterministic correct; 'fixed' = the one deterministic arm with the highest correct over all fault scenarios)
+c1_cm_cfg_camera_hang: oracle 1.00, best deterministic agent_txn@5 1.00, gap +0.00; fixed agent_txn2@10 1.00, gap +0.00
+c1_latent_cfg_crash: oracle 1.00, best deterministic agent_txn@5 1.00, gap +0.00; fixed agent_txn2@10 1.00, gap +0.00
+c1_rsp_param_camera_crash: oracle 1.00, best deterministic agent_txn@5 1.00, gap +0.00; fixed agent_txn2@10 1.00, gap +0.00
+c2_safe_deploy_crash_early: oracle 1.00, best deterministic agent_txn2@10 1.00, gap +0.00; fixed agent_txn2@10 1.00, gap +0.00
+c2_safe_deploy_crash_late: oracle 1.00, best deterministic agent_txn@5 1.00, gap +0.00; fixed agent_txn2@10 1.00, gap +0.00
+c2_safe_deploy_crash_mid: oracle 1.00, best deterministic agent_txn@5 1.00, gap +0.00; fixed agent_txn2@10 1.00, gap +0.00
+c3_late_cfg_early: oracle 1.00, best deterministic agent_txn@5 1.00, gap +0.00; fixed agent_txn2@10 1.00, gap +0.00
+c3_late_cfg_late: oracle 1.00, best deterministic agent_txn@5 0.00, gap +1.00; fixed agent_txn2@10 0.00, gap +1.00
+c3_late_cfg_mid: oracle 1.00, best deterministic agent_txn@10 1.00, gap +0.00; fixed agent_txn2@10 1.00, gap +0.00
