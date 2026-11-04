@@ -212,7 +212,7 @@ other direction.
 Notes on the flags and env:
 
 - `run_sim_humble.sh` already sets `OMNI_KIT_ACCEPT_EULA=YES`, activates
-  `~/Sim/isaac-sim-venv`, and points `PYTHONPATH` / `LD_LIBRARY_PATH` at Isaac's
+  `~/Projects/Sim/isaac-sim-venv`, and points `PYTHONPATH` / `LD_LIBRARY_PATH` at Isaac's
   bundled Humble. Do **not** source `/opt/ros/humble` in this terminal: mixing an
   external rclpy with the bundled one causes typesupport double-loads.
 - The launcher defaults `RMW_IMPLEMENTATION` to fastrtps but honors a pre-set
